@@ -25,11 +25,11 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <McVec3f.h>
-#include <McVec2f.h>
-#include <McMat3f.h>
-#include <McDArray.h>
-#include <McSmallArray.h>
+#include <mclib/McVec3f.h>
+#include <mclib/McVec2f.h>
+#include <mclib/McMat3f.h>
+#include <mclib/McDArray.h>
+#include <mclib/McSmallArray.h>
 
 #include "psurfaceAPI.h"
 

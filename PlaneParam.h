@@ -58,12 +58,12 @@
 #ifndef PLANE_PARAM_H
 #define PLANE_PARAM_H
 
-#include <McVec3f.h>
-#include <McVec2f.h>
-#include <McMat3f.h>
-#include <McDArray.h>
-#include <McSArray.h>
-#include <McSmallArray.h>
+#include <mclib/McVec3f.h>
+#include <mclib/McVec2f.h>
+#include <mclib/McMat3f.h>
+#include <mclib/McDArray.h>
+#include <mclib/McSArray.h>
+#include <mclib/McSmallArray.h>
 
 #include <psurface/Node.h>
 

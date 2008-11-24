@@ -1,10 +1,10 @@
 #ifndef CONTACT_TOOLBOX_H
 #define CONTACT_TOOLBOX_H
 
-#include <McDArray.h>
-#include <McBox3f.h>
-#include <McVec3f.h>
-#include <McVec3i.h>
+#include <mclib/McDArray.h>
+#include <mclib/McBox3f.h>
+#include <mclib/McVec3f.h>
+#include <mclib/McVec3i.h>
 
 #include <psurface/Node.h>
 #include <psurface/IntersectionPrimitive.h>

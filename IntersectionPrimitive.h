@@ -1,9 +1,9 @@
 #ifndef INTERSECTIONPRIMITIVE_H
 #define INTERSECTIONPRIMITIVE_H
 
-#include <McVec2f.h>
-#include <McVec3f.h>
-#include <McSArray.h>
+#include <mclib/McVec2f.h>
+#include <mclib/McVec3f.h>
+#include <mclib/McSArray.h>
 
 
 /** This class represents a part of the overlap of a basis function on the

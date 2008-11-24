@@ -1,14 +1,14 @@
 #ifndef MC_POINTER_SURFACE_PARTS
 #define MC_POINTER_SURFACE_PARTS
 
-#include <McVec2f.h>
-#include <McVec3f.h>
-#include <McBox3f.h>
-#include <McBox2f.h>
-#include <McMat3f.h>
-#include <McDArray.h>
-#include <McSmallArray.h>
-#include <McSArray.h>
+#include <mclib/McVec2f.h>
+#include <mclib/McVec3f.h>
+#include <mclib/McBox3f.h>
+#include <mclib/McBox2f.h>
+#include <mclib/McMat3f.h>
+#include <mclib/McDArray.h>
+#include <mclib/McSmallArray.h>
+#include <mclib/McSArray.h>
 
 
 typedef int VertexIdx;

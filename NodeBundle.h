@@ -1,7 +1,7 @@
 #ifndef NODE_BUNDLE_H
 #define NODE_BUNDLE_H
 
-#include <McSmallArray.h>
+#include <mclib/McSmallArray.h>
 #include <psurface/GlobalNodeIdx.h>
 
 /** \brief Set of graph nodes */

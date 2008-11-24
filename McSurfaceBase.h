@@ -1,7 +1,7 @@
 #ifndef MC__SURFACE_BASE
 #define MC__SURFACE_BASE
 
-#include <McDArray.h>
+#include <mclib/McDArray.h>
 #include "McPointerSurfaceParts.h"
 
 #include <vector>

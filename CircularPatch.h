@@ -1,8 +1,8 @@
 #ifndef CIRCULAR_PATCH
 #define CIRCULAR_PATCH
 
-#include <McBox3f.h>
-#include <McSArray.h>
+#include <mclib/McBox3f.h>
+#include <mclib/McSArray.h>
 
 #include <psurface/Domains.h>
 #include <psurface/Parametrization.h>

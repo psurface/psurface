@@ -147,7 +147,7 @@
 //
 /////////////////////////////////////////////////////////////////
 
-#include <McDArray.h>
+#include <mclib/McDArray.h>
 #include <amiramesh/AmiraMesh.h>
 
 #include <psurface/Parametrization.h>
@@ -159,8 +159,8 @@
 #include <hxparamtools/HxParamToolBox.h>
 #endif
 
-#include <McBox3f.h>
-#include <McVec2i.h>
+#include <mclib/McBox3f.h>
+#include <mclib/McVec2i.h>
 
 Parametrization::Parametrization(HxParamBundle* bundle)
 {

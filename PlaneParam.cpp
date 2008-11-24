@@ -1,6 +1,6 @@
 #include <psurface/PlaneParam.h>
-#include <McSparseMatrix.h>
-#include <McDVector.h>
+#include <mclib/McSparseMatrix.h>
+#include <mclib/McDVector.h>
 
 #include <limits>
 

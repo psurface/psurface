@@ -1,7 +1,7 @@
 #ifndef DOMAINS_H
 #define DOMAINS_H
 
-#include <McVec2f.h>
+#include <mclib/McVec2f.h>
 
 #include "McPointerSurfaceParts.h"
 #include "PlaneParam.h"
