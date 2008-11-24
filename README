@@ -1,0 +1,175 @@
+##################################################################
+##################################################################
+#
+# INSTALLATION AND PROGRAMMER INFORMATION FOR THE PARAMETRIZED
+# SURFACE EXTENSIONS FOR AMIRA
+#
+# written by Oliver Sander on 12.18.01
+#
+##################################################################
+##################################################################
+
+This is a brief text explaining some details about the installation
+and use of parametrized surfaces in Amira and the separate
+standalone library that goes with it.  Details about the theory
+and the implementation can be found in my diploma thesis
+available at www.zib.de/????????. 
+
+This text contains three parts:
+
+1) Information on how to add the code for the parametrized
+   surfaces to Amira 2.3.
+2) Information on installation and usage of the parametrization
+   standalone library.
+4) A description of the file-format.
+
+
+
+##########################################################
+# EXTENSIONS FOR AMIRA
+##########################################################
+
+In order to extend Amira Release 2.3 to handle parametrized 
+surfaces, the following things are necessary:
+
+1)  You need the packages parametrization, hxparamtools and
+    hxparamedit, of course together with all .rc, .doc, and
+    .xpm files.
+
+2)  You also need a new version of the mclib, since the
+    packages above need a few extensions that have entered
+    mclib since the release of Amira 2.3.
+
+3)  The AmiraMesh library shipped with Amira 2.3 contained
+    a bug that made it impossible to read AmiraMesh files
+    containing an empty data section.  This is necessary,
+    however, if you want to save and reload base grids with
+    an identity function (cf. the description of the file
+    format below).  The bug has been fixed and you'll need
+    a version AmiraMesh containing that fix.
+
+4)  If you want to parametrize surface over explicitly given
+    base grids, you'll use the 'on given Grid' function of
+    the Parametrizer-Module.  This function depends on the
+    correct behaviour of the HxSurface::recompute() method.
+    However, in Amira 2.3, this method didn't work properly.
+    The bug has been fixed, too.  However, by now, the
+    region-of-interest (ROI) support has been built into
+    the hxsurface-package.  Therefore, you'll either have
+    to get a new Amira kernel together with a new hxsurface
+    package or you have to do without the 'on given Grid'
+    method.
+
+
+###########################################################
+# THE PARAMETRIZATION STANDALONE LIBRARY
+###########################################################
+
+The Parametrization standalone library contains everything
+you need to use parametrized surface created by Amira in
+your own code.  It consists of a single dynamic shared
+object together with suitable header files for C and C++.
+
+In order to create the lates version, all you have to do
+is to invoke gmake in the Amira2000/packages/parametrization/solo/
+directory.  All necessary code from the parametrization package,
+the mclib and amiramesh are assembled into a single
+dso file that doesn't need linking against anything else.
+This has been tested successfully on RedHat 7.1 Linux.
+You can increase your popularity by perfecting the
+GNUmakefile for other platforms.
+
+For both C and C++ programmers, I recommend the use of the
+C-header AmiraParamAccess.h.  It implements a basic object
+management that handles an arbitrary number of parametrized
+surfaces.  It is quite self-explanatory.  'Handling'
+includes reading a parametrized surface in AmiraMesh format
+from disk and evaluation the function defined on it at
+any point specified by a base grid triangle number and
+barycentric coordinates on that triangle.  C++ programmers
+can also create and work with Parametrization objects directly.
+However, I dissuade from this since it is somewhat more
+involved that the C-interface, it doesn't lead to any
+performance benefits, and, most important of all, I will
+most likely change the internal data structure form 
+small separate objects and pointers to object-arrays and
+indices.  The C-header will remain more or less as it
+is, though.
+
+
+############################################################
+# THE FILE FORMAT
+############################################################
+
+Amira saves parametrized surfaces using a subformat of AmiraMesh.
+Since the files are usually very large, only the binary AmiraMesh
+format is used.  Files can be read and written by using the appropriate
+member functions of the Parametrization class.  For completeness'
+sake, we'll describe the exact format here:
+
+- The ContentType needs to be 'Parametrization'
+
+- The file contains seven data sections:
+
+  1) 'Patches'
+     This section contains information about the different patches
+     occuring in the base grid.  Each entry consists of three ints,
+     describing the innerRegion material, the outerRegion material,
+     and the boundary conditions.
+
+  2) 'BaseGridVertexCoords'
+     The coordinates of the base grid vertices.  Simply x, y, and z
+     for each vertex.
+
+  3) 'BaseGridTriangles'
+     Three ints for each base grid triangle, each giving the index
+     of one corner vertex.  Vertex indices are counted starting from
+     zero!
+
+  The remaining sections describe the plane graphs on each base grid
+  triangle. Each graph is saved as a list of nodes and a list of edges.  
+  Since all information about corner nodes can be deduced from the base
+  grid vertices, they are never saved and a file-format reader
+  has to 'invent' them.  This saves a considerable amount of
+  disk-space, especially when storing parametrized surface where
+  base grid and image surface have similar resolutions.
+
+  4) 'NumNodesAndParameterEdgesPerTriangle'
+     General information on the plane graph on each triangle. For 
+     each triangle, there are eight integers specifying
+   
+       1) The total number of intersection nodes
+       2) The total number of touching nodes
+       3) The total number of interior nodes
+
+       Note that the number of corner nodes is not saved, since it
+       is always equal to three.
+
+       4) The number of edges of the plane graph
+       5) The patch number of the triangle
+
+       6-8) For each of the three triangle edges, these three entries
+          give the number of graph nodes on the respective edge
+          NOT counting the two corner nodes!
+
+  5) 'Nodes'
+     This section contains the position information for all nodes on all
+     base grid triangles.  For each triangle, first all intersection nodes
+     are saved, then all touching nodes and then all interior nodes.  The
+     previous sections contains the sizes of the blocks.  For each
+     node, five floats are stored containing first the local position in
+     barycentric coordinates on the respective triangle and 
+     x, y, and z-coordinates of the image position.
+
+  6) 'ParameterEdges'
+     All edges of the graphs on all triangles.  Each entry is a tuple of
+     two integers storing the indices of the two endnodes of the edge.
+     The counting starts anew for each triangle.  The three invented
+     corner nodes always have the indices 0, 1, and 2, respectively.
+
+  7) 'EdgePoints'
+     For each edge on each triangle, a list of all nodes that are situated
+     on that edge.
+
+
+Good Luck!
