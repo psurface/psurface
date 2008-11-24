@@ -31,7 +31,7 @@
 #include <McDArray.h>
 #include <McSmallArray.h>
 
-#include <psurface/parametrizationAPI.h>
+#include "psurfaceAPI.h"
 
 //#define NodeType unsigned int
 //#define NodeLocation unsigned int

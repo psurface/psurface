@@ -6,7 +6,7 @@
 #include "McPointerSurfaceParts.h"
 #include "PlaneParam.h"
 
-#include <psurface/parametrizationAPI.h>
+#include "psurfaceAPI.h"
 
 class DomainTriangle;
 class DomainVertex;
@@ -14,7 +14,7 @@ class DomainEdge;
 
 
 /** A vertex of the base domain */
-class PARAMETRIZATION_API DomainVertex: public McVertex {
+class PSURFACE_API DomainVertex: public McVertex {
 public:
 
     DomainVertex() {}
@@ -34,7 +34,7 @@ public:
 
 
 /** A triangle containing a plane triangulation */
-class PARAMETRIZATION_API DomainTriangle : public McTriangle,
+class PSURFACE_API DomainTriangle : public McTriangle,
                                            public PlaneParam
 {
 public:
@@ -168,7 +168,7 @@ public:
 
 
 /** An edge in the base domain */
-class PARAMETRIZATION_API DomainEdge: public McEdge<DomainVertex> {
+class PSURFACE_API DomainEdge: public McEdge<DomainVertex> {
 public:
     /// default constructor
     DomainEdge() : McEdge<DomainVertex>() {}

@@ -4,7 +4,7 @@
 #include <psurface/SurfacePath.h>
 
 
-class PARAMETRIZATION_API SurfacePathSet : public McDArray<SurfacePath> {
+class PSURFACE_API SurfacePathSet : public McDArray<SurfacePath> {
 
 public:
 

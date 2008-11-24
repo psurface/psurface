@@ -67,7 +67,7 @@
 
 #include <psurface/Node.h>
 
-#include <psurface/parametrizationAPI.h>
+#include "psurfaceAPI.h"
 
 template<class T, bool SYMMETRIC> class McSparseMatrix;
 class Parametrization;
@@ -75,7 +75,7 @@ class Parametrization;
 /** The parametrization of a surface in space.  It is actually a planar graph
    having only triangular and unbounded faces.  The nodes of the graph store
    a 3D position, the rest is computed via linear interpolation. */
-class PARAMETRIZATION_API PlaneParam{
+class PSURFACE_API PlaneParam{
 public:
 
     class DirectedEdgeIterator {

@@ -7,7 +7,7 @@
 #include <psurface/Domains.h>
 #include <psurface/Parametrization.h>
 
-#include <psurface/parametrizationAPI.h>
+#include "psurfaceAPI.h"
 
 
 class Parametrization;
@@ -15,7 +15,7 @@ class Parametrization;
 /** This class represents the retriangulation of a small hole in a surface.
     It's basically a bunch of triangles.  The feature of this class are the
     routines that evaluate the quality of the retriangulation. */
-class PARAMETRIZATION_API CircularPatch {
+class PSURFACE_API CircularPatch {
 public:
     
 

@@ -125,7 +125,7 @@
 
 #include <amiramesh/HxParamBundle.h>
 
-#include <psurface/parametrizationAPI.h>
+#include "psurfaceAPI.h"
 
 #include <psurface/McSurfaceBase.h>
 #include <psurface/Domains.h>
@@ -136,7 +136,7 @@
 class AmiraMesh;
 
 /** The parametrization of an arbitrary surface over a simple base grid */
-class PARAMETRIZATION_API Parametrization : public McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>{
+class PSURFACE_API Parametrization : public McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>{
 
 public:
 
