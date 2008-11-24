@@ -2,7 +2,7 @@
 #define NORMAL_PROJECTOR_H
 
 #include <mclib/McVec3d.h>
-#include <psurface/Parametrization.h>
+#include "Parametrization.h"
 
 #include <vector>
 

@@ -65,7 +65,7 @@
 #include <mclib/McSArray.h>
 #include <mclib/McSmallArray.h>
 
-#include <psurface/Node.h>
+#include "Node.h"
 
 #include "psurfaceAPI.h"
 

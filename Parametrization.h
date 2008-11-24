@@ -127,11 +127,11 @@
 
 #include "psurfaceAPI.h"
 
-#include <psurface/McSurfaceBase.h>
-#include <psurface/Domains.h>
-#include <psurface/SurfacePathSet.h>
-#include <psurface/GlobalNodeIdx.h>
-#include <psurface/NodeBundle.h>
+#include "McSurfaceBase.h"
+#include "Domains.h"
+#include "SurfacePathSet.h"
+#include "GlobalNodeIdx.h"
+#include "NodeBundle.h"
 
 class AmiraMesh;
 

@@ -6,8 +6,8 @@
 #include <mclib/McVec3f.h>
 #include <mclib/McVec3i.h>
 
-#include <psurface/Node.h>
-#include <psurface/IntersectionPrimitive.h>
+#include "Node.h"
+#include "IntersectionPrimitive.h"
 
 #include <vector>
 

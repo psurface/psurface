@@ -2,7 +2,7 @@
 #define NODE_BUNDLE_H
 
 #include <mclib/McSmallArray.h>
-#include <psurface/GlobalNodeIdx.h>
+#include "GlobalNodeIdx.h"
 
 /** \brief Set of graph nodes */
 class NodeBundle : public McSmallArray<GlobalNodeIdx, 2> {

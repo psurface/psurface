@@ -1,6 +1,6 @@
-#include <psurface/ContactToolBox.h>
-#include <psurface/ContactBoundary.h>
-#include <psurface/NormalProjector.h>
+#include "ContactToolBox.h"
+#include "ContactBoundary.h"
+#include "NormalProjector.h"
 
 #include <mclib/McSArray.h>
 

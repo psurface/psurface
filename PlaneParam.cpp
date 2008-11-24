@@ -1,4 +1,4 @@
-#include <psurface/PlaneParam.h>
+#include "PlaneParam.h"
 #include <mclib/McSparseMatrix.h>
 #include <mclib/McDVector.h>
 

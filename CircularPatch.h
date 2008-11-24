@@ -4,8 +4,8 @@
 #include <mclib/McBox3f.h>
 #include <mclib/McSArray.h>
 
-#include <psurface/Domains.h>
-#include <psurface/Parametrization.h>
+#include "Domains.h"
+#include "Parametrization.h"
 
 #include "psurfaceAPI.h"
 
