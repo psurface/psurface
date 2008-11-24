@@ -6,11 +6,6 @@
 inline int isnan(double x) {return _isnan(x);}
 #endif
 
-// debugging only
-#ifndef NDEBUG
-#include <hxparamtools/HxParamToolBox.h>
-#endif
-
 static int counter = 0;
 
 void DomainPolygon::init(const DomainTriangle& tri, const McVec2f coords[3]){
@@ -102,9 +97,6 @@ void DomainPolygon::mergeTriangle(TriangleIdx tri, McVec2f coords[3], int& newCe
     nodes.appendArray(cT.nodes);
     
     installWorldCoordinates(newNodeIdx, coords[0], coords[1], coords[2]);
-
-//     if (counter==194)
-//         ParamToolBox::display(cT, 194+boundaryPoints.size());
 
     McSArray<McSmallArray<int, 2>, 3> tmpEdgePoints = cT.edgePoints;
 
@@ -359,28 +351,14 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, McDArray<unsigned int>& n
 
     // debugging counter
 
-    //ParamToolBox::display(*this, counter++);
     if (fillIn.size()>=2) {
         insertExtraEdges();
         createPointLocationStructure();
         removeExtraEdges();
     }
 
-    // debug
-//     printf("-- the polygon --\n");
-//     for (i=0; i<boundaryPoints.size(); i++)
-//         printf("  %d", cornerNode(i));
-
-//     printf("\n");
     for (i=0; i<nodes.size(); i++)
         assert(!isnan(nodes[i].domainPos().x) && !isnan(nodes[i].domainPos().y));
-
-    //printf("counter= %d\n", counter);
-//     if (counter==194){
-//         ParamToolBox::display(*this, i);
-//         print(true, true, true);
-//         //return true;
-//     }
 
     for (i=0; i<fillIn.size()-1; i++){
 
@@ -567,10 +545,6 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, McDArray<unsigned int>& n
                 assert(false);
             }
         }
-
-        // ///////////////////////////////////
-//         ParamToolBox::display(cT, i);
-//         cT.print(true, true, true);
 
         cT.installBarycentricCoordinates();
 

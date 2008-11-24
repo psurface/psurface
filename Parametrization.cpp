@@ -153,12 +153,6 @@
 #include "Parametrization.h"
 #include "GlobalNodeIdx.h"
 
-
-// debug 
-#ifndef NDEBUG
-#include <hxparamtools/HxParamToolBox.h>
-#endif
-
 #include <mclib/McBox3f.h>
 #include <mclib/McVec2i.h>
 
@@ -1497,9 +1491,6 @@ int Parametrization::positionMap(TriangleIdx triIdx, McVec2f& p, McVec3f& result
     
     if (!status) {
         printf("p: (%f %f)\n", p.x, p.y);
-#ifndef NDEBUG
-        //ParamToolBox::display(triangles(triIdx), 0);
-#endif
         triangles(triIdx).print(true, true, false);
         assert(false);
         return false;
