@@ -1,0 +1,3 @@
+set PACKAGE {psurface}
+
+set LIBS {mclib amiramesh}
