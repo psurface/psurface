@@ -20,7 +20,7 @@
 #include <vector>
 #include <deque>
 #include <map>
-#include "Box.hh"
+#include "Box.h"
 
 // can be defined if desired
 #ifndef MEMINCREMENT
