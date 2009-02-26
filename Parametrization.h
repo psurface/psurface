@@ -121,7 +121,11 @@
 #ifndef PARAMETRIZATION_H
 #define PARAMETRIZATION_H
 
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
 #include "hxsurface/Surface.h"
+#endif
 
 #include <amiramesh/HxParamBundle.h>
 
