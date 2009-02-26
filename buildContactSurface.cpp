@@ -1,3 +1,5 @@
+#include <tr1/array>
+
 #include <psurface/ContactToolBox.h>
 #include <psurface/ContactBoundary.h>
 #include <psurface/NormalProjector.h>
@@ -5,6 +7,7 @@
 #include <mclib/McSArray.h>
 
 #include <mclib/McOctree.h>
+#include <psurface/MultiDimOctree.h>
 #include "MyMcVec3f.h"
 
 // Debug
@@ -154,28 +157,52 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
     // We first put the vertices of surface1 into an octree
     McOctree<MyMcVec3f> octree1(bbox1);
+
+    std::tr1::array<float,3> lower, upper;
+    for (int i=0; i<3; i++) {
+        lower[i] = bbox1.getMin()[i];
+        upper[i] = bbox1.getMax()[i];
+    }
+    Box<std::tr1::array<float,3>, 3> mdBBox1(lower, upper);
+    MultiDimOctree<MyMcVec3f, MyMcVec3fIntersector, std::tr1::array<float,3>, 3, true> mdOctree1(mdBBox1);
+    MyMcVec3fIntersector myMcVec3fIntersector;
+
     McDArray<MyMcVec3f> points1(surf1->points.size());        
 
     for (int i=0; i<surf1->points.size(); i++) {
         points1[i] = surf1->points[i];
         octree1.insert(points1[i]);
+
+        mdOctree1.insert(&points1[i], &myMcVec3fIntersector);
     }
 
     octree1.enableUniqueLookup(points1.size(), points1.dataPtr());
+    mdOctree1.enableUniqueLookup(points1.size(), points1.dataPtr());
     
     // We first put the vertices of surface2 into an octree
     McOctree<MyMcVec3f> octree2(intersectBox);
+
+    for (int i=0; i<3; i++) {
+        lower[i] = intersectBox.getMin()[i];
+        upper[i] = intersectBox.getMax()[i];
+    }
+    Box<std::tr1::array<float,3>, 3> mdIntersectBox(lower, upper);
+    MultiDimOctree<MyMcVec3f, MyMcVec3fIntersector, std::tr1::array<float,3>, 3, true> mdOctree2(mdIntersectBox);
+
     McDArray<MyMcVec3f> points2(surf2->points.size());        
 
     for (int i=0; i<surf2->points.size(); i++){
         
         points2[i] = surf2->points[i];
-        if (intersectBox.contains(surf2->points[i]))
+        if (intersectBox.contains(surf2->points[i])) {
             octree2.insert(points2[i]);
+            mdOctree2.insert(&points2[i], &myMcVec3fIntersector);
+        }
         
     }
     
     octree2.enableUniqueLookup(points2.size(), points2.dataPtr());
+    mdOctree2.enableUniqueLookup(points2.size(), points2.dataPtr());
     
     // Two bitfields to mark the contact nodes
     std::vector<bool> contactField2(surf2->points.size(), false);
@@ -199,7 +226,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
         const McVec3f& p1 = surf1->points[surf1->triangles[i].points[1]];
         const McVec3f& p2 = surf1->points[surf1->triangles[i].points[2]];
 
-        //  Look up the octree for points in a conversative neighborhood
+        //  Look up the octree for points in a conservative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
         McBox3f queryBox(p0, p1);
         queryBox.extendBy(p2);
@@ -207,10 +234,19 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
         McDArray<int> result;
         octree2.lookupIndex(queryBox, result);
-                                       
+
+        std::vector<int> mdResult;
+        Box<std::tr1::array<float,3>, 3> mdQueryBox(p0,p1);
+        mdQueryBox.extendBy(p2);
+        mdQueryBox.extendByEps(epsilon);
+        mdOctree2.lookupIndex(mdQueryBox, mdResult);
+
+        assert(result.size()==mdResult.size());
+        
+
         for (j=0; j<result.size(); j++) {
 
-            // Don't recompute everything is the vertex is already marked
+            // Don't recompute everything if the vertex is already marked
             if (contactField2[result[j]])
                 continue;
 
@@ -240,6 +276,14 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
         McDArray<int> result;
         octree1.lookupIndex(queryBox, result);
+
+        std::vector<int> mdResult;
+        Box<std::tr1::array<float,3>, 3> mdQueryBox(p0,p1);
+        mdQueryBox.extendBy(p2);
+        mdQueryBox.extendByEps(epsilon);
+        mdOctree1.lookupIndex(mdQueryBox, mdResult);
+
+        assert(result.size()==mdResult.size());
 
         // If the bounding box contains any vertices from surface one we keep
         // the whole triangle
