@@ -1,11 +1,11 @@
-#include "ContactBoundary.h"
-#include "NormalProjector.h"
+#include <psurface/ContactBoundary.h>
+#include <psurface/NormalProjector.h>
 
 #include <mclib/McVec2d.h>
 #include <mclib/McMat3d.h>
 #include <mclib/McVec3d.h>
 
-#include "NodeBundle.h"
+#include <psurface/NodeBundle.h>
 
 #include <stdexcept>
 #include <vector>

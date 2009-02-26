@@ -150,8 +150,8 @@
 #include <mclib/McDArray.h>
 #include <amiramesh/AmiraMesh.h>
 
-#include "Parametrization.h"
-#include "GlobalNodeIdx.h"
+#include <psurface/Parametrization.h>
+#include <psurface/GlobalNodeIdx.h>
 
 #include <mclib/McBox3f.h>
 #include <mclib/McVec2i.h>

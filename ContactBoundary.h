@@ -2,7 +2,11 @@
 #define CONTACT_BOUNDARY_H
 
 #include <mclib/McBox3f.h>
-#include <hxsurface/Surface.h>
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
+#include "hxsurface/Surface.h"
+#endif
 
 class ContactBoundary {
 public:
