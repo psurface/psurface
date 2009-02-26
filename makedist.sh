@@ -47,7 +47,6 @@ cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
 
 cp local_mclib/McDArray.h                 libpsurface/include/mclib
 cp local_mclib/McSmallArray.h             libpsurface/include/mclib
-cp local_mclib/include/mclib/McOctree.h   libpsurface/include/mclib
 cp local_mclib/McVec2d.h                  libpsurface/include/mclib
 cp local_mclib/McMat3d.h                  libpsurface/include/mclib
 cp MyMcVec3f.h                            libpsurface/include/mclib

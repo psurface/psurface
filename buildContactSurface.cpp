@@ -6,7 +6,6 @@
 
 #include <mclib/McSArray.h>
 
-#include <mclib/McOctree.h>
 #include <psurface/MultiDimOctree.h>
 #include "MyMcVec3f.h"
 
@@ -156,8 +155,6 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     McBox3f intersectBox = bbox1.intersectWith(bbox2);
 
     // We first put the vertices of surface1 into an octree
-    McOctree<MyMcVec3f> octree1(bbox1);
-
     std::tr1::array<float,3> lower, upper;
     for (int i=0; i<3; i++) {
         lower[i] = bbox1.getMin()[i];
@@ -171,17 +168,12 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
     for (int i=0; i<surf1->points.size(); i++) {
         points1[i] = surf1->points[i];
-        octree1.insert(points1[i]);
-
         mdOctree1.insert(&points1[i], &myMcVec3fIntersector);
     }
 
-    octree1.enableUniqueLookup(points1.size(), points1.dataPtr());
     mdOctree1.enableUniqueLookup(points1.size(), points1.dataPtr());
     
     // We first put the vertices of surface2 into an octree
-    McOctree<MyMcVec3f> octree2(intersectBox);
-
     for (int i=0; i<3; i++) {
         lower[i] = intersectBox.getMin()[i];
         upper[i] = intersectBox.getMax()[i];
@@ -194,14 +186,11 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     for (int i=0; i<surf2->points.size(); i++){
         
         points2[i] = surf2->points[i];
-        if (intersectBox.contains(surf2->points[i])) {
-            octree2.insert(points2[i]);
+        if (intersectBox.contains(surf2->points[i]))
             mdOctree2.insert(&points2[i], &myMcVec3fIntersector);
-        }
         
     }
     
-    octree2.enableUniqueLookup(points2.size(), points2.dataPtr());
     mdOctree2.enableUniqueLookup(points2.size(), points2.dataPtr());
     
     // Two bitfields to mark the contact nodes
@@ -228,21 +217,11 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
         //  Look up the octree for points in a conservative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
-        McBox3f queryBox(p0, p1);
-        queryBox.extendBy(p2);
-        queryBox.extendByEps(epsilon);
-
-        McDArray<int> result;
-        octree2.lookupIndex(queryBox, result);
-
-        std::vector<int> mdResult;
+        std::vector<int> result;
         Box<std::tr1::array<float,3>, 3> mdQueryBox(p0,p1);
         mdQueryBox.extendBy(p2);
         mdQueryBox.extendByEps(epsilon);
-        mdOctree2.lookupIndex(mdQueryBox, mdResult);
-
-        assert(result.size()==mdResult.size());
-        
+        mdOctree2.lookupIndex(mdQueryBox, result);
 
         for (j=0; j<result.size(); j++) {
 
@@ -270,20 +249,11 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
         //  Look up the octree for points in a conversative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
-        McBox3f queryBox(p0, p1);
-        queryBox.extendBy(p2);
-        queryBox.extendByEps(epsilon);
-
-        McDArray<int> result;
-        octree1.lookupIndex(queryBox, result);
-
-        std::vector<int> mdResult;
+        std::vector<int> result;
         Box<std::tr1::array<float,3>, 3> mdQueryBox(p0,p1);
         mdQueryBox.extendBy(p2);
         mdQueryBox.extendByEps(epsilon);
-        mdOctree1.lookupIndex(mdQueryBox, mdResult);
-
-        assert(result.size()==mdResult.size());
+        mdOctree1.lookupIndex(mdQueryBox, result);
 
         // If the bounding box contains any vertices from surface one we keep
         // the whole triangle
