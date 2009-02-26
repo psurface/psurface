@@ -47,7 +47,7 @@ cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
 
 cp local_mclib/McDArray.h                 libpsurface/include/mclib
 cp local_mclib/McSmallArray.h             libpsurface/include/mclib
-cp local_mclib/McOctree.h                 libpsurface/include/mclib
+cp local_mclib/include/mclib/McOctree.h   libpsurface/include/mclib
 cp local_mclib/McVec2d.h                  libpsurface/include/mclib
 cp local_mclib/McMat3d.h                  libpsurface/include/mclib
 cp MyMcVec3f.h                            libpsurface/include/mclib
@@ -66,6 +66,8 @@ cp Parametrization.h        libpsurface/include/psurface
 cp PlaneParam.h             libpsurface/include/psurface
 cp SurfacePath.h            libpsurface/include/psurface
 cp SurfacePathSet.h         libpsurface/include/psurface
+cp Box.h                    libpsurface/include/psurface
+cp MultiDimOctree.h         libpsurface/include/psurface
 cp psurfaceAPI.h            libpsurface/include/psurface
 
 cp local_mclib/McMat3f.cpp                libpsurface/src
