@@ -45,7 +45,6 @@ cp local_mclib/include/mclib/McVec4i.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McWildMatch.h            libpsurface/include/mclib
 cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
 
-cp local_mclib/McException.h              libpsurface/include/mclib
 cp local_mclib/McDArray.h                 libpsurface/include/mclib
 cp local_mclib/McSmallArray.h             libpsurface/include/mclib
 cp local_mclib/McOctree.h                 libpsurface/include/mclib
@@ -71,7 +70,6 @@ cp psurfaceAPI.h            libpsurface/include/psurface
 
 cp local_mclib/McMat3f.cpp                libpsurface/src
 cp local_mclib/McHashTable.cpp            libpsurface/src
-cp local_mclib/McException.cpp            libpsurface/src
 
 
 cp psurface.cpp                     libpsurface/src
