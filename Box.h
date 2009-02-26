@@ -30,14 +30,21 @@ public:
 	~Box()
 	{}
 
-	Box(const C& lower, const C& upper) : _lower(lower), _upper(upper)
-    {}
-
-	Box(const McVec3f& lower, const McVec3f& upper)
+    /** \brief Set box from two points */
+    Box(const C& lower, const C& upper) : _lower(lower), _upper(upper)
     {
         for (int i=0; i<3; i++) {
-            _lower[i] = lower[i];
-            _upper[i] = upper[i];
+            _lower[i] = std::min(lower[i],upper[i]);
+            _upper[i] = std::max(lower[i],upper[i]);
+        }
+    }
+
+    /** \brief Set box from two points */
+    Box(const McVec3f& lower, const McVec3f& upper)
+    {
+        for (int i=0; i<3; i++) {
+            _lower[i] = std::min(lower[i],upper[i]);
+            _upper[i] = std::max(lower[i],upper[i]);
         }
     }
 
