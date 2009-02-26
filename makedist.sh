@@ -42,7 +42,6 @@ cp local_mclib/include/mclib/McVec3d_impl.h           libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec3i.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec4f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec4i.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McWildMatch.h            libpsurface/include/mclib
 cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
 
 cp local_mclib/McDArray.h                 libpsurface/include/mclib
