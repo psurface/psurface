@@ -1,0 +1,1930 @@
+/////////////////////////////////////////////////////////////////
+/*
+ * $Id: TargetSurface.cpp.standalone,v 1.1 2007/10/17 13:16:55 sander Exp $
+ *
+ * $Log: TargetSurface.cpp.standalone,v $
+ * Revision 1.1  2007/10/17 13:16:55  sander
+ * moved here from the ZIB server
+ *
+ * Revision 1.1  2006/03/01 10:18:44  bzfsande
+ * Trying to reduce the ties to Amira even more so I can use this package
+ * more easily outside of Amira without technical and licensing trouble.
+ *
+ * This new class contains the few methods of Surface that I really need.
+ * When this package is compiled with -DPSURFACE_STANDALONE, it is used
+ * as the target surface of the parametrization.  When compiled within
+ * Amira, the standard Surface class is still used (the real one, no
+ * local copy).  That way I can still watch target surfaces with the
+ * normal SurfaceView module.
+ * mailtoauthor: sander@zib.de
+ *
+ *
+ */
+/////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include <ctype.h>
+
+#include <McHashTable.h>
+
+#include "TargetSurface.h"
+
+
+Surface::Patch& Surface::Patch::operator=(const Surface::Patch& other)
+{
+    innerRegion = other.innerRegion;
+    outerRegion = other.outerRegion;
+    boundaryId  = other.boundaryId;
+    branchingPoints = other.branchingPoints;
+    triangles = other.triangles;
+    contours  = other.contours; 
+    segments  = other.segments;
+    return *this;
+}
+
+Surface::Patch::Patch(const Surface::Patch& other)
+{ 
+    *this = other;
+}
+
+
+Surface::Surface(HxParamBundle* bundle)
+{
+    if (bundle) {
+        params = bundle;
+        hasOwnParamBundle=0;
+    } else {
+        params = new HxParamBundle;
+        hasOwnParamBundle = 1;
+    }
+
+    debug = 0;
+    nBranchingPoints = 0;
+    nContourPoints = 0;
+    lastTriangleIdx = -1;
+    lastWhich = -1;
+    lastGlobal = 0;
+    contourFlag = 0;
+    normalBinding = PER_TRIANGLE;
+}
+
+int Surface::getMaterialID(const char *mat)
+{
+    HxParamBundle* materials = params->materials();
+    HxParamBundle* bundle = materials->bundle(mat,0);
+    if (bundle)
+        return materials->index(bundle);
+    return (-1);
+}
+
+int Surface::addMaterial(const char *name, int id)
+{
+    HxParamBundle* materials = params->materials();
+
+    if (id<0) id = materials->nBundles();
+    HxParamBundle* bundle = new HxParamBundle(name);
+    bundle->insert(new HxParameter("id",id));
+    materials->insert(bundle);
+    return id;
+}
+
+Surface::~Surface()
+{
+    if (hasOwnParamBundle)
+        delete params;
+
+    int i;
+    for (i=0; i<contours.size(); i++) {
+        if (contours[i])
+            delete contours[i];
+    }
+
+    for (i=0; i<patches.size(); i++) {
+        if (patches[i])
+            delete patches[i];
+    }
+}
+
+int Surface::operator==(const Surface& other) const
+{
+    if (points.size() !=other.points.size() ||
+        nBranchingPoints !=other.nBranchingPoints ||
+        nContourPoints!=other.nContourPoints ||
+        contours.size() !=other.contours.size())
+        return(0);
+    return(1);
+}
+
+void Surface::print()
+{
+    printf("Surface has %ld points, %ld patches, %ld triangles, %ld edges \n",
+           points.size(),patches.size(),triangles.size(),edges.size());
+}
+
+void Surface::clear()
+{
+    int i;
+    points.resize(0);
+    triangles.resize(0);
+
+    for (i=0; i<patches.size(); i++)
+        delete patches[i];
+    patches.resize(0);
+    
+    for (i=0; i<contours.size(); i++)
+        delete contours[i];
+    contours.resize(0);
+
+    params->materials()->removeAll();
+    nBranchingPoints = 0;
+    nContourPoints = 0;
+    contourFlag = 0;
+}
+
+void Surface::removePoint(int patch,int point)
+{
+    McDArray<int> tris;
+    int i;
+    for (i=0 ; i<patches[patch]->triangles.size() ; i++) {
+        Triangle& ta=triangles[patches[patch]->triangles[i]];
+        if (point==ta.points[0] || point==ta.points[1] || point==ta.points[2])
+            tris.append(i);
+    }
+    if (tris.size()==0) {
+        printf("ERROR: Surface::removePoint(%d,%d), no triangle found\n",
+               patch,point);
+        return;
+    }
+    if (tris.size()==1) {
+        patches[patch]->triangles.remove(tris[0]);
+        printf("WARNING: IMPLEMENT POINT TYPE SWITCH (inner->contour)\n");
+        return;
+    }
+}
+
+void Surface::createAllEdges(int  createEdgeIds)
+{
+    int i;
+    if (debug)
+        fprintf(stderr,"createAllEdges\n");
+    
+    for (i=0; i<edgesPerPoint.size(); i++)
+        edgesPerPoint[i].resize(0);
+
+    // cleanup any edge id information
+    for (i=0; i<edgesPerTriangle.size(); i++)
+        edgesPerTriangle[i].resize(0);
+
+    // edge ids per triangle can be stored on demand
+    if (createEdgeIds)
+        edgesPerTriangle.resize(triangles.size());
+    else
+        edgesPerTriangle.resize(0);
+
+    edgesPerPoint.resize(points.size());
+    edges.resize(0);
+    
+    for (int patch=0 ; patch<patches.size() ; patch++) {
+        for (i=0 ; i<patches[patch]->triangles.size() ; i++) {
+            Triangle& ta=triangles[patches[patch]->triangles[i]];           
+            for (int k=0 ; k<3 ; k++) {    
+                int from = ta.points[(k+1)%3];
+                int to = ta.points[(k+2)%3];
+                int nEdges = edgesPerPoint[from].size();
+                int m;
+                for (m=0; m<nEdges; m++) {
+                    int f=edges[edgesPerPoint[from][m]].from;
+                    int t=edges[edgesPerPoint[from][m]].to;
+                    if (f==to || t==to) {
+                        break;
+                    }                   
+                }               
+                if (m==nEdges) {
+                    int e = edges.appendSpace(1);
+                    Edge *edge = &edges[e];
+                    edge->from = from;
+                    edge->to = to;
+                    edge->triangles.append(patches[patch]->triangles[i]);
+                    edgesPerPoint[from].append(e);
+                    edgesPerPoint[to].append(e);
+                } else {
+                    edges[edgesPerPoint[from][m]].triangles.append(patches[patch]->triangles[i]);
+                }
+            }
+        }
+    }    
+
+    // store edge indices for each triangle
+    if (createEdgeIds && (edgesPerTriangle.size() >= triangles.size())) {
+        for (int eIdx = 0; eIdx < edges.size(); eIdx++) {
+            for (int tIdx = (edges[eIdx].triangles.size() - 1); tIdx >= 0; tIdx--) {
+                edgesPerTriangle[edges[eIdx].triangles[tIdx]].append(eIdx);
+            }
+        }
+    }
+
+    if (debug)
+        fprintf(stderr,"number of edges: %ld\n",edges.size());
+}
+
+
+void Surface::findContours()
+{
+    McDArray<unsigned char> edgeUsed(edges.size());
+    edgeUsed.fill(0);
+
+    int i;
+    McDArray<int> leftPoints;
+    McDArray<int> rightPoints;
+
+    // Clear old contours:
+    for (i=0 ; i<contours.size() ; i++)
+        if (contours[i])
+            delete contours[i];
+    contours.resize(0);
+    
+    // Clear old contours of patches:
+    int iPatch;
+    for (iPatch=0; iPatch < patches.size(); iPatch++) {
+        patches[iPatch]->contours.resize(0);
+    }
+  
+    for (i=0; i<edgeUsed.size(); i++) {
+        if (!edgeUsed[i] && pointType[edges[i].from]!=INNER) {
+            leftPoints.resize(0);
+            rightPoints.resize(0);
+            edgeUsed[i]=1;
+            int currEdge=i;
+            /* Go to the left, until a branching point is found, 
+               or the starting edge is met again */
+            int currPoint;
+            unsigned char closedContour = 0;
+            for (currPoint=edges[currEdge].from; 
+                 pointType[currPoint]!=BRANCHING && !closedContour;) {
+                leftPoints.append(currPoint);
+                assert(edgesPerPoint[currPoint].size()==2);
+                int e=edgesPerPoint[currPoint][0];
+                if (e==currEdge)
+                    e=edgesPerPoint[currPoint][1];
+                currEdge=e;
+                if (edgeUsed[e])
+                    closedContour = 1;
+                edgeUsed[e]=1;
+                if (currPoint!=edges[e].from)
+                    currPoint=edges[e].from;
+                else
+                    currPoint=edges[e].to;
+            }
+            leftPoints.append(currPoint);
+
+            if (!closedContour) {
+                // Now to the right.
+                currEdge=i;
+                for (currPoint=edges[currEdge].to;
+                     pointType[currPoint]!=BRANCHING; ) {       
+                    rightPoints.append(currPoint);
+                    int e=edgesPerPoint[currPoint][0];
+                    if (e==currEdge)
+                        e=edgesPerPoint[currPoint][1];
+                    currEdge=e;
+                    assert(edgeUsed[e]==0);     
+                    edgeUsed[e]=1;
+                    if (currPoint!=edges[e].from)
+                        currPoint=edges[e].from;
+                    else
+                        currPoint=edges[e].to;
+                }
+                rightPoints.append(currPoint);
+            }
+            Contour *contour=new Contour;
+            contour->points.remax(leftPoints.size()+rightPoints.size()+2);
+            int j;
+            for (j=leftPoints.size()-1 ; j>=0 ; j--) {
+                contour->points.append(leftPoints[j]);
+            }
+            for (j=0 ; j<rightPoints.size() ; j++) {
+                contour->points.append(rightPoints[j]);
+            }
+            int cn=contours.size();
+            contours.append(contour);
+            for (j=0 ; j<edges[i].triangles.size() ; j++) {
+                int patch=triangles[edges[i].triangles[j]].patch;
+                if (patches[patch]->contours.size()==0 ||
+                    patches[patch]->contours.last()!=cn) {                  
+                    contour->patches.append(patch);
+                    patches[patch]->contours.append(cn);
+                }
+            }
+        }
+    }
+    //sortContoursOfPatches();
+}
+
+void Surface::sortContoursOfPatches(int fixDeadEnds)
+{
+    for (int i=0 ; i<patches.size() ; i++) 
+        sortContoursOfPatch(i,fixDeadEnds);
+}
+
+void Surface::deleteDeadEnds()
+{
+    int i,k,nContours = contours.size();
+    McSmallArray<int,2> emptyArray ;
+    McDArray<short> deadEnds(nContours);
+    McHashTable<int,McSmallArray<int,2> > contoursPerPoint(emptyArray);
+    
+    // Initialize contourList array
+    for (i=0; i<nContours; i++) {       
+        int from=contours[i]->points[0];
+        int to=contours[i]->points.last();
+        McSmallArray<int,2> *contourList = &contoursPerPoint[from];
+        contourList->append(i);
+        contourList = &contoursPerPoint[to];
+        contourList->append(i);
+    }
+
+    // Compute deadEnds
+    for (i=0 ; i<nContours ; i++) {
+        deadEnds[i]=0;
+
+        int from=contours[i]->points[0];
+        McSmallArray<int,2> *contourList = contoursPerPoint.lookup(from);
+        if (contourList->size()==1)
+            deadEnds[i]=1;
+        else {
+            int to=contours[i]->points.last();
+            contourList=contoursPerPoint.lookup(to);
+            if (contourList->size()==1)
+                deadEnds[i]=1;
+        }
+    }
+
+    for (i=0 ; i<nContours ; i++) {
+        int from = contours[i]->points[0];
+        McSmallArray<int,2> *contourList=contoursPerPoint.lookup(from);
+
+        int nTrueContours=0;
+        for (k=0; k<contourList->size(); k++)
+            if (!deadEnds[(*contourList)[k]]) nTrueContours++;
+        if (nTrueContours==2 && pointType[from]==Surface::BRANCHING) {
+            pointType[from] = Surface::CONTOUR;
+        }
+        if (nTrueContours==0 && pointType[from]==Surface::BRANCHING) {
+            pointType[from] = Surface::INNER;
+        }
+
+        int to = contours[i]->points.last();
+        contourList=contoursPerPoint.lookup(to);
+
+        nTrueContours=0;
+        for (k=0; k<contourList->size(); k++)
+            if (!deadEnds[(*contourList)[k]]) nTrueContours++;
+        if (nTrueContours==2 && pointType[to]==Surface::BRANCHING) {
+            pointType[to] = Surface::CONTOUR;
+        }
+        if (nTrueContours==0 && pointType[to]==Surface::BRANCHING) {
+            pointType[to] = Surface::INNER;
+        }
+    }
+}
+
+int Surface::sortContoursOfPatch(int p, int)
+{
+    Surface::Patch& patch=*patches[p];
+    int i,k,nContours=patch.contours.size();
+    
+    McDArray<unsigned char> contourUsed(nContours);    
+    McDArray<short> sign(nContours);
+    McDArray<short> newIndex(nContours);
+    McDArray<short> deadEnds(nContours);
+    McSmallArray<int,2> emptyArray ;
+    contourUsed.fill(0);
+    sign.fill(1);
+
+    /* Put the Branching points together with a list of contours at this point
+       in a hashtable. The list contains indices, relative to this
+       patches contours list.*/
+    McHashTable<int,McSmallArray<int,2> > contoursPerPoint(emptyArray);
+    
+    // Initialize contourList array
+    for (i=0 ; i<nContours ; i++) {     
+        int from=contours[(int)patch.contours[i]]->points[0];
+        int to=contours[(int)patch.contours[i]]->points.last();
+        McSmallArray<int,2> *contourList = &contoursPerPoint[from];
+        contourList->append(i);
+        contourList = &contoursPerPoint[to];
+        contourList->append(i);
+    }
+
+    // Compute deadEnds
+    for (i=0 ; i<nContours ; i++) {
+        deadEnds[i]=0;
+
+        int from=contours[(int)patch.contours[i]]->points[0];
+        McSmallArray<int,2> *contourList=contoursPerPoint.lookup(from);
+        if (contourList->size()==1)
+            deadEnds[i]=1;
+        else {
+            int to=contours[(int)patch.contours[i]]->points.last();
+            contourList=contoursPerPoint.lookup(to);
+            if (contourList->size()==1)
+                deadEnds[i]=1;
+        }
+    }
+
+    int cnt = 0;
+    int nLoops = 0;
+    int kStart = 0;
+
+    for (i=0; i<nContours; i++) {
+        if (!deadEnds[i]) {
+            kStart = i;
+            break;
+        }
+    }
+
+    for (k=kStart; k<kStart+nContours; k++) {
+        i = k%nContours;
+        if (!contourUsed[i]) {
+            contourUsed[i]=1;
+            Patch::Segment s;
+            s.first = cnt;
+            patch.segments.append(s);
+            nLoops++;
+            sign[cnt]  = patch.contours[i].sign();
+            newIndex[i]= cnt++;
+            
+            int currPoint   = contourToPoint(patch.contours[i]);
+            int from        = contourFromPoint(patch.contours[i]);          
+            int currContour = i;
+            int nextContour;
+
+            while (currPoint!=from) {
+                McSmallArray<int,2> *contourList=contoursPerPoint.lookup(currPoint);
+                if (contourList->size()!=2) {
+                    int i;
+                    for ( i=0 ; i<contourList->size() ; i++) {
+                        if ((*contourList)[i]==currContour || 
+                            deadEnds[(*contourList)[i]])
+                            continue;
+                        else { 
+                            nextContour = (*contourList)[i];
+                            break;
+                        }
+                    }
+                    if (i==contourList->size()) {
+                        if (debug)
+                            printf("Surface::sortContoursOfPatch(%d):"
+                                   "Inconsistency I"
+                                   "(%d instead of 2 contours at "
+                                   "branchingpoint)!\n",
+                                   p,contourList->size());
+                        break;
+                    }
+                } else {
+                    nextContour=(*contourList)[0];
+                    if (nextContour==currContour)
+                        nextContour=(*contourList)[1];
+                }
+
+                currContour=nextContour;
+                if (contourUsed[nextContour]) {
+                    if (debug)
+                        printf("Surface::sortContoursOfPatch(%d), closed contour\n",p);
+                    break;
+                }
+                contourUsed[nextContour]=1;
+                newIndex[nextContour]=cnt;
+                
+                sign[cnt] = patch.contours[nextContour].sign();
+                
+                int p=contourToPoint(patch.contours[nextContour]);
+                if (p==currPoint) {
+                    p=contourFromPoint(patch.contours[nextContour]);                
+                    sign[cnt]*=-1;
+                }
+                cnt++;
+                currPoint=p;
+            }
+            patch.segments.last().last = cnt-1;
+        }
+    }
+    McDArray<int> tmpArray(nContours);
+    for ( i=0 ; i<nContours ; i++) {
+        if (!contourUsed[i]) {
+            newIndex[i]=cnt++;
+            printf("ERROR: After tracing, still unused contours.\n");
+            assert(0);
+        }
+        tmpArray[(int)(newIndex[i])] = patch.contours[i];
+    }
+
+    if (debug)
+        printf("sortContoursOfPatch(patch=%d): %d Contours in %d loops.\n",p,
+               nContours,nLoops);
+    for ( i=0 ; i<nContours ; i++) {
+        patch.contours[i]=oint(tmpArray[i],sign[i]);
+        if (debug)
+            printf("             Contour %c%d: %d->%d (%d points)\n",
+                   patch.contours[i].positive()?'+':'-',(int)patch.contours[i],
+                   contourFromPoint(patch.contours[i]),
+                   contourToPoint(patch.contours[i]),
+                   (int)contours[(int)patch.contours[i]]->points.size());
+    }
+    return(nLoops);
+}
+
+int Surface::getEdgeOfTriangle(int triangleIdx,int which)
+{
+    int p1,p2;
+    p1=triangles[triangleIdx].points[(which+1)%3];
+    p2=triangles[triangleIdx].points[(which+2)%3];
+    if (edgesPerPoint.size()!=points.size())
+        printf("Error 1 in Surface::getEdgeOfTriangle\n");
+
+    for (int i=0 ; i<edgesPerPoint[p1].size() ; i++) {
+        int e = edgesPerPoint[p1][i];
+        int f=edges[e].from;
+        int t=edges[e].to;
+        if (f==p2 || t==p2)
+            return(e);
+    }
+    printf("Error 2 in Surface::getEdgeOfTriangle\n");
+    return(-1);
+}
+
+int Surface::getNeighbourTriangle(int triangleIdx, int which, int global)
+{
+    lastGlobal = global;
+    lastTriangleIdx = lastWhich = -1;
+
+    if (triangleIdx >= triangles.size() || which < 0 || which > 2)
+        return -1;
+
+    int ret = -1;
+    Triangle tri = triangles[triangleIdx];
+    if (tri.neighbours[which].isEmpty)
+        return -1;
+
+    if (tri.neighbours[which].isContour) {
+        if (global) {
+            Surface::Edge& edge = edges[tri.neighbours[which].neighbourIdx];
+            if (edge.triangles.size() > 1) {
+                int i = edge.triangles[0];
+                lastNeighbourIdx = 0;
+                if (i == triangleIdx) {
+                    i = edge.triangles[1];
+                    lastNeighbourIdx = 1;
+                }
+                ret = i;
+                lastTriangleIdx = triangleIdx;
+                lastWhich = which;
+            }
+        }
+    }
+    else ret = tri.neighbours[which].neighbourIdx;
+       
+    return ret;
+}
+
+int Surface::getNextNeighbourTriangle()
+{
+    if (!lastGlobal || lastTriangleIdx < 0 || lastWhich < 0)
+        return -1;
+
+    int ret = -1;
+    Surface::Edge& edge =
+        edges[triangles[lastTriangleIdx].neighbours[lastWhich].neighbourIdx];
+
+    for (int i=lastNeighbourIdx+1; i<edge.triangles.size(); i++) {
+         if (edge.triangles[i] != lastTriangleIdx) {
+             ret = edge.triangles[i];
+             lastNeighbourIdx = i;
+             break;
+         }
+    }
+
+    if (ret == -1) {
+        lastTriangleIdx = lastWhich = -1;
+    }
+
+    return ret;
+}
+
+void Surface::createNeighbours()
+{
+    int nTriangles = triangles.size();
+    int i,tri;
+    for (tri=0; tri<nTriangles; tri++) {
+        int patch = triangles[tri].patch;
+        /* For all 3 edges: */
+        for ( i=0 ; i<3 ; i++) {
+            triangles[tri].neighbours[i].isEmpty=0;
+            int e=getEdgeOfTriangle(tri,i);
+            /* not exactly one neighbour ? */
+            if (edges[e].triangles.size()!=2) {
+                triangles[tri].neighbours[i].isContour=1;
+                triangles[tri].neighbours[i].neighbourIdx = e;
+            } else {
+                // Get the opposite triangle
+                int other=edges[e].triangles[0];
+                if (other==tri)
+                    other=edges[e].triangles[1];
+
+                // Find 'other' in the patch's triangle list
+                int otherPatch = triangles[other].patch;
+                int otherFound = (otherPatch == patch);
+
+                if (otherFound) {
+                    // triangle belongs to patch
+                    triangles[tri].neighbours[i].neighbourIdx=other;
+                    triangles[tri].neighbours[i].isContour=0;
+                } else {
+                    // found triangle belongs to other path => contour!
+                    triangles[tri].neighbours[i].neighbourIdx=e;
+                    triangles[tri].neighbours[i].isContour=1;
+                }
+            }
+        }
+    }    
+}
+
+void Surface::createConnectivity()
+{
+    if (debug)
+        fprintf(stderr,"createConnectivity\n");
+
+    int nPatches = patches.size();
+    for (int iPatch=0; iPatch<nPatches; iPatch++) {
+        createConnectivity(iPatch);
+    }
+}
+
+void Surface::createConnectivity(int patch)
+{
+    int i,n=0;
+
+    int nPatches = patches.size();
+
+    if (patches[patch]->triangles.size()==0) {
+        fprintf(stderr,"createConnectivity: Empty patch %d\n",patch);
+        return;
+    }
+    
+    int nTriangle = patches[patch]->triangles.size();
+    for (i=0; i<nTriangle; i++) {
+        Triangle& tri = triangles[patches[patch]->triangles[i]];
+        tri.neighbours[0].isEmpty = 1;
+        tri.neighbours[1].isEmpty = 1;
+        tri.neighbours[2].isEmpty = 1;
+        //tri.patch = -1;
+        tri.patch = nPatches;
+    }
+    
+    McDArray<int> stack;
+
+    // this is a temporary array to speed up the search farther down
+    // McDArray<int> patchTriangles = patches[patch]->triangles;
+    // patchTriangles.sort(&mcStandardCompare);
+
+    // Start with first triangle
+    int first = patches[patch]->triangles[0];
+    stack.push(first);
+
+    while (stack.size()) {
+        int tri;
+        stack.pop(tri);
+        //if (triangles[tri].patch<0) { // not yet touched
+        if (triangles[tri].patch == nPatches) { // not yet touched
+            n++;
+            triangles[tri].patch=patch;
+            int i;
+            /* For all 3 edges: */
+            for ( i=0 ; i<3 ; i++) {
+                triangles[tri].neighbours[i].isEmpty=0;
+                int e=getEdgeOfTriangle(tri,i);
+                /* not exactly one neighbour ? */
+                if (edges[e].triangles.size()!=2) {
+                    triangles[tri].neighbours[i].isContour=1;
+                    triangles[tri].neighbours[i].neighbourIdx = e;
+                } else {
+                    // Get the opposite triangle
+                    int other=edges[e].triangles[0];
+                    if (other==tri)
+                        other=edges[e].triangles[1];
+
+                    // Find 'other' in the patch's triangle list
+                    // int otherFound = patchTriangles.findSorted(other, &mcStandardCompare);
+                    int otherPatch = triangles[other].patch;
+                    int otherFound = (otherPatch == patch ||
+                                      otherPatch == nPatches);
+
+                    //if (otherFound!=-1) // triangle belongs to patch
+                    if (otherFound) // triangle belongs to patch
+                       {
+                        triangles[tri].neighbours[i].neighbourIdx=other;
+                        triangles[tri].neighbours[i].isContour=0;
+                        //if (triangles[other].patch==-1)
+                        if (triangles[other].patch==nPatches)
+                            stack.push(other);
+                       }
+                    else  // found triangle belongs to other path => contour!
+                       {
+                        triangles[tri].neighbours[i].neighbourIdx=e;
+                        triangles[tri].neighbours[i].isContour=1;
+                       }
+                }
+            }
+        }
+    }
+    if (nTriangle!=n) {
+            if (debug)
+                printf("Only %d of %ld triangles are connected. The others are "
+                       "put in a new patch\n",n,
+               patches[patch]->triangles.size());
+        Patch *newPatch = new Patch;
+        newPatch->triangles.remax(patches[patch]->triangles.size()-n);
+        int delta=0;
+        for ( i=0 ; i<nTriangle ; i++) {
+            //if (triangles[patches[patch]->triangles[i]].patch>-1) {
+            if (triangles[patches[patch]->triangles[i]].patch==patch) {
+                patches[patch]->triangles[i-delta]=
+                    patches[patch]->triangles[i];
+            } else {
+                delta++;
+                newPatch->triangles.append(patches[patch]->triangles[i]);
+            }
+        }
+        newPatch->innerRegion = patches[patch]->innerRegion;
+        newPatch->outerRegion = patches[patch]->outerRegion;
+        newPatch->boundaryId  = patches[patch]->boundaryId;
+        patches[patch]->triangles.remax(n,n);
+        patches.append(newPatch);
+        createConnectivity(patches.size()-1);
+    }
+}
+
+
+void Surface::findBranchingPoints()
+{
+    if (debug)
+        fprintf(stderr,"findBranchingPoints\n");
+
+    int i;
+    int nPoints = points.size();
+
+    /* initialize all points as inner points */
+    pointType.resize(points.size());
+    pointType.fill(INNER);
+
+    /* mark points on contour edges */
+    int nEdges = edges.size();
+    int f, t;
+
+    for (i=0; i<nEdges; i++) {
+        if (edges[i].triangles.size() != 2 ||
+            triangles[edges[i].triangles[0]].patch !=
+            triangles[edges[i].triangles[1]].patch) {
+            f = edges[i].from;
+            t = edges[i].to;
+            pointType[f] = CONTOUR;
+            pointType[t] = CONTOUR;
+        }
+    }
+
+    McSmallArray<int,6> triaList;
+    McDArray<int> markTria;
+
+    /* 1st (3rd) type of branching points: INNER points with nGroups > 1 */
+    for (i=0; i<nPoints; i++) {
+        if (pointType[i] == INNER) {
+
+            /* create list of all triangles adjacent to point i */
+            triaList.resize(0);
+            nEdges = edgesPerPoint[i].size();
+            int j;
+            for (j=0; j<nEdges; j++) {
+                int iEdge = edgesPerPoint[i][j];
+                int k;
+                for (k=0; k<edges[iEdge].triangles.size(); k++) {
+                    int iTriangle = edges[iEdge].triangles[k];
+
+                    int triangleInList = 0;
+                    int l;
+                    for (l=0; l<triaList.size(); l++) {
+                        if (iTriangle == triaList[l]) {
+                            triangleInList = 1;
+                        }
+                    }
+                    if (triangleInList == 0)
+                        triaList.append(iTriangle);
+                }
+            }
+
+            /* examine if all triangles are in one group */
+            int nTriangle = triaList.size();
+            if (nTriangle>0) {
+                markTria.resize(nTriangle);
+                markTria.fill(0);
+                
+                int nGroups = 1;
+                markTria[0] = nGroups;
+                int iTriangle = triaList[0];
+                int change = 1;
+                while (change == 1) {
+                    change = 0;
+                    int iVertex;
+                    for (iVertex=0; iVertex<3; iVertex++) {
+                        if (triangles[iTriangle].points[iVertex] == i) break;
+                    }
+                    if (iVertex == 3) {
+                        fprintf(stderr,"Error searching for 1st type of branching points\n");
+                        fprintf(stderr,"point %d triangle vertices %d %d %d\n",
+                                i,
+                                triangles[iTriangle].points[0],
+                                triangles[iTriangle].points[1],
+                                triangles[iTriangle].points[2]
+                                );
+                        
+                    } else {
+                        int iEdge = (iVertex+2)%3;
+                        Surface::Triangle::Neighbour neighbour = 
+                            triangles[iTriangle].neighbours[iEdge];
+                        
+                        if (!neighbour.isEmpty && !neighbour.isContour) {
+                            iTriangle = neighbour.neighbourIdx;
+                            int iList;
+                            for (iList=0; iList<nTriangle; iList++) {
+                                if (iTriangle == triaList[iList]) break;
+                            }
+                            if (iList == nTriangle) {
+                                fprintf(stderr,
+                                        "Error searching for 1st type of branching points\n");
+                                fprintf(stderr,"triangle not in list\n");
+                            } else {
+                                if (markTria[iList] == 0) {
+                                    markTria[iList] = nGroups;
+                                    change = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                int iList;
+                for (iList=0; iList<nTriangle; iList++) {
+                    if (markTria[iList] == 0) nGroups = 2;
+                }
+
+                if (nGroups > 1) {
+                    pointType[i] = BRANCHING;
+                }
+            } else 
+                pointType[i] = UNUSED;
+        }
+    }
+
+    /* 2nd type of branching points: CONTOUR points shared by != 2 boundary edges */
+    for (i=0; i<nPoints; i++) {
+        if (pointType[i] == CONTOUR) {
+            nEdges = edgesPerPoint[i].size();
+            int nContourEdges = 0;
+            int j;
+            for (j=0; j<nEdges; j++) {
+                int iEdge = edgesPerPoint[i][j];
+                if (edges[iEdge].triangles.size() != 2 ||
+                    triangles[edges[iEdge].triangles[0]].patch !=
+                    triangles[edges[iEdge].triangles[1]].patch) 
+                    nContourEdges++;
+            }
+
+            if (nContourEdges != 2) {
+                pointType[i] = BRANCHING;
+            }
+        }
+    }
+
+    // 4th type of branching points: 
+    // CONTOUR points with nGroups != # of triangles at contour edge
+    for (i=0; i<nPoints; i++) {
+        if (pointType[i] == CONTOUR) {
+
+            int nTrianglesAtContour = 0;
+            nEdges = edgesPerPoint[i].size();
+            int j;
+            for (j=0; j<nEdges; j++) {
+                int iEdge = edgesPerPoint[i][j];
+                if (edges[iEdge].triangles.size() != 2 ||
+                    triangles[edges[iEdge].triangles[0]].patch !=
+                    triangles[edges[iEdge].triangles[1]].patch)
+                    nTrianglesAtContour = edges[iEdge].triangles.size();
+            }
+            if (nTrianglesAtContour == 2) {
+                // fprintf(stderr,"Error searching for 4th type of branching points\n");
+                // fprintf(stderr,"nTrianglesAtContour = 2 for CONTOUR point\n");
+            }
+
+            // create list of all triangles adjacent to point i 
+            triaList.resize(0);
+            nEdges = edgesPerPoint[i].size();
+            for (j=0; j<nEdges; j++) {
+                int iEdge = edgesPerPoint[i][j];
+                int k;
+                for (k=0; k<edges[iEdge].triangles.size(); k++) {
+                    int iTriangle = edges[iEdge].triangles[k];
+
+                    int triangleInList = 0;
+                    int l;
+                    for (l=0; l<triaList.size(); l++) {
+                        if (iTriangle == triaList[l]) {
+                            triangleInList = 1;
+                        }
+                    }
+                    if (triangleInList == 0)
+                        triaList.append(iTriangle);
+                }
+            }
+
+            // determine nGroups
+            int nTriangle = triaList.size();
+            markTria.resize(nTriangle);
+            markTria.fill(0);
+
+            McDArray<int> stack;
+
+            int nGroups = 0;
+            int startTriangle = triaList[0];
+            int iList = 0;
+
+            while (startTriangle != -1) {
+                nGroups++;
+                markTria[iList] = nGroups;
+
+                stack.resize(0);
+                stack.push(startTriangle);
+
+                while (stack.size()) {
+                    int iTriangle;
+                    stack.pop(iTriangle);
+
+                    for (j=0; j<3; j++) {
+                        Triangle::Neighbour neighbour = 
+                            triangles[iTriangle].neighbours[j];
+
+                        if (!neighbour.isEmpty && !neighbour.isContour) {
+                            int jTriangle = neighbour.neighbourIdx;
+
+                            for (iList=0; iList<nTriangle; iList++) {
+                                if (jTriangle == triaList[iList]) {
+                                    if (markTria[iList] == 0) {
+                                        markTria[iList] = nGroups;
+                                        stack.push(jTriangle);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // find new start triangle
+                startTriangle = -1;
+                for (iList=0; iList<nTriangle; iList++) {
+                    if (markTria[iList] == 0){
+                        startTriangle = triaList[iList];
+                        break;
+                    }
+                }
+            }
+
+            if (nGroups != nTrianglesAtContour) {
+                pointType[i] = BRANCHING;
+            }
+        }
+    }
+}
+
+void Surface::renumberPoints()
+{
+    McDArray<int> newIdx(points.size());
+    int i, cnt=0;
+
+    for (i=0; i<points.size(); i++) {
+        if (pointType[i]==BRANCHING)
+            newIdx[i] = cnt++;
+    }
+    nBranchingPoints = cnt;
+
+    for (i=0; i<points.size(); i++) {
+        if (pointType[i]==CONTOUR)
+            newIdx[i] = cnt++;
+    }
+    nContourPoints = cnt-nBranchingPoints;
+
+    int notInnerPoints = cnt;
+    for (i=0; i<points.size(); i++) {
+        if (pointType[i]==INNER)
+            newIdx[i] = cnt++;
+    }
+
+    McDArray<McVec3f> tmpPointList(notInnerPoints);
+    McDArray<McSmallArray<int,6> > tmpEdgeList;
+    
+    int hasEdgesPerPoint = (edgesPerPoint.size()==points.size());
+    if (hasEdgesPerPoint)
+        tmpEdgeList.resize(notInnerPoints);
+    
+    // Copy branching points and contour points into temporary array
+    for (i=0; i<points.size(); i++) {
+        if (pointType[i]==BRANCHING ||
+            pointType[i]==CONTOUR)
+        {
+            tmpPointList[newIdx[i]] = points[i];
+            if (hasEdgesPerPoint) {
+                memmove(&tmpEdgeList[newIdx[i]], &edgesPerPoint[i],
+                        sizeof(edgesPerPoint[i]));
+                memset(&edgesPerPoint[i], 0, sizeof(edgesPerPoint[i]));
+            }
+        }
+        else if (hasEdgesPerPoint && pointType[i]==UNUSED)
+            edgesPerPoint[i].remax(0,0);
+    }
+
+    // Total number of new points (number of old points minus unused ones)
+    int newNPoints = cnt;
+    cnt = 0;
+
+    if (newNPoints != points.size()) {
+        for (i=0; i<points.size(); i++) {
+            if (pointType[i]==INNER) {
+                points[cnt] = points[i];
+                if (hasEdgesPerPoint && cnt!=i) {
+                    memmove(&edgesPerPoint[cnt], &edgesPerPoint[i],
+                        sizeof(edgesPerPoint[i]));
+                    memset(&edgesPerPoint[i], 0, sizeof(edgesPerPoint[i]));
+                }
+                cnt++;
+            }
+        }
+        memmove(&points[notInnerPoints], &points[0],
+            (newNPoints-notInnerPoints)*sizeof(points[0]));
+        if (hasEdgesPerPoint) {
+            memmove(&edgesPerPoint[notInnerPoints], &edgesPerPoint[0],
+                (newNPoints-notInnerPoints)*sizeof(edgesPerPoint[0]));
+            memset(&edgesPerPoint[0], 0,
+                notInnerPoints*sizeof(edgesPerPoint[0]));
+        }
+    }
+    else { 
+        for (i=points.size()-1; i>=0 ; i--) {
+            if (pointType[i] == INNER) {
+                points[newIdx[i]] = points[i];
+                if (hasEdgesPerPoint && newIdx[i]!=i) {
+                    memmove(&edgesPerPoint[newIdx[i]], &edgesPerPoint[i],
+                        sizeof(edgesPerPoint[i]));
+                    memset(&edgesPerPoint[i], 0, sizeof(edgesPerPoint[i]));
+                }
+            }
+        }
+    }
+    
+    if (notInnerPoints)
+        memmove(&points[0], &tmpPointList[0], notInnerPoints*sizeof(McVec3f));
+    if (hasEdgesPerPoint && notInnerPoints) {
+        memmove(&edgesPerPoint[0], &tmpEdgeList[0],
+            notInnerPoints*sizeof(tmpEdgeList[0]));
+        memset(&tmpEdgeList[0], 0, notInnerPoints*sizeof(tmpEdgeList[0]));
+        edgesPerPoint.resize(newNPoints);
+    }
+
+    int oldNum = points.size();
+    points.resize(newNPoints);
+    pointType.resize(newNPoints);
+
+    for (i=0; i<nBranchingPoints; i++)
+        pointType[i] = BRANCHING;
+
+    for ( ; i<nBranchingPoints+nContourPoints; i++)
+        pointType[i] = CONTOUR;
+
+    for ( ; i<pointType.size(); i++)
+        pointType[i] = INNER;
+
+    for (i=0; i<triangles.size(); i++) {
+        triangles[i].points[0] = newIdx[triangles[i].points[0]];
+        triangles[i].points[1] = newIdx[triangles[i].points[1]];
+        triangles[i].points[2] = newIdx[triangles[i].points[2]];
+    }
+
+    for (i=0; i<edges.size(); i++) {
+        edges[i].from = newIdx[edges[i].from];
+        edges[i].to = newIdx[edges[i].to];
+    }
+
+    for (i=0; i<contours.size(); i++) {
+        for (int j=0; j<contours[i]->points.size(); j++)
+            contours[i]->points[j]=newIdx[contours[i]->points[j]];
+    }
+
+    if (debug) {
+        printf("Surface::renumber(): %d points before, now %d "
+            "(%d branch, %d contour)\n",
+                oldNum,(int) points.size(), nBranchingPoints, nContourPoints);
+    }
+}
+
+void Surface::clearInnerEdges()
+{
+    clearInnerEdges(1);
+}
+
+void Surface::clearInnerEdges(int renumber)
+{
+    int nEdges = edges.size();
+    int nContourEdges = 0;
+    int i;
+    for (i=0; i<nEdges; i++) {
+        if (edges[i].triangles.size() == 2 &&
+            triangles[edges[i].triangles[0]].patch ==
+            triangles[edges[i].triangles[1]].patch) {
+            edges[i].triangles.remax(0,0);
+        } else {
+            if (nContourEdges != i) {
+                memmove(&edges[nContourEdges], &edges[i], sizeof(edges[i]));
+                memset(&edges[i], 0, sizeof(edges[i]));
+            }
+            nContourEdges++;
+        }
+    }    
+    edges.remax(nContourEdges,nContourEdges);
+    
+    if (renumber) {
+        edgesPerPoint.remax(0,0);
+        renumberPoints(); 
+        edgesPerPoint.resize(nBranchingPoints+nContourPoints);
+    }
+    else {
+        for (i=0; i<points.size(); i++)
+            edgesPerPoint[i].remax(0,0);
+    }
+
+    for (i=0; i<edges.size(); i++) {
+        edgesPerPoint[edges[i].from].append(i);
+        edgesPerPoint[edges[i].to].append(i);
+    }
+}
+
+void Surface::removeEmptyPatches()
+{
+    int nPatches = patches.size();
+    int nTruePatches = 0;
+    int i;
+    for (i=0; i<nPatches; i++) {
+        if (patches[i]->triangles.size() == 0) {
+            patches[i]->triangles.remax(0,0);
+            patches[i]->branchingPoints.remax(0,0);
+            patches[i]->contours.remax(0,0);
+            patches[i]->segments.remax(0,0);
+        } else {
+            patches[nTruePatches]=patches[i];
+            nTruePatches++;
+        }
+    }    
+    patches.remax(nTruePatches,nTruePatches);
+
+    for (i=0; i<nTruePatches; i++) {
+        Patch* patch = patches[i];
+        for (int k=patch->triangles.size()-1; k>=0; k--)
+            triangles[patch->triangles[k]].patch = i;
+    }
+}
+
+void Surface::computeOrientationOfContours()
+{
+  /* contours of patches have already been defined in findContours;
+     here only the orientation is checked */
+  //    printf("findContoursOfPatches\n");
+
+  int iPatch;
+  for (iPatch=0; iPatch<patches.size(); iPatch++) {
+    int i;
+    for (i=0; i<patches[iPatch]->contours.size(); i++) {
+      int ic = patches[iPatch]->contours[i];
+      //      printf("patch %d, contour %d \n",iPatch,ic); 
+      int f = contours[ic]->points[0];
+      int t = contours[ic]->points[1];
+      //      printf("from %d, to %d \n",f,t); 
+      int j, e;
+      for (j=0; j<edgesPerPoint[f].size(); j++) {
+        e = edgesPerPoint[f][j];
+        if (edges[e].to == t || edges[e].from == t) break;
+      }
+      if (j == edgesPerPoint[f].size())
+        fprintf(stderr,"findContoursOfPatches: Error 1 \n");
+
+      int orientation = 1;
+      /* if (f == edges[e].from && t == edges[e].to) {
+        orientation = 1;
+      } else {
+        orientation = -1;
+      } */
+
+      int it;
+      for (j=0; j<edges[e].triangles.size(); j++) {
+        it = edges[e].triangles[j];
+        if (triangles[it].patch == iPatch) break;       
+      }
+      if (j == edges[e].triangles.size())
+        fprintf(stderr,"findContoursOfPatches: Error 2 \n");
+
+      int ied;
+      for (ied=0; ied<3; ied++) {
+        int i1 = (ied+1)%3;
+        int i2 = (ied+2)%3;
+        if (triangles[it].points[i1] == f && triangles[it].points[i2] == t)
+          break;
+        if (triangles[it].points[i1] == t && triangles[it].points[i2] == f) {
+          orientation = -orientation;
+          break;
+        }
+      }
+
+    if (orientation == -1) 
+      patches[iPatch]->contours[i] = oint(ic,-1);
+    else 
+      patches[iPatch]->contours[i] = oint(ic,1);
+
+    }
+  }
+}
+
+void Surface::findBranchingPointsOfPatches()
+{
+  /* only the 'non-trivial' branching points are collected */
+  //  printf("findBranchingPointsOfPatches\n");
+  int iPatch;
+  for (iPatch=0; iPatch<patches.size(); iPatch++) {
+    patches[iPatch]->branchingPoints.resize(0);
+    int i;
+    for (i=0; i<patches[iPatch]->triangles.size(); i++) {
+      int it = patches[iPatch]->triangles[i];
+      int j;
+      for (j=0; j<3; j++) {
+        int ipoint = triangles[it].points[j];
+        if (pointType[ipoint] == BRANCHING) {
+          int k;
+          for (k=0; k<patches[iPatch]->contours.size(); k++) {
+            int ic = patches[iPatch]->contours[k];
+            if (ic < 0) ic = -ic;
+            if (contours[ic]->points[0] == ipoint) break;
+            int npoints = contours[ic]->points.size();
+            if (contours[ic]->points[npoints-1] == ipoint) break;
+          }
+          if (k == patches[iPatch]->contours.size()) 
+            patches[iPatch]->branchingPoints.append(ipoint);
+        }
+      }
+    }
+  }
+}
+
+void Surface::fitPlane(const McDArray<int>& pidx,float plane[4])
+{
+    int i;
+    float refpt[3]={0,0,0};
+    float normal[3]={0,0,0};
+    float *u, *v, len;
+
+    /* compute the polygon normal and a reference point on
+       the plane. Note that the actual reference point is
+       refpt / nverts
+    */
+    for(i = 0; i < pidx.size(); i++) {
+        u = &points[pidx[i]][0];
+        v = &points[pidx[(i + 1) % pidx.size()]][0];
+        normal[0] += (u[1] - v[1]) * (u[2] + v[2]);
+        normal[1] += (u[2] - v[2]) * (u[0] + v[0]);
+        normal[2] += (u[0] - v[0]) * (u[1] + v[1]);
+        refpt[0]+=u[0];
+        refpt[1]+=u[1];
+        refpt[2]+=u[2];
+    }
+    /* normalize the polygon normal to obtain the first
+       three coefficients of the plane equation
+    */
+    len = sqrt(normal[0]*normal[0]+normal[1]*normal[1]+normal[2]+normal[2]);
+    plane[0] = normal[0] / len;
+    plane[1] = normal[1] / len;
+    plane[2] = normal[2] / len;
+    /* compute the last coefficient of the plane equation */
+    len *= pidx.size();
+    plane[3]=-( refpt[0]*normal[0]+refpt[1]*normal[1]+refpt[2]*normal[2])/len;
+}
+
+int Surface::tile(const McDArray<int>& v)
+{
+    assert(v.size()>=3);
+#if 0
+    int i;
+
+    triangles.remax(triangles.size()+v.size()-2);
+    McDArray<int> v2(v);
+    int np=v2.size();
+    i=1;
+    while (np>3) {
+        i=(i+1) % np;
+        SbVec3f p1((float *) &points[v2[i]]); 
+        SbVec3f p2((float *) &points[v2[(i+1)%np]]); 
+        SbVec3f p3((float *) &points[v2[(i+2)%np]]);
+        SbVec3f p4((float *) &points[v2[(i+3)%np]]);
+        SbVec3f n123=(p2-p1).cross(p3-p1);
+        SbVec3f n234=(p3-p2).cross(p4-p2);
+        SbVec3f n341=(p4-p3).cross(p1-p3);
+        SbVec3f n412=(p1-p4).cross(p2-p4);
+        n123.normalize(); 
+        n234.normalize();
+        n341.normalize(); 
+        n412.normalize();
+        float a1 = n123.dot(n341);
+        float a2 = n234.dot(n412);
+        Triangle tri;
+        if (a1<a2) {
+            tri.points[0]=v2[i]; 
+            tri.points[1]=v2[(i+1)%np]; 
+            tri.points[2]=v2[(i+2)%np];
+            triangles.append(tri);
+            
+            tri.points[0]=v2[(i+2)%np]; 
+            tri.points[1]=v2[(i+3)%np]; 
+            tri.points[2]=v2[i];
+            triangles.append(tri);          
+        } else {
+            tri.points[0]=v2[(i+1)%np]; 
+            tri.points[1]=v2[(i+2)%np]; 
+            tri.points[2]=v2[(i+3)%np];
+            triangles.append(tri);
+            
+            tri.points[0]=v2[(i+3)%np]; 
+            tri.points[1]=v2[i]; 
+            tri.points[2]=v2[(i+1)%np];
+            triangles.append(tri);          
+        }
+        if ((i+2)%np > (i+1)%np) {
+            v2.remove((i+2)%np);
+            v2.remove((i+1)%np);
+        } else {
+            v2.remove((i+1)%np);
+            v2.remove((i+2)%np);
+        }
+        np-=2;
+    }
+    
+    if (np>2) {
+        Triangle tri;
+        tri.points[0]=v2[0]; 
+        tri.points[1]=v2[1]; 
+        tri.points[2]=v2[2];
+        triangles.append(tri);
+    }
+    return(v.size()-2);
+#endif
+}
+
+int Surface::tileCenter(const McDArray<int>& v)
+{
+    McDArray<int> v2(v);
+    McVec3f center(0,0,0);
+    
+    int np = v2.size();
+    for (int k=0; k<np; k++)
+        center += points[v[k]];
+    center /= np;
+    
+    if (np>4) {
+        int p = points.append(center);
+        
+        for (int j=0; j<np; j++) {          
+            Triangle tri;
+            tri.points[0] = p; 
+            tri.points[1] = v2[j]; 
+            tri.points[2] = v2[(j+1)%np];
+            triangles.append(tri);
+        }
+        return np;
+    }  
+    
+    int i=1;
+    while (np>3) {
+        i = (i+1) % np;
+        McVec3f p1 = points[v2[i]]; 
+        McVec3f p2 = points[v2[(i+1)%np]]; 
+        McVec3f p3 = points[v2[(i+2)%np]];
+        McVec3f p4 = points[v2[(i+3)%np]];
+        McVec3f n123=(p2-p1).cross(p3-p1);
+        McVec3f n234=(p3-p2).cross(p4-p2);
+        McVec3f n341=(p4-p3).cross(p1-p3);
+        McVec3f n412=(p1-p4).cross(p2-p4);
+        n123.normalize(); 
+        n234.normalize();
+        n341.normalize(); 
+        n412.normalize();
+        float a1 = n123.dot(n341);
+        float a2 = n234.dot(n412);
+        Triangle tri;
+        if (a1<a2) {
+            tri.points[0]=v2[i]; 
+            tri.points[1]=v2[(i+1)%np]; 
+            tri.points[2]=v2[(i+2)%np];
+            triangles.append(tri);
+            
+            tri.points[0]=v2[(i+2)%np]; 
+            tri.points[1]=v2[(i+3)%np]; 
+            tri.points[2]=v2[i];
+            triangles.append(tri);          
+        } else {
+            tri.points[0]=v2[(i+1)%np]; 
+            tri.points[1]=v2[(i+2)%np]; 
+            tri.points[2]=v2[(i+3)%np];
+            triangles.append(tri);
+            
+            tri.points[0]=v2[(i+3)%np]; 
+            tri.points[1]=v2[i]; 
+            tri.points[2]=v2[(i+1)%np];
+            triangles.append(tri);          
+        }
+        if ((i+2)%np > (i+1)%np) {
+            v2.remove((i+2)%np);
+            v2.remove((i+1)%np);
+        } else {
+            v2.remove((i+1)%np);
+            v2.remove((i+2)%np);
+        }
+        np-=2;
+    }
+    
+    if (np>2) {
+        Triangle tri;
+        tri.points[0]=v2[0]; 
+        tri.points[1]=v2[1]; 
+        tri.points[2]=v2[2];
+        triangles.append(tri);
+    }
+    return v.size()-2;
+}
+
+int Surface::tileFan(const McDArray<int>& v, int anchor)
+{
+    int nPoints = v.size();
+    int nTriangles = v.size()-2;
+
+    for (int i=0; i<nTriangles; i++) {
+        Triangle tri;
+        tri.points[0] = v[anchor]; 
+        tri.points[1] = v[(anchor+i+1)%nPoints]; 
+        tri.points[2] = v[(anchor+i+2)%nPoints];
+        triangles.append(tri);
+    }  
+    
+    return nTriangles;
+}
+
+void Surface::check()
+{
+    int err=0;
+
+    for (int i=0; i<patches.size(); i++) {
+        McDArray<oint>& contours = patches[i]->contours;
+        int n = contours.size();
+        for (int k=0; k<n; k++)
+        {
+            int from     = contourFromPoint(contours[k]);
+            int to       = contourToPoint(contours[k]);
+            int nextFrom = contourFromPoint(contours[(k+1)%n]);
+            int nextTo   = contourToPoint(contours[(k+1)%n]);
+
+            if (to != nextFrom) {
+                printf("patches[%d]->contours[%d] = %d -> %d\n",
+                    i, k, from, to);
+                printf("patches[%d]->contours[%d] = %d -> %d\n",
+                    i, (k+1)%n, nextFrom, nextTo);
+                err = 1;
+            }
+        }
+    }
+
+    if (!err) printf("Surface check ok!\n");
+        else printf("Surface inconsistent !\n");
+}
+
+void Surface::recompute()
+{
+    //theWorkArea->startWorkingNoStop("computing surface connectivity");
+
+    // theWorkArea->startWorkingNoStop("creating edges");
+    createAllEdges();
+
+    // theWorkArea->setProgressInfo("creating connectivity");
+    createConnectivity();
+
+    // theWorkArea->setProgressInfo("finding branching points");
+    findBranchingPoints();
+
+    // theWorkArea->setProgressInfo("clearing inner edges");
+    clearInnerEdges();
+
+    // theWorkArea->setProgressInfo("finding contours");
+    findContours();
+
+    // theWorkArea->setProgressInfo("compute orientation of contours");
+    computeOrientationOfContours();
+
+    // theWorkArea->setProgressInfo("find branching points of patches");
+    findBranchingPointsOfPatches();
+
+    // theWorkArea->setProgressInfo("removing empty patches");
+    removeEmptyPatches();
+
+    //theWorkArea->stopWorking();
+
+    contourFlag = 1;
+}
+
+void Surface::cleanup()
+{
+    int i, n = edgesPerPoint.size();
+
+    edges.remax(0,0);
+    edgesPerPoint.remax(0,0);
+    pointType.remax(0,0);
+
+    n = patches.size();
+    for (i=0; i<n; i++) {
+        patches[i]->contours.remax(0,0);
+        patches[i]->segments.remax(0,0);
+    }
+
+    n = contours.size();
+    for (i=0; i<n; i++) {
+        contours[i]->points.remax(0,0);
+        contours[i]->patches.remax(0,0);
+        delete contours[i];
+    }
+    contours.remax(0,0);
+
+    contourFlag = 0;
+}
+
+int Surface::hasContours()
+{
+    return contourFlag;
+}
+
+void Surface::copyData(const Surface &source)
+{
+    int i, size;
+
+    contourFlag = source.contourFlag;
+    lastTriangleIdx = source.lastTriangleIdx;
+    lastWhich = source.lastWhich;
+    lastGlobal = source.lastGlobal;
+    lastNeighbourIdx = source.lastNeighbourIdx;
+    debug = source.debug;
+    
+    params->operator=(*source.params);
+
+    edgesPerPoint = source.edgesPerPoint;
+    edges = source.edges;
+    triangles = source.triangles;
+
+    // Patches
+    size = patches.size();
+    for (i=0; i<size; i++)
+        if (patches[i]) delete patches[i];
+
+    size = source.patches.size();
+    patches.resize(size);
+    for (i=0; i<size; i++) {
+        if (source.patches[i]) {
+            patches[i] = new Patch();
+
+            // I don't want to add a copy assignment operator to Patch..
+            patches[i]->innerRegion = source.patches[i]->innerRegion;
+            patches[i]->outerRegion = source.patches[i]->outerRegion;
+            patches[i]->boundaryId = source.patches[i]->boundaryId;
+            patches[i]->branchingPoints = source.patches[i]->branchingPoints;
+            patches[i]->triangles = source.patches[i]->triangles;
+            patches[i]->contours = source.patches[i]->contours;
+            patches[i]->segments = source.patches[i]->segments;
+        }
+        else patches[i] = NULL;
+    }
+
+    // Contours
+    size = contours.size();
+    for (i=0; i<size; i++)
+        if (contours[i]) delete contours[i];
+
+    size = source.contours.size();
+    contours.resize(size);
+    for (i=0; i<size; i++) {
+        if (source.contours[i]) {
+            contours[i] = new Contour();
+            contours[i]->points = source.contours[i]->points;
+            contours[i]->patches = source.contours[i]->patches;
+        }
+        else contours[i] = NULL;
+    }
+
+    // PointType and points
+    pointType = source.pointType;
+    points = source.points;
+
+    nContourPoints = source.nContourPoints;
+    nBranchingPoints = source.nBranchingPoints;
+}
+
+void Surface::sortTriangles() {
+    int nTriangles = triangles.size();
+    McDArray<int> newIndices(nTriangles);
+    int i,j,k=0;
+    for (i=0; i<patches.size(); i++) {
+        Patch *p = patches[i];
+        for (j=0; j<p->triangles.size(); j++) {
+            int iTri = p->triangles[j];
+            newIndices[k++] = iTri;
+        }
+    }
+
+    McDArray<int> invNewIndices(nTriangles);
+    for (i=0; i<nTriangles; i++) {
+        invNewIndices[newIndices[i]] = i;
+    }
+
+    for (i=0; i<nTriangles; i++) {
+        if (newIndices[i] != i) {
+            triangles.swap(newIndices[i],i);
+            invNewIndices.swap(newIndices[i],i);
+            j = invNewIndices[newIndices[i]];
+            newIndices[j] = newIndices[i];
+        }
+    }
+
+    k=0;
+    for (i=0; i<patches.size(); i++) {
+        Patch *p = patches[i];
+        for (j=0; j<p->triangles.size(); j++) {
+            p->triangles[j] = k++;
+        }
+    }
+
+}
+
+int Surface::write(const char *file, int ascii)
+{
+    ascii = true;
+
+    FILE *out=fopen(file,"wb");
+    if (!out) {
+        //theMsg->ioError(file);
+        return(1);
+    }
+    fprintf(out,"# %s 0.1 %s\n\n","HyperSurface",ascii ? "ASCII" : "BINARY");
+    
+    int result = writeSurfaceData(out, ascii);
+
+    fclose(out);
+
+    return result;
+}
+
+int Surface::writeSurfaceData(FILE *out, int ascii)
+{
+    int err=0,i;
+//    fprintf(out, "Parameters ");
+    params->print(out);
+    fprintf(out, "\n");
+        
+    fprintf(out,"Vertices %d\n",points.size());
+    if (ascii) {
+        for ( i=0 ; i<points.size() && !err; i++)
+            fprintf(out,"\t%f %f %f\n",
+                    points[i][0], points[i][1], points[i][2]);
+    } else {
+#if 0
+        myFwriteBE(&points[0],sizeof(float),3*points.size(),out);
+        fprintf(out,"\n");
+#endif
+    }
+    fprintf(out,
+            "NBranchingPoints %d\n"
+            "NVerticesOnCurves %d\n"
+            "BoundaryCurves %d\n",
+            nBranchingPoints,nContourPoints,contours.size());
+    if (ascii) {
+        for ( i=0 ; i<contours.size() && !err; i++) {
+            fprintf(out,"{\n  Vertices %d\n  ",contours[i]->points.size());
+            for (int j=0 ; j<contours[i]->points.size() ; j++)
+                fprintf(out,"  %d",contours[i]->points[j]+1);
+            fprintf(out,"\n}\n");
+        }
+    } else {
+#if 0
+        for ( i=0 ; i<contours.size() && !err; i++) {
+            int n=contours[i]->points.size();
+            myFwriteBE(&n,sizeof(int),1,out);       
+            for (int j=0 ; j<contours[i]->points.size() ; j++) {
+                contours[i]->points[j]++;
+                myFwriteBE(&contours[i]->points[j],sizeof(int),1,out);
+                contours[i]->points[j]--;
+            }
+        }
+#endif
+    }
+    
+    fprintf(out,"Patches %d\n",patches.size());
+    HxParamBundle* materials = params->materials();
+    // don't write obsolete triangles !!!
+    for (i=0 ; i<patches.size() ; i++) {
+        int nTriangles = 0;
+        for (int j=0 ; j<patches[i]->triangles.size() ; j++) {
+            int iTri = patches[i]->triangles[j];
+            if (triangles[iTri].patch > -1)   // == i ?
+                patches[i]->triangles[nTriangles++] = iTri;
+        }
+        patches[i]->triangles.resize(nTriangles);
+    }
+    
+    for (i=0 ; i<patches.size() ; i++) {
+        fprintf(out,"{\n");
+        
+        if (patches[i]->innerRegion >= 0) {
+            HxParamBundle* inner = materials->bundle(patches[i]->innerRegion);
+            if (inner) fprintf(out,"InnerRegion %s\n", inner->name());
+        }
+        
+        if (patches[i]->outerRegion >= 0) {
+            HxParamBundle* outer = materials->bundle(patches[i]->outerRegion);
+            if (outer) fprintf(out,"OuterRegion %s\n", outer->name());
+        }
+        
+        fprintf(out,
+                "BoundaryID %d\n"
+                "BranchingPoints %d\n    ",
+                patches[i]->boundaryId,
+                patches[i]->branchingPoints.size());
+        
+        for (int j=0 ; j<patches[i]->branchingPoints.size() ; j++) {
+            fprintf(out,"  %d",patches[i]->branchingPoints[j]);
+        }
+        
+        fprintf(out,"\nTriangles %d\n",patches[i]->triangles.size());
+        if (ascii) {
+            for (int j=0 ; j<patches[i]->triangles.size() ; j++)
+                fprintf(out,"  %d %d %d\n",
+                        triangles[patches[i]->triangles[j]].points[0]+1,
+                        triangles[patches[i]->triangles[j]].points[1]+1,
+                        triangles[patches[i]->triangles[j]].points[2]+1);
+        } else {
+#if 0
+            for (int j=0 ; j<patches[i]->triangles.size() ; j++) {
+                int k;
+                for ( k=0 ; k<3 ; k++)
+                    triangles[patches[i]->triangles[j]].points[k]++;
+                myFwriteBE(&triangles[patches[i]->triangles[j]].points[0],
+                           sizeof(int),3,out);
+                for ( k=0 ; k<3 ; k++)
+                    triangles[patches[i]->triangles[j]].points[k]--;
+            }
+            fprintf(out,"\n");
+#endif
+        }
+        fprintf(out,"}\n");
+    }
+    return(0);
+}
+
+void Surface::getBoundingBox(float bbox[6]) const
+{
+    if (points.size()) {
+        bbox[0] = bbox[1] = points[0][0];
+        bbox[2] = bbox[3] = points[0][1];
+        bbox[4] = bbox[5] = points[0][2];
+    } else {
+        memset(bbox,0,6*sizeof(float));
+    }
+
+    for (int i=0 ; i<points.size() ; i++) {
+        for (int k=0 ; k<3 ; k++) {
+            if (bbox[k*2]>points[i][k])
+                bbox[k*2]=points[i][k];
+            if (bbox[k*2+1]<points[i][k])
+                bbox[k*2+1]=points[i][k];
+        }
+    }
+}
+
+
+int Surface::removeUnusedPoints()
+{
+    int i,k;
+    int nPoints = points.size();
+    int nTriangles = triangles.size();
+
+    McDArray<int> newIndex(nPoints);
+    newIndex.fill(-1);
+
+    for (i=0; i<nTriangles; i++) {
+        Triangle& tri = triangles[i];
+        if (tri.patch<0)
+            continue;
+
+        newIndex[tri.points[0]] = 1;
+        newIndex[tri.points[1]] = 1;
+        newIndex[tri.points[2]] = 1;
+    }
+
+    for (i=k=0; i<nPoints; i++) {
+        if (newIndex[i]==1) {
+            newIndex[i] = k;
+            points[k] = points[i];
+            k++;
+        }
+    }
+
+    if (nPoints==k)
+        return 0; // No unused points found
+
+    for (i=0; i<nTriangles; i++) {
+        Triangle& tri = triangles[i];
+        if (tri.patch<0)
+            continue;
+
+        tri.points[0] = newIndex[tri.points[0]];
+        tri.points[1] = newIndex[tri.points[1]];
+        tri.points[2] = newIndex[tri.points[2]];
+    }
+
+    points.remax(k,k);
+    edges.remax(0,0);
+    edgesPerPoint.remax(0,0);
+    trianglesPerPoint.remax(0,0);
+
+    if (normalBinding==PER_VERTEX)
+        normals.resize(0);
+
+    /**********************************************************
+    Remove data values of connected fields as well
+    **********************************************************/
+
+    // First, try to locate the HxSurface in the object pool.
+    // Of course, it would be much better if removeUnusedPoints
+    // would be directly a member of HxSurface instead of Surface
+#if 0
+    for (int iObject=0; iObject<theObjectPool->nodeList.size(); iObject++) {
+        HxSurface* surface = dynamic_cast<HxSurface*>(theObjectPool->nodeList[iObject]);
+        if (surface && (&surface->parameters == params)) {
+            for (int iField=0; iField<surface->downStreamConnections.size(); iField++) {
+                HxSurfaceField* field = dynamic_cast<HxSurfaceField*>(
+                    surface->downStreamConnections[iField]->owner());
+                if (field && field->getEncoding()==HxSurfaceField::OnNodes) {
+                    int nDataVar = field->nDataVar();
+                    int n = field->nDataElements();
+                    if (nPoints<n) n = nPoints;
+                    float* src = field->dataPtr();
+                    float* dst = field->dataPtr();
+                    for (int i=0; i<n; i++, src += nDataVar) {
+                        if (newIndex[i]>=0) {
+                            for (int m=0; m<nDataVar; m++)
+                                *dst++ = src[m];
+                        }
+                    }
+                }
+            }
+        }
+    }
+#endif
+    return nPoints-k;
+}
+
+
+void Surface::computeTrianglesPerPoint()
+{
+    int nPoints = points.size();
+    int nTriangles = triangles.size();
+    Surface::Triangle* triangles = this->triangles;
+
+    trianglesPerPoint.remax(nPoints,nPoints);
+
+    // This is a critical MEMORY LEAK:
+    // memset(&trianglesPerPoint[0], 0, sizeof(trianglesPerPoint[0])*nPoints);
+    
+    // Need to resize the McSmallArrays individually (Detlev 10 Jan 2003).
+    // resize(0) frees any dynamically allocated memory.
+    for (int k=0; k<nPoints; k++)
+        trianglesPerPoint[k].resize(0);
+    
+    for (int i=0; i<nTriangles; i++) {
+        Surface::Triangle& tri = triangles[i];
+        trianglesPerPoint[tri.points[0]].append(i);
+        trianglesPerPoint[tri.points[1]].append(i);
+        trianglesPerPoint[tri.points[2]].append(i);
+    }
+}

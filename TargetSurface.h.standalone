@@ -1,0 +1,635 @@
+/////////////////////////////////////////////////////////////////
+/*
+ * $Id: TargetSurface.h.standalone,v 1.1 2007/10/17 13:16:55 sander Exp $
+ *
+ * $Log: TargetSurface.h.standalone,v $
+ * Revision 1.1  2007/10/17 13:16:55  sander
+ * moved here from the ZIB server
+ *
+ * Revision 1.2  2006/03/16 16:04:15  bzfsande
+ * removed a few obsolete references to McBitfield
+ * mailtoauthor: sander@zib.de
+ *
+ * Revision 1.1  2006/03/01 10:18:44  bzfsande
+ * Trying to reduce the ties to Amira even more so I can use this package
+ * more easily outside of Amira without technical and licensing trouble.
+ *
+ * This new class contains the few methods of Surface that I really need.
+ * When this package is compiled with -DPSURFACE_STANDALONE, it is used
+ * as the target surface of the parametrization.  When compiled within
+ * Amira, the standard Surface class is still used (the real one, no
+ * local copy).  That way I can still watch target surfaces with the
+ * normal SurfaceView module.
+ * mailtoauthor: sander@zib.de
+ *
+ */
+/////////////////////////////////////////////////////////////////
+#ifndef SURFACE_H
+#define SURFACE_H
+
+#include <hxsurface/HxSurfaceWinDLLApi.h>
+
+#include <McDArray.h>
+#include <McVec3f.h>
+#include <McSmallArray.h>
+#include <amiramesh/HxParamBundle.h>
+#include <hxfield/oint.h>
+
+#include <McFHeap.h>
+
+/** This class implements structured, triangulated surfaces. A surface
+    consists of a number of sub-surfaces, called @c patches. Each patch can
+    have different regions on its two sides: @c innerRegion and
+    @c outerRegion. Patches are bounded by @c contours.
+    
+    Points can have different @c pointTypes. Points not lying on a contour
+    are @c INNER points. Points lying on more than one contour, or being the
+    first or last point of a contour are @c BRANCHING points. All other
+    points are @c CONTOUR points.
+    
+    This implementation works with indices instead of pointers, this allows
+    easy realloc. The surface contains one big array of @c points, of
+    @c triangles, of @c patches, of @c contours and for temporary use of
+    @c edges and lists of @c edgesPerPoint for each point. */
+
+class HXSURFACE_API Surface { 
+
+  public:
+
+    // ==================== Subclass declaration ====================
+
+    /**@name Subclass declaration */ //@{
+    /// Point type. Stored in separate array.
+    enum { INNER=0, CONTOUR, BRANCHING, DEADEND, UNUSED };
+    
+    /// This class represents a contour where different patches join.
+    class Contour {
+      public:
+        /** The indices of the contour's points. <b> Note:</b> In the file
+            format, the first point in the surface's point array is 1. In
+            this data structure, the first point has the index 0.
+            Conversion is done when writing and reading.*/
+        McDArray<int> points;
+
+        /** The indices of the patches this contour belongs to. */
+        McDArray<int> patches;  
+    };
+    
+    /// This class represents a surface triangle.
+    class Triangle {
+      public:
+        /** Indices of the three points of the triangle. <b> Note:</b> In the
+            file format, the first point in the surface's point array is 1.
+            In this data structure, the first point has the index 0.
+            Conversion is done when writing and reading. */
+        int points[3];
+
+        /// Index of the patch this triangle belongs to.
+        int patch;
+
+        /// This struct is used to store neighbourhood information.
+        struct Neighbour {
+            /// Set if there is no neighbouring triangle in the same patch.
+            unsigned int isEmpty:1;
+
+            /// Set if the triangle touches a contour.
+            unsigned int isContour:1;
+
+            /// Index of neighbouring triangle, or index of boundary edge.
+            int neighbourIdx:30;
+
+            /// Constructor.
+            Neighbour() { isEmpty=1; isContour=0; neighbourIdx=0; }
+        };
+
+        /// One neighbour struct for each of the three triangle edges.
+        Neighbour neighbours[3];
+        
+        inline void invert() {
+            int p = points[1];
+            points[1] = points[2];
+            points[2] = p;
+            Neighbour n = neighbours[1];
+            neighbours[1] = neighbours[2];
+            neighbours[2] = n;
+        }
+
+        inline int hasPoint(int p) {
+            return (p==points[0] || p==points[1] || p==points[2]);
+        }
+
+        inline int pointIndex(int p) {
+            if (p==points[0]) return 0;
+            if (p==points[1]) return 1;
+            if (p==points[2]) return 2;
+            return -1;
+        }
+    };
+    
+    /// This class represents a patch of connected triangles.
+    class Patch {
+      public:
+        /// Index of the inner region (starting from zero).
+        int innerRegion;
+
+        /// Index of the outer region (starting from zero).
+        int outerRegion;
+
+        /// Additional id which defines some kind of material properties.
+        int boundaryId;
+
+        /// Indices of all inner branching points.
+        McDArray<int> branchingPoints;
+
+        /// Indices of all the triangles of the patch.
+        McDArray<int> triangles;
+
+        /// Indices of the patch's contours as well as their orientations.
+        McDArray<oint> contours;        
+
+        /// Stores information about segments, i.e. subsequent contours
+        struct Segment {
+            /// Index of the first contour of a segment.
+            int first;
+
+            /// Index of the last contour (for closed segments first==last).
+            int last;
+        };
+        
+        /// Contains all connected contour segments of the patch.
+        McDArray<Segment> segments;
+
+        /// Assignment operator
+        Patch& operator=(const Patch& other);
+        
+        /// Default constructor.
+        Patch() { innerRegion=outerRegion=boundaryId=0; }
+        
+        /// Copy constructor.
+        Patch(const Patch& other);
+    };
+
+    /// This class represents a surface edge.
+    class Edge {
+      public:
+        /// Index of the first point of the edge.
+        int from;
+
+        /// Index of the second point of the edge.
+        int to;
+
+        /// There are 2 triangles per edge, except for boundary edges.
+        McSmallArray<int,3> triangles;
+
+        ///
+        Edge() { from=to=0; };
+    };
+
+    //@}
+
+    // ======================= Member variables =====================
+
+    /**@name Member variables */ //@{
+
+    /// Branching points have indices [0...nBranchingPoints-1].
+    int nBranchingPoints;
+
+    /// Contour points start with index @c nBranchingPoints.
+    int nContourPoints;
+
+    /// Array of all surface points (required).
+    McDArray<McVec3f> points;
+
+    /// Array of point types (full surface only).
+    McDArray<unsigned char> pointType;
+
+    /// Array of all surface contours (full surface only).
+    McDArray<Contour*> contours;
+
+    /// Array of all surface patches (at least 1 patch is required).
+    McDArray<Patch*> patches;
+
+    /// Array of all surface triangles (required).
+    McDArray<Triangle> triangles;       
+
+    /// All edges of the surface (temporary data).
+    McDArray<Edge> edges;    
+
+    /// Stores for each point all edges incident at that point (temporary).
+    McDArray< McSmallArray<int,6> > edgesPerPoint;
+
+    ///Stores the edge ids for each triangle (optional and temporary).
+    McDArray< McSmallArray<int,3> > edgesPerTriangle;
+  
+    /** Stores for each point all incident triangles. To initialize this
+        array the method @c computeTrianglesPerPoint() has to be called
+        explicitely. The class @c HxSurfaceEditor uses this information. */
+    McDArray< McSmallArray<int,6> > trianglesPerPoint;
+
+    /** Contains info about the regions. The indices @c innerRegion and
+        @c outerRegion refer to this structure, e.g. @c materials[0]. */
+    HxParamBundle* params;
+
+    McDArray<McVec3f> normals;
+
+    enum NormalBinding { PER_TRIANGLE=0, PER_VERTEX, PER_VERTEX_INDEXED };
+
+    NormalBinding normalBinding;
+
+    //@}
+
+    // ======================== Member methods ======================
+
+    /**@name Member methods */ //@{
+
+    /// Constructor. If params is null an own parameter bundle is created.
+    Surface(HxParamBundle* params=0);
+
+    /// Destructor.
+    ~Surface();
+
+    /// Deletes all points, triangles, patches, materials, etc.
+    virtual void clear();
+
+    /// Returns 1 if the contours of the surface have been computed.
+    int hasContours();
+
+    /** This method recomputes the connectivity information of a surface.
+        Surface contours and point types are inewly determined. Patches
+        containing disconnected triangles are separated into new patches. */
+    void recompute();
+
+    /// Removes patches containing no triangles.
+    void removeEmptyPatches();
+
+    /// Remove all triangles with patchid<0, returns number of removed tris.
+    int removeObsoleteTriangles();
+
+    /** Remove coplanar triangles. The methods uses an iterative
+        reduction scheme. It stops when no more coplanar triangles
+        are found after an iteration or if the maximum number of
+        iterations is reached (@c maxIter). If checkQuads is set
+        also coplanar intersecting quad configurations are removed.
+        The method returns the number of removed triangles. */
+    int removeCoplanarTriangles(int nMaxIter=4, int checkQuads=0);
+
+    /// Removes all points not referenced by any triangle.
+    int removeUnusedPoints();
+
+    /** Simplify almost planar 3-star and 4-star configurations.
+        The number of removed triangles is returned. Removed triangles
+        are not actually deleted but only marked as obsolete. */
+    int simplify34();
+    
+    /** Discards the contour information. This method should be called after
+        the surface topology has been changed. */
+    void cleanup();
+
+    /// Returns bounding box of point coordinates.
+    void getBoundingBox(float box[6]) const;
+
+    /// Returns center of the surface (= average of all point coordinates).
+    void getCenter(float center[3]);
+
+    /// Modifies the coordinates of the surface points.
+    void setCenter(const float center[3]);
+
+    /// Copies points, triangles, and patches from other surface into this.
+    void add(const Surface* other);
+
+    /// Read the surface from a file.
+    int read(const char *);
+
+#if 0
+    /// Read surface information except header.
+    int readSurfaceData(const char* file, FILE * in, int ascii, 
+                        McDArray<SurfaceData*>& additionalData);
+    
+    /// Read the surface from a file.
+    int readPLY(const char *);
+
+    /// Alternative read method which also return optional surface data.
+    int read(const char *, McDArray<SurfaceData*>& additionalData);
+#endif
+
+    /// Write surface + header to a file.
+    int write(const char *file, int ascii=0);
+
+    /// Write the surface without header to file.
+    int writeSurfaceData(FILE *out, int ascii=0);
+
+    /// Performs a consistency check (not very sophisticated up to now).
+    void check();
+
+    ///
+    void computeNormalsPerTriangle();
+
+    ///
+    void computeNormalsPerVertexIndexed();
+
+    ///
+    void computeNormalsPerVertex(float creaseAngle);
+
+    /** Refine surface. If mode==0, every edge is divided in two and
+    each triangle into 4. If mode==1 an inner point is inserted into each
+    triangle, dividing it into 3 triangles. */
+    void refine(int mode); 
+
+    /** Makes orientation of triangles in patch consistent, by
+        inverting some if necessary. You have to call @c createConnectivity
+        before.
+    @return Number of inverted triangles*/
+    int fixOrientation(int patch);
+
+    /** Invert the triangles of patch @c patch or all triangles, if
+        #patch==-1.*/
+    void invertTriangles(int patch=-1);
+    
+    //@}
+
+    // ====================== Internal methods ======================
+
+    /**@name Internal methods */ //@{
+
+    ///
+    int isClosedSegment(int patch,int segment) {
+        int first = patches[patch]->segments[segment].first;
+        int last = patches[patch]->segments[segment].last;
+        
+        return(contourFromPoint(patches[patch]->contours[first]) ==
+               contourToPoint(patches[patch]->contours[last]));
+    };
+
+    /** Initializes the array @c trianglePerPoint. */
+    void computeTrianglesPerPoint();
+
+    /** Fills the edges and edgesPerPoint arrays
+        optional: when @param createEdgeIds is set  the edgesPerTriangle array.is filled
+        otherwise the edgesPerTriangle array is resized to zero */
+    void createAllEdges(int  createEdgeIds = 0);
+
+    /** Fills the neighbour array for each triangle in patch. This method
+      needs the arrays @c edges and @c edgesPerPoint, which can be generated
+      by calling @c createAllEdges(). If not all triangles in this patch
+      are connected, the unconnected ones are put into a new patch.
+      @c createConnectivity() for this new patch is called automatically.*/
+    void createConnectivity(int patch);
+    
+    /** Fills the neighbour array for  all triangles.
+      @see #createConnectivity */
+    void createConnectivity();
+    
+    /** Fills the neighbour array for  all triangles without 
+	decomposing patches. */
+    void createNeighbours();
+    
+    /** This methods initializes the @c type field in all
+      point-structures with the correct value. This method relies on
+      the arrays @c edges and @c edgesPerPoint, which can be generated by
+      calling @c createAllEdges().*/
+    void findBranchingPoints();
+
+    /** Removes edges, that are not part of a contour. After doing this,
+      this method calls @c renumberPoints. This method was kept for 
+      backward compatibility.*/
+    void clearInnerEdges();
+
+    /** Removes edges, that are not part of a contour. After doing this,
+      this method calls @c renumberPoints, only if @c renumber is set to one. */
+    void clearInnerEdges(int renumber);
+
+    /** Find contours, by tracing edges.  This method relies on the
+       arrays @c edges and @c edgesPerPoint, which can be generated by
+       calling @c createAllEdges(). Also the @c PointType array must be
+       initialized properly, which can be done by
+       @c findBranchingPoints().*/
+    void findContours();
+    
+    /** This method shuffels the points in such a way, that 
+      they are sorted according to their type in the following way:
+      BRANCHING-points, CONTOUR-Points, INNER-Points.
+      Points marked as UNUSED are deleted. The indices in the triangles
+      edges and contours are modified accordingly. If the @c edgesPerPoint
+      array is present, the @c edgesPerPoint lists are interchanged
+      in a consistent way. As a side effect, the variables
+      @c nBranchingPoints and @c nContourPoints are set.*/
+    void renumberPoints();
+    
+    void deleteDeadEnds();
+
+    /** Sort the contours so that they form one (or more) closed path.
+      The indices pointing to the contours may become negative...
+      @return The number of closed paths.
+      */
+    int sortContoursOfPatch(int p, int fixDeadEnds=0);
+
+    /// Calls sortContoursOfPatch for all patches.
+    void sortContoursOfPatches(int fixDeadEnds=0);
+
+
+    /// sort triangle list according to patch order
+    void sortTriangles();
+
+    ///
+    void findBranchingPointsOfPatches();
+    
+    ///
+    void computeOrientationOfContours();
+
+    /** Compute a triangulation for the polygon, consisting of the
+      vertices v[]. Insert triangles into surfaces' triangle list.
+      @return number of new triangles. This should be @c v.size()-2.*/
+    int tile(const McDArray<int>& pidx);
+    int tileCenter(const McDArray<int>& pidx);
+    int tileFan(const McDArray<int>& pidx, int anchor);
+
+    /** Compute best fitting plane for a polygon usign Newells method.*/
+    void fitPlane(const McDArray<int>& pidx,float plane[4]);
+
+    
+    /// returns -1 if material is not found.
+    int getMaterialID(const char *mat);
+
+    //
+    int addMaterial(const char *name,int id=-1);
+
+    ///
+    void removePoint(int patch,int point);
+
+    /** Remove triangles containing the same three points. 
+        @return Number of removed triangles. */
+    int removeDuplicateTriangles();
+    
+    /** Remove triangles with two or three identical points. 
+        @return Number of removed triangles. */
+    int removeDegenerateTriangles();
+
+    ///
+    int isInnerPoint(int idx) {
+        return(idx>=nBranchingPoints+nContourPoints);
+    }
+
+    /** Get first point of contour indexed by @c contourIdx. @c contourIdx is
+        an oint. If it is negatively oriented, the last point of the
+        contour is returned instead. */
+    int contourFromPoint(oint contourIdx) {
+        if (contourIdx.positive()) return contours[(int)contourIdx]->points[0];
+            else return contours[(int)contourIdx]->points.last();
+    }
+
+    /** Get last point of contour indexed by @c contourIdx. @c contourIdx is
+        an oint. If it is negatively oriented, the first point of the
+        contour is returned instead. */
+    int contourToPoint(oint contourIdx) {
+        if (contourIdx.positive()) return contours[(int)contourIdx]->points.last();
+            else return contours[(int)contourIdx]->points[0];
+    }
+
+    ///
+    int getEdgeOfTriangle(int triangleIdx,int which);
+
+    ///
+    int getNeighbourTriangle(int triangleIdx, int which, int global = 0);
+
+    ///
+    int getNextNeighbourTriangle();
+        
+    int debug;
+
+    int operator==(const Surface& other) const;
+
+    virtual void print();
+
+    /// Copies the whole data set
+    void copyData(const Surface &source);
+
+    /// Appends a triangle and inserts it in given patch.
+    void appendTriangle(int patchIdx, Triangle& triangle) {
+        int idx = triangles.append(triangle);
+        patches[patchIdx]->triangles.append(idx);
+        triangle.patch = patchIdx;
+    }
+
+    /// Check intersection of triangle t with its neighbours.
+    int intersectionTest(int t, McDArray<int>& neighbours,
+			 float eps, int selectNeighbours=0);
+
+    /// Determine number of triangles of region adjacent to each edge.
+    void classifyEdges(int iRegion, int &nOdd, 
+                       int &nEdge0, int &nEdge2, int &nEdge4, 
+                       McDArray<signed char> &markEdges,
+                       McDArray<int> &triangleList);
+    /// Create groups of connected triangles.
+    int createTriangleGroups(const int iRegion, 
+                             McDArray<signed char> &markEdges,
+                             McDArray<short> &markTriangles);
+    /// Find inconsistent edges.
+    void findInconsistentEdges(const int iRegion, 
+                               McDArray<signed char> &markEdges,
+                               McDArray<short> &markTriangles);
+    /// Create closed surfaces.
+    int createClosedSurfaces(const int iRegion, int nGroups,
+                             McDArray<signed char> &markEdges,
+                             McDArray<short> &markTriangles);
+    /// Calculate volumes enclosed by surfaces.
+    void calcEnclosedVolumes(const int iRegion, 
+                             McDArray<short> &markTriangles,
+                             McDArray<float> &enclosedVolumes);
+    /// Check enclosed volumes.
+    void checkEnclosedVolumes(McDArray<float> &enclosedVolumes,
+                              McDArray<signed char> &inclusionInfo,
+                              McDArray<short> &markTriangles,
+                              int insideOut,
+                              int &groupsOf4,
+                              McDArray<int> &triangleList);
+
+    /// Calculate minimal, maximal and mean edge length.
+    void calcMinMaxMeanEdgeLen(float *min, float *max, float *mean);
+
+
+    // basic surface properties
+
+    /// Returns area of triangle.
+    float getTriangleArea(int triangle);
+
+    /// Get surface area of given patch
+    double getPatchArea(int patch);
+
+    /// Make one patch.
+    void makeOnePatch();
+
+    /// Compute index of edge between given vertices
+    int getEdgeIdx(int v1, int v2);
+
+    /// Compute index of triangle with given vertices.
+    int getTriangleIdx(int v1, int v2, int v3);
+
+    /// Given a triangle index and two nodes, compute 3rd node number.
+    int get3rdPoint(int v1, int v2, int triIdx, int& orient);
+
+    /// Compute neighboured nodes around given node.
+
+    /// Compute neighboured nodes around given node for a general surface (not sorted).
+    void getNeighbouredNodesGeneralSurface(int node, McDArray<int>& notSorted);
+
+    /// Compute neighboured nodes at all vertices for a general surface.
+    void getNeighbouredNodesGeneralSurface(McDArray<McDArray<int> >& neighs);
+
+    /// Compute neighboured nodes around given node (sorted).
+    void getNeighbouredNodes(int node, McDArray<int>& sorted);
+
+    /// Compute neighboured nodes at all vertices
+    void getNeighbouredNodes(McDArray<McDArray<int> >& neighs);
+
+    // surface paths given by an array of nodes
+
+    /// Check if array of vertices form a closed loop on the surface
+    int isClosedLoop(const McDArray<McDArray<int> >& boundary);
+
+    /// Compute length of boundary line on surface
+    float getBoundaryLength(const McDArray<int>& boundary, 
+                            McDArray<float>& lengths);
+
+    /// Compute the shortest @c path on the surface from @c from to @c to.
+    int findShortestPath(int from, int to, 
+                         McDArray<int>& path,
+                         float* weights=0, float minWeight=0);
+
+    //@}
+
+  protected:
+
+    /**@name Auxiliary methods */ //@{
+
+    /// Class for the computation of shortest paths on a surface.
+    class PointPath : public McFHeapElement {
+      public:
+        ///
+        int point;
+        ///
+        int neighbour;
+        ///
+        float path;
+        ///
+        char done;
+        ///
+        char inlist;
+        ///
+        int operator <(const PointPath& other) {
+            return path < other.path;	    
+        }
+    };
+
+    //@}
+
+  private:
+    int contourFlag; // Indicates whether contours have been computed or not
+    int lastTriangleIdx;
+    int lastWhich;
+    int lastGlobal;
+    int lastNeighbourIdx;
+    unsigned int hasOwnParamBundle;
+};
+
+#endif
+

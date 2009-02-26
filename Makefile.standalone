@@ -1,0 +1,50 @@
+###########################################################################
+#
+# This Makefile builds the standalone version of the parametrization library.
+#
+# Copyright (C) 2005 Oliver Sander (FU Berlin)
+#
+###########################################################################
+
+AMIRAMESH_DIR = /home/haile/sander/libamiramesh
+
+CXX = g++
+CFLAGS = -O
+CXXFLAGS = $(CFLAGS) -DHX_OS_LINUX -DHX_NO_MATHF -DHX_HAS_STDIOSTREAM -DNDEBUG -DNEWSTYLE_IOSTREAM -DHX_HAS_STDCOMPLEX
+LDFLAGS = -O
+AR = ar
+
+CXXFLAGS += -DPSURFACE_STANDALONE
+
+#### End of system configuration section. ####
+
+VPATH = ./zlib
+
+INCLUDES = -I../include -I../include/mclib -I../include/hxsurface -I$(AMIRAMESH_DIR)/include \
+           -I$(AMIRAMESH_DIR)/include/amiramesh
+
+.SUFFIXES: .cpp .c .d
+
+OBJS = psurface.o CircularPatch.o DomainPolygon.o Domains.o Iterators.o \
+       Parametrization.o PlaneParam.o TargetSurface.o debugCode.o \
+       contact.o NormalProjector.o buildContactSurface.o extractMergedGrid.o
+
+OBJS += McMat3f.o McMat3d.o McHashTable.o McException.o
+
+all: ../lib/libpsurface.a
+
+../lib/libpsurface.a: $(OBJS)
+	${AR} cr ../lib/libpsurface.a $(OBJS)
+
+dynamic: $(OBJS)
+	$(CXX) $(LDFLAGS) -shared -Wl --export-dynamic $(OBJS) -o ../lib/libpsurface.so
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $(@F)
+
+clean:
+	rm -rf *.a *.o ii_files
+
+distclean: clean
+	rm -rf ../lib/libpsurface.a
+
