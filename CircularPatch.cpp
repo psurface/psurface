@@ -1,3 +1,5 @@
+#include <limits>
+
 #include <psurface/CircularPatch.h>
 #include <psurface/Parametrization.h>
 

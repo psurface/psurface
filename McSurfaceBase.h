@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 /** A simple pointer-based surface.  The @c VertexType, @c EdgeType, and @c TriangleType
     classes have to be derived from McVertex, McEdge, McTriangle,
