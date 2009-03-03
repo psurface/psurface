@@ -7,7 +7,7 @@
 #include <mclib/McSArray.h>
 
 #include <psurface/MultiDimOctree.h>
-#include "MyMcVec3f.h"
+#include <psurface/PointIntersectionFunctor.h>
 
 // Debug
 // #include <hxcluster/HxCluster.h>
@@ -161,14 +161,14 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
         upper[i] = bbox1.getMax()[i];
     }
     Box<std::tr1::array<float,3>, 3> mdBBox1(lower, upper);
-    MultiDimOctree<MyMcVec3f, MyMcVec3fIntersector, std::tr1::array<float,3>, 3, true> mdOctree1(mdBBox1);
-    MyMcVec3fIntersector myMcVec3fIntersector;
+    MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree1(mdBBox1);
+    PointIntersectionFunctor intersectionFunctor;
 
-    McDArray<MyMcVec3f> points1(surf1->points.size());        
+    McDArray<McVec3f> points1(surf1->points.size());        
 
     for (int i=0; i<surf1->points.size(); i++) {
         points1[i] = surf1->points[i];
-        mdOctree1.insert(&points1[i], &myMcVec3fIntersector);
+        mdOctree1.insert(&points1[i], &intersectionFunctor);
     }
 
     mdOctree1.enableUniqueLookup(points1.size(), points1.dataPtr());
@@ -179,15 +179,15 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
         upper[i] = intersectBox.getMax()[i];
     }
     Box<std::tr1::array<float,3>, 3> mdIntersectBox(lower, upper);
-    MultiDimOctree<MyMcVec3f, MyMcVec3fIntersector, std::tr1::array<float,3>, 3, true> mdOctree2(mdIntersectBox);
+    MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree2(mdIntersectBox);
 
-    McDArray<MyMcVec3f> points2(surf2->points.size());        
+    McDArray<McVec3f> points2(surf2->points.size());        
 
     for (int i=0; i<surf2->points.size(); i++){
         
         points2[i] = surf2->points[i];
         if (intersectBox.contains(surf2->points[i]))
-            mdOctree2.insert(&points2[i], &myMcVec3fIntersector);
+            mdOctree2.insert(&points2[i], &intersectionFunctor);
         
     }
     
