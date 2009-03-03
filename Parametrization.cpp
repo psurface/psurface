@@ -147,6 +147,8 @@
 //
 /////////////////////////////////////////////////////////////////
 
+#include <tr1/array>
+
 #include <mclib/McDArray.h>
 #include <amiramesh/AmiraMesh.h>
 
@@ -154,7 +156,6 @@
 #include <psurface/GlobalNodeIdx.h>
 
 #include <mclib/McBox3f.h>
-#include <mclib/McVec2i.h>
 
 Parametrization::Parametrization(HxParamBundle* bundle)
 {
@@ -561,7 +562,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
     McDArray<McVec2f> domainPositions(numNodes);
     McDArray<int>     nodeNumbers(numNodes);
-    McDArray<McVec2i> parameterEdgeArray(numParamEdges);
+    McDArray<std::tr1::array<int,2> > parameterEdgeArray(numParamEdges);
     McDArray<int>     edgePointsArray(numEdgePoints);
 
     int cN;    
@@ -631,8 +632,8 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
         PlaneParam::UndirectedEdgeIterator cE;
         for (cE = cT.firstUndirectedEdge(); cE.isValid(); ++cE){
             if (cE.isRegularEdge()) {
-                parameterEdgeArray[edgeArrayIdx].x = newIdx[cE.from()];
-                parameterEdgeArray[edgeArrayIdx].y = newIdx[cE.to()];
+                parameterEdgeArray[edgeArrayIdx][0] = newIdx[cE.from()];
+                parameterEdgeArray[edgeArrayIdx][1] = newIdx[cE.to()];
                 edgeArrayIdx++;
             }
         }
@@ -810,7 +811,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
     const int* numNodesAndEdgesData = (int*)numNodesAndEdges->dataPtr();
     const McVec2f*   nodeData       = (McVec2f*)nodes->dataPtr();
     const int* nodeNumbers          = (int*)AMnodeNumbers->dataPtr();
-    const McVec2i* edgeData         = (McVec2i*)AMedges->dataPtr();
+    const std::tr1::array<int,2>* edgeData  = (std::tr1::array<int,2>*)AMedges->dataPtr();
     const int*     edgePointData    = (int*)AMedgePoints->dataPtr();
 
 
@@ -884,7 +885,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
         ///////////////////////////////
         // the parameterEdges
         for (j=0; j<numParamEdges; j++, edgeCounter++){
-            triangles(newTriIdx).addEdge(edgeData[edgeCounter].x, edgeData[edgeCounter].y);
+            triangles(newTriIdx).addEdge(edgeData[edgeCounter][0], edgeData[edgeCounter][1]);
         }
 
         //////////////////////////////////

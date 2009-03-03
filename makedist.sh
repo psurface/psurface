@@ -34,7 +34,6 @@ cp local_mclib/include/mclib/McSparseMatrix.h         libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdlib.h               libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdio.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec2f.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McVec2i.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec3f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec3f_impl.h           libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec3d.h                libpsurface/include/mclib
