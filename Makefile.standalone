@@ -29,7 +29,7 @@ OBJS = psurface.o CircularPatch.o DomainPolygon.o Domains.o Iterators.o \
        Parametrization.o PlaneParam.o TargetSurface.o debugCode.o \
        contact.o NormalProjector.o buildContactSurface.o extractMergedGrid.o
 
-OBJS += McMat3f.o McMat3d.o McHashTable.o
+OBJS += McMat3f.o McMat3d.o
 
 all: ../lib/libpsurface.a
 

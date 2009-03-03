@@ -23,7 +23,6 @@ cp local_mclib/include/mclib/McBox3f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McDVector.h              libpsurface/include/mclib
 cp local_mclib/include/mclib/McFHeap.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McHandable.h             libpsurface/include/mclib
-cp local_mclib/include/mclib/McHashTable.h            libpsurface/include/mclib
 cp local_mclib/include/mclib/McMat3f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McMat4f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McPrimType.h             libpsurface/include/mclib
@@ -40,7 +39,6 @@ cp local_mclib/include/mclib/McVec3d.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec3d_impl.h           libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec3i.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec4f.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McVec4i.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
 
 cp local_mclib/McDArray.h                 libpsurface/include/mclib
@@ -68,7 +66,6 @@ cp PointIntersectionFunctor.h  libpsurface/include/psurface
 cp psurfaceAPI.h            libpsurface/include/psurface
 
 cp local_mclib/McMat3f.cpp                libpsurface/src
-cp local_mclib/McHashTable.cpp            libpsurface/src
 
 
 cp psurface.cpp                     libpsurface/src
