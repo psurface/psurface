@@ -1,6 +1,8 @@
 #ifndef CONTACT_BOUNDARY_H
 #define CONTACT_BOUNDARY_H
 
+#include <vector>
+
 #include <mclib/McBox3f.h>
 #ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"
@@ -36,9 +38,9 @@ public:
         return surf->triangles[triIdx[n]];
     }
 
-    McDArray<int> getVertexOffsets() const {
-        McDArray<int> result(surf->points.size());
-        result.fill(-1);
+    std::vector<int> getVertexOffsets() const {
+        std::vector<int> result(surf->points.size());
+        result.assign(result.size(), -1);
         for (int i=0; i<vertices.size(); i++)
             result[vertices[i]] = i;
 
@@ -57,9 +59,9 @@ public:
         return counter;
     }
 
-    McDArray<int> vertices;
+    std::vector<int> vertices;
 
-    McDArray<int> triIdx;
+    std::vector<int> triIdx;
 
     const Surface* surf;
 };

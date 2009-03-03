@@ -1,4 +1,6 @@
 #include <tr1/array>
+#include <vector>
+#include <set>
 
 #include <psurface/ContactToolBox.h>
 #include <psurface/ContactBoundary.h>
@@ -114,9 +116,9 @@ void ContactToolBox::buildContactSurface(Parametrization* cPar,
     
     cPar->params->insert(new HxParameter("targetTris",
                                          contactBoundary[0].triIdx.size(),
-                                         contactBoundary[0].triIdx.dataPtr()));
+                                         &contactBoundary[0].triIdx[0]));
     
-    McDArray<int> vertexOffsets = contactBoundary[0].getVertexOffsets();
+    std::vector<int> vertexOffsets = contactBoundary[0].getVertexOffsets();
     for (i=0; i<contactBoundary[0].triIdx.size(); i++) {
         
         TriangleIdx newTri = cPar->createSpaceForTriangle(vertexOffsets[contactBoundary[0].triangles(i).points[0]],
@@ -138,7 +140,7 @@ void ContactToolBox::buildContactSurface(Parametrization* cPar,
 
 
 void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
-                                   McDArray<int>& contactNodes1, McDArray<int>& contactNodes2,
+                                   std::vector<int>& contactNodes1, std::vector<int>& contactNodes2,
                                    float epsilon)
 {
     int i, j;
@@ -164,14 +166,15 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree1(mdBBox1);
     PointIntersectionFunctor intersectionFunctor;
 
-    McDArray<McVec3f> points1(surf1->points.size());        
+    std::vector<McVec3f> points1(surf1->points.size());        
 
     for (int i=0; i<surf1->points.size(); i++) {
         points1[i] = surf1->points[i];
         mdOctree1.insert(&points1[i], &intersectionFunctor);
     }
 
-    mdOctree1.enableUniqueLookup(points1.size(), points1.dataPtr());
+    /** \todo Don't hand over a pointer here */
+    mdOctree1.enableUniqueLookup(points1.size(), &points1[0]);
     
     // We first put the vertices of surface2 into an octree
     for (int i=0; i<3; i++) {
@@ -181,7 +184,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     Box<std::tr1::array<float,3>, 3> mdIntersectBox(lower, upper);
     MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree2(mdIntersectBox);
 
-    McDArray<McVec3f> points2(surf2->points.size());        
+    std::vector<McVec3f> points2(surf2->points.size());        
 
     for (int i=0; i<surf2->points.size(); i++){
         
@@ -191,7 +194,8 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
         
     }
     
-    mdOctree2.enableUniqueLookup(points2.size(), points2.dataPtr());
+    /** \todo Don't hand over a pointer here */
+    mdOctree2.enableUniqueLookup(points2.size(), &points2[0]);
     
     // Two bitfields to mark the contact nodes
     std::vector<bool> contactField2(surf2->points.size(), false);
@@ -367,21 +371,30 @@ McVec3f ContactToolBox::getClosestPointOnTriangle(const McVec3f& p0,
 
 void ContactToolBox::computeContactPatch(const Surface* surf, ContactBoundary& cBound)
 {
-    int i;
-    
     //////////////////////////////////////////////////
     // create triangles
-    cBound.vertices.sort(&mcStandardCompare);
+    //////////////////////////////////////////////////
+    //cBound.vertices.sort(&mcStandardCompare);
 
-    for (i=0; i<surf->triangles.size(); i++) {
+    /** \todo Maybe cbound.vertices can be a std::set?
+        Then we wouldn't have to copy
+    */
+    std::set<int> vertexSet;
+    for (int i=0; i<cBound.vertices.size(); i++)
+        vertexSet.insert(cBound.vertices[i]);
+
+    for (int i=0; i<surf->triangles.size(); i++) {
         
         const McVec3i& p = surf->triangles[i].points;
         
-        if (cBound.vertices.findSorted(p[0], mcStandardCompare)>=0 &&
-            cBound.vertices.findSorted(p[1], mcStandardCompare)>=0 &&
-            cBound.vertices.findSorted(p[2], mcStandardCompare)>=0) {
+//         if (cBound.vertices.findSorted(p[0], mcStandardCompare)>=0 &&
+//             cBound.vertices.findSorted(p[1], mcStandardCompare)>=0 &&
+//             cBound.vertices.findSorted(p[2], mcStandardCompare)>=0) {
+        if (vertexSet.find(p[0]) != vertexSet.end() &&
+            vertexSet.find(p[1]) != vertexSet.end() &&
+            vertexSet.find(p[1]) != vertexSet.end()) {
             
-            cBound.triIdx.append(i);
+            cBound.triIdx.push_back(i);
         }
     }
 }

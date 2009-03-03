@@ -1,7 +1,6 @@
 #ifndef CONTACT_TOOLBOX_H
 #define CONTACT_TOOLBOX_H
 
-#include <mclib/McDArray.h>
 #include <mclib/McBox3f.h>
 #include <mclib/McVec3f.h>
 #include <mclib/McVec3i.h>
@@ -25,7 +24,7 @@ namespace ContactToolBox {
                              );
 
     void contactOracle(const Surface* surf1, const Surface* surf2,
-                       McDArray<int>& contactNodes1, McDArray<int>& contactNodes2,
+                       std::vector<int>& contactNodes1, std::vector<int>& contactNodes2,
                        float epsilon);
 
     McVec3f getClosestPointOnTriangle(const McVec3f& p0,
