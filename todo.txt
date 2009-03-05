@@ -35,6 +35,12 @@
 
 - amiramesh reader more stable
 
+- Get rid of McLib classes
+
+- Factor out memory management of McSurfaceBase into a PoolAllocator class
+
+- integrate some 2d support from dune/contact
+
 
   Interna
 -------------
