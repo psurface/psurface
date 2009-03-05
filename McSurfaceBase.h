@@ -1,7 +1,7 @@
 #ifndef MC__SURFACE_BASE
 #define MC__SURFACE_BASE
 
-#include <mclib/McDArray.h>
+#include <vector>
 #include "McPointerSurfaceParts.h"
 
 #include <vector>
@@ -30,12 +30,12 @@ public:
 
     ///
     void clear() {
-        triangleArray.clear();
-        freeTriangleStack.clear();
-        edgeArray.clear();
-        freeEdgeStack.clear();
-        vertexArray.clear();
-        freeVertexStack.clear();
+        triangleArray.resize(0);
+        freeTriangleStack.resize(0);
+        edgeArray.resize(0);
+        freeEdgeStack.resize(0);
+        vertexArray.resize(0);
+        freeVertexStack.resize(0);
     }
 
     /**@name Procedural Access to the Elements */
@@ -100,7 +100,7 @@ public:
 
         // remove triangle
         //triangles(tri).invalidate();
-        freeTriangleStack.push(tri);
+        freeTriangleStack.push_back(tri);
     }
 
     /// removes an edge
@@ -108,14 +108,12 @@ public:
         vertices(edges(edge).from).removeReferenceTo(edge);
         vertices(edges(edge).to).removeReferenceTo(edge);
 
-        //edges(edge).invalidate();
-        freeEdgeStack.push(edge);
+        freeEdgeStack.push_back(edge);
     };
 
     void removeVertex(VertexIdx vertex) {
         assert(!vertices(vertex).degree());
-        //vertices(vertex).invalidate();
-        freeVertexStack.push(vertex);
+        freeVertexStack.push_back(vertex);
     }
 
     void addVertex(VertexType* vertex) {
@@ -125,44 +123,47 @@ public:
 
     VertexIdx newVertex(const McVec3f& p) {
 
-        VertexIdx newVertexIdx;
         if (freeVertexStack.size()){
-            freeVertexStack.pop(newVertexIdx);
+            VertexIdx newVertexIdx = freeVertexStack.back();
+            freeVertexStack.pop_back();
             vertices(newVertexIdx) = p;
-        } else
-            newVertexIdx = vertexArray.append(p);
+            return newVertexIdx;
+        } 
 
-        return newVertexIdx;
+        vertexArray.push_back(p);
+        return vertexArray.size()-1;
     }
 
     EdgeIdx newEdge(VertexIdx a, VertexIdx b) {
 
         EdgeIdx newEdgeIdx;
-        if (freeEdgeStack.size())
-            freeEdgeStack.pop(newEdgeIdx);
-        else
-            newEdgeIdx = edgeArray.appendSpace(1);
+        if (freeEdgeStack.size()) {
+            newEdgeIdx = freeEdgeStack.back();
+            freeEdgeStack.pop_back();
+        } else {
+            edgeArray.push_back(EdgeType());
+            newEdgeIdx = edgeArray.size()-1;
+        }
 
         EdgeType& newEdge = edges(newEdgeIdx);
 
         newEdge.from = a;
         newEdge.to   = b;
 
-        newEdge.triangles.clear();
+        newEdge.triangles.resize(0);
         
         return newEdgeIdx;
     }
 
     TriangleIdx createSpaceForTriangle(VertexIdx a, VertexIdx b, VertexIdx c) {
         TriangleIdx newTri;
-        if (freeTriangleStack.size())
-            freeTriangleStack.pop(newTri);
-        else
-            newTri = triangleArray.appendSpace(1);
-
-        triangles(newTri).vertices[0] = a;
-        triangles(newTri).vertices[1] = b;
-        triangles(newTri).vertices[2] = c;
+        if (freeTriangleStack.size()) {
+            newTri = freeTriangleStack.back();
+            freeTriangleStack.pop_back();
+        } else {
+            triangleArray.push_back(TriangleType(a,b,c));
+            newTri = triangleArray.size()-1;
+        }
 
         return newTri;
     }
@@ -530,7 +531,7 @@ public:
             
             int offset = 0;
 
-            McDArray<VertexIdx> vertexOffsets(vertexArray.size());
+            std::vector<VertexIdx> vertexOffsets(vertexArray.size());
             isInvalid.resize(vertexArray.size());
 
             for (i=0; i<isInvalid.size(); i++)
@@ -564,7 +565,7 @@ public:
                 for (j=0; j<3; j++) 
                     triangleArray[i].vertices[j] -= vertexOffsets[triangleArray[i].vertices[j]];
 
-            freeVertexStack.clear();                
+            freeVertexStack.resize(0);                
         }
 
         // clean up edges
@@ -572,7 +573,7 @@ public:
             
             int offset = 0;
 
-            McDArray<EdgeIdx> edgeOffsets(edgeArray.size());
+            std::vector<EdgeIdx> edgeOffsets(edgeArray.size());
             isInvalid.resize(edgeArray.size());
 
             for (i=0; i<isInvalid.size(); i++)
@@ -605,7 +606,7 @@ public:
                     if (triangleArray[i].edges[j]>=0)
                         triangleArray[i].edges[j] -= edgeOffsets[triangleArray[i].edges[j]];
 
-            freeEdgeStack.clear();
+            freeEdgeStack.resize(0);
         }
 
         // clean up triangles
@@ -613,7 +614,7 @@ public:
             
             int offset = 0;
 
-            McDArray<TriangleIdx> triangleOffsets(triangleArray.size());
+            std::vector<TriangleIdx> triangleOffsets(triangleArray.size());
             isInvalid.resize(triangleArray.size());
 
             for (i=0; i<isInvalid.size(); i++)
@@ -641,7 +642,7 @@ public:
                 for (j=0; j<edgeArray[i].triangles.size(); j++) 
                     edgeArray[i].triangles[j] -= triangleOffsets[edgeArray[i].triangles[j]];
                 
-            freeTriangleStack.clear();
+            freeTriangleStack.resize(0);
         }
 
 
@@ -652,23 +653,23 @@ public:
     
 protected:
     ///
-    McDArray<TriangleType> triangleArray;
+    std::vector<TriangleType> triangleArray;
 
     ///
-    McDArray<VertexType> vertexArray;
+    std::vector<VertexType> vertexArray;
 
     ///
-    McDArray<EdgeType> edgeArray;
+    std::vector<EdgeType> edgeArray;
 
 public:
     ///
-    McDArray<TriangleIdx> freeTriangleStack;
+    std::vector<TriangleIdx> freeTriangleStack;
 protected:
     ///
-    McDArray<EdgeIdx>     freeEdgeStack;
+    std::vector<EdgeIdx>     freeEdgeStack;
 
     ///
-    McDArray<VertexIdx>  freeVertexStack;
+    std::vector<VertexIdx>  freeVertexStack;
 
 };
 
