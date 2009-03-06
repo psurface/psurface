@@ -37,7 +37,7 @@
  *  associated functor object. The functor class F has to provide the operator
  *
  *  @code
- *  bool operator()(const BoxType &box, const T* item);
+ *  bool operator()(const CoordType& lower, const CoordType& upper, const T& item);
  *  @endcode
  *
  *  This method should return TRUE if the item intersects the box, FALSE otherwise.
@@ -419,10 +419,11 @@ bool MultiDimOctree<T, F, C, dim, uniform_access>::insert(T* element, F* f_)
 	{
 		// set the functor
 		this->f = f_;
-		if (this->f == 0)
-			return false;
-		// return the success of the insert method
-		return insert(0, 0 , box, element);
+		if (this->f != NULL && (*this->f)(this->box.lower(), this->box.upper(), *element))
+		{
+			// return the success of the insert method
+			return insert(0, 0 , box, element);
+		}
 	}
 	else
 	{
@@ -443,6 +444,7 @@ bool MultiDimOctree<T, F, C, dim, uniform_access>::insert(T* element, F* f_)
 		else
 			return false;
 	}
+	return false;
 }
 
 
