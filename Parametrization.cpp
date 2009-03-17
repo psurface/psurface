@@ -186,11 +186,12 @@ void Parametrization::clear()
 
 void Parametrization::getBoundingBox(Box<std::tr1::array<float,3>,3>& bbox) const
 {
-    if (getNumVertices()==VertexIdx(0)) return;
+    if (getNumVertices()==0)
+        return;
 
     bbox.set(vertices(0), vertices(0));
 
-    for (VertexIdx i=VertexIdx(1); i<getNumVertices(); i++)
+    for (int i=1; i<getNumVertices(); i++)
         bbox.extendBy(vertices(i));
 }
 
@@ -232,7 +233,7 @@ McVec2f Parametrization::getLocalTargetCoords(const GlobalNodeIdx& n, int target
 }
 
 
-GlobalNodeIdx Parametrization::getOtherEndNode(TriangleIdx triIdx, NodeIdx cN) const
+GlobalNodeIdx Parametrization::getOtherEndNode(int triIdx, NodeIdx cN) const
 {
     int i;
     
@@ -245,7 +246,7 @@ GlobalNodeIdx Parametrization::getOtherEndNode(TriangleIdx triIdx, NodeIdx cN) c
         int edgePos = cT.nodes[cN].getDomainEdgePosition();
         
         // get adjacent triangle
-        const EdgeIdx cE = cT.getOppositeEdge(cT.vertices[(edge+2)%3]);
+        const int cE = cT.getOppositeEdge(cT.vertices[(edge+2)%3]);
 
 #ifndef NDEBUG
         if (edges(cE).numTriangles()!=2) {
@@ -257,7 +258,7 @@ GlobalNodeIdx Parametrization::getOtherEndNode(TriangleIdx triIdx, NodeIdx cN) c
 
         assert(edges(cE).numTriangles()==2);
         
-        const TriangleIdx oppT = (edges(cE).triangles[0]==triIdx) 
+        const int oppT = (edges(cE).triangles[0]==triIdx) 
             ? edges(cE).triangles[1] 
             : edges(cE).triangles[0];
         
@@ -316,7 +317,7 @@ int Parametrization::getNumTrueNodes()
 {
     int highestTrueNodeNumber = -1;
 
-    for (TriangleIdx j(0); j<getNumTriangles(); j++) {
+    for (int j(0); j<getNumTriangles(); j++) {
 
         const DomainTriangle& cT = triangles(j);
 
@@ -334,7 +335,7 @@ int Parametrization::getNumTrueNodes()
 void Parametrization::removeExtraEdges()
 {
 
-    for (TriangleIdx i(0); i<getNumTriangles(); i++) {
+    for (int i(0); i<getNumTriangles(); i++) {
         triangles(i).removeExtraEdges();
     }
 
@@ -354,7 +355,7 @@ void Parametrization::insertExtraEdges()
 
 void Parametrization::createPointLocationStructure()
 {
-    for (TriangleIdx i(0); i<getNumTriangles(); i++){
+    for (int i(0); i<getNumTriangles(); i++){
         //        printf("######## Triangle: %d\n", i);
         triangles(i).checkConsistency("Before Insert");
         triangles(i).insertExtraEdges();
@@ -384,7 +385,7 @@ void Parametrization::garbageCollection()
         
         int offset = 0;
         
-        McDArray<VertexIdx> vertexOffsets(vertexArray.size());
+        McDArray<int> vertexOffsets(vertexArray.size());
         isInvalid.resize(vertexArray.size());
         for (i=0; i<isInvalid.size(); i++)
             isInvalid[i] = false;
@@ -439,8 +440,8 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     am.parameters = *(par->params);
 
     int i, j, k;
-    int numVertices  = IntValue(par->getNumVertices());
-    int numTriangles = IntValue(par->getNumTriangles());
+    int numVertices  = par->getNumVertices();
+    int numTriangles = par->getNumTriangles();
 
     am.parameters.set("ContentType", "Parametrization");
 
@@ -463,8 +464,8 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     am.insert(vertices);
 
     McDArray<McVec3f> baseGridVertexCoordsArray(numVertices);
-    for (VertexIdx i(0); i<par->getNumVertices(); i++)
-        baseGridVertexCoordsArray[IntValue(i)] = par->vertices(i);
+    for (i=0; i<par->getNumVertices(); i++)
+        baseGridVertexCoordsArray[i] = par->vertices(i);
 
     AmiraMesh::Data* vertexCoords = new AmiraMesh::Data("BaseGridVertexCoords", vertices, 
                                                         McPrimType::mc_float, 3, 
@@ -478,8 +479,8 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
     McDArray<McSArray<int, 3> > baseGridTriArray(numTriangles);
 
-    for (TriangleIdx i(0); i<par->getNumTriangles(); i++)
-        baseGridTriArray[IntValue(i)] = par->triangles(i).vertices;
+    for (int i(0); i<par->getNumTriangles(); i++)
+        baseGridTriArray[i] = par->triangles(i).vertices;
     
 
     AmiraMesh::Data* triangleCoords = new AmiraMesh::Data("BaseGridTriangles", triangles,
@@ -814,7 +815,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
     
     for (i=0; i<numTriangles; i++){
         
-        TriangleIdx newTriIdx = createSpaceForTriangle(triIdx[i].i, triIdx[i].j, triIdx[i].k);
+        int newTriIdx = createSpaceForTriangle(triIdx[i].i, triIdx[i].j, triIdx[i].k);
 
         triangles(newTriIdx).patch = numNodesAndEdgesData[11*i+4];
 
@@ -1047,7 +1048,7 @@ void Parametrization::setupOriginalSurface()
                 if (!cN.neighbors(cN.degree()-1).isRegular()) {
 
 #if 0
-                    TriangleIdx otherTri;
+                    int otherTri;
                     v[1] = v[2];
                     v[2] = getOtherEndNodeNumber(k, cN.neighbors(cN.degree()-1), &otherTri);
                     
@@ -1123,7 +1124,7 @@ void Parametrization::savePaths(HxParamBundle& parameters)
 
 
 
-int Parametrization::map(TriangleIdx triIdx, McVec2f& p, McVec3i& vertices, 
+int Parametrization::map(int triIdx, McVec2f& p, McVec3i& vertices, 
                          McVec2f& coords, int seed) const
 {
     int i;
@@ -1211,7 +1212,7 @@ int Parametrization::map(TriangleIdx triIdx, McVec2f& p, McVec3i& vertices,
     return true;
 }
 
-void Parametrization::getActualVertices(TriangleIdx tri, const McSArray<NodeIdx, 3>& nds,
+void Parametrization::getActualVertices(int tri, const McSArray<NodeIdx, 3>& nds,
                                         McSArray<GlobalNodeIdx, 3>& vertices) const
 {
     const DomainTriangle& cT = triangles(tri);
@@ -1323,7 +1324,7 @@ void Parametrization::getActualVertices(TriangleIdx tri, const McSArray<NodeIdx,
     }
 }
 
-int Parametrization::getImageSurfaceTriangle(TriangleIdx tri,
+int Parametrization::getImageSurfaceTriangle(int tri,
                                              const McSArray<NodeIdx, 3>& nds
                                              ) const
 {
@@ -1414,7 +1415,7 @@ void Parametrization::getTrianglesPerEdge(int from, int to, McSmallArray<int, 6>
 
 }
 
-void Parametrization::handleMapOnEdge(TriangleIdx triIdx, const McVec2f& p, const McVec2f& a, const McVec2f& b,
+void Parametrization::handleMapOnEdge(int triIdx, const McVec2f& p, const McVec2f& a, const McVec2f& b,
                                       int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, McVec2f& coords) const
 {
     const DomainTriangle& tri = triangles(triIdx);
@@ -1477,7 +1478,7 @@ void Parametrization::handleMapOnEdge(TriangleIdx triIdx, const McVec2f& p, cons
 }
 
 
-int Parametrization::positionMap(TriangleIdx triIdx, McVec2f& p, McVec3f& result) const
+int Parametrization::positionMap(int triIdx, McVec2f& p, McVec3f& result) const
 {
     McVec2f localCoords;
     McVec3i tri;
@@ -1499,7 +1500,7 @@ int Parametrization::positionMap(TriangleIdx triIdx, McVec2f& p, McVec3f& result
 
 
 
-int Parametrization::directNormalMap(TriangleIdx triIdx, McVec2f& p, McVec3f& result) const
+int Parametrization::directNormalMap(int triIdx, McVec2f& p, McVec3f& result) const
 {
     McVec2f localCoords;
     McVec3i tri;
@@ -1523,10 +1524,10 @@ int Parametrization::directNormalMap(TriangleIdx triIdx, McVec2f& p, McVec3f& re
 int Parametrization::invertTriangles(int patch)
 {
     
-    TriangleIdx i;
+    int i;
     int count=0;
     
-    for (i=TriangleIdx(0); i<TriangleIdx(getNumTriangles()); i++) 
+    for (i=int(0); i<int(getNumTriangles()); i++) 
         if (patch==-1 || triangles(i).patch==patch){
             
             triangles(i).flip();
@@ -1543,7 +1544,7 @@ int Parametrization::invertTriangles(int patch)
     return count;
 }
 
-// NodeIdx Parametrization::addNode(TriangleIdx tri, const McVec3f& p)
+// NodeIdx Parametrization::addNode(int tri, const McVec3f& p)
 // {
 //     DomainTriangle& cT = pars[side].triangles(tri);
 
@@ -1555,19 +1556,19 @@ int Parametrization::invertTriangles(int patch)
 
 // }
 
-NodeIdx Parametrization::addInteriorNode(TriangleIdx tri, const McVec2f& dom, int nodeNumber)
+NodeIdx Parametrization::addInteriorNode(int tri, const McVec2f& dom, int nodeNumber)
 {
     return triangles(tri).nodes.append(Node(dom, nodeNumber, Node::INTERIOR_NODE));  
 }
 
-NodeIdx Parametrization::addGhostNode(TriangleIdx tri, int corner, int targetTri, const McVec2f& localTargetCoords)
+NodeIdx Parametrization::addGhostNode(int tri, int corner, int targetTri, const McVec2f& localTargetCoords)
 {
     int newNode = triangles(tri).nodes.append(Node());
     triangles(tri).nodes.last().makeGhostNode(corner, targetTri, localTargetCoords);
     return newNode;
 }
 
-NodeIdx Parametrization::addCornerNode(TriangleIdx tri, int corner, int nodeNumber)
+NodeIdx Parametrization::addCornerNode(int tri, int corner, int nodeNumber)
 {
     DomainTriangle& cT = triangles(tri);
 
@@ -1577,7 +1578,7 @@ NodeIdx Parametrization::addCornerNode(TriangleIdx tri, int corner, int nodeNumb
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
-NodeIdx Parametrization::addIntersectionNodePair(TriangleIdx tri1, TriangleIdx tri2,
+NodeIdx Parametrization::addIntersectionNodePair(int tri1, int tri2,
                                                 const McVec2f& dP1, const McVec2f& dP2, 
                                                 int edge1, int edge2, const McVec3f& range)
 {
@@ -1598,7 +1599,7 @@ NodeIdx Parametrization::addIntersectionNodePair(TriangleIdx tri1, TriangleIdx t
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
-NodeIdx Parametrization::addTouchingNode(TriangleIdx tri, const McVec2f& dP, int edge, int nodeNumber)
+NodeIdx Parametrization::addTouchingNode(int tri, const McVec2f& dP, int edge, int nodeNumber)
 {
     DomainTriangle& cT = triangles(tri);
 
@@ -1610,7 +1611,7 @@ NodeIdx Parametrization::addTouchingNode(TriangleIdx tri, const McVec2f& dP, int
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
-NodeIdx Parametrization::addTouchingNodePair(TriangleIdx tri1, TriangleIdx tri2,
+NodeIdx Parametrization::addTouchingNodePair(int tri1, int tri2,
                                             const McVec2f& dP1, const McVec2f& dP2, 
                                             int edge1, int edge2, int nodeNumber)
 {
@@ -1629,7 +1630,7 @@ NodeIdx Parametrization::addTouchingNodePair(TriangleIdx tri1, TriangleIdx tri2,
     return newNode1;
 }
 
-void Parametrization::addParTriangle(TriangleIdx tri, const McVec3i& p)
+void Parametrization::addParTriangle(int tri, const McVec3i& p)
 {
     DomainTriangle& cT = triangles(tri);
 
@@ -1646,10 +1647,10 @@ void Parametrization::addParTriangle(TriangleIdx tri, const McVec3i& p)
 
 }
 
-NodeBundle Parametrization::getNodeBundleAtVertex(VertexIdx v) const
+NodeBundle Parametrization::getNodeBundleAtVertex(int v) const
 {
     NodeBundle result;
-    McSmallArray<TriangleIdx, 12> neighbors = getTrianglesPerVertex(v);
+    McSmallArray<int, 12> neighbors = getTrianglesPerVertex(v);
 
     result.resize(neighbors.size());
 

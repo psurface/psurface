@@ -175,7 +175,7 @@ float CircularPatch::distanceTo(const McVec3f &p) const
     return bestDist;
 }
 
-bool CircularPatch::intersectsParametrization(const McDArray<EdgeIdx> &closeEdges) const
+bool CircularPatch::intersectsParametrization(const McDArray<int> &closeEdges) const
 {
     int i, j;
     
@@ -184,8 +184,8 @@ bool CircularPatch::intersectsParametrization(const McDArray<EdgeIdx> &closeEdge
 //         printf("closeEdge:  %d    %d --> %d\n", closeEdges[i],
 //                par->edges(closeEdges[i]).from, par->edges(closeEdges[i]).to);
 
-        VertexIdx from = par->edges(closeEdges[i]).from;
-        VertexIdx to   = par->edges(closeEdges[i]).to;
+        int from = par->edges(closeEdges[i]).from;
+        int to   = par->edges(closeEdges[i]).to;
         
         for (j=0; j<size(); j++){
             

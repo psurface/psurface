@@ -42,36 +42,36 @@ public:
     /**@name Procedural Access to the Elements */
     //@{
     ///
-    TriangleType& triangles(TriangleIdx i) {return triangleArray[IntValue(i)];}
+    TriangleType& triangles(int i) {return triangleArray[i];}
 
     ///
-    const TriangleType& triangles(TriangleIdx i) const {return triangleArray[IntValue(i)];}
+    const TriangleType& triangles(int i) const {return triangleArray[i];}
 
     ///
-    EdgeType& edges(EdgeIdx i) {return edgeArray[IntValue(i)];}
+    EdgeType& edges(int i) {return edgeArray[i];}
 
     ///
-    const EdgeType& edges(EdgeIdx i) const {return edgeArray[IntValue(i)];}
+    const EdgeType& edges(int i) const {return edgeArray[i];}
 
     ///
-    VertexType& vertices(VertexIdx i) {return vertexArray[IntValue(i)];}
+    VertexType& vertices(int i) {return vertexArray[i];}
 
     ///
-    const VertexType& vertices(VertexIdx i) const {return vertexArray[IntValue(i)];}
+    const VertexType& vertices(int i) const {return vertexArray[i];}
 
     ///
-    TriangleIdx getNumTriangles() const {
-        return TriangleIdx(triangleArray.size());
+    size_t getNumTriangles() const {
+        return triangleArray.size();
     }
 
     ///
-    EdgeIdx getNumEdges() const {
-        return EdgeIdx(edgeArray.size());
+    size_t getNumEdges() const {
+        return edgeArray.size();
     }
 
     ///
-    VertexIdx getNumVertices() const {
-        return VertexIdx(vertexArray.size());
+    size_t getNumVertices() const {
+        return vertexArray.size();
     }
 
     //@}
@@ -79,13 +79,13 @@ public:
     /**@name Insertion and Removal of Elements */
     //@{
     /// removes a triangle and maintains a consistent data structure
-    void removeTriangle(TriangleIdx tri){
+    void removeTriangle(int tri){
         int i;
         
         // update all three neighboring edges
         for (i=0; i<3; i++){
             
-            EdgeIdx thisEdge = triangles(tri).edges[i];
+            int thisEdge = triangles(tri).edges[i];
             if (thisEdge==-1)
                 continue;
             
@@ -105,14 +105,14 @@ public:
     }
 
     /// removes an edge
-    void removeEdge(EdgeIdx edge){
+    void removeEdge(int edge){
         vertices(edges(edge).from).removeReferenceTo(edge);
         vertices(edges(edge).to).removeReferenceTo(edge);
 
         freeEdgeStack.push_back(edge);
     };
 
-    void removeVertex(VertexIdx vertex) {
+    void removeVertex(int vertex) {
         assert(!vertices(vertex).degree());
         freeVertexStack.push_back(vertex);
     }
@@ -122,10 +122,10 @@ public:
     }
 
 
-    VertexIdx newVertex(const McVec3f& p) {
+    int newVertex(const McVec3f& p) {
 
         if (freeVertexStack.size()){
-            VertexIdx newVertexIdx = freeVertexStack.back();
+            int newVertexIdx = freeVertexStack.back();
             freeVertexStack.pop_back();
             vertices(newVertexIdx) = p;
             return newVertexIdx;
@@ -135,9 +135,9 @@ public:
         return vertexArray.size()-1;
     }
 
-    EdgeIdx newEdge(VertexIdx a, VertexIdx b) {
+    int newEdge(int a, int b) {
 
-        EdgeIdx newEdgeIdx;
+        int newEdgeIdx;
         if (freeEdgeStack.size()) {
             newEdgeIdx = freeEdgeStack.back();
             freeEdgeStack.pop_back();
@@ -156,8 +156,8 @@ public:
         return newEdgeIdx;
     }
 
-    TriangleIdx createSpaceForTriangle(VertexIdx a, VertexIdx b, VertexIdx c) {
-        TriangleIdx newTri;
+    int createSpaceForTriangle(int a, int b, int c) {
+        int newTri;
         if (freeTriangleStack.size()) {
             newTri = freeTriangleStack.back();
             freeTriangleStack.pop_back();
@@ -169,22 +169,22 @@ public:
         return newTri;
     }
 
-    void integrateTriangle(TriangleIdx triIdx) {
+    void integrateTriangle(int triIdx) {
 
         TriangleType& tri = triangles(triIdx);
         
         // look for and possible create the new edges
         for (int i=0; i<3; i++){
             
-            VertexIdx pointA = tri.vertices[i];
-            VertexIdx pointB = tri.vertices[(i+1)%3];
+            int pointA = tri.vertices[i];
+            int pointB = tri.vertices[(i+1)%3];
             
-            EdgeIdx thisEdge = findEdge(pointA, pointB);
+            int thisEdge = findEdge(pointA, pointB);
             
             if (thisEdge == -1){
                 
                 // this edge doesn't exist yet
-                EdgeIdx newEdgeIdx = newEdge(pointA, pointB);
+                int newEdgeIdx = newEdge(pointA, pointB);
                 
                 vertices(pointA).edges.append(newEdgeIdx);
                 vertices(pointB).edges.append(newEdgeIdx);
@@ -207,7 +207,7 @@ public:
 
     /** Given two vertices, this routine returns the edge that connects them,
         or -1, if no such edge exists. */
-    EdgeIdx findEdge(VertexIdx a, VertexIdx b) const {
+    int findEdge(int a, int b) const {
         assert(a>=0 && a<getNumVertices() && b>=0 && b<getNumVertices());
         for (int i=0; i<vertices(a).degree(); i++)
             if (edges(vertices(a).edges[i]).from == b ||
@@ -219,12 +219,12 @@ public:
 
     /** Given three vertices, this routine returns the triangle that connects them,
         or -1, if no such triangle exists. */
-    TriangleIdx findTriangle(VertexIdx a, VertexIdx b, VertexIdx c) const {
+    int findTriangle(int a, int b, int c) const {
         assert(a>=0 && a<getNumVertices());
         assert(b>=0 && b<getNumVertices());
         assert(c>=0 && c<getNumVertices());
 
-        EdgeIdx oneEdge = findEdge(a, b);
+        int oneEdge = findEdge(a, b);
         
         if (oneEdge==-1)
             return -1;
@@ -237,7 +237,7 @@ public:
     }
 
     /// Tests whether the two edges are connected by a common triangle
-    TriangleIdx findCommonTriangle(EdgeIdx a, EdgeIdx b) const {
+    int findCommonTriangle(int a, int b) const {
         assert(a!=b);
         assert(a>=0 && a<getNumVertices());
         assert(b>=0 && b<getNumVertices());
@@ -251,11 +251,11 @@ public:
     }
 
     /// 
-    McSmallArray<TriangleIdx, 12> getTrianglesPerVertex(VertexIdx v) const {
+    McSmallArray<int, 12> getTrianglesPerVertex(int v) const {
 
         const VertexType& cV = vertices(v);
 
-        McSmallArray<TriangleIdx, 12> result;
+        McSmallArray<int, 12> result;
         
         for (int i=0; i<cV.edges.size(); i++) {
 
@@ -274,10 +274,10 @@ public:
     }
 
     ///
-    McSmallArray<VertexIdx, 12> getNeighbors(VertexIdx v) const {
+    McSmallArray<int, 12> getNeighbors(int v) const {
 
         const VertexType& cV = vertices(v);
-        McSmallArray<VertexIdx, 12> result;
+        McSmallArray<int, 12> result;
         
         for (int i=0; i<cV.edges.size(); i++) {
             
@@ -289,10 +289,10 @@ public:
         return result;
     }
 
-    TriangleIdx getNeighboringTriangle(TriangleIdx tri, int side) const {
+    int getNeighboringTriangle(int tri, int side) const {
         assert(side>=0 && side<3);
-        TriangleIdx neighboringTri = -1;
-        EdgeIdx cE = triangles(tri).edges[side];
+        int neighboringTri = -1;
+        int cE = triangles(tri).edges[side];
                 
         if (edges(cE).triangles.size()==2) {
             neighboringTri = (edges(cE).triangles[0]==tri) 
@@ -308,9 +308,9 @@ public:
     //@{
 
     /// gives the smallest interior angle of a triangle
-    float minInteriorAngle(TriangleIdx n) const {
+    float minInteriorAngle(int n) const {
         float minAngle = 2*M_PI;
-        const McSArray<VertexIdx, 3>& p = triangles(n).vertices;
+        const McSArray<int, 3>& p = triangles(n).vertices;
 
         for (int i=0; i<3; i++){
             McVec3f a = vertices(p[(i+1)%3]) - vertices(p[i]);
@@ -325,9 +325,9 @@ public:
     }
 
     /// returns the aspect ratio
-    float aspectRatio(TriangleIdx n) const {
+    float aspectRatio(int n) const {
 
-        const McSArray<VertexIdx, 3>& p = triangles(n).vertices;
+        const McSArray<int, 3>& p = triangles(n).vertices;
 
         const float a = (vertices(p[1]) - vertices(p[0])).length();
         const float b = (vertices(p[2]) - vertices(p[1])).length();
@@ -340,7 +340,7 @@ public:
     }
 
         /// returns the normal vector
-    McVec3f normal(TriangleIdx tri) const {
+    McVec3f normal(int tri) const {
         const McVec3f a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
         const McVec3f b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
         McVec3f n = a.cross(b);
@@ -349,7 +349,7 @@ public:
     }
 
     ///
-    float smallestDihedralAngle(EdgeIdx edge) const {
+    float smallestDihedralAngle(int edge) const {
         float minAngle = std::numeric_limits<float>::max();
         for (int i=0; i<edges(edge).triangles.size(); i++)
             for (int j=i+1; j<edges(edge).triangles.size(); j++)
@@ -359,7 +359,7 @@ public:
     }
 
     /// gives the surface area
-    float area(TriangleIdx tri) const { 
+    float area(int tri) const { 
         McVec3f a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
         McVec3f b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
 
@@ -367,7 +367,7 @@ public:
     }
 
     /// gives the dihedral angle with a neighboring triangle
-    float dihedralAngle(TriangleIdx first, TriangleIdx second) const {
+    float dihedralAngle(int first, int second) const {
         McVec3f n1 = normal(first);
         McVec3f n2 = normal(second);
 
@@ -378,7 +378,7 @@ public:
         return (triangles(first).isCorrectlyOriented(triangles(second))) ? acos(-scalProd) : acos(scalProd);
     }
 
-    float length(EdgeIdx e) const {
+    float length(int e) const {
         return (vertices(edges(e).from) - vertices(edges(e).to)).length();
     }
 
@@ -389,7 +389,7 @@ public:
 
     /** Tests whether this triangle intersects the given edge.  This routine is not
         faster than the one that returns the intersection point. */
-    bool intersectionTriangleEdge(TriangleIdx tri, 
+    bool intersectionTriangleEdge(int tri, 
                                   const McEdge<VertexType> *edge,
                                   float eps=0) const {
         bool parallel;
@@ -399,7 +399,7 @@ public:
 
     /** Tests whether this triangle intersects the given edge, and returns the intersection
         point if there is one. If not, the variable @c where is untouched. */
-    bool intersectionTriangleEdge(TriangleIdx tri, 
+    bool intersectionTriangleEdge(int tri, 
                                   const McEdge<VertexType> *edge, 
                                   McVec3f& where, 
                                   bool& parallel, float eps=0) const{
@@ -506,7 +506,7 @@ protected:
 
 public:
     /// 
-    bool intersectionTriangleBox(TriangleIdx n, const Box<std::tr1::array<float,3>, 3>& box) {
+    bool intersectionTriangleBox(int n, const Box<std::tr1::array<float,3>, 3>& box) {
         return box.contains(vertices(triangles(n).vertices[0])) ||
             box.contains(vertices(triangles(n).vertices[1])) ||
             box.contains(vertices(triangles(n).vertices[2]));
@@ -532,7 +532,7 @@ public:
             
             int offset = 0;
 
-            std::vector<VertexIdx> vertexOffsets(vertexArray.size());
+            std::vector<int> vertexOffsets(vertexArray.size());
             isInvalid.resize(vertexArray.size());
 
             for (i=0; i<isInvalid.size(); i++)
@@ -574,7 +574,7 @@ public:
             
             int offset = 0;
 
-            std::vector<EdgeIdx> edgeOffsets(edgeArray.size());
+            std::vector<int> edgeOffsets(edgeArray.size());
             isInvalid.resize(edgeArray.size());
 
             for (i=0; i<isInvalid.size(); i++)
@@ -615,7 +615,7 @@ public:
             
             int offset = 0;
 
-            std::vector<TriangleIdx> triangleOffsets(triangleArray.size());
+            std::vector<int> triangleOffsets(triangleArray.size());
             isInvalid.resize(triangleArray.size());
 
             for (i=0; i<isInvalid.size(); i++)
@@ -664,13 +664,13 @@ protected:
 
 public:
     ///
-    std::vector<TriangleIdx> freeTriangleStack;
+    std::vector<int> freeTriangleStack;
 protected:
     ///
-    std::vector<EdgeIdx>     freeEdgeStack;
+    std::vector<int>     freeEdgeStack;
 
     ///
-    std::vector<VertexIdx>  freeVertexStack;
+    std::vector<int>  freeVertexStack;
 
 };
 

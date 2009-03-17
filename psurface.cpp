@@ -100,7 +100,7 @@ int psurface::CallParametrization(int tri, double* p, int* res, double* coords, 
     McVec3i result;
     McVec2f localCoords;
 
-    int status = currentDomain->map(TriangleIdx(tri), input, result, localCoords, seed);
+    int status = currentDomain->map(tri, input, result, localCoords, seed);
 
     res[0] = result[0];
     res[1] = result[1];
@@ -119,7 +119,7 @@ int psurface::CallPositionParametrization(int tri, double* p, double* res)
     McVec2f input(p[0], p[1]);
     McVec3f result; 
 
-    int status = currentDomain->positionMap(TriangleIdx(tri), input, result);
+    int status = currentDomain->positionMap(tri, input, result);
 
     res[0] = result[0];
     res[1] = result[1];
@@ -135,7 +135,7 @@ int psurface::CallPositionParametrizationForDomain(int domain, int tri, double* 
     McVec2f input(p[0], p[1]);
     McVec3f result; 
 
-    int status = domains[domain].second->positionMap(TriangleIdx(tri), input, result);
+    int status = domains[domain].second->positionMap(tri, input, result);
 
     res[0] = result[0];
     res[1] = result[1];
@@ -150,7 +150,7 @@ int psurface::CallDirectNormalParametrization(int tri, double* p, double* res)
     McVec2f input(p[0], p[1]);
     McVec3f result; 
 
-    int status = currentDomain->directNormalMap(TriangleIdx(tri), input, result);
+    int status = currentDomain->directNormalMap(tri, input, result);
 
     res[0] = result[0];
     res[1] = result[1];
@@ -163,18 +163,18 @@ int psurface::CallDirectNormalParametrization(int tri, double* p, double* res)
 // Returns the number vertices in the currently chosen parametrization
 int psurface::GetNoOfNodes()
 {
-    return IntValue(currentDomain->getNumVertices());
+    return currentDomain->getNumVertices();
 }
 
 // Returns the number triangles in the currently chosen parametrization
 int psurface::GetNoOfSegments()
 {
-    return IntValue(currentDomain->getNumTriangles());
+    return currentDomain->getNumTriangles();
 }
 
 int psurface::GetNoOfPatches()
 {
-    return IntValue(currentDomain->patches.size());
+    return currentDomain->patches.size();
 }
 
 int psurface::GetNoOfDomains()
@@ -184,25 +184,25 @@ int psurface::GetNoOfDomains()
 
 void psurface::GetNodeNumbersOfSegment(int* points, int tri)
 {
-    points[0] = IntValue(currentDomain->triangles(TriangleIdx(tri)).vertices[0]);
-    points[1] = IntValue(currentDomain->triangles(TriangleIdx(tri)).vertices[1]);
-    points[2] = IntValue(currentDomain->triangles(TriangleIdx(tri)).vertices[2]);
+    points[0] = currentDomain->triangles(tri).vertices[0];
+    points[1] = currentDomain->triangles(tri).vertices[1];
+    points[2] = currentDomain->triangles(tri).vertices[2];
 }
 
 
 void psurface::GetLeftAndRightSideOfSegment(int* left, int* right, int tri)
 {
-    *left  = currentDomain->patches[currentDomain->triangles(TriangleIdx(tri)).patch].innerRegion;
-    *right = currentDomain->patches[currentDomain->triangles(TriangleIdx(tri)).patch].outerRegion;
+    *left  = currentDomain->patches[currentDomain->triangles(tri).patch].innerRegion;
+    *right = currentDomain->patches[currentDomain->triangles(tri).patch].outerRegion;
 }
 
 int psurface::GetBoundaryIdOfSegment(int tri)
 {
-    return currentDomain->patches[currentDomain->triangles(TriangleIdx(tri)).patch].boundaryId;
+    return currentDomain->patches[currentDomain->triangles(tri).patch].boundaryId;
 }
 
 int psurface::GetPatchNoOfSegment(int tri)
 {
-    return currentDomain->triangles(TriangleIdx(tri)).patch;
+    return currentDomain->triangles(tri).patch;
 }
 

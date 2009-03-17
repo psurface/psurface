@@ -12,7 +12,7 @@ public:
     /** \brief Get the index of that node of the bundle that is on triangle 'tri'
         \return -1 if none of the nodes is on triangle 'tri'
     */
-    NodeIdx triToIdx(TriangleIdx tri) const {
+    NodeIdx triToIdx(int tri) const {
         for (int i=0; i<size(); i++)
             if ((*this)[i].tri == tri)
                 return (*this)[i].idx;

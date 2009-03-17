@@ -30,7 +30,7 @@ void DomainPolygon::init(const DomainTriangle& tri, const McVec2f coords[3]){
     //print(false, false, true);
 }
 
-void DomainPolygon::mergeTriangle(TriangleIdx tri, McVec2f coords[3], int& newCenterNode,
+void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode,
                                   McDArray<unsigned int>& nodeStack)
 {
 
@@ -1086,7 +1086,7 @@ unsigned int DomainPolygon::createNodePosition(McDArray<McVec3f>& nodePositions,
 
 
 
-void DomainPolygon::removeVertex(VertexIdx point)
+void DomainPolygon::removeVertex(int point)
 {
     int idx;
     int size = boundaryPoints.size();
@@ -1106,7 +1106,7 @@ void DomainPolygon::removeVertex(VertexIdx point)
 
 }
 
-void DomainPolygon::slice(int centerNode, VertexIdx centerVertex, int bVertex)
+void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 {             
     McDArray<unsigned char> nodeLocs(nodes.size());
 

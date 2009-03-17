@@ -6,7 +6,7 @@
     public:
         /** Indices to Vertex coordinates.  For closed lines the first
             index should be replicated as last one. */
-        McDArray<VertexIdx> points;
+        McDArray<int> points;
         McDArray<char> isFix;
         int selected;
 
@@ -22,7 +22,7 @@
         }
 
         ///
-        void removePoint(VertexIdx p) {
+        void removePoint(int p) {
 
             // special handling for loops
             if (points.size()>1 && points[0]==p && points.last()==p) {

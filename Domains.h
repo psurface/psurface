@@ -47,10 +47,10 @@ public:
     }
 
     /// creates a domain triangle with an empty parametrization
-    DomainTriangle(VertexIdx vertexIdx[3]) : McTriangle(vertexIdx), PlaneParam() {}
+    DomainTriangle(int vertexIdx[3]) : McTriangle(vertexIdx), PlaneParam() {}
 
     /// creates a domain triangle with an empty parametrization
-    DomainTriangle(VertexIdx a, VertexIdx b, VertexIdx c) : McTriangle(a, b, c), PlaneParam() {}
+    DomainTriangle(int a, int b, int c) : McTriangle(a, b, c), PlaneParam() {}
 
     ~DomainTriangle() {}
 
@@ -174,7 +174,7 @@ public:
     DomainEdge() : McEdge<DomainVertex>() {}
     
     ///
-    DomainEdge(VertexIdx a, VertexIdx b) : McEdge<DomainVertex>(a, b) {}
+    DomainEdge(int a, int b) : McEdge<DomainVertex>(a, b) {}
 
     ~DomainEdge() {}
 

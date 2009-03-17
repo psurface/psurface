@@ -117,9 +117,9 @@ void ContactToolBox::buildContactSurface(Parametrization* cPar,
     std::vector<int> vertexOffsets = contactBoundary[0].getVertexOffsets();
     for (i=0; i<contactBoundary[0].triIdx.size(); i++) {
         
-        TriangleIdx newTri = cPar->createSpaceForTriangle(vertexOffsets[contactBoundary[0].triangles(i).points[0]],
-                                                          vertexOffsets[contactBoundary[0].triangles(i).points[1]],
-                                                          vertexOffsets[contactBoundary[0].triangles(i).points[2]]);
+        int newTri = cPar->createSpaceForTriangle(vertexOffsets[contactBoundary[0].triangles(i).points[0]],
+                                                  vertexOffsets[contactBoundary[0].triangles(i).points[1]],
+                                                  vertexOffsets[contactBoundary[0].triangles(i).points[2]]);
         cPar->integrateTriangle(newTri);
         cPar->triangles(newTri).patch = 0;
         

@@ -135,7 +135,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
     for (i=0; i<contactPatch.vertices.size(); i++) {
 
         McVec2d bestDPos;
-        TriangleIdx bestTri = -1;
+        int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
         for (j=0; j<par->getNumTriangles(); j++) {
@@ -209,7 +209,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             double mu;
 
             // if the normal projection hits a base grid vertex, this is the vertex
-            VertexIdx v = -1;
+            int v = -1;
 
             if (bestDPos.x < eps) {
                 dir = 1;
@@ -256,7 +256,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             if (newType==Node::TOUCHING_NODE) {
 
                 // find the other triangle, if there is one
-                TriangleIdx neighboringTri = par->getNeighboringTriangle(bestTri, dir);
+                int neighboringTri = par->getNeighboringTriangle(bestTri, dir);
                 //printf("dir: %d, bestTri: %d,  neighboringTri: %d\n", dir, bestTri, neighboringTri);
                 if (neighboringTri == -1) {
                     NodeIdx newNodeNumber = par->addTouchingNode(bestTri, bestDPosFloat, dir, contactPatch.vertices[i]);
@@ -264,7 +264,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                     projectedTo[contactPatch.vertices[i]][0].setValue(bestTri, newNodeNumber);
                 } else {
                     // find domain pos on other triangle
-                    EdgeIdx commonEdge = par->triangles(bestTri).getCommonEdgeWith(par->triangles(neighboringTri));
+                    int commonEdge = par->triangles(bestTri).getCommonEdgeWith(par->triangles(neighboringTri));
                     int dir2 = par->triangles(neighboringTri).getEdge(commonEdge);
                     McVec2f dP2((dir2==0)*(mu) + (dir2==2)*(1-mu), (dir2==0)*(1-mu) + (dir2==1)*(mu));
 
@@ -280,7 +280,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
                 addCornerNodeBundle(par, v, contactPatch.vertices[i]);
                 vertexHasBeenHandled[v] = true;
-                McSmallArray<TriangleIdx, 12> neighboringTris = par->getTrianglesPerVertex(v);
+                McSmallArray<int, 12> neighboringTris = par->getTrianglesPerVertex(v);
                 projectedTo[contactPatch.vertices[i]].resize(neighboringTris.size());
                 for (j=0; j<neighboringTris.size(); j++) {
                     projectedTo[contactPatch.vertices[i]][j].setValue(neighboringTris[j],
@@ -330,7 +330,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             continue;
 
         McVec2d bestDPos;
-        TriangleIdx bestTri = -1;
+        int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
         const McVec3f& basePointFloat = par->vertices(i);
@@ -427,7 +427,7 @@ void NormalProjector::insertEdge(Parametrization* par,
         if (onSameTriangle(curr, projectedTo[to])) {
             
             // Get the common triangle
-            McSmallArray<TriangleIdx, 2> commonTris = getCommonTris(curr, projectedTo[to]);
+            McSmallArray<int, 2> commonTris = getCommonTris(curr, projectedTo[to]);
             for (int i=0; i<commonTris.size(); i++) {
                 par->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
                                                       projectedTo[to].triToIdx(commonTris[i]));
@@ -479,7 +479,7 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
                                                  NodeBundle& curr, int& enteringEdge)
 {
     int i;
-    TriangleIdx cT = curr[0].tri;
+    int cT = curr[0].tri;
 
     //curr.print();
 
@@ -492,8 +492,8 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
             
         //printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
         McVec3d x;
-        VertexIdx p = par->triangles(curr[0].tri).vertices[i];
-        VertexIdx q = par->triangles(curr[0].tri).vertices[(i+1)%3];
+        int p = par->triangles(curr[0].tri).vertices[i];
+        int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
         //printf("p: %d   q: %d\n", p, q);
         const Surface* surf = par->surface;
 
@@ -522,7 +522,7 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
 //             printf("corner: %d\n", corner);
             if (corner==-1) {
                 // get neighboring triangle
-                TriangleIdx neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
+                int neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -589,7 +589,7 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
                                                  NodeBundle& curr, int& enteringEdge)
 {
     int i;
-    TriangleIdx cTIdx = curr[0].tri;
+    int cTIdx = curr[0].tri;
 
     //curr.print();
 
@@ -605,8 +605,8 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
             
         //   printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
         McVec3d x;
-        VertexIdx p = par->triangles(curr[0].tri).vertices[i];
-        VertexIdx q = par->triangles(curr[0].tri).vertices[(i+1)%3];
+        int p = par->triangles(curr[0].tri).vertices[i];
+        int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
         //printf("p: %d   q: %d\n", p, q);
         const Surface* surf = par->surface;
         if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
@@ -633,7 +633,7 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
 //             printf("corner: %d\n", corner);
             if (corner==-1) {
                 // get neighboring triangle
-                TriangleIdx neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
+                int neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -722,8 +722,8 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                 continue;
             
             McVec3d x;
-            VertexIdx p = cT.vertices[j];
-            VertexIdx q = cT.vertices[(j+1)%3];
+            int p = cT.vertices[j];
+            int q = cT.vertices[(j+1)%3];
 
             if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
                                         par->vertices(p), par->vertices(q),
@@ -746,7 +746,7 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                     // parameter polyedge is leaving basegrid triangle through an edge
                     
                     // get neighboring triangle
-                    TriangleIdx neighboringTri = par->getNeighboringTriangle(curr[i].tri, j);
+                    int neighboringTri = par->getNeighboringTriangle(curr[i].tri, j);
                     //printf("neighboringTri = %d\n", neighboringTri);
                     // if no neighboring triangle --> error
                     if (neighboringTri==-1) {
@@ -836,7 +836,7 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
     // The other end of the edge is *not* on this triangle
     for (i=0; i<curr.size(); i++) {
         
-        TriangleIdx cT = curr[i].tri;
+        int cT = curr[i].tri;
 
         // it is called enteringEdge, but the incoming value is the entering*Tri*!
         if (cT == enteringEdge)
@@ -846,8 +846,8 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
         int oppEdge = (thisCorner+1)%3;
         //printf("Testing Triangle %d\n", cT);
         McVec3d x;
-        VertexIdx p = par->triangles(cT).vertices[(thisCorner+1)%3];
-        VertexIdx q = par->triangles(cT).vertices[(thisCorner+2)%3];
+        int p = par->triangles(cT).vertices[(thisCorner+1)%3];
+        int q = par->triangles(cT).vertices[(thisCorner+2)%3];
         //printf("p: %d   q: %d\n", p, q);
         if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
                                     par->vertices(p), par->vertices(q),
@@ -873,7 +873,7 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
                 // through the opposite edge
                 
                 // get neighboring triangle
-                TriangleIdx neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
+                int neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
                 //printf("neighboringTri = %d\n", neighboringTri);
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -907,7 +907,7 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
 
                 // edge leaves through a corner
                 NodeBundle target = par->getNodeBundleAtVertex(par->triangles(cT).vertices[corner]);
-                McSmallArray<TriangleIdx, 2> commonTris = getCommonTris(curr, target);
+                McSmallArray<int, 2> commonTris = getCommonTris(curr, target);
                 for (i=0; i<commonTris.size(); i++) {
                     par->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
                                                           target.triToIdx(commonTris[i]));
@@ -954,7 +954,7 @@ bool NormalProjector::edgeCanBeInserted(const Parametrization* par,
         return true;
 
     Node::NodeType currType = par->nodes(curr[0]).type;
-    TriangleIdx currTri     = curr[0].tri;
+    int currTri     = curr[0].tri;
 
     // parameter value for the edge to be inserted
     double lambda = 0;
@@ -1010,7 +1010,7 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
                                                      const std::vector<McVec3d>& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
-                                                     Node::NodeType& currType, TriangleIdx& currTri,
+                                                     Node::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
@@ -1023,8 +1023,8 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
             
         //printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
         McVec3d x;
-        VertexIdx p = par->triangles(currTri).vertices[i];
-        VertexIdx q = par->triangles(currTri).vertices[(i+1)%3];
+        int p = par->triangles(currTri).vertices[i];
+        int q = par->triangles(currTri).vertices[(i+1)%3];
         //printf("p: %d   q: %d\n", p, q);
         const Surface* surf = par->surface;
 
@@ -1054,7 +1054,7 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
 //             printf("corner: %d\n", corner);
             if (corner==-1) {
                 // get neighboring triangle
-                TriangleIdx neighboringTri = par->getNeighboringTriangle(currTri, i);
+                int neighboringTri = par->getNeighboringTriangle(currTri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -1092,7 +1092,7 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
                                                          const std::vector<McVec3d>& normals,
                                                          int from, int to, double &lambda,
                                                          const std::vector<NodeBundle>& projectedTo,
-                                                         Node::NodeType& currType, TriangleIdx& currTri,
+                                                         Node::NodeType& currType, int& currTri,
                                                          int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
@@ -1107,8 +1107,8 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
             continue;
             
         McVec3d x;
-        VertexIdx p = par->triangles(currTri).vertices[i];
-        VertexIdx q = par->triangles(currTri).vertices[(i+1)%3];
+        int p = par->triangles(currTri).vertices[i];
+        int q = par->triangles(currTri).vertices[(i+1)%3];
         
         const Surface* surf = par->surface;
         if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
@@ -1134,7 +1134,7 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
 
             if (corner==-1) {
                 // get neighboring triangle
-                TriangleIdx neighboringTri = par->getNeighboringTriangle(currTri, i);
+                int neighboringTri = par->getNeighboringTriangle(currTri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -1173,7 +1173,7 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
                                                      const NodeBundle& curr,
-                                                     Node::NodeType& currType, TriangleIdx& currTri,
+                                                     Node::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
     //printf("Edge from TouchingNode\n");
@@ -1191,8 +1191,8 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
                 continue;
         
             McVec3d x;
-            VertexIdx p = cT.vertices[j];
-            VertexIdx q = cT.vertices[(j+1)%3];
+            int p = cT.vertices[j];
+            int q = cT.vertices[(j+1)%3];
 
             if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
                                         par->vertices(p), par->vertices(q),
@@ -1215,7 +1215,7 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
                     // parameter polyedge is leaving basegrid triangle through an edge
                     
                     // get neighboring triangle
-                    TriangleIdx neighboringTri = par->getNeighboringTriangle(curr[i].tri, j);
+                    int neighboringTri = par->getNeighboringTriangle(curr[i].tri, j);
 
                     // if no neighboring triangle --> error
                     if (neighboringTri==-1)
@@ -1257,7 +1257,7 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
                                                    int from, int to, double &lambda,
                                                    const std::vector<NodeBundle>& projectedTo,
                                                    const NodeBundle& curr, 
-                                                   Node::NodeType& currType, TriangleIdx& currTri,
+                                                   Node::NodeType& currType, int& currTri,
                                                    int& enteringEdge)
 {
     int i;
@@ -1267,7 +1267,7 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
     // The other end of the edge is *not* on this triangle
     for (i=0; i<curr.size(); i++) {
         
-        TriangleIdx cT = curr[i].tri;
+        int cT = curr[i].tri;
 
 #if 0   // Pointless: there is no entering anything!
         // it is called enteringEdge, but the incoming value is the entering*Tri*!
@@ -1279,8 +1279,8 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
         int oppEdge = (thisCorner+1)%3;
         //printf("Testing Triangle %d\n", cT);
         McVec3d x;
-        VertexIdx p = par->triangles(cT).vertices[(thisCorner+1)%3];
-        VertexIdx q = par->triangles(cT).vertices[(thisCorner+2)%3];
+        int p = par->triangles(cT).vertices[(thisCorner+1)%3];
+        int q = par->triangles(cT).vertices[(thisCorner+2)%3];
         //printf("p: %d   q: %d\n", p, q);
         if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
                                     par->vertices(p), par->vertices(q),
@@ -1306,7 +1306,7 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
                 // through the opposite edge
                 
                 // get neighboring triangle
-                TriangleIdx neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
+                int neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
                 //printf("neighboringTri = %d\n", neighboringTri);
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1)
@@ -1352,7 +1352,7 @@ bool NormalProjector::onSameTriangle(const NodeBundle& a, const NodeBundle& b) c
     return false;
 }
 
-bool NormalProjector::onSameTriangle(const TriangleIdx& tri, const NodeBundle& b) const
+bool NormalProjector::onSameTriangle(const int& tri, const NodeBundle& b) const
 {
     for (int j=0; j<b.size(); j++)
         if (tri==b[j].tri)
@@ -1364,7 +1364,7 @@ bool NormalProjector::onSameTriangle(const TriangleIdx& tri, const NodeBundle& b
 void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v, 
                                               int targetTri, const McVec2d& localTargetCoords)
 {
-    McSmallArray<TriangleIdx, 12> neighbors = par->getTrianglesPerVertex(v);
+    McSmallArray<int, 12> neighbors = par->getTrianglesPerVertex(v);
     //printf("localtargetCoords (%f %f)\n", localTargetCoords.x, localTargetCoords.y);
     for (int i=0; i<neighbors.size(); i++) {
 
@@ -1380,7 +1380,7 @@ void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v,
 
 void NormalProjector::addCornerNodeBundle(Parametrization* cS, int v, int nN)
 {
-    McSmallArray<TriangleIdx, 12> neighbors = cS->getTrianglesPerVertex(v);
+    McSmallArray<int, 12> neighbors = cS->getTrianglesPerVertex(v);
     //printf("localtargetCoords (%f %f)\n", localTargetCoords.x, localTargetCoords.y);
     for (int i=0; i<neighbors.size(); i++) {
 
@@ -1590,7 +1590,7 @@ NodeIdx NormalProjector::getCornerNode(const DomainTriangle& cT, int corner)
     return -1;
 }
 
-TriangleIdx NormalProjector::getCommonTri(const NodeBundle& a, const NodeBundle& b)
+int NormalProjector::getCommonTri(const NodeBundle& a, const NodeBundle& b)
 {
     for (int i=0; i<a.size(); i++)
         for (int j=0; j<b.size(); j++)
@@ -1600,9 +1600,9 @@ TriangleIdx NormalProjector::getCommonTri(const NodeBundle& a, const NodeBundle&
     return -1;
 }
 
-McSmallArray<TriangleIdx, 2> NormalProjector::getCommonTris(const NodeBundle& a, const NodeBundle& b)
+McSmallArray<int, 2> NormalProjector::getCommonTris(const NodeBundle& a, const NodeBundle& b)
 {
-    McSmallArray<TriangleIdx, 2> result;
+    McSmallArray<int, 2> result;
 
     for (int i=0; i<a.size(); i++)
         for (int j=0; j<b.size(); j++)

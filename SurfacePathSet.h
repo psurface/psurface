@@ -8,7 +8,7 @@ class PSURFACE_API SurfacePathSet : public McDArray<SurfacePath> {
 
 public:
 
-    void removePoint(VertexIdx p)
+    void removePoint(int p)
     {
         for (int i=size()-1; i>=0; i--)
             (*this)[i].removePoint(p);

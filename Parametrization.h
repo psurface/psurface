@@ -275,7 +275,7 @@ public:
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    McVec3f imagePos(TriangleIdx tri, NodeIdx node) const {
+    McVec3f imagePos(int tri, NodeIdx node) const {
         const Node& cN = triangles(tri).nodes[node];
 
         switch (cN.type) {
@@ -319,7 +319,7 @@ public:
      * \todo Document seed!
      * 
      */
-    int map(TriangleIdx tri,                ///< The triangle of the input point \f$x\f$
+    int map(int tri,                ///< The triangle of the input point \f$x\f$
             McVec2f& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
             McVec3i& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
             McVec2f& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
@@ -337,7 +337,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int positionMap(TriangleIdx tri, McVec2f& p, McVec3f& result) const;
+    int positionMap(int tri, McVec2f& p, McVec3f& result) const;
 
     /** \brief Convenience function for accessing the normals of the target surface.
      *
@@ -350,7 +350,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int directNormalMap(TriangleIdx tri, McVec2f& p, McVec3f& result) const;
+    int directNormalMap(int tri, McVec2f& p, McVec3f& result) const;
 
     //@}
 
@@ -360,7 +360,7 @@ public:
      * this routine returns the preimage nodes of the target triangle \f$T\f$ that
      * \f$t\f$ is part of.
      */
-    void getActualVertices(TriangleIdx tri,                     
+    void getActualVertices(int tri,                     
                            const McSArray<NodeIdx, 3>& nds,
                            McSArray<GlobalNodeIdx, 3>& vertices   ///< The result nodes are returned here
                            ) const;
@@ -371,7 +371,7 @@ public:
      *
      * \return A triangle index, -1 if the input data was invalid.
      */
-    int getImageSurfaceTriangle(TriangleIdx tri,
+    int getImageSurfaceTriangle(int tri,
                                 const McSArray<NodeIdx, 3>& nds
                                 ) const;
 
@@ -409,7 +409,7 @@ public:
      * away from the input triangle, without first traversing it.
      * </ul>
      */
-    GlobalNodeIdx getOtherEndNode(TriangleIdx tri, NodeIdx cN) const;
+    GlobalNodeIdx getOtherEndNode(int tri, NodeIdx cN) const;
 
 
     /** \brief Tests the object for consistency.
@@ -424,32 +424,32 @@ public:
      */
     void checkConsistency(const char* where) const;
 
-    NodeIdx addNode(TriangleIdx tri, const McVec3f& p);
+    NodeIdx addNode(int tri, const McVec3f& p);
 
-    NodeIdx addInteriorNode(TriangleIdx tri, const McVec2f& dom, int nodeNumber);
+    NodeIdx addInteriorNode(int tri, const McVec2f& dom, int nodeNumber);
 
-    NodeIdx addGhostNode(TriangleIdx tri, int corner, int targetTri, const McVec2f& localTargetCoords);
+    NodeIdx addGhostNode(int tri, int corner, int targetTri, const McVec2f& localTargetCoords);
 
-    NodeIdx addCornerNode(TriangleIdx tri, int corner, int nodeNumber);
+    NodeIdx addCornerNode(int tri, int corner, int nodeNumber);
 
     /** \todo Sollte vielleicht ein Bundle zurückgeben */
-    NodeIdx addIntersectionNodePair(TriangleIdx tri1, TriangleIdx tri2,
+    NodeIdx addIntersectionNodePair(int tri1, int tri2,
                                     const McVec2f& dP1, const McVec2f& dP2, 
                                     int edge1, int edge2, const McVec3f& range);
 
-    NodeIdx addTouchingNode(TriangleIdx tri, const McVec2f& dP, int edge, int nodeNumber);
+    NodeIdx addTouchingNode(int tri, const McVec2f& dP, int edge, int nodeNumber);
 
     /** \todo Sollte vielleicht ein Bundle zurückgeben */
-    NodeIdx addTouchingNodePair(TriangleIdx tri1, TriangleIdx tri2,
+    NodeIdx addTouchingNodePair(int tri1, int tri2,
                                 const McVec2f& dP1, const McVec2f& dP2, 
                                 int edge1, int edge2, int nodeNumber);
 
-    void addParTriangle(TriangleIdx tri, const McVec3i& p);
+    void addParTriangle(int tri, const McVec3i& p);
     
     /** Not a fast implementation, but it works even if the edgePoint arrays
      * haven't been set up yet.
      */
-    NodeBundle getNodeBundleAtVertex(VertexIdx v) const;
+    NodeBundle getNodeBundleAtVertex(int v) const;
 
 protected:
 
@@ -458,7 +458,7 @@ protected:
 
     /** \brief Internal routine used by map() 
      */
-    void handleMapOnEdge(TriangleIdx tri, const McVec2f& p, const McVec2f& a, const McVec2f& b,
+    void handleMapOnEdge(int tri, const McVec2f& p, const McVec2f& a, const McVec2f& b,
                          int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, McVec2f& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
@@ -467,6 +467,7 @@ protected:
 
     /////////////////////////////////////////////////////
     // Data members
+    /////////////////////////////////////////////////////
 
 public:
     /** This flag needs to set if the the map()-method on a DomainTriangle is used

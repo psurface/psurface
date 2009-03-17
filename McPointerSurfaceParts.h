@@ -10,12 +10,6 @@
 #include <mclib/McSArray.h>
 
 
-typedef int VertexIdx;
-typedef int EdgeIdx;
-typedef int TriangleIdx;
-#define IntValue(i) (i)
-
-
 class McTriangle;
 class McVertex;
 template<class VertexType>  class McEdge;
@@ -38,13 +32,13 @@ public:
 
     ~McVertex() {}
 
-    McDArray<EdgeIdx> edges;
+    McDArray<int> edges;
 
     /// the number of edges connected to this vertex
     int degree() const {return edges.size();}
 
     ///
-    void removeReferenceTo(EdgeIdx edge){
+    void removeReferenceTo(int edge){
         for (int i=0; i<edges.size(); i++)
             if (edges[i] == edge){
                 edges.remove(i);
@@ -53,7 +47,7 @@ public:
     }
 
     ///
-    void replaceReferenceTo(EdgeIdx a, EdgeIdx b){
+    void replaceReferenceTo(int a, int b){
         for (int i=0; i<edges.size(); i++)
             if (edges[i] == a){
                 edges[i] = b;
@@ -78,7 +72,7 @@ public:
     ~McEdge(){}
     
     ///
-    McEdge(VertexIdx a, VertexIdx b)
+    McEdge(int a, int b)
         {
             to = a;
             from = b;
@@ -88,17 +82,17 @@ public:
     int numTriangles() const {return triangles.size();}
 
     ///
-    int theOtherVertex(VertexIdx point) const {
+    int theOtherVertex(int point) const {
         return (point == to) ? from : to;
     }
 
     ///
-    bool isConnectedTo(VertexIdx vertex) const {
+    bool isConnectedTo(int vertex) const {
         return to==vertex || from==vertex;
     }
 
     ///
-    bool isConnectedToTriangle(TriangleIdx tri) const {
+    bool isConnectedToTriangle(int tri) const {
         for (int i=0; i<triangles.size(); i++)
             if (triangles[i]==tri)
                 return true;
@@ -107,7 +101,7 @@ public:
     }
 
     ///
-    bool removeReferenceTo(TriangleIdx tri){
+    bool removeReferenceTo(int tri){
         for(int i=0; i<triangles.size(); i++)
             if (triangles[i] == tri){
                 triangles.remove(i);
@@ -118,7 +112,7 @@ public:
     }
 
     ///
-    bool replaceReferenceTo(TriangleIdx a, TriangleIdx b){
+    bool replaceReferenceTo(int a, int b){
         for(int i=0; i<triangles.size(); i++)
             if (triangles[i] == a){
                 triangles[i] = b;
@@ -129,7 +123,7 @@ public:
     }
 
     /// The connection to a is replaced by the connection to b.
-    bool replaceReferenceToVertex(VertexIdx a, VertexIdx b){
+    bool replaceReferenceToVertex(int a, int b){
         if (from==a){
             from = b;
             return true;
@@ -210,10 +204,10 @@ public:
 
     ///////////////////////////////////////////
     ///
-    VertexIdx from, to;
+    int from, to;
 
     ///
-    McSmallArray<TriangleIdx, 2> triangles;
+    McSmallArray<int, 2> triangles;
 
 };
 
@@ -229,33 +223,33 @@ class MCLIB_API McTriangle
 public:
     /// default constructor
     McTriangle() {
-        vertices[0] = vertices[1] = vertices[2] = VertexIdx(-1);
-        edges[0]  = edges[1]  = edges[2]  = EdgeIdx(-1);
+        vertices[0] = vertices[1] = vertices[2] = -1;
+        edges[0]  = edges[1]  = edges[2]  = -1;
     }
 
     /// creates a triangle using three given vertices
-    McTriangle(VertexIdx vertexIdx[3]) {
+    McTriangle(int vertexIdx[3]) {
 
         vertices[0] = vertexIdx[0];
         vertices[1] = vertexIdx[1];
         vertices[2] = vertexIdx[2];
 
-        edges[0] = edges[1] = edges[2] = EdgeIdx(-1);
+        edges[0] = edges[1] = edges[2] = -1;
     }
 
     ///
-    McTriangle(VertexIdx a, VertexIdx b, VertexIdx c) {
+    McTriangle(int a, int b, int c) {
         vertices[0] = a;
         vertices[1] = b;
         vertices[2] = c;
 
-        edges[0] = edges[1] = edges[2] = EdgeIdx(-1);
+        edges[0] = edges[1] = edges[2] = -1;
     }
 
     ~McTriangle() {}
 
     ///
-    bool isConnectedTo(VertexIdx vertex) const {
+    bool isConnectedTo(int vertex) const {
         return vertices[0]==vertex || vertices[1]==vertex || vertices[2]==vertex;
     }
 
@@ -273,7 +267,7 @@ public:
     }
 
     ///
-    VertexIdx getThirdVertex(VertexIdx a, VertexIdx b) const {
+    int getThirdVertex(int a, int b) const {
         for (int i=0; i<3; i++)
             if (vertices[i]!=a && vertices[i]!=b)
                 return vertices[i];
@@ -282,7 +276,7 @@ public:
     }
 
     ///
-    VertexIdx getThirdVertex(EdgeIdx e) const {
+    int getThirdVertex(int e) const {
         for (int i=0; i<3; i++)
             if (edges[i]==e)
                 return vertices[(i+2)%3];
@@ -296,7 +290,7 @@ public:
      * \return 0, 1, or 2 if everything is okay. -1 if the triangle 
      * doesn't touch v.
      */
-    int getCorner(VertexIdx v) const {
+    int getCorner(int v) const {
         for (int i=0; i<3; i++)
             if (vertices[i]==v)
                 return i;
@@ -309,7 +303,7 @@ public:
      * \return 0, 1, or 2 if everything is okay. -1 if the triangle 
      * doesn't touch v.
      */
-    int getEdge(EdgeIdx v) const {
+    int getEdge(int v) const {
         for (int i=0; i<3; i++)
             if (edges[i]==v)
                 return i;
@@ -317,7 +311,7 @@ public:
     }
 
     ///
-    EdgeIdx getOppositeEdge(VertexIdx a) const {
+    int getOppositeEdge(int a) const {
         assert(vertices[0]==a || vertices[1]==a || vertices[2]==a);
         for (int i=0; i<3; i++)
             if (vertices[i]==a)
@@ -326,7 +320,7 @@ public:
         return -1;
     }
 
-    EdgeIdx getCommonEdgeWith(const McTriangle& other) const {
+    int getCommonEdgeWith(const McTriangle& other) const {
         int i, j;
         for (i=0; i<3; i++)
             for (j=0; j<3; j++)
@@ -337,7 +331,7 @@ public:
     }
 
     ///
-    bool replaceReferenceToEdge(EdgeIdx a, EdgeIdx b) {
+    bool replaceReferenceToEdge(int a, int b) {
         for (int i=0; i<3; i++)
             if (edges[i]==a){
                 edges[i] = b;
@@ -348,7 +342,7 @@ public:
     }
 
     ///
-    bool replaceReferenceToVertex(VertexIdx a, VertexIdx b) {
+    bool replaceReferenceToVertex(int a, int b) {
         for (int i=0; i<3; i++)
             if (vertices[i]==a){
                 vertices[i] = b;
@@ -362,9 +356,9 @@ public:
     //////////////////////////////////////////////////////////////
 public:
 
-    McSArray<VertexIdx, 3> vertices;
+    McSArray<int, 3> vertices;
 
-    McSArray<EdgeIdx, 3> edges;
+    McSArray<int, 3> edges;
 
 };
 

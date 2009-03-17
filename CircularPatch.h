@@ -38,18 +38,18 @@ public:
     ///
     CircularPatch(int size, Parametrization* param) {
         triangles.resize(size);
-        triangles.fill(TriangleIdx(-1U));
+        triangles.fill(-1U);
 
         innerEdges.resize(size-1);
-        McSArray<VertexIdx, 2> emptyArray;
-        emptyArray.fill(VertexIdx(-1U));
+        McSArray<int, 2> emptyArray;
+        emptyArray.fill(-1U);
         innerEdges.fill(emptyArray);
 
         par = param;
     }
 
     ///
-    CircularPatch(const McDArray<TriangleIdx>& array, Parametrization* param) {
+    CircularPatch(const McDArray<int>& array, Parametrization* param) {
         triangles.resize(array.size());
         for (int i=0; i<array.size(); i++)
             triangles[i] = array[i];
@@ -59,39 +59,29 @@ public:
 
     //@}
 
-    ~CircularPatch() {}
-
-#if 0
-    ///
-    void init() { 
-        for (int i=0; i<size(); i++)
-            triangles[i] = par->newTriangle(VertexIdx(-1), VertexIdx(-1), VertexIdx(-1));
-    }
-#endif
-
     ///
     void resize(int size) {
         triangles.resize(size);
-        triangles.fill(VertexIdx(-1));
+        triangles.fill(-1);
         
         innerEdges.resize(size-1);
-        McSArray<VertexIdx, 2> emptyArray;
-        emptyArray.fill(VertexIdx(-1));
+        McSArray<int, 2> emptyArray;
+        emptyArray.fill(-1);
         innerEdges.fill(emptyArray);
     }
 
     ///
-    TriangleIdx& last() {
+    int& last() {
         return triangles.last();
     }
     
     ///
-    TriangleIdx& operator[](int i) {
+    int& operator[](int i) {
         return triangles[i];
     }
 
     ///
-    const TriangleIdx operator[](int i) const {
+    const int operator[](int i) const {
         return triangles[i];
     }
     
@@ -144,7 +134,7 @@ public:
     bool hasSelfintersections() const;
 
     /// tests whether the patch intersects the given parametrization, except for the immediate neighbors of center
-    bool intersectsParametrization(const McDArray<EdgeIdx> &closeEdges) const;
+    bool intersectsParametrization(const McDArray<int> &closeEdges) const;
 
     /// tests whether insertion of this patch would lead to topology changes
     bool inducesTopologyChange() const;
@@ -153,11 +143,11 @@ public:
 
     float distanceTo(const class McVec3f &) const ;
 
-    McSmallArray<McSArray<VertexIdx, 2>, 50> innerEdges;
+    McSmallArray<McSArray<int, 2>, 50> innerEdges;
 
 private:
 
-    McSmallArray<TriangleIdx, 50> triangles;
+    McSmallArray<int, 50> triangles;
 public:
     Parametrization* par;
 

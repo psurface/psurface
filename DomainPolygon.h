@@ -95,7 +95,7 @@ public:
     void insertExtraEdges();
         
     /// merges the polygon with a triangle
-    void mergeTriangle(TriangleIdx tri, McVec2f coords[3], int& newCenterNode,
+    void mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode,
                        McDArray<unsigned int>& nodeStack);
 
     /** \brief This uses a given triangulation to cut a DomainPolygon into a
@@ -122,10 +122,10 @@ public:
                                     const McVec3f& newImagePos);
 
     /// removes a vertex from the polygon
-    void removeVertex(VertexIdx point);
+    void removeVertex(int point);
 
     /// does a cut from a given node to the first boundaryVertex
-    void slice(int centerNode, VertexIdx centerVertex, int bVertex);
+    void slice(int centerNode, int centerVertex, int bVertex);
 
     /** \brief Determines the intersection point of \f$(p1, p2) \f$ and (p3, p4) as the affine
      *  combination of p1 and p2 
@@ -190,7 +190,7 @@ public:
     ////////////////////////////////////////////
 
     /// a list of the boundary points
-    McDArray<VertexIdx> boundaryPoints;
+    McDArray<int> boundaryPoints;
 
     /// for each edge of the polygon, a list of the mapping nodes that are right on this edge
     McDArray<McSmallArray<int, 2> > edgePoints;

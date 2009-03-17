@@ -71,14 +71,14 @@ public:
                                         const std::vector<McVec3d>& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
-                                        Node::NodeType& currType, TriangleIdx& currTri,
+                                        Node::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
     bool testInsertEdgeFromIntersectionNode(const Parametrization* par, 
                                             const std::vector<McVec3d>& normals, 
                                             int from, int to, double& lambda,
                                             const std::vector<NodeBundle>& projectedTo,
-                                            Node::NodeType& currType, TriangleIdx& currTri,
+                                            Node::NodeType& currType, int& currTri,
                                             int& enteringEdge);
 
     bool testInsertEdgeFromTouchingNode(const Parametrization* par, 
@@ -86,7 +86,7 @@ public:
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         const NodeBundle& curr,
-                                        Node::NodeType& currType, TriangleIdx& currTri,
+                                        Node::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
     bool testInsertEdgeFromCornerNode(const Parametrization* par, 
@@ -94,7 +94,7 @@ public:
                                       int from, int to, double& lambda,
                                       const std::vector<NodeBundle>& projectedTo,
                                       const NodeBundle& curr, 
-                                      Node::NodeType& currType, TriangleIdx& currTri,
+                                      Node::NodeType& currType, int& currTri,
                                       int& enteringEdge);
 
     void insertGhostNodeAtVertex(Parametrization* par, 
@@ -112,11 +112,11 @@ public:
     bool onSameTriangle(const NodeBundle& a, const NodeBundle& others) const;
 
     /** \brief Return true if the NodeBundle contains a Node on the given triangle */
-    bool onSameTriangle(const TriangleIdx& tri, const NodeBundle& others) const;
+    bool onSameTriangle(const int& tri, const NodeBundle& others) const;
 
-    TriangleIdx getCommonTri(const NodeBundle& a, const NodeBundle& b);
+    int getCommonTri(const NodeBundle& a, const NodeBundle& b);
 
-    McSmallArray<TriangleIdx, 2> getCommonTris(const NodeBundle& a, const NodeBundle& b);
+    McSmallArray<int, 2> getCommonTris(const NodeBundle& a, const NodeBundle& b);
 
     NodeIdx getCornerNode(const DomainTriangle& cT, int corner);
 
