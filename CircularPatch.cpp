@@ -177,9 +177,7 @@ float CircularPatch::distanceTo(const McVec3f &p) const
 
 bool CircularPatch::intersectsParametrization(const std::vector<int> &closeEdges) const
 {
-    int i, j;
-    
-    for (i=0; i<closeEdges.size(); i++){
+    for (size_t i=0; i<closeEdges.size(); i++){
         
 //         printf("closeEdge:  %d    %d --> %d\n", closeEdges[i],
 //                par->edges(closeEdges[i]).from, par->edges(closeEdges[i]).to);
@@ -187,7 +185,7 @@ bool CircularPatch::intersectsParametrization(const std::vector<int> &closeEdges
         int from = par->edges(closeEdges[i]).from;
         int to   = par->edges(closeEdges[i]).to;
         
-        for (j=0; j<size(); j++){
+        for (int j=0; j<size(); j++){
             
             // printf("tri: %d  von %d (%d %d %d)\n", j, size(),
 //                    par->triangles(triangles[j]).vertices[0],
@@ -215,16 +213,14 @@ bool CircularPatch::intersectsParametrization(const std::vector<int> &closeEdges
 
 bool CircularPatch::hasSelfintersections() const
 {
-    int i, j;
-    
     DomainEdge tmpEdge;
     
-    for (i=0; i<innerEdges.size(); i++){
+    for (size_t i=0; i<innerEdges.size(); i++){
         
         tmpEdge.from = innerEdges[i][0];
         tmpEdge.to   = innerEdges[i][1];
         
-        for (j=0; j<size(); j++){
+        for (int j=0; j<size(); j++){
             
             // check whether triangle and edge have one common point
             if (par->triangles(triangles[j]).isConnectedTo(tmpEdge.from) 

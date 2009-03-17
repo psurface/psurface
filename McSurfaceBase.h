@@ -207,7 +207,7 @@ public:
 
     /** Given two vertices, this routine returns the edge that connects them,
         or -1, if no such edge exists. */
-    int findEdge(int a, int b) const {
+    int findEdge(unsigned int a, unsigned int b) const {
         assert(a>=0 && a<getNumVertices() && b>=0 && b<getNumVertices());
         for (int i=0; i<vertices(a).degree(); i++)
             if (edges(vertices(a).edges[i]).from == b ||
@@ -520,9 +520,10 @@ public:
     {
         int i, j;
 #ifndef NDEBUG
-        printf("This is the SurfaceBase garbage collection...\n");
-        printf("%ld vertices, %ld edges, %ld triangles removed\n",
-               freeVertexStack.size(), freeEdgeStack.size(), freeTriangleStack.size());
+        std::cout << "This is the SurfaceBase garbage collection..." << std::endl;
+        std::cout << freeVertexStack.size() << " vertices, "
+                  << freeEdgeStack.size()   << " edges, "
+                  << freeTriangleStack.size() << " triangles removed" << std::endl;
 #endif
 
         std::vector<bool> isInvalid;

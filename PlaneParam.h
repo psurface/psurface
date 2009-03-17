@@ -344,7 +344,7 @@ public:
     ///
     unsigned int getNumEdges() const {
         int n=0;
-        for (int i=0; i<nodes.size(); i++)
+        for (size_t i=0; i<nodes.size(); i++)
             n += nodes[i].degree();
 
         return n/2;
@@ -484,7 +484,7 @@ public:
 
     ///
     void augmentNeighborIdx(int d) {
-        for (int i=0; i<nodes.size(); i++)
+        for (size_t i=0; i<nodes.size(); i++)
             for (int j=0; j<nodes[i].degree(); j++)
                 nodes[i].neighbors(j) += d;
 

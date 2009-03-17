@@ -44,7 +44,6 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
 
     //print(true, true, true);
 
-    int i, j, k;
     int thePolygonEdge[2];
     int theTriangleEdge[2];
 
@@ -58,8 +57,8 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
     
     // find corresponding edge
     int numMatchingEdges = 0;
-    for (i=0; i<boundaryPoints.size(); i++){
-        for (j=0; j<3; j++){
+    for (size_t i=0; i<boundaryPoints.size(); i++){
+        for (int j=0; j<3; j++){
 
             if ((cT.vertices[j]==boundaryPoints[i] && 
                  cT.vertices[(j+1)%3]==boundaryPoints[(i+1)%boundaryPoints.size()])){
@@ -95,8 +94,8 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
     int newNodeIdx = nodes.size();
 
     //nodes.appendArray(cT.nodes);
-    for (k=0; k<cT.nodes.size(); k++)
-        nodes.push_back(cT.nodes[i]);
+    for (size_t k=0; k<cT.nodes.size(); k++)
+        nodes.push_back(cT.nodes[k]);
 
     installWorldCoordinates(newNodeIdx, coords[0], coords[1], coords[2]);
 
@@ -111,9 +110,9 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
     assert(tmpEdgePoints[theTriangleEdge[0]].size() == edgePoints[thePolygonEdge[0]].size());
     
     // handle all edges that cross the unifying edges
-    for (k=0; k<numMatchingEdges; k++){
+    for (int k=0; k<numMatchingEdges; k++){
 
-        for (i=1; i<edgePoints[thePolygonEdge[k]].size()-1; i++){
+        for (int i=1; i<edgePoints[thePolygonEdge[k]].size()-1; i++){
             
             if (nodes[edgePoints[thePolygonEdge[k]][i]].isINTERSECTION_NODE()){
                 
@@ -315,8 +314,8 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
             edgePoints.back().reverse();
     }
 
-    for (i=0; i<edgePoints.size(); i++)
-        for (j=0; j<edgePoints[i].size(); j++)
+    for (size_t i=0; i<edgePoints.size(); i++)
+        for (int j=0; j<edgePoints[i].size(); j++)
             assert(edgePoints[i][j]>=0);
     
     garbageCollection();
@@ -423,23 +422,20 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
 
         // edge nodes on triangle
         for (j=0; j<edgePoints[boundaryIdx].size(); j++)
-            //nodes[edgePoints[boundaryIdx][j]].location = IN_TRIANGLE;
             nodeLocs[edgePoints[boundaryIdx][j]] = IN_TRIANGLE;
         
         for (j=0; j<edgePoints[(boundaryIdx+1)%boundaryPoints.size()].size(); j++)
-            //nodes[edgePoints[(boundaryIdx+1)%boundaryPoints.size()][j]].location = IN_TRIANGLE;
             nodeLocs[edgePoints[(boundaryIdx+1)%boundaryPoints.size()][j]] = IN_TRIANGLE;
 
         // two segment nodes
-        //nodes[cornerNode(boundaryIdx)].location = ON_SEGMENT;
         nodeLocs[cornerNode(boundaryIdx)] = ON_SEGMENT;
-        //nodes[edgePoints[(boundaryIdx+1)%boundaryPoints.size()].last()].location = ON_SEGMENT;
         nodeLocs[edgePoints[(boundaryIdx+1)%boundaryPoints.size()].last()] = ON_SEGMENT;
         
         int cN;
 
         /////////////////////////////////////////////////////////////////
         // interior nodes.  here we have to make a geometric decision
+        /////////////////////////////////////////////////////////////////
         for (cN=0; cN<nodes.size(); cN++) {
 
             if (nodes[cN].isINTERIOR_NODE()) {
@@ -447,16 +443,13 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
                 // This works only if the polygon is convex
                 switch (orientation(newTriangleCoords[0], newTriangleCoords[2], nodes[cN].domainPos())) {
                 case 1:
-                    //nodes[cN].location = IN_POLYGON;
                     nodeLocs[cN] = IN_POLYGON;
                     break;
                 case 0:
-                    //nodes[cN].location =  ON_SEGMENT;
                     nodeLocs[cN] = ON_SEGMENT;
                     break;
                 case -1:
                     nodeLocs[cN] = IN_TRIANGLE;
-                    //nodes[cN].location =  IN_TRIANGLE;
                     break;
                 }
 
@@ -469,6 +462,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
 
         // ///////////////////////////////////////////////////////////////
         // transfer, and possibly cut, the parameterEdges
+        // ///////////////////////////////////////////////////////////////
         cutParameterEdges(boundaryIdx, edgePoints[boundaryIdx][0],
                           edgePoints[(boundaryIdx+1)%boundaryPoints.size()].last(),
                           nodeLocs,
@@ -1156,11 +1150,10 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
     
     
     // split nodes that lie on the cutting segment
-    int cN;
     int newNode;
 
     // classify nodes
-    for (cN=0; cN<nodes.size(); cN++) {
+    for (size_t cN=0; cN<nodes.size(); cN++) {
         if (nodes[cN].isOnSegment(segmentFrom, segmentTo, 0.000001))
             
             if (nodes[cN].isINTERSECTION_NODE() || nodes[cN].isTOUCHING_NODE()){
@@ -1187,7 +1180,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
     nodeLocs[boundaryCutNode] = ON_SEGMENT;
 
 
-    for (cN=nodes.size()-1; cN>=0; cN--) {
+    for (int cN=nodes.size()-1; cN>=0; cN--) {
 
         //assert(!isnan(cN->domainPos.x) && !isnan(cN->domainPos.y));
 
@@ -1273,9 +1266,9 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
     // bisect edges that cross the cut
     
-    int triNode, polyNode;
+    int polyNode;
 
-    for (triNode=0; triNode<nodes.size(); triNode++) {
+    for (size_t triNode=0; triNode<nodes.size(); triNode++) {
 
         if (nodeLocs[triNode] != IN_TRIANGLE)
             continue;
@@ -1354,48 +1347,41 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
 void DomainPolygon::garbageCollection(std::vector<int>& offArr)
 {
-     int i, j;
-
-
     int offset = 0;
 
     offArr.resize(nodes.size());
 
-    for (i=0; i<nodes.size(); i++){
+    for (size_t i=0; i<nodes.size(); i++){
         offArr[i] = offset;
 
         if (nodes[i].isInvalid()) 
             offset++;
     }
 
-
     ////////////////////
-    for (i=0; i<offArr.size(); i++)
+    for (size_t i=0; i<offArr.size(); i++)
         nodes[i-offArr[i]] = nodes[i];
 
     nodes.resize(nodes.size()-offset);
 
     ///////////////////
-    for (i=0; i<nodes.size(); i++)
-        for (j=0; j<nodes[i].degree(); j++)
+    for (size_t i=0; i<nodes.size(); i++)
+        for (int j=0; j<nodes[i].degree(); j++)
             nodes[i].neighbors(j) -= offArr[nodes[i].neighbors(j)];
 
     //////////////////
-    for (i=0; i<edgePoints.size(); i++)
-        for (j=0; j<edgePoints[i].size(); j++)
+    for (size_t i=0; i<edgePoints.size(); i++)
+        for (int j=0; j<edgePoints[i].size(); j++)
             edgePoints[i][j] -= offArr[edgePoints[i][j]];
-
 
 }
 
 
 void DomainPolygon::createPointLocationStructure() 
 {
-    int i, j;
-
     checkConsistency("BeforeCreate");
 
-    for (i=0; i<nodes.size(); i++){
+    for (size_t i=0; i<nodes.size(); i++){
         
         if (nodes[i].isINTERIOR_NODE()){
             makeCyclicInteriorNode(nodes[i]);
@@ -1406,7 +1392,7 @@ void DomainPolygon::createPointLocationStructure()
 
     const int N = boundaryPoints.size();
 
-    for (i=0; i<N; i++) {
+    for (int i=0; i<N; i++) {
         
         checkConsistency("Edge");
 
@@ -1416,7 +1402,7 @@ void DomainPolygon::createPointLocationStructure()
 
         checkConsistency("AfterCorners");
 
-        for (j=1; j<edgePoints[i].size()-1; j++){
+        for (int j=1; j<edgePoints[i].size()-1; j++){
             makeCyclicBoundaryNode(nodes[edgePoints[i][j]], edgePoints[i][j+1], edgePoints[i][j-1]);
 
             if (nodes[edgePoints[i][j]].isINTERSECTION_NODE()){

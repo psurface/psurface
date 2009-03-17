@@ -40,7 +40,7 @@ public:
     ///
     void removeReferenceTo(int edge){
         /** \todo Can be implemented more elegantly using the find() method */
-        for (int i=0; i<edges.size(); i++)
+        for (size_t i=0; i<edges.size(); i++)
             if (edges[i] == edge){
                 //edges.remove(i);
                 edges.erase(edges.begin() + i);
@@ -50,7 +50,7 @@ public:
 
     ///
     void replaceReferenceTo(int a, int b){
-        for (int i=0; i<edges.size(); i++)
+        for (size_t i=0; i<edges.size(); i++)
             if (edges[i] == a){
                 edges[i] = b;
                 break;

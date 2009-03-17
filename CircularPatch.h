@@ -51,7 +51,7 @@ public:
     ///
     CircularPatch(const std::vector<int>& array, Parametrization* param) {
         triangles.resize(array.size());
-        for (int i=0; i<array.size(); i++)
+        for (size_t i=0; i<array.size(); i++)
             triangles[i] = array[i];
 
         par = param;
