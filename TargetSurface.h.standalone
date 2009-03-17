@@ -29,7 +29,7 @@
 
 #include <hxsurface/HxSurfaceWinDLLApi.h>
 
-#include <McDArray.h>
+#include <vector>
 #include <McVec3f.h>
 #include <McSmallArray.h>
 #include <amiramesh/HxParamBundle.h>

@@ -5,7 +5,7 @@
 #include <mclib/McVec3f.h>
 #include <psurface/Box.h>
 #include <mclib/McMat3f.h>
-#include <mclib/McDArray.h>
+#include <vector>
 #include <mclib/McSmallArray.h>
 #include <mclib/McSArray.h>
 
@@ -32,16 +32,18 @@ public:
 
     ~McVertex() {}
 
-    McDArray<int> edges;
+    std::vector<int> edges;
 
     /// the number of edges connected to this vertex
     int degree() const {return edges.size();}
 
     ///
     void removeReferenceTo(int edge){
+        /** \todo Can be implemented more elegantly using the find() method */
         for (int i=0; i<edges.size(); i++)
             if (edges[i] == edge){
-                edges.remove(i);
+                //edges.remove(i);
+                edges.erase(edges.begin() + i);
                 break;
             }
     }

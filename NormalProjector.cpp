@@ -27,9 +27,9 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
     std::vector<McVec3d> normals(nPoints);
     normals.assign(nPoints, McVec3d(0.0,0.0,0.0));
     
-    McDArray<unsigned char> nTriPerVertex(nPoints);
+    std::vector<unsigned char> nTriPerVertex(nPoints);
 
-    nTriPerVertex.fill(0);
+    nTriPerVertex.assign(nTriPerVertex.size(), 0);
 
     if (obsDirections) {
 
@@ -685,7 +685,7 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
 #ifndef NDEBUG
         printf("No intersection found!\n");
 #endif
-        par->triangles(curr[0].tri).nodes.remove(curr[0].idx);
+        par->triangles(curr[0].tri).nodes.erase(par->triangles(curr[0].tri).nodes.begin() + curr[0].idx);
         curr = projectedTo[to];
         return;
         assert(false);

@@ -1,10 +1,12 @@
 #ifndef SURFACE_PATH_SET
 #define SURFACE_PATH_SET
 
+#include <vector>
+
 #include <psurface/SurfacePath.h>
 
 
-class PSURFACE_API SurfacePathSet : public McDArray<SurfacePath> {
+class PSURFACE_API SurfacePathSet : public std::vector<SurfacePath> {
 
 public:
 

@@ -6,13 +6,13 @@
     public:
         /** Indices to Vertex coordinates.  For closed lines the first
             index should be replicated as last one. */
-        McDArray<int> points;
-        McDArray<char> isFix;
+        std::vector<int> points;
+        std::vector<char> isFix;
         int selected;
 
         ///
         bool isLoop() const {
-            return points.size()>1 && points[0]==points.last();
+            return points.size()>1 && points[0]==points.back();
         }
 
         ///
@@ -25,17 +25,17 @@
         void removePoint(int p) {
 
             // special handling for loops
-            if (points.size()>1 && points[0]==p && points.last()==p) {
+            if (points.size()>1 && points[0]==p && points.back()==p) {
                 points[0] = points[points.size()-2];
                 isFix[0]  = isFix[isFix.size()-2];
-                points.removeLast();
-                isFix.removeLast();
+                points.pop_back();
+                isFix.pop_back();
             }
             
             for (int i=points.size()-1; i>=0; i--)
                 if (points[i] == p) {
-                    points.remove(i);
-                    isFix.remove(i);
+                    points.erase(points.begin() + i);
+                    isFix.erase(isFix.begin() + i);
                 }
             
         }

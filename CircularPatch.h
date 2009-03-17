@@ -49,7 +49,7 @@ public:
     }
 
     ///
-    CircularPatch(const McDArray<int>& array, Parametrization* param) {
+    CircularPatch(const std::vector<int>& array, Parametrization* param) {
         triangles.resize(array.size());
         for (int i=0; i<array.size(); i++)
             triangles[i] = array[i];
@@ -134,7 +134,7 @@ public:
     bool hasSelfintersections() const;
 
     /// tests whether the patch intersects the given parametrization, except for the immediate neighbors of center
-    bool intersectsParametrization(const McDArray<int> &closeEdges) const;
+    bool intersectsParametrization(const std::vector<int> &closeEdges) const;
 
     /// tests whether insertion of this patch would lead to topology changes
     bool inducesTopologyChange() const;

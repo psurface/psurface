@@ -31,7 +31,7 @@ void DomainPolygon::init(const DomainTriangle& tri, const McVec2f coords[3]){
 }
 
 void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode,
-                                  McDArray<unsigned int>& nodeStack)
+                                  std::vector<unsigned int>& nodeStack)
 {
 
     // for debugging
@@ -94,8 +94,10 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
 
     int newNodeIdx = nodes.size();
 
-    nodes.appendArray(cT.nodes);
-    
+    //nodes.appendArray(cT.nodes);
+    for (k=0; k<cT.nodes.size(); k++)
+        nodes.push_back(cT.nodes[i]);
+
     installWorldCoordinates(newNodeIdx, coords[0], coords[1], coords[2]);
 
     McSArray<McSmallArray<int, 2>, 3> tmpEdgePoints = cT.edgePoints;
@@ -139,7 +141,7 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
                 nodes[innerPointPoly].replaceReferenceTo(intersectPointPoly, innerPointTri);
 
                 // remove the two intersection points 
-                nodeStack.push(nodes[intersectPointPoly].getNodeNumber());
+                nodeStack.push_back(nodes[intersectPointPoly].getNodeNumber());
 
                 invalidate(intersectPointPoly);
                 invalidate(intersectPointTri);
@@ -277,40 +279,40 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
         
     if (numMatchingEdges == 1){
 
-        boundaryPoints.insert(thePolygonEdge[0]+1, cT.vertices[(theTriangleEdge[0]+2)%3]);
+        boundaryPoints.insert(boundaryPoints.begin() + thePolygonEdge[0]+1, cT.vertices[(theTriangleEdge[0]+2)%3]);
         
-        edgePoints.remove(thePolygonEdge[0]);
+        edgePoints.erase(edgePoints.begin() + thePolygonEdge[0]);
 
         if (reverse){
-            edgePoints.append(tmpEdgePoints[(theTriangleEdge[0]+1)%3]);
-            edgePoints.append(tmpEdgePoints[(theTriangleEdge[0]+2)%3]);
+            edgePoints.push_back(tmpEdgePoints[(theTriangleEdge[0]+1)%3]);
+            edgePoints.push_back(tmpEdgePoints[(theTriangleEdge[0]+2)%3]);
         }else{
-            edgePoints.append(tmpEdgePoints[(theTriangleEdge[0]+2)%3]);
-            edgePoints.append(tmpEdgePoints[(theTriangleEdge[0]+1)%3]);
+            edgePoints.push_back(tmpEdgePoints[(theTriangleEdge[0]+2)%3]);
+            edgePoints.push_back(tmpEdgePoints[(theTriangleEdge[0]+1)%3]);
 
-            edgePoints.last().reverse();
+            edgePoints.back().reverse();
             edgePoints[edgePoints.size()-2].reverse();
         }
         
     }else{
         
-        boundaryPoints.remove(thePolygonEdge[0]);
+        boundaryPoints.erase(boundaryPoints.begin() + thePolygonEdge[0]);
 
         if (thePolygonEdge[0] < thePolygonEdge[1]){
-            edgePoints.remove(thePolygonEdge[1]);
-            edgePoints.remove(thePolygonEdge[0]);
+            edgePoints.erase(edgePoints.begin() + thePolygonEdge[1]);
+            edgePoints.erase(edgePoints.begin() + thePolygonEdge[0]);
         }else{
-            edgePoints.remove(thePolygonEdge[0]);
-            edgePoints.remove(thePolygonEdge[1]);
+            edgePoints.erase(edgePoints.begin() + thePolygonEdge[0]);
+            edgePoints.erase(edgePoints.begin() + thePolygonEdge[1]);
         }
 
         int thirdEdge = (theTriangleEdge[0]+1)%3;
         if (thirdEdge == theTriangleEdge[1])
             thirdEdge = (thirdEdge+1)%3;
         
-        edgePoints.append(tmpEdgePoints[thirdEdge]);
+        edgePoints.push_back(tmpEdgePoints[thirdEdge]);
         if (!reverse)
-            edgePoints.last().reverse();
+            edgePoints.back().reverse();
     }
 
     for (i=0; i<edgePoints.size(); i++)
@@ -345,7 +347,7 @@ float DomainPolygon::computeIntersection(float &mu, const McVec2f &p1, const McV
 
 
 
-bool DomainPolygon::triangulate(CircularPatch& fillIn, McDArray<unsigned int>& nodeStack)
+bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>& nodeStack)
 {
     int i, j, k;
 
@@ -411,7 +413,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, McDArray<unsigned int>& n
         ///////////////////////////////////////////////////////////////////////////////////////
         // classify each node as either in the new triangle, on the separating segment
         // or in the remaining polygon
-        McDArray<int> nodeLocs(nodes.size());
+        std::vector<int> nodeLocs(nodes.size());
 
         // edge nodes on polygon
         for (j=0; j<edgePoints.size(); j++)
@@ -474,9 +476,9 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, McDArray<unsigned int>& n
         
         // update boundaryPoints and edgePoints
         edgePoints[boundaryIdx] = polyNewEdgePoints;
-        edgePoints.remove((boundaryIdx+1)%edgePoints.size());
+        edgePoints.erase(edgePoints.begin() + (boundaryIdx+1)%edgePoints.size());
         
-        boundaryPoints.remove((boundaryIdx+1)%boundaryPoints.size());
+        boundaryPoints.erase(boundaryPoints.begin() + (boundaryIdx+1)%boundaryPoints.size());
         
         cT.edgePoints[2] = triNewEdgePoints;
         
@@ -504,7 +506,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, McDArray<unsigned int>& n
         
         int triCount = 0;
         cT.nodes.resize(numTriNodes);
-        McDArray<int> offArr(nodes.size());
+        std::vector<int> offArr(nodes.size());
         
         for (triNode=0; triNode<nodes.size(); triNode++)
             if (nodeLocs[triNode] == IN_TRIANGLE) {
@@ -609,12 +611,12 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, McDArray<unsigned int>& n
 //#define PATHLOG
 
 void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
-                                      McDArray<int>& nodeLocs,
+                                      std::vector<int>& nodeLocs,
                                       DomainTriangle& cT,
                                       const McSArray<McVec2f, 3>& newTriangleCoords,
                                       McSmallArray<int, 2>& triNewEdgePoints,
                                       McSmallArray<int, 2>& polyNewEdgePoints,
-                                      McDArray<unsigned int>& nodeStack)
+                                      std::vector<unsigned int>& nodeStack)
 {
     int i;
 
@@ -832,9 +834,11 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                                                   par->iPos[nodes[currentTriNode].getNodeNumber()],
                                                   par->iPos[nodes[currentPolyNode].getNodeNumber()]);
 
-            int newTriNode  = nodes.appendSpace(2);
-            int newPolyNode = newTriNode + 1;
-            nodeLocs.appendSpace(2);
+            nodes.resize(nodes.size()+2);
+            int newTriNode  = nodes.size()-2;
+            int newPolyNode = nodes.size()-1;
+
+            nodeLocs.resize(nodeLocs.size()+2);
             
             int newNodeNumber = createNodePosition(par->iPos, nodeStack, newImagePos);
             
@@ -986,15 +990,19 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
 
 }
 
-NodeIdx DomainPolygon::splitNode(NodeIdx cN, McDArray<int>& nodeLocs)
+NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
 {
     int i;
 
     assert(nodeLocs[cN]==ON_SEGMENT);
 
-    NodeIdx newNode = nodes.appendSpace(1);
-    nodeLocs.appendSpace(1);
-                
+    //NodeIdx newNode = nodes.appendSpace(1);
+    nodes.resize(nodes.size()+1);
+    NodeIdx newNode = nodes.size()-1;
+
+    //nodeLocs.appendSpace(1);
+    nodeLocs.resize(nodeLocs.size()+1);
+          
     if (nodes[cN].isCORNER_NODE()){
         nodes[newNode].setValue(nodes[cN].domainPos(),
                                 nodes[cN].getNodeNumber(), Node::CORNER_NODE);
@@ -1061,15 +1069,17 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, McDArray<int>& nodeLocs)
     return newNode;
 }
 
-unsigned int DomainPolygon::createNodePosition(McDArray<McVec3f>& nodePositions, 
-                                               McDArray<unsigned int>& nodeStack,
+unsigned int DomainPolygon::createNodePosition(std::vector<McVec3f>& nodePositions, 
+                                               std::vector<unsigned int>& nodeStack,
                                                const McVec3f& newImagePos)
 {
 
     if (nodeStack.size()!=0) {
 
         unsigned int newNodeNumber;
-        nodeStack.pop(newNodeNumber);
+        //nodeStack.pop(newNodeNumber);
+        newNodeNumber = nodeStack.back();
+        nodeStack.pop_back();
 
         nodePositions[newNodeNumber] = newImagePos;
 
@@ -1077,7 +1087,7 @@ unsigned int DomainPolygon::createNodePosition(McDArray<McVec3f>& nodePositions,
 
     } else {
 
-        nodePositions.append(newImagePos);
+        nodePositions.push_back(newImagePos);
         return nodePositions.size()-1;
 
     }
@@ -1095,20 +1105,20 @@ void DomainPolygon::removeVertex(int point)
         if (boundaryPoints[idx] == point)
             break;
 
-    boundaryPoints.remove(idx);
+    boundaryPoints.erase(boundaryPoints.begin() + idx);
 
     nodes[edgePoints[idx][0]].makeTouchingNode();
 
     edgePoints[(idx+size-1)%size].removeLast();
     edgePoints[(idx+size-1)%size].appendArray(edgePoints[idx]);
 
-    edgePoints.remove(idx);
+    edgePoints.erase(edgePoints.begin() + idx);
 
 }
 
 void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 {             
-    McDArray<unsigned char> nodeLocs(nodes.size());
+    std::vector<unsigned char> nodeLocs(nodes.size());
 
     nodes[centerNode].makeCornerNode();
 
@@ -1120,12 +1130,12 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
     McVec2f segmentTo   = nodes[boundaryCutNode].domainPos();
         
 
-    boundaryPoints.insert(bVertex, centerVertex);
+    boundaryPoints.insert(boundaryPoints.begin() + bVertex, centerVertex);
     // die Null am Ende dieser Zeile ist höchstwahrscheinlich falsch!!
-    boundaryPoints.insert(bVertex, boundaryPoints[0]);
+    boundaryPoints.insert(boundaryPoints.begin() + bVertex, boundaryPoints[0]);
 
     // prepare the two new edgePoint lists
-    edgePoints.insertSpace(bVertex, 2);
+    edgePoints.insert(edgePoints.begin() + bVertex, 2, 0);
 
     McSmallArray<int, 2>& newEdgePoints1 = edgePoints[bVertex];
     McSmallArray<int, 2>& newEdgePoints2 = edgePoints[bVertex+1];
@@ -1133,7 +1143,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
     newEdgePoints1.resize(2);
     newEdgePoints2.resize(2);
     
-    McDArray<float> lambda1(2);
+    std::vector<float> lambda1(2);
     
     newEdgePoints1[0] = boundaryCutNode;
     newEdgePoints1[1] = centerNode;
@@ -1186,8 +1196,10 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
             //printf("Node on Segment found!\n");
             //cN->print();
 
-            newNode = nodes.appendSpace(1);
-            nodeLocs.appendSpace(1);
+            nodes.resize(nodes.size()+1);
+            newNode = nodes.size()-1;
+            nodeLocs.resize(nodeLocs.size()+1);
+
             nodes[newNode].setValue(nodes[cN].domainPos(), nodes[cN].getNodeNumber(), Node::TOUCHING_NODE);
 
             if (nodes[cN].isCORNER_NODE())
@@ -1243,7 +1255,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
                 int j=0;
                 while (lambda1[j]<lambda) j++;
                 
-                lambda1.insert(j, lambda);
+                lambda1.insert(lambda1.begin() + j, lambda);
                 newEdgePoints1.insert(j, newNode);
                 
                 newEdgePoints2.insert(newEdgePoints2.size()-j, cN);
@@ -1293,11 +1305,14 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
                     lambda*(par->iPos[nodes[polyNode].getNodeNumber()]  - 
                              par->iPos[nodes[triNode].getNodeNumber()]);
 
-                int newTriNode = nodes.appendSpace(2);
-                nodeLocs.appendSpace(2);
-                int newPolyNode = newTriNode+1;
+                nodes.resize(nodes.size()+2);
+                int newTriNode  = nodes.size()-2;
+                int newPolyNode = nodes.size()-1;
 
-                int newNodeNumber = par->iPos.append(newImagePos);
+                nodeLocs.resize(nodeLocs.size()+2);
+
+                par->iPos.push_back(newImagePos);
+                int newNodeNumber = par->iPos.size()-1;
 
                 nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
                 nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
@@ -1315,7 +1330,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
                 int j=0;
                 while (lambda1[j]<mu) j++;
         
-                lambda1.insert(j, mu);
+                lambda1.insert(lambda1.begin() + j, mu);
                 newEdgePoints1.insert(j, newTriNode);
         
                 newEdgePoints2.insert(newEdgePoints2.size()-j, newPolyNode);
@@ -1337,7 +1352,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 }
 
 
-void DomainPolygon::garbageCollection(McDArray<int>& offArr)
+void DomainPolygon::garbageCollection(std::vector<int>& offArr)
 {
      int i, j;
 

@@ -368,7 +368,7 @@ int PlaneParam::map(McVec2f &domainCoord, McSArray<NodeIdx, 3>& tri, McVec2f& lo
 }
 
 
-void PlaneParam::unflipTriangles(const McDArray<McVec3f>& nodePositions)
+void PlaneParam::unflipTriangles(const std::vector<McVec3f>& nodePositions)
 {
     applyParametrization(nodePositions);
     return;
@@ -390,7 +390,8 @@ void PlaneParam::unflipTriangles(const McDArray<McVec3f>& nodePositions)
 ////////////////////////////////////////////////////////////////
 // this routine installs the shape-preserving parametrization 
 // only INTERIOR_NODEs get moved
-void PlaneParam::applyParametrization(const McDArray<McVec3f>& nodePositions)
+////////////////////////////////////////////////////////////////
+void PlaneParam::applyParametrization(const std::vector<McVec3f>& nodePositions)
 {
     int i;
     
@@ -440,7 +441,7 @@ void PlaneParam::applyParametrization(const McDArray<McVec3f>& nodePositions)
 ////////////////////////////////////////////////////////
 // computes lambda_ij for the Floater-Parametrization
 void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij, 
-                                       const McDArray<McVec3f>& nodePositions)
+                                       const std::vector<McVec3f>& nodePositions)
 {
     int i, k, l;
     int N = nodes.size();
@@ -496,7 +497,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
                 
             } else {
                 
-                McDArray<int> index(p.degree());
+                std::vector<int> index(p.degree());
                 for (l=0; l<p.degree(); l++) 
                     index[l] = p_k[l];
                 

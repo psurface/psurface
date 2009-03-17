@@ -186,8 +186,8 @@ public:
                 // this edge doesn't exist yet
                 int newEdgeIdx = newEdge(pointA, pointB);
                 
-                vertices(pointA).edges.append(newEdgeIdx);
-                vertices(pointB).edges.append(newEdgeIdx);
+                vertices(pointA).edges.push_back(newEdgeIdx);
+                vertices(pointB).edges.push_back(newEdgeIdx);
                 
                 edges(newEdgeIdx).triangles.append(triIdx);
                 tri.edges[i] = newEdgeIdx;

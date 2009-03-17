@@ -68,8 +68,8 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
     HxParameter* nonMortarTargetTriParam = cPar->params->find("targetTris");
     assert(nonMortarTargetTriParam);
     assert(nonMortarTargetTriParam->dim() == cPar->getNumTriangles());
-    McDArray<int> nonMortarTargetTris(nonMortarTargetTriParam->dim());
-    nonMortarTargetTriParam->getNum(nonMortarTargetTris.dataPtr());
+    std::vector<int> nonMortarTargetTris(nonMortarTargetTriParam->dim());
+    nonMortarTargetTriParam->getNum(&nonMortarTargetTris[0]);
 
     //
 #ifndef MY_DB

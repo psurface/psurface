@@ -477,7 +477,7 @@ public:
 
 
     /// All base grid patches
-    McDArray<Patch> patches;
+    std::vector<Patch> patches;
 
     /// A set of arbitrary parameters
     HxParamBundle* params;
@@ -485,7 +485,7 @@ public:
     bool hasOwnParamBundle;
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
-    McDArray<McVec3f> iPos;
+    std::vector<McVec3f> iPos;
 
     /// The corresponding image surface
     Surface* surface;

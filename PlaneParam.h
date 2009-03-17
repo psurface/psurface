@@ -61,7 +61,7 @@
 #include <mclib/McVec3f.h>
 #include <mclib/McVec2f.h>
 #include <mclib/McMat3f.h>
-#include <mclib/McDArray.h>
+#include <vector>
 #include <mclib/McSArray.h>
 #include <mclib/McSmallArray.h>
 
@@ -82,7 +82,7 @@ public:
     public:
         DirectedEdgeIterator() : fromNode(-1), neighborIdx(0) , nodes(0){}
 
-        DirectedEdgeIterator(const McDArray<Node>& _nodes) :  fromNode(-1), neighborIdx(0) {
+        DirectedEdgeIterator(const std::vector<Node>& _nodes) :  fromNode(-1), neighborIdx(0) {
             nodes = &_nodes;
         }
 
@@ -123,7 +123,7 @@ public:
         int fromNode;
         int neighborIdx;
 
-        const McDArray<Node>* nodes;
+        const std::vector<Node>* nodes;
 
     };
 
@@ -131,7 +131,7 @@ public:
     public:
         UndirectedEdgeIterator() : fromNode(-1), neighborIdx(0) , nodes(0){}
 
-        UndirectedEdgeIterator(const McDArray<Node>& _nodes) :  fromNode(-1), neighborIdx(0) {
+        UndirectedEdgeIterator(const std::vector<Node>& _nodes) :  fromNode(-1), neighborIdx(0) {
             nodes = &_nodes;
         }
 
@@ -154,7 +154,7 @@ public:
         NodeIdx fromNode;
         int neighborIdx;
 
-        const McDArray<Node>* nodes;
+        const std::vector<Node>* nodes;
 
     };
 
@@ -477,10 +477,10 @@ public:
     void installBarycentricCoordinates(const McVec2f &a, const McVec2f &b, const McVec2f &c);
 
     ///
-    void applyParametrization(const McDArray<McVec3f>& nodePositions);
+    void applyParametrization(const std::vector<McVec3f>& nodePositions);
 
     ///
-    void unflipTriangles(const McDArray<McVec3f>& nodePositions);
+    void unflipTriangles(const std::vector<McVec3f>& nodePositions);
 
     ///
     void augmentNeighborIdx(int d) {
@@ -502,7 +502,7 @@ public:
     void removeExtraEdges();
     
     void computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
-                               const McDArray<McVec3f>& nodePositions);
+                               const std::vector<McVec3f>& nodePositions);
 
     bool polarMap(const McVec3f& center, const McSmallArray<McVec3f, 15> &threeDStarVertices, 
                   McSmallArray<McVec2f, 15>& flattenedCoords, McSmallArray<float, 15>& theta);
@@ -568,7 +568,7 @@ public:
     //////////////////////////////////////////////////////////////
 
     ///
-    McDArray<Node> nodes;
+    std::vector<Node> nodes;
 
 };
 

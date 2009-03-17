@@ -81,12 +81,12 @@ public:
 
     ///
     void garbageCollection() {
-        McDArray<int> offArr;
+        std::vector<int> offArr;
         garbageCollection(offArr);
     }
 
     ///
-    void garbageCollection(McDArray<int>& offArr);
+    void garbageCollection(std::vector<int>& offArr);
 
     ///
     void createPointLocationStructure();
@@ -96,29 +96,29 @@ public:
         
     /// merges the polygon with a triangle
     void mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode,
-                       McDArray<unsigned int>& nodeStack);
+                       std::vector<unsigned int>& nodeStack);
 
     /** \brief This uses a given triangulation to cut a DomainPolygon into a
      * set of DomainTriangles.
      *
      */
     bool triangulate(CircularPatch &fillIn, 
-                     McDArray<unsigned int>& nodeStack);
+                     std::vector<unsigned int>& nodeStack);
 
     ///
     void cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
-                           McDArray<int>& nodeLocs,
+                           std::vector<int>& nodeLocs,
                            DomainTriangle& cT,
                            const McSArray<McVec2f, 3>& newTriangleCoords,
                            McSmallArray<int, 2>& triNewEdgePoints,
                            McSmallArray<int, 2>& polyNewEdgePoints,
-                           McDArray<unsigned int>& nodeStack);
+                           std::vector<unsigned int>& nodeStack);
 
     ///
-    NodeIdx splitNode(NodeIdx cN, McDArray<int>& nodeLocs);
+    NodeIdx splitNode(NodeIdx cN, std::vector<int>& nodeLocs);
 
     ///
-    unsigned int createNodePosition(McDArray<McVec3f>& nodePositions, McDArray<unsigned int>& nodeStack,
+    unsigned int createNodePosition(std::vector<McVec3f>& nodePositions, std::vector<unsigned int>& nodeStack,
                                     const McVec3f& newImagePos);
 
     /// removes a vertex from the polygon
@@ -190,10 +190,10 @@ public:
     ////////////////////////////////////////////
 
     /// a list of the boundary points
-    McDArray<int> boundaryPoints;
+    std::vector<int> boundaryPoints;
 
     /// for each edge of the polygon, a list of the mapping nodes that are right on this edge
-    McDArray<McSmallArray<int, 2> > edgePoints;
+    std::vector<McSmallArray<int, 2> > edgePoints;
 
     Parametrization* par;
 

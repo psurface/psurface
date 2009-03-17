@@ -148,8 +148,8 @@
 /////////////////////////////////////////////////////////////////
 
 #include <tr1/array>
+#include <vector>
 
-#include <mclib/McDArray.h>
 #include <amiramesh/AmiraMesh.h>
 
 #include <psurface/Parametrization.h>
@@ -385,7 +385,7 @@ void Parametrization::garbageCollection()
         
         int offset = 0;
         
-        McDArray<int> vertexOffsets(vertexArray.size());
+        std::vector<int> vertexOffsets(vertexArray.size());
         isInvalid.resize(vertexArray.size());
         for (i=0; i<isInvalid.size(); i++)
             isInvalid[i] = false;
@@ -455,7 +455,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
     AmiraMesh::Data* patchesData = new AmiraMesh::Data("Patches", patchesLoc, 
                                                        McPrimType::mc_int32, 3, 
-                                                       (void*)par->patches.dataPtr());
+                                                       (void*)&par->patches[0]);
     am.insert(patchesData);
 
     //////////////////////////////////////
@@ -463,13 +463,13 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     AmiraMesh::Location* vertices = new AmiraMesh::Location("BaseGridVertexCoords", numVertices);
     am.insert(vertices);
 
-    McDArray<McVec3f> baseGridVertexCoordsArray(numVertices);
+    std::vector<McVec3f> baseGridVertexCoordsArray(numVertices);
     for (i=0; i<par->getNumVertices(); i++)
         baseGridVertexCoordsArray[i] = par->vertices(i);
 
     AmiraMesh::Data* vertexCoords = new AmiraMesh::Data("BaseGridVertexCoords", vertices, 
                                                         McPrimType::mc_float, 3, 
-                                                        (void*)baseGridVertexCoordsArray.dataPtr());
+                                                        (void*)&baseGridVertexCoordsArray[0]);
     am.insert(vertexCoords);
 
     /////////////////////////////////////
@@ -477,7 +477,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     AmiraMesh::Location* triangles = new AmiraMesh::Location("BaseGridTriangles", numTriangles);
     am.insert(triangles);
 
-    McDArray<McSArray<int, 3> > baseGridTriArray(numTriangles);
+    std::vector<McSArray<int, 3> > baseGridTriArray(numTriangles);
 
     for (int i(0); i<par->getNumTriangles(); i++)
         baseGridTriArray[i] = par->triangles(i).vertices;
@@ -485,7 +485,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
     AmiraMesh::Data* triangleCoords = new AmiraMesh::Data("BaseGridTriangles", triangles,
                                                           McPrimType::mc_int32, 3, 
-                                                          (void*)baseGridTriArray.dataPtr());
+                                                          (void*)&baseGridTriArray);
     am.insert(triangleCoords);
 
     ////////////////////////////////////////
@@ -495,7 +495,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
     AmiraMesh::Data* nodePosData = new AmiraMesh::Data("NodePositions", nodePosLoc,
                                                        McPrimType::mc_float, 3, 
-                                                       (void*)par->iPos.dataPtr());
+                                                       (void*)&par->iPos[0]);
     am.insert(nodePosData);
 
     ////////////////////////////////////////////////////////////
@@ -509,7 +509,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     int numParamEdges = 0;
     int numEdgePoints = 0;
 
-    McDArray<int> numNodesAndEdgesArray(11*numTriangles);
+    std::vector<int> numNodesAndEdgesArray(11*numTriangles);
     
     for (i=0; i<numTriangles; i++) {
 
@@ -549,16 +549,16 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     AmiraMesh::Data*  numNodesAndEdgesData = new AmiraMesh::Data("NumNodesAndParameterEdgesPerTriangle", 
                                                                  numNodesAndEdges,
                                                                  McPrimType::mc_int32, 11, 
-                                                                 (void*)numNodesAndEdgesArray.dataPtr());
+                                                                 (void*)&numNodesAndEdgesArray[0]);
     am.insert(numNodesAndEdgesData);
     
     /////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
-    McDArray<McVec2f> domainPositions(numNodes);
-    McDArray<int>     nodeNumbers(numNodes);
-    McDArray<std::tr1::array<int,2> > parameterEdgeArray(numParamEdges);
-    McDArray<int>     edgePointsArray(numEdgePoints);
+    std::vector<McVec2f> domainPositions(numNodes);
+    std::vector<int>     nodeNumbers(numNodes);
+    std::vector<std::tr1::array<int,2> > parameterEdgeArray(numParamEdges);
+    std::vector<int>     edgePointsArray(numEdgePoints);
 
     int cN;    
 
@@ -570,7 +570,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
         const DomainTriangle& cT = par->triangles(i);
 
-        McDArray<int> newIdx(cT.nodes.size());
+        std::vector<int> newIdx(cT.nodes.size());
         int localArrayIdx = 3;
         // the cornerNode are not saved, because everything about them
         // can be deduced from the base grid
@@ -648,14 +648,14 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     am.insert(nodeLoc);
 
     AmiraMesh::Data*  nodeData   = new AmiraMesh::Data("Nodes", nodeLoc,
-                                                       McPrimType::mc_float, 2, (void*)domainPositions.dataPtr());
+                                                       McPrimType::mc_float, 2, (void*)&domainPositions[0]);
     am.insert(nodeData);
 
     AmiraMesh::Location* nNLoc = new AmiraMesh::Location("NodeNumbers", numNodes);
     am.insert(nNLoc);
 
     AmiraMesh::Data* nNData    = new AmiraMesh::Data("NodeNumbers", nNLoc,
-                                                     McPrimType::mc_int32, 1, (void*)nodeNumbers.dataPtr());
+                                                     McPrimType::mc_int32, 1, (void*)&nodeNumbers[0]);
     am.insert(nNData);
 
     
@@ -663,7 +663,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     am.insert(parameterEdges);
 
     AmiraMesh::Data*  parameterEdgeData = new AmiraMesh::Data("ParameterEdges", parameterEdges,
-                                                              McPrimType::mc_int32, 2, (void*)parameterEdgeArray.dataPtr());
+                                                              McPrimType::mc_int32, 2, (void*)&parameterEdgeArray[0]);
     am.insert(parameterEdgeData);
 
     /////////////////////////////////////////
@@ -674,7 +674,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
     AmiraMesh::Data* edgePointsData = new AmiraMesh::Data("EdgePoints", edgePoints,
                                                           McPrimType::mc_int32, 1, 
-                                                          (void*)edgePointsArray.dataPtr());
+                                                          (void*)&edgePointsArray[0]);
     am.insert(edgePointsData);
 
     //////////////////////////////
@@ -1089,10 +1089,10 @@ void Parametrization::getPaths(const HxParamBundle& parameters)
         if (strncmp("SurfacePath", parameters[i]->name(),11)==0) {
             HxParameter* p = (HxParameter*) parameters[i];
             if (!p->isBundle() && p->primType()== McPrimType::mc_int32) {
-                paths.appendSpace(1);
+                paths.resize(paths.size()+1);
                 for (int j=0 ; j<p->dim() ; j+=2) {
-                    paths.last().points.append(p->getNum(j));
-                    paths.last().isFix.append(p->getNum(j+1));
+                    paths.back().points.push_back(p->getNum(j));
+                    paths.back().isFix.push_back(p->getNum(j+1));
                 }
             }
         }
@@ -1112,12 +1112,12 @@ void Parametrization::savePaths(HxParamBundle& parameters)
         char buf[64];
         sprintf(buf,"SurfacePath%03d",i);
         parameters.remove(buf);
-        McDArray<int> tmp;
+        std::vector<int> tmp;
         for (int j=0 ; j<paths[i].points.size() ; j++) {
-            tmp.append(paths[i].points[j]);
-            tmp.append(paths[i].isFix[j]);
+            tmp.push_back(paths[i].points[j]);
+            tmp.push_back(paths[i].isFix[j]);
         }
-        HxParameter* p = new HxParameter(buf, tmp.size(), tmp.dataPtr());
+        HxParameter* p = new HxParameter(buf, tmp.size(), &tmp[0]);
         parameters.insert(p);
     }
 }
@@ -1129,7 +1129,7 @@ int Parametrization::map(int triIdx, McVec2f& p, McVec3i& vertices,
 {
     int i;
     const DomainTriangle& tri = triangles(triIdx);
-    const McDArray<McVec3f>& nP = iPos;
+    const std::vector<McVec3f>& nP = iPos;
 
     // this is boundary handling
     if (p.x < 0.001){
@@ -1492,8 +1492,7 @@ int Parametrization::positionMap(int triIdx, McVec2f& p, McVec3f& result) const
         return false;
     }
 
-    const McDArray<McVec3f>& nP = iPos;
-    result = PlaneParam::linearInterpol<McVec3f>(localCoords, nP[tri[0]], nP[tri[1]], nP[tri[2]]);
+    result = PlaneParam::linearInterpol<McVec3f>(localCoords, iPos[tri[0]], iPos[tri[1]], iPos[tri[2]]);
 
     return true;
 }
@@ -1510,9 +1509,8 @@ int Parametrization::directNormalMap(int triIdx, McVec2f& p, McVec3f& result) co
     if (!status)
         return false;
 
-    const McDArray<McVec3f>& nP = iPos;
-    const McVec3f a = nP[tri[1]] - nP[tri[0]];
-    const McVec3f b = nP[tri[2]] - nP[tri[0]];
+    const McVec3f a = iPos[tri[1]] - iPos[tri[0]];
+    const McVec3f b = iPos[tri[2]] - iPos[tri[0]];
     result = a.cross(b);
     result.normalize();
 
@@ -1558,23 +1556,24 @@ int Parametrization::invertTriangles(int patch)
 
 NodeIdx Parametrization::addInteriorNode(int tri, const McVec2f& dom, int nodeNumber)
 {
-    return triangles(tri).nodes.append(Node(dom, nodeNumber, Node::INTERIOR_NODE));  
+    triangles(tri).nodes.push_back(Node(dom, nodeNumber, Node::INTERIOR_NODE));
+    return triangles(tri).nodes.size()-1;
 }
 
 NodeIdx Parametrization::addGhostNode(int tri, int corner, int targetTri, const McVec2f& localTargetCoords)
 {
-    int newNode = triangles(tri).nodes.append(Node());
-    triangles(tri).nodes.last().makeGhostNode(corner, targetTri, localTargetCoords);
-    return newNode;
+    triangles(tri).nodes.push_back(Node());
+    triangles(tri).nodes.back().makeGhostNode(corner, targetTri, localTargetCoords);
+    return triangles(tri).nodes.size()-1;
 }
 
 NodeIdx Parametrization::addCornerNode(int tri, int corner, int nodeNumber)
 {
     DomainTriangle& cT = triangles(tri);
 
-    int newNode = cT.nodes.append(Node());
-    cT.nodes.last().makeCornerNode(corner, nodeNumber);
-    return newNode;
+    cT.nodes.push_back(Node());
+    cT.nodes.back().makeCornerNode(corner, nodeNumber);
+    return cT.nodes.size()-1;
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
@@ -1585,16 +1584,18 @@ NodeIdx Parametrization::addIntersectionNodePair(int tri1, int tri2,
     DomainTriangle& cT1 = triangles(tri1);
     DomainTriangle& cT2 = triangles(tri2);
 
-    int nodeNumber = iPos.append(range);
+    iPos.push_back(range);
+    int nodeNumber = iPos.size()-1;
 
-    int newNode1 = cT1.nodes.append(Node());
-    cT2.nodes.append(Node());
+    cT1.nodes.push_back(Node());
+    int newNode1 = cT1.nodes.size()-1;
+    cT2.nodes.push_back(Node());
     
-    cT1.nodes.last().setValue(dP1, nodeNumber, Node::INTERSECTION_NODE);
-    cT2.nodes.last().setValue(dP2, nodeNumber, Node::INTERSECTION_NODE);
+    cT1.nodes.back().setValue(dP1, nodeNumber, Node::INTERSECTION_NODE);
+    cT2.nodes.back().setValue(dP2, nodeNumber, Node::INTERSECTION_NODE);
 
-    cT1.nodes.last().setDomainEdge(edge1);
-    cT2.nodes.last().setDomainEdge(edge2);
+    cT1.nodes.back().setDomainEdge(edge1);
+    cT2.nodes.back().setDomainEdge(edge2);
     return newNode1;
 }
 
@@ -1603,11 +1604,11 @@ NodeIdx Parametrization::addTouchingNode(int tri, const McVec2f& dP, int edge, i
 {
     DomainTriangle& cT = triangles(tri);
 
-    int newNode = cT.nodes.append(Node());
+    cT.nodes.push_back(Node());
     
-    cT.nodes.last().setValue(dP, nodeNumber, Node::TOUCHING_NODE);
-    cT.nodes.last().setDomainEdge(edge);
-    return newNode;
+    cT.nodes.back().setValue(dP, nodeNumber, Node::TOUCHING_NODE);
+    cT.nodes.back().setDomainEdge(edge);
+    return cT.nodes.size()-1;
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
@@ -1618,16 +1619,16 @@ NodeIdx Parametrization::addTouchingNodePair(int tri1, int tri2,
     DomainTriangle& cT1 = triangles(tri1);
     DomainTriangle& cT2 = triangles(tri2);
 
-    int newNode1 = cT1.nodes.append(Node());
-    cT2.nodes.append(Node());
+    cT1.nodes.push_back(Node());
+    cT2.nodes.push_back(Node());
     
-    cT1.nodes.last().setValue(dP1, nodeNumber, Node::TOUCHING_NODE);
-    cT2.nodes.last().setValue(dP2, nodeNumber, Node::TOUCHING_NODE);
+    cT1.nodes.back().setValue(dP1, nodeNumber, Node::TOUCHING_NODE);
+    cT2.nodes.back().setValue(dP2, nodeNumber, Node::TOUCHING_NODE);
 
-    cT1.nodes.last().setDomainEdge(edge1);
-    cT2.nodes.last().setDomainEdge(edge2);
+    cT1.nodes.back().setDomainEdge(edge1);
+    cT2.nodes.back().setDomainEdge(edge2);
 
-    return newNode1;
+    return cT1.nodes.size()-1;
 }
 
 void Parametrization::addParTriangle(int tri, const McVec3i& p)

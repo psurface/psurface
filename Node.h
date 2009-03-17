@@ -28,7 +28,7 @@
 #include <mclib/McVec3f.h>
 #include <mclib/McVec2f.h>
 #include <mclib/McMat3f.h>
-#include <mclib/McDArray.h>
+#include <vector>
 #include <mclib/McSmallArray.h>
 
 #include "psurfaceAPI.h"
@@ -286,11 +286,11 @@ public:
 
     NodeType getType() const {return type;}
 
-    mclong getNodeNumber() const {
+    unsigned int getNodeNumber() const {
         return nodeNumber;
     }
 
-    mclong getDomainEdge() const {
+    unsigned int getDomainEdge() const {
         assert(!isINTERIOR_NODE());
         return edge;
     }

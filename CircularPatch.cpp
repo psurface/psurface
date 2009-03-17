@@ -175,7 +175,7 @@ float CircularPatch::distanceTo(const McVec3f &p) const
     return bestDist;
 }
 
-bool CircularPatch::intersectsParametrization(const McDArray<int> &closeEdges) const
+bool CircularPatch::intersectsParametrization(const std::vector<int> &closeEdges) const
 {
     int i, j;
     
