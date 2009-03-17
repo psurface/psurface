@@ -14,9 +14,11 @@
  * @brief
  */
 
-#ifndef BOX_HH_
-#define BOX_HH_
+#ifndef BOX_H
+#define BOX_H
 
+#include <algorithm>
+#include <mclib/McVec3f.h>
 
 /** \brief A axis-parallel box in a Euclidean space
     \tparam C Type used for coordinates
@@ -27,8 +29,9 @@ class Box
 {
 public:
 
-	~Box()
-	{}
+    /** \brief Default constructor.  Box is not initialized! */
+    Box()
+    {}
 
     /** \brief Set box from two points */
     Box(const C& lower, const C& upper) : _lower(lower), _upper(upper)
@@ -48,9 +51,29 @@ public:
         }
     }
 
+    /** \brief Copy constructor */
 	Box(const Box& b) : _lower(b._lower), _upper(b._upper)
     {}
 
+    /** \brief Set up box from to diagonal corners */
+    void set(const C& lower, const C& upper)
+    {
+        for (int i=0; i<3; i++) {
+            _lower[i] = std::min(lower[i],upper[i]);
+            _upper[i] = std::max(lower[i],upper[i]);
+        }
+    }
+
+    /** \brief Set up box from to diagonal corners */
+    void set(const McVec3f& lower, const McVec3f& upper)
+    {
+        for (int i=0; i<3; i++) {
+            _lower[i] = std::min(lower[i],upper[i]);
+            _upper[i] = std::max(lower[i],upper[i]);
+        }
+    }
+
+    /** \brief Test whether box contains a given point */
 	bool contains(const C& c) const
 	{
 		for (int i = 0; i < dim; ++i)
@@ -59,6 +82,15 @@ public:
 		return true;
 	}
 
+    /** \brief Test whether box contains a given point */
+    bool contains(const McVec3f& c) const
+    {
+        for (int i = 0; i < dim; ++i)
+            if (c[i] < this->_lower[i] || c[i] >= this->_upper[i])
+                return false;
+        return true;
+    }
+
 	bool intersects(const Box& b)
 	{
 		for (int i = 0; i < dim; ++i)
@@ -66,6 +98,26 @@ public:
 				return false;
 		return true;
 	}
+
+    /// Returns intersection of two boxes.
+    Box<C,dim> intersectWith(const Box<C,dim> &other) const {
+
+        C zero;
+        zero.assign(0);
+
+        Box<C,dim> innerBox(zero,zero);
+
+        for (int i = 0; i < dim; i++) {
+
+            if ((upper()[i] < other.lower()[i]) || (lower()[i] > other.upper()[i]))
+                return Box<C,dim>(zero,zero);
+            
+            innerBox._lower[i] = std::max(lower()[i],other.lower()[i]);
+            innerBox._upper[i] = std::min(upper()[i],other.upper()[i]);
+        }
+
+        return innerBox;
+    }
 
 	C center() const
 	{
