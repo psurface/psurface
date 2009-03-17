@@ -11,10 +11,6 @@
 #include <psurface/MultiDimOctree.h>
 #include <psurface/PointIntersectionFunctor.h>
 
-// Debug
-// #include <hxcluster/HxCluster.h>
-// #include <Amira/HxObjectPool.h>
-
 void ContactToolBox::buildContactSurface(Parametrization* cPar, 
                                          const Surface* surf1,  const Surface* surf2,
                                          float epsilon, 
@@ -146,22 +142,37 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     int i, j;
     const float epsSquared = epsilon*epsilon;
     
-    McBox3f bbox1, bbox2;
-    surf1->getBoundingBox(&bbox1[0]);
-    surf2->getBoundingBox(&bbox2[0]);
-    
+    Box<std::tr1::array<float,3>,3> bbox1, bbox2;
+
+    // stupid hack: The Amira Surface class wants a float* as the bounding box
+    float bbox1_raw[6], bbox2_raw[6];
+    surf1->getBoundingBox(bbox1_raw);
+    surf2->getBoundingBox(bbox2_raw);
+
+    std::tr1::array<float,3> lower1, upper1, lower2, upper2;
+
+    for (i=0; i<3; i++) {
+        lower1[i] = bbox1_raw[2*i];
+        upper1[i] = bbox1_raw[2*i+1];
+
+        lower2[i] = bbox2_raw[2*i];
+        upper2[i] = bbox2_raw[2*i+1];
+    }
+
+    bbox1.set(lower1, upper1);
+    bbox2.set(lower2, upper2);
+
     bbox1.extendByEps(epsilon);
     bbox2.extendByEps(epsilon);
 
     // The possible contact patches must be in intersectBox
-    McBox3f intersectBox = bbox1.intersectWith(bbox2);
+    Box<std::tr1::array<float,3>,3> intersectBox = bbox1.intersectWith(bbox2);
 
     // We first put the vertices of surface1 into an octree
     std::tr1::array<float,3> lower, upper;
-    for (int i=0; i<3; i++) {
-        lower[i] = bbox1.getMin()[i];
-        upper[i] = bbox1.getMax()[i];
-    }
+    lower = bbox1.lower();
+    upper = bbox1.upper();
+
     Box<std::tr1::array<float,3>, 3> mdBBox1(lower, upper);
     MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree1(mdBBox1);
     PointIntersectionFunctor intersectionFunctor;
@@ -177,10 +188,9 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     mdOctree1.enableUniqueLookup(points1.size(), &points1[0]);
     
     // We first put the vertices of surface2 into an octree
-    for (int i=0; i<3; i++) {
-        lower[i] = intersectBox.getMin()[i];
-        upper[i] = intersectBox.getMax()[i];
-    }
+    lower = intersectBox.lower();
+    upper = intersectBox.upper();
+
     Box<std::tr1::array<float,3>, 3> mdIntersectBox(lower, upper);
     MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree2(mdIntersectBox);
 

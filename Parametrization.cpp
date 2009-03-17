@@ -155,8 +155,6 @@
 #include <psurface/Parametrization.h>
 #include <psurface/GlobalNodeIdx.h>
 
-#include <mclib/McBox3f.h>
-
 Parametrization::Parametrization(HxParamBundle* bundle)
 {
     if (bundle) {
@@ -185,16 +183,12 @@ void Parametrization::clear()
     paths.clear();
     McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>::clear();
 }
-void Parametrization::getBoundingBox(McBox3f& bbox) const
+
+void Parametrization::getBoundingBox(Box<std::tr1::array<float,3>,3>& bbox) const
 {
     if (getNumVertices()==VertexIdx(0)) return;
 
-    bbox.setValue(vertices(VertexIdx(0)).x, 
-                  vertices(VertexIdx(0)).y, 
-                  vertices(VertexIdx(0)).z,
-                  vertices(VertexIdx(0)).x, 
-                  vertices(VertexIdx(0)).y, 
-                  vertices(VertexIdx(0)).z);
+    bbox.set(vertices(0), vertices(0));
 
     for (VertexIdx i=VertexIdx(1); i<getNumVertices(); i++)
         bbox.extendBy(vertices(i));

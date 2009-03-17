@@ -179,7 +179,7 @@ public:
     void clear();
 
     /// Get box containing all vertices.
-    virtual void getBoundingBox(McBox3f& bbox) const;
+    virtual void getBoundingBox(Box<std::tr1::array<float,3>,3>& bbox) const;
 
     /** \brief Sets up the internal data structures needed by the map() method.
      * 

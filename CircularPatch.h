@@ -1,7 +1,7 @@
 #ifndef CIRCULAR_PATCH
 #define CIRCULAR_PATCH
 
-#include <mclib/McBox3f.h>
+#include <psurface/Box.h>
 #include <mclib/McSArray.h>
 
 #include "Domains.h"
@@ -99,7 +99,7 @@ public:
     int size() const { return triangles.size(); }
 
     ///
-    void getBoundingBox(McBox3f &bbox) const;
+    void getBoundingBox(Box<std::tr1::array<float,3>,3> &bbox) const;
 
     ///
     void killAll(){

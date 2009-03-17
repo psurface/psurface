@@ -2,8 +2,9 @@
 #define CONTACT_BOUNDARY_H
 
 #include <vector>
+#include <tr1/array>
 
-#include <mclib/McBox3f.h>
+#include <psurface/Box.h>
 #ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"
 #else
@@ -23,10 +24,12 @@ public:
         surf = surface;
     }
 
-    McBox3f getBoundingBox() const {
-        if (vertices.size()==0) return McBox3f(1, 1, 1, -1, -1, -1);
+    Box<std::tr1::array<float,3>,3> getBoundingBox() const {
         
-        McBox3f box(surf->points[vertices[0]], surf->points[vertices[0]]);
+        if (vertices.size()==0)
+            return Box<std::tr1::array<float,3>,3>();
+
+        Box<std::tr1::array<float,3>,3> box(surf->points[vertices[0]], surf->points[vertices[0]]);
         
         for (int i=1; i<vertices.size(); i++)
             box.extendBy(surf->points[vertices[i]]);

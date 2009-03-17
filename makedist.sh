@@ -18,8 +18,6 @@ cp local_mclib/include/hxfield/oint.h                 libpsurface/include/hxfiel
 cp local_mclib/include/hxsurface/HxSurfaceWinDLLApi.h libpsurface/include/hxsurface
 cp TargetSurface.h.standalone                         libpsurface/include/TargetSurface.h
 
-cp local_mclib/include/mclib/McBox2f.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McBox3f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McDVector.h              libpsurface/include/mclib
 cp local_mclib/include/mclib/McFHeap.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McHandable.h             libpsurface/include/mclib

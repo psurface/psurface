@@ -1,7 +1,7 @@
 #ifndef CONTACT_TOOLBOX_H
 #define CONTACT_TOOLBOX_H
 
-#include <mclib/McBox3f.h>
+#include <psurface/Box.h>
 #include <mclib/McVec3f.h>
 #include <mclib/McVec3i.h>
 

@@ -3,8 +3,7 @@
 
 #include <mclib/McVec2f.h>
 #include <mclib/McVec3f.h>
-#include <mclib/McBox3f.h>
-#include <mclib/McBox2f.h>
+#include <psurface/Box.h>
 #include <mclib/McMat3f.h>
 #include <mclib/McDArray.h>
 #include <mclib/McSmallArray.h>
@@ -148,7 +147,6 @@ public:
     bool intersects(const TriangleType* triangle, float eps=0) const {
         return triangle->intersects(this, eps);
     }
-#endif    
 
     /// tests for intersection with a box, for use with a McOctree
     bool intersect(const McBox3f &box, void* userData=0) const {
@@ -208,6 +206,7 @@ public:
 
         return rect.intersect(intersection);
     }
+#endif    
 
     ///////////////////////////////////////////
     ///

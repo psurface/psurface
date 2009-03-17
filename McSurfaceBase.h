@@ -2,11 +2,12 @@
 #define MC__SURFACE_BASE
 
 #include <vector>
-#include "McPointerSurfaceParts.h"
-
-#include <vector>
+#include <tr1/array>
 #include <algorithm>
 #include <limits>
+
+#include "McPointerSurfaceParts.h"
+
 
 /** A simple pointer-based surface.  The @c VertexType, @c EdgeType, and @c TriangleType
     classes have to be derived from McVertex, McEdge, McTriangle,
@@ -505,7 +506,7 @@ protected:
 
 public:
     /// 
-    bool intersectionTriangleBox(TriangleIdx n, const McBox3f& box) {
+    bool intersectionTriangleBox(TriangleIdx n, const Box<std::tr1::array<float,3>, 3>& box) {
         return box.contains(vertices(triangles(n).vertices[0])) ||
             box.contains(vertices(triangles(n).vertices[1])) ||
             box.contains(vertices(triangles(n).vertices[2]));

@@ -76,12 +76,12 @@ bool CircularPatch::hasSmallDihedralAngles(float threshold, const Parametrizatio
 //////////////////////////////////////////////////////////////////
 // this routine returns the bounding box of the patch
 // it is not well programmed.  Each vertex is checked three times
-void CircularPatch::getBoundingBox(McBox3f &bbox) const
+void CircularPatch::getBoundingBox(Box<std::tr1::array<float,3>,3> &bbox) const
 {
     assert(size());
 
-    bbox = McBox3f(par->vertices(par->triangles(triangles[0]).vertices[0]), 
-                   par->vertices(par->triangles(triangles[0]).vertices[1]));
+    bbox.set(par->vertices(par->triangles(triangles[0]).vertices[0]), 
+             par->vertices(par->triangles(triangles[0]).vertices[1]));
     bbox.extendBy( par->vertices(par->triangles(triangles[0]).vertices[2]));
 
     for (int i=1; i<size(); i++)
