@@ -1,58 +1,6 @@
 /////////////////////////////////////////////////////////////////
 /*
  * $Id: PlaneParam.h,v 1.2 2007/10/18 16:05:58 sander Exp $
- *
- * $Log: PlaneParam.h,v $
- * Revision 1.2  2007/10/18 16:05:58  sander
- * stuff from 'contact' merged, renamed to psurface
- *
- * Revision 1.1  2007/10/17 13:16:55  sander
- * moved here from the ZIB server
- *
- * Revision 1.30  2006/12/20 09:19:15  bzfsande
- * fix for gcc-4.1: remove extra qualification
- * mailtoauthor: sander@zib.de
- *
- * Revision 1.29  2005/08/23 12:10:59  bzfsande
- * minor cleanup
- * mailtoauthor: sander@zib.de
- *
- * Revision 1.28  2005/02/03 17:27:33  bzfsande
- * documentation
- * mailtoauthor: sander@zib.de
- *
- * Revision 1.27  2003/08/27 12:22:19  bzfsande
- * fixes
- *
- * Revision 1.26  2003/06/30 12:44:44  bzfsande
- * generalizations needed for the contact library
- *
- * Revision 1.25  2003/06/05 13:01:33  bzfsande
- * introduces ghost nodes as a fifth node type
- * also, the access to the node domain positions is procedural now
- *
- * Revision 1.24  2003/05/09 08:58:20  bzfsande
- * bugfixes
- *
- * Revision 1.23  2003/04/04 14:59:18  bzfsande
- * The base grid is now array-based
- *
- * Revision 1.22  2003/03/24 13:26:53  bzfsande
- * separated the Parametrization object into a base grid object connected to a standard Surface
- *
- * Revision 1.21  2002/10/14 12:25:12  bzfsande
- * SUN fixes
- *
- * Revision 1.20  2002/10/08 13:00:29  bzfsande
- * mapping function with an explicit seed
- *
- * Revision 1.19  2002/10/02 15:22:39  bzfsande
- * Introduced the global #imagePos# array
- * - any data defined on the vertices of the original surface
- *   can now be queried
- * - The base grid vertices don't have to be at the same
- *   position as their homologues on the original surface anymore
- *
  */
 /////////////////////////////////////////////////////////////////
 #ifndef PLANE_PARAM_H
