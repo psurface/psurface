@@ -7,7 +7,7 @@
  */
 struct PointIntersectionFunctor
 {
-    bool operator()(const Box<std::tr1::array<float,3>, 3>& box, const McVec3f* item) const {
+    bool operator()(const Box<float, 3>& box, const McVec3f* item) const {
         return (box.lower()[0] <= item->x) && (item->x <= box.upper()[0])
             && (box.lower()[1] <= item->y) && (item->y <= box.upper()[1])
             && (box.lower()[2] <= item->z) && (item->z <= box.upper()[2]);

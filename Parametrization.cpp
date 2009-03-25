@@ -184,7 +184,7 @@ void Parametrization::clear()
     McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>::clear();
 }
 
-void Parametrization::getBoundingBox(Box<std::tr1::array<float,3>,3>& bbox) const
+void Parametrization::getBoundingBox(Box<float,3>& bbox) const
 {
     if (getNumVertices()==0)
         return;

@@ -151,11 +151,11 @@ public:
 	/** This method appends all elements which potentially may contain
         point @c pos to the dynamic array @c result. The array is not cleared
         in advance allowing you to collect results for multiple points. */
-	int lookup(const C& pos, ResultContainer& result);
+    int lookup(const std::tr1::array<C,dim>& pos, ResultContainer& result);
 
 	/** Same as lookup except that indices instead of pointers are
         returned. Requires prior call to enableUniqueLookup. */
-	int lookupIndex(const C& pos, std::vector<int>& result);
+	int lookupIndex(const std::tr1::array<C,dim>& pos, std::vector<int>& result);
 
 	/** This methods appends all elements that intersect a given box. */
 	int lookup(const BoxType &queryBox, ResultContainer& result);
@@ -293,7 +293,7 @@ protected:
 
 	bool remove(int elem, const BoxType &elemBox, const T* toBeDeleted);
 
-	void lookup(int elem, BoxType &elemBox, const C& pos, ResultContainer& result);
+	void lookup(int elem, BoxType &elemBox, const std::tr1::array<C,dim>& pos, ResultContainer& result);
 
 	void lookup(int elem, const BoxType &elemBox, const BoxType& queryBox, ResultContainer& result);
 
@@ -501,7 +501,7 @@ bool MultiDimOctree<T, F, C, dim, uniform_access>::insert(int elem, int depth, c
 	bool inserted = false;
 
 	// helpful points that describe box corners
-	C upper, lower;
+        std::tr1::array<C,dim> upper, lower;
 	// iterate over all subcells and check for intersections between
 	// item and subcells
 	for (int j = 0; j < SUBCELLS; ++j)
@@ -555,7 +555,7 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::iterateCells(int elem, int dep
 
 	int firstChild = element.n;
 
-	C lower, upper, center = elemBox.center();
+	std::tr1::array<C,dim> lower, upper, center = elemBox.center();
 
 	// prepare all indices for the next stage
 	depth++;
@@ -680,7 +680,7 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::info()
 
 
 template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::lookup(const C& pos, ResultContainer& result)
+int MultiDimOctree<T, F, C, dim, uniform_access>::lookup(const std::tr1::array<C,dim>& pos, ResultContainer& result)
 {
 	BoxType b(box);
 
@@ -769,7 +769,7 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, const BoxTyp
 		// since we do not have to check lower and upper coordinates of both boxes
 
 		// the boundary of the next subcell is stored in here
-		C lower, upper;
+                std::tr1::array<C,dim> lower, upper;
 		for (int j = 0; j < SUBCELLS; ++j)
 		{
 			bool intersects_subcell = true;
@@ -801,7 +801,7 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, const BoxTyp
 
 
 template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::lookupIndex(const C& pos, std::vector<int>& result)
+int MultiDimOctree<T, F, C, dim, uniform_access>::lookupIndex(const std::tr1::array<C,dim>& pos, std::vector<int>& result)
 {
 	ResultContainer tmpResult;
 	lookup(pos, tmpResult);
@@ -814,7 +814,7 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::lookupIndex(const C& pos, std:
 
 
 template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, BoxType &elemBox, const C& pos, ResultContainer& result)
+void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, BoxType &elemBox, const std::tr1::array<C,dim>& pos, ResultContainer& result)
 {
 	Element& element = allElements[elem];
 
@@ -840,7 +840,7 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, BoxType &ele
 	{
 		int firstChild = element.n;
 
-		C lower, upper;
+		std::tr1::array<C,dim> lower, upper;
 
 		int config = 0;
 		// compute the subcell in which the point is located
@@ -898,7 +898,7 @@ bool MultiDimOctree<T, F, C, dim, uniform_access>::remove(int elem, const BoxTyp
 		bool removed = false;
 
 		// helpful points that describe box corners
-		C upper, lower;
+		std::tr1::array<C,dim> upper, lower;
 		// iterate over all subcells and check for intersections between
 		// item and subcells
 		for (int j = 0; j < SUBCELLS; ++j)

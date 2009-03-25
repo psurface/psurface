@@ -142,7 +142,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     int i, j;
     const float epsSquared = epsilon*epsilon;
     
-    Box<std::tr1::array<float,3>,3> bbox1, bbox2;
+    Box<float,3> bbox1, bbox2;
 
     // stupid hack: The Amira Surface class wants a float* as the bounding box
     float bbox1_raw[6], bbox2_raw[6];
@@ -166,15 +166,15 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     bbox2.extendByEps(epsilon);
 
     // The possible contact patches must be in intersectBox
-    Box<std::tr1::array<float,3>,3> intersectBox = bbox1.intersectWith(bbox2);
+    Box<float,3> intersectBox = bbox1.intersectWith(bbox2);
 
     // We first put the vertices of surface1 into an octree
     std::tr1::array<float,3> lower, upper;
     lower = bbox1.lower();
     upper = bbox1.upper();
 
-    Box<std::tr1::array<float,3>, 3> mdBBox1(lower, upper);
-    MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree1(mdBBox1);
+    Box<float, 3> mdBBox1(lower, upper);
+    MultiDimOctree<McVec3f, PointIntersectionFunctor, float, 3, true> mdOctree1(mdBBox1);
     PointIntersectionFunctor intersectionFunctor;
 
     std::vector<McVec3f> points1(surf1->points.size());        
@@ -191,8 +191,8 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     lower = intersectBox.lower();
     upper = intersectBox.upper();
 
-    Box<std::tr1::array<float,3>, 3> mdIntersectBox(lower, upper);
-    MultiDimOctree<McVec3f, PointIntersectionFunctor, std::tr1::array<float,3>, 3, true> mdOctree2(mdIntersectBox);
+    Box<float, 3> mdIntersectBox(lower, upper);
+    MultiDimOctree<McVec3f, PointIntersectionFunctor, float, 3, true> mdOctree2(mdIntersectBox);
 
     std::vector<McVec3f> points2(surf2->points.size());        
 
@@ -232,7 +232,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
         //  Look up the octree for points in a conservative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
         std::vector<int> result;
-        Box<std::tr1::array<float,3>, 3> mdQueryBox(p0,p1);
+        Box<float, 3> mdQueryBox(p0,p1);
         mdQueryBox.extendBy(p2);
         mdQueryBox.extendByEps(epsilon);
         mdOctree2.lookupIndex(mdQueryBox, result);
@@ -264,7 +264,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
         //  Look up the octree for points in a conversative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
         std::vector<int> result;
-        Box<std::tr1::array<float,3>, 3> mdQueryBox(p0,p1);
+        Box<float, 3> mdQueryBox(p0,p1);
         mdQueryBox.extendBy(p2);
         mdQueryBox.extendByEps(epsilon);
         mdOctree1.lookupIndex(mdQueryBox, result);

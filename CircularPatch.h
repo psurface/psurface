@@ -89,7 +89,7 @@ public:
     int size() const { return triangles.size(); }
 
     ///
-    void getBoundingBox(Box<std::tr1::array<float,3>,3> &bbox) const;
+    void getBoundingBox(Box<float,3> &bbox) const;
 
     ///
     void killAll(){

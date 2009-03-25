@@ -24,12 +24,12 @@ public:
         surf = surface;
     }
 
-    Box<std::tr1::array<float,3>,3> getBoundingBox() const {
+    Box<float,3> getBoundingBox() const {
         
         if (vertices.size()==0)
-            return Box<std::tr1::array<float,3>,3>();
+            return Box<float,3>();
 
-        Box<std::tr1::array<float,3>,3> box(surf->points[vertices[0]], surf->points[vertices[0]]);
+        Box<float,3> box(surf->points[vertices[0]], surf->points[vertices[0]]);
         
         for (int i=1; i<vertices.size(); i++)
             box.extendBy(surf->points[vertices[i]]);

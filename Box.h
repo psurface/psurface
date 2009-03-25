@@ -2,7 +2,7 @@
  *  Filename:    Box.hh
  *  Version:     1.0
  *  Created on:  Jan 13, 2009
- *  Author:      Gerrit Buse
+ *  Author:      Gerrit Buse/Oliver Sander
  *  ---------------------------------
  *  Project:     liboctree
  *  Description: <short_description>
@@ -18,10 +18,11 @@
 #define BOX_H
 
 #include <algorithm>
+#include <tr1/array>
 #include <mclib/McVec3f.h>
 
 /** \brief A axis-parallel box in a Euclidean space
-    \tparam C Type used for coordinates
+    \tparam C Type used for coordinate components
     \tparam dim Dimension of the box
 */
 template<typename C, int dim>
@@ -34,9 +35,10 @@ public:
     {}
 
     /** \brief Set box from two points */
-    Box(const C& lower, const C& upper) : _lower(lower), _upper(upper)
+    Box(const std::tr1::array<C,dim>& lower, const std::tr1::array<C,dim>& upper) 
+        : _lower(lower), _upper(upper)
     {
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<dim; i++) {
             _lower[i] = std::min(lower[i],upper[i]);
             _upper[i] = std::max(lower[i],upper[i]);
         }
@@ -52,13 +54,13 @@ public:
     }
 
     /** \brief Copy constructor */
-	Box(const Box& b) : _lower(b._lower), _upper(b._upper)
+    Box(const Box& b) : _lower(b._lower), _upper(b._upper)
     {}
 
     /** \brief Set up box from to diagonal corners */
-    void set(const C& lower, const C& upper)
+    void set(const std::tr1::array<C,dim>& lower, const std::tr1::array<C,dim>& upper)
     {
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<dim; i++) {
             _lower[i] = std::min(lower[i],upper[i]);
             _upper[i] = std::max(lower[i],upper[i]);
         }
@@ -74,7 +76,7 @@ public:
     }
 
     /** \brief Test whether box contains a given point */
-	bool contains(const C& c) const
+	bool contains(const std::tr1::array<C,dim>& c) const
 	{
 		for (int i = 0; i < dim; ++i)
 			if (c[i] < this->_lower[i] || c[i] >= this->_upper[i])
@@ -102,7 +104,7 @@ public:
     /// Returns intersection of two boxes.
     Box<C,dim> intersectWith(const Box<C,dim> &other) const {
 
-        C zero;
+        std::tr1::array<C,dim> zero;
         zero.assign(0);
 
         Box<C,dim> innerBox(zero,zero);
@@ -119,9 +121,9 @@ public:
         return innerBox;
     }
 
-	C center() const
+	std::tr1::array<C,dim> center() const
 	{
-            C center;
+            std::tr1::array<C,dim> center;
             for (int i = 0; i < dim; ++i)
                 center[i] = 0.5*(_upper[i]+_lower[i]);
             return center;
@@ -133,18 +135,18 @@ public:
 		return _upper[i]-_lower[i];
 	}
 
-	const C& lower() const
+	const std::tr1::array<C,dim>& lower() const
 	{
 		return _lower;
 	}
 
-	const C& upper() const
+	const std::tr1::array<C,dim>& upper() const
 	{
 		return _upper;
 	}
 
         /// Extends the box to contain given point.
-    void extendBy(const C& point){
+    void extendBy(const std::tr1::array<C,dim>& point){
         for (int i=0; i<dim; i++) {
             _lower[i] = std::min(_lower[i], point[i]);
             _upper[i] = std::max(_upper[i], point[i]);
@@ -169,8 +171,8 @@ public:
 
 private:
 
-	C  _lower;
-	C  _upper;
+	std::tr1::array<C,dim> _lower;
+	std::tr1::array<C,dim> _upper;
 };
 
 #endif // BOX_HH_
