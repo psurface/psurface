@@ -120,19 +120,6 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
 
             // //////////////////////////////////////////////
             // Assemble the triangles
-#if 0
-            int newTri = mergedGrid.appendSpace(1);
-            mergedGrid[newTri].tris[0] = nonMortarTargetTris[i];
-            mergedGrid[newTri].tris[1] = targetTri;
-            
-            mergedGrid[newTri].localCoords[0][0] = intersections[0].pos;
-            mergedGrid[newTri].localCoords[0][1] = intersections[1].pos;
-            mergedGrid[newTri].localCoords[0][2] = intersections[2].pos;
-            
-            mergedGrid[newTri].localCoords[1][0] = intersections[0].localTargetCoords;
-            mergedGrid[newTri].localCoords[1][1] = intersections[1].localTargetCoords;
-            mergedGrid[newTri].localCoords[1][2] = intersections[2].localTargetCoords;
-#else
             mergedGrid.push_back(IntersectionPrimitive());
             mergedGrid.back().tris[0] = nonMortarTargetTris[i];
             mergedGrid.back().tris[1] = targetTri;
@@ -144,22 +131,21 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
             mergedGrid.back().localCoords[1][0] = intersections[0].localTargetCoords;
             mergedGrid.back().localCoords[1][1] = intersections[1].localTargetCoords;
             mergedGrid.back().localCoords[1][2] = intersections[2].localTargetCoords;
-#endif
             
 #ifndef MY_DB
             // world coordinate function
             mergedGrid.back().points[0] = 
-                PlaneParam::linearInterpol<McVec3f>(intersections[0].pos,
+                PlaneParam::linearInterpol<StaticVector<float,3> >(intersections[0].pos,
                                                     cPar->vertices(cT.vertices[0]), 
                                                     cPar->vertices(cT.vertices[1]), 
                                                     cPar->vertices(cT.vertices[2]));
             mergedGrid.back().points[1] = 
-                PlaneParam::linearInterpol<McVec3f>(intersections[1].pos, 
+                PlaneParam::linearInterpol<StaticVector<float,3> >(intersections[1].pos, 
                                                     cPar->vertices(cT.vertices[0]), 
                                                     cPar->vertices(cT.vertices[1]),
                                                     cPar->vertices(cT.vertices[2]));
             mergedGrid.back().points[2] = 
-                PlaneParam::linearInterpol<McVec3f>(intersections[2].pos, 
+                PlaneParam::linearInterpol<StaticVector<float,3> >(intersections[2].pos, 
                                                     cPar->vertices(cT.vertices[0]), 
                                                     cPar->vertices(cT.vertices[1]), 
                                                     cPar->vertices(cT.vertices[2]));           
@@ -167,9 +153,9 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
             
 #else
             // output in barycentric coordinates (for debugging)
-            mergedGrid[newTri].points[0] = McVec3f(intersections[0].pos.x, intersections[0].pos.y, 0);
-            mergedGrid[newTri].points[1] = McVec3f(intersections[1].pos.x, intersections[1].pos.y, 0);
-            mergedGrid[newTri].points[2] = McVec3f(intersections[2].pos.x, intersections[2].pos.y, 0);
+            mergedGrid[newTri].points[0] = StaticVector<float,3>(intersections[0].pos.x, intersections[0].pos.y, 0);
+            mergedGrid[newTri].points[1] = StaticVector<float,3>(intersections[1].pos.x, intersections[1].pos.y, 0);
+            mergedGrid[newTri].points[2] = StaticVector<float,3>(intersections[2].pos.x, intersections[2].pos.y, 0);
 #endif
             
             

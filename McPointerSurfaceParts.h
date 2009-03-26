@@ -1,11 +1,12 @@
 #ifndef MC_POINTER_SURFACE_PARTS
 #define MC_POINTER_SURFACE_PARTS
 
-#include <mclib/McVec2f.h>
-#include <mclib/McVec3f.h>
-#include <psurface/Box.h>
-#include <mclib/McMat3f.h>
 #include <vector>
+
+#include <mclib/McVec2f.h>
+#include <psurface/StaticVector.h>
+#include <psurface/StaticMatrix.h>
+#include <psurface/Box.h>
 #include <mclib/McSmallArray.h>
 #include <mclib/McSArray.h>
 
@@ -24,11 +25,11 @@ template<class VertexType>  class McEdge;
     @see McPointerSurface, McEdge, McTriangle
 */
 ///////////////////////////////////////////////////////////////
-class MCLIB_API McVertex: public McVec3f
+class MCLIB_API McVertex: public StaticVector<float,3>
 {
 public:
     McVertex() {}
-    McVertex(const McVec3f &a) : McVec3f(a) {}
+    McVertex(const StaticVector<float,3> &a) : StaticVector<float,3>(a) {}
 
     ~McVertex() {}
 
@@ -160,8 +161,8 @@ public:
 
     bool intersectsXYPatch(const McBox2f& rect, float z, const VertexType* vertices) const {
 
-        const McVec3f& f = vertices[from];
-        const McVec3f& t = vertices[to];
+        const StaticVector<float,3>& f = vertices[from];
+        const StaticVector<float,3>& t = vertices[to];
 
         if ( (f.z < z && t.z < z) || (f.z > z && t.z > z))
             return false;
@@ -175,8 +176,8 @@ public:
 
     bool intersectsXZPatch(const McBox2f& rect, float y, const VertexType* vertices) const {
 
-        const McVec3f& f = vertices[from];
-        const McVec3f& t = vertices[to];
+        const StaticVector<float,3>& f = vertices[from];
+        const StaticVector<float,3>& t = vertices[to];
 
         if ( (f.y < y && t.y <y) || (f.y > y && t.y > y))
             return false;
@@ -190,8 +191,8 @@ public:
 
     bool intersectsYZPatch(const McBox2f& rect, float x, const VertexType* vertices) const {
 
-        const McVec3f& f = vertices[from];
-        const McVec3f& t = vertices[to];
+        const StaticVector<float,3>& f = vertices[from];
+        const StaticVector<float,3>& t = vertices[to];
 
         if ( (f.x < x && t.x <x) || (f.x > x && t.x > x))
             return false;

@@ -118,8 +118,8 @@ public:
     NodeIdx splitNode(NodeIdx cN, std::vector<int>& nodeLocs);
 
     ///
-    unsigned int createNodePosition(std::vector<McVec3f>& nodePositions, std::vector<unsigned int>& nodeStack,
-                                    const McVec3f& newImagePos);
+    unsigned int createNodePosition(std::vector<StaticVector<float,3> >& nodePositions, std::vector<unsigned int>& nodeStack,
+                                    const StaticVector<float,3>& newImagePos);
 
     /// removes a vertex from the polygon
     void removeVertex(int point);

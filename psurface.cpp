@@ -117,7 +117,7 @@ int psurface::CallParametrization(int tri, double* p, int* res, double* coords, 
 int psurface::CallPositionParametrization(int tri, double* p, double* res)
 {
     McVec2f input(p[0], p[1]);
-    McVec3f result; 
+    StaticVector<float,3> result; 
 
     int status = currentDomain->positionMap(tri, input, result);
 
@@ -133,7 +133,7 @@ int psurface::CallPositionParametrization(int tri, double* p, double* res)
 int psurface::CallPositionParametrizationForDomain(int domain, int tri, double* p, double* res)
 {
     McVec2f input(p[0], p[1]);
-    McVec3f result; 
+    StaticVector<float,3> result; 
 
     int status = domains[domain].second->positionMap(tri, input, result);
 
@@ -148,7 +148,7 @@ int psurface::CallPositionParametrizationForDomain(int domain, int tri, double* 
 int psurface::CallDirectNormalParametrization(int tri, double* p, double* res)
 {
     McVec2f input(p[0], p[1]);
-    McVec3f result; 
+    StaticVector<float,3> result; 
 
     int status = currentDomain->directNormalMap(tri, input, result);
 

@@ -2,6 +2,7 @@
 #define DOMAINS_H
 
 #include <mclib/McVec2f.h>
+#include <psurface/StaticVector.h>
 
 #include "McPointerSurfaceParts.h"
 #include "PlaneParam.h"
@@ -19,14 +20,13 @@ public:
 
     DomainVertex() {}
 
-    DomainVertex(const McVec3f &a) : McVertex(a) {}
+    DomainVertex(const StaticVector<float,3> &a) : McVertex(a) {}
 
     ~DomainVertex() {}
 
-    DomainVertex& operator=(const McVec3f& rhs) {
-        x = rhs.x;
-        y = rhs.y;
-        z = rhs.z;
+    DomainVertex& operator=(const StaticVector<float,3>& rhs) {
+        for (int i=0; i<3; i++)
+            (*this)[i] = rhs[i];
         return *this;
     }
 

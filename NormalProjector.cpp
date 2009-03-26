@@ -1,9 +1,8 @@
 #include <psurface/ContactBoundary.h>
 #include <psurface/NormalProjector.h>
 
-#include <mclib/McVec2d.h>
-#include <mclib/McMat3d.h>
-#include <mclib/McVec3d.h>
+#include <psurface/StaticVector.h>
+#include <psurface/StaticMatrix.h>
 
 #include <psurface/NodeBundle.h>
 
@@ -24,8 +23,8 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
     int nPoints = par->getNumVertices();
     int nTriangles = par->getNumTriangles();
         
-    std::vector<McVec3d> normals(nPoints);
-    normals.assign(nPoints, McVec3d(0.0,0.0,0.0));
+    std::vector<StaticVector<double,3> > normals(nPoints);
+    normals.assign(nPoints, StaticVector<double,3>(0.0));
     
     std::vector<unsigned char> nTriPerVertex(nPoints);
 
@@ -53,12 +52,12 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             int p1 = par->triangles(i).vertices[1];
             int p2 = par->triangles(i).vertices[2];
             
-            McVec3f a_ = par->vertices(p1) - par->vertices(p0);
-            McVec3f b_ = par->vertices(p2) - par->vertices(p0);
+            StaticVector<float,3> a_ = par->vertices(p1) - par->vertices(p0);
+            StaticVector<float,3> b_ = par->vertices(p2) - par->vertices(p0);
             
-            McVec3d a(a_[0], a_[1], a_[2]);
-            McVec3d b(b_[0], b_[1], b_[2]);
-            McVec3d triNormal = a.cross(b);
+            StaticVector<double,3> a(a_[0], a_[1], a_[2]);
+            StaticVector<double,3> b(b_[0], b_[1], b_[2]);
+            StaticVector<double,3> triNormal = a.cross(b);
             triNormal.normalize();
             
             normals[p0] += triNormal;
@@ -84,7 +83,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
     int nTargetPoints = contactPatch.surf->points.size();
     int nTargetTriangles = contactPatch.triIdx.size();
         
-    targetNormals.assign(nTargetPoints, McVec3d(0.0,0.0,0.0));
+    targetNormals.assign(nTargetPoints, StaticVector<double,3>(0.0,0.0,0.0));
     std::vector<bool> hasTargetNormal;
     hasTargetNormal.assign(nTargetPoints, false);
 
@@ -94,12 +93,12 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
         int p1 = contactPatch.triangles(i).points[1];
         int p2 = contactPatch.triangles(i).points[2];
         
-        McVec3f a_ = contactPatch.surf->points[p1] - contactPatch.surf->points[p0];
-        McVec3f b_ = contactPatch.surf->points[p2] - contactPatch.surf->points[p0];
+        StaticVector<float,3> a_ = contactPatch.surf->points[p1] - contactPatch.surf->points[p0];
+        StaticVector<float,3> b_ = contactPatch.surf->points[p2] - contactPatch.surf->points[p0];
         
-        McVec3d a(a_[0], a_[1], a_[2]);
-        McVec3d b(b_[0], b_[1], b_[2]);
-        McVec3d triNormal = a.cross(b);
+        StaticVector<double,3> a(a_[0], a_[1], a_[2]);
+        StaticVector<double,3> b(b_[0], b_[1], b_[2]);
+        StaticVector<double,3> triNormal = a.cross(b);
         triNormal.normalize();
         
         targetNormals[p0] += triNormal;
@@ -134,21 +133,21 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
     // Loop over the vertices of the target surface
     for (i=0; i<contactPatch.vertices.size(); i++) {
 
-        McVec2d bestDPos;
+        StaticVector<double,2> bestDPos;
         int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
         for (j=0; j<par->getNumTriangles(); j++) {
 
-            const McVec3f& p0 = par->vertices(par->triangles(j).vertices[0]);
-            const McVec3f& p1 = par->vertices(par->triangles(j).vertices[1]);
-            const McVec3f& p2 = par->vertices(par->triangles(j).vertices[2]);
+            const StaticVector<float,3>& p0 = par->vertices(par->triangles(j).vertices[0]);
+            const StaticVector<float,3>& p1 = par->vertices(par->triangles(j).vertices[1]);
+            const StaticVector<float,3>& p2 = par->vertices(par->triangles(j).vertices[2]);
 
-            const McVec3d& n0 = normals[par->triangles(j).vertices[0]];
-            const McVec3d& n1 = normals[par->triangles(j).vertices[1]];
-            const McVec3d& n2 = normals[par->triangles(j).vertices[2]];
+            const StaticVector<double,3>& n0 = normals[par->triangles(j).vertices[0]];
+            const StaticVector<double,3>& n1 = normals[par->triangles(j).vertices[1]];
+            const StaticVector<double,3>& n2 = normals[par->triangles(j).vertices[2]];
 
-            McVec3d x; // the unknown...
+            StaticVector<double,3> x; // the unknown...
 
             if (computeInverseNormalProjection(p0, p1, p2, n0, n1, n2, 
                                                surf->points[contactPatch.vertices[i]], x)) {
@@ -159,9 +158,9 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                 // We do a simplified test by comparing the connecting segment
                 // with the normal at the target surface and the normal at the
                 // domain surface
-                McVec3f base       = p0*x[0] + p1*x[1] + (1-x[0]-x[1])*p2;
-                McVec3d baseNormal = n0*x[0] + n1*x[1] + (1-x[0]-x[1])*n2;
-                McVec3d segment(surf->points[contactPatch.vertices[i]][0] - base[0],
+                StaticVector<float,3> base       = p0*x[0] + p1*x[1] + (1-x[0]-x[1])*p2;
+                StaticVector<double,3> baseNormal = n0*x[0] + n1*x[1] + (1-x[0]-x[1])*n2;
+                StaticVector<double,3> segment(surf->points[contactPatch.vertices[i]][0] - base[0],
                                 surf->points[contactPatch.vertices[i]][1] - base[1],
                                 surf->points[contactPatch.vertices[i]][2] - base[2]);
                 
@@ -174,7 +173,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 //                        targetNormals[contactPatch.vertices[i]][1],
 //                        targetNormals[contactPatch.vertices[i]][2]);
 //                 printf("scalar product %g\n", segment.dot(targetNormals[contactPatch.vertices[i]]));
-                double distance = segment.length2();
+                double distance = segment.length() * segment.length();
 
                 if (segment.dot(targetNormals[contactPatch.vertices[i]]) > -eps
                     && segment.dot(baseNormal) > 0
@@ -190,7 +189,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                 if (distance < bestDist) {
 
                     bestDist = distance;
-                    bestDPos = McVec2d(x[0], x[1]);
+                    bestDPos = StaticVector<double,2>(x[0], x[1]);
                     bestTri  = j;
 
                 }
@@ -199,7 +198,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
         }
         
-        //printf("vertex: %d, bestTri: %d,  bestDPos %g %g\n", i, bestTri, bestDPos.x, bestDPos.y);
+        //printf("vertex: %d, bestTri: %d,  bestDPos %g %g\n", i, bestTri, bestDPos[0], bestDPos[1]);
 
         if (bestTri != -1) {
 
@@ -211,37 +210,37 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             // if the normal projection hits a base grid vertex, this is the vertex
             int v = -1;
 
-            if (bestDPos.x < eps) {
+            if (bestDPos[0] < eps) {
                 dir = 1;
-                mu = 1-bestDPos.y;
-                if (bestDPos.y < eps) {
+                mu = 1-bestDPos[1];
+                if (bestDPos[1] < eps) {
                     newType = Node::CORNER_NODE;
                     v       = par->triangles(bestTri).vertices[2];
-                } else if (bestDPos.y > 1-eps) {
+                } else if (bestDPos[1] > 1-eps) {
                     newType = Node::CORNER_NODE;
                     v       = par->triangles(bestTri).vertices[1];
                 } else {
                     newType = Node::TOUCHING_NODE;
                 }
-            } else if (bestDPos.y < eps) {
+            } else if (bestDPos[1] < eps) {
                 dir = 2;
-                mu = bestDPos.x;
-                if (bestDPos.x < eps) {
+                mu = bestDPos[0];
+                if (bestDPos[0] < eps) {
                     newType = Node::CORNER_NODE;
                     v       = par->triangles(bestTri).vertices[2];
-                } else if (bestDPos.x > 1-eps) {
+                } else if (bestDPos[0] > 1-eps) {
                     newType = Node::CORNER_NODE;
                     v       = par->triangles(bestTri).vertices[0];
                 } else {
                     newType = Node::TOUCHING_NODE;
                 }
-            } else if (1-bestDPos.x-bestDPos.y < eps) {
+            } else if (1-bestDPos[0]-bestDPos[1] < eps) {
                 dir = 0;
-                mu = 1-bestDPos.x;
-                if (bestDPos.y < eps) {
+                mu = 1-bestDPos[0];
+                if (bestDPos[1] < eps) {
                     newType = Node::CORNER_NODE;
                     v       = par->triangles(bestTri).vertices[0];
-                } else if (bestDPos.y > 1-eps) {
+                } else if (bestDPos[1] > 1-eps) {
                     newType = Node::CORNER_NODE;
                     v       = par->triangles(bestTri).vertices[1];
                 } else {
@@ -251,7 +250,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                     
             //printf("newType: %d\n", newType);
 
-            McVec2f bestDPosFloat(bestDPos.x, bestDPos.y);
+            McVec2f bestDPosFloat(bestDPos[0], bestDPos[1]);
 
             if (newType==Node::TOUCHING_NODE) {
 
@@ -329,26 +328,26 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
         if (vertexHasBeenHandled[i])
             continue;
 
-        McVec2d bestDPos;
+        StaticVector<double,2> bestDPos;
         int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
-        const McVec3f& basePointFloat = par->vertices(i);
-        const McVec3d basePoint(basePointFloat.x, basePointFloat.y, basePointFloat.z);
-        const McVec3d& normal    = normals[i];
+        const StaticVector<float,3>& basePointFloat = par->vertices(i);
+        const StaticVector<double,3> basePoint(basePointFloat[0], basePointFloat[1], basePointFloat[2]);
+        const StaticVector<double,3>& normal    = normals[i];
 
         //for (j=0; j<reducedContactPatch.triIdx.size(); j++) {
         for (j=0; j<contactPatch.triIdx.size(); j++) {
 
-            McVec2d domainPos;
+            StaticVector<double,2> domainPos;
             double dist;
 
-//             const McVec3f& p0 = surf->points[reducedContactPatch.triangles(j).points[0]];
-//             const McVec3f& p1 = surf->points[reducedContactPatch.triangles(j).points[1]];
-//             const McVec3f& p2 = surf->points[reducedContactPatch.triangles(j).points[2]];
-            const McVec3f& p0 = surf->points[contactPatch.triangles(j).points[0]];
-            const McVec3f& p1 = surf->points[contactPatch.triangles(j).points[1]];
-            const McVec3f& p2 = surf->points[contactPatch.triangles(j).points[2]];
+//             const StaticVector<float,3>& p0 = surf->points[reducedContactPatch.triangles(j).points[0]];
+//             const StaticVector<float,3>& p1 = surf->points[reducedContactPatch.triangles(j).points[1]];
+//             const StaticVector<float,3>& p2 = surf->points[reducedContactPatch.triangles(j).points[2]];
+            const StaticVector<float,3>& p0 = surf->points[contactPatch.triangles(j).points[0]];
+            const StaticVector<float,3>& p1 = surf->points[contactPatch.triangles(j).points[1]];
+            const StaticVector<float,3>& p2 = surf->points[contactPatch.triangles(j).points[2]];
 
             if (rayIntersectsTriangle(basePoint, normal, p0, p1, p2, domainPos, dist, eps)) {
 
@@ -362,7 +361,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             
             // ...
             if (bestTri != -1) {
-                //printf("Insert ghostNode at (%f %f)\n", bestDPos.x, bestDPos.y);
+                //printf("Insert ghostNode at (%f %f)\n", bestDPos[0], bestDPos[1]);
                 //insertGhostNodeAtVertex(par, i, reducedContactPatch.triIdx[bestTri], bestDPos);
                 insertGhostNodeAtVertex(par, i, contactPatch.triIdx[bestTri], bestDPos);
                 break;
@@ -404,7 +403,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
 
 void NormalProjector::insertEdge(Parametrization* par, 
-                                 const std::vector<McVec3d>& normals,
+                                 const std::vector<StaticVector<double,3> >& normals,
                                  int from, int to, 
                                  const std::vector<NodeBundle>& projectedTo)
 {
@@ -473,7 +472,7 @@ void NormalProjector::insertEdge(Parametrization* par,
 }
 
 void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par, 
-                                                 const std::vector<McVec3d>& normals,
+                                                 const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
@@ -491,7 +490,7 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
             continue;
             
         //printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
-        McVec3d x;
+        StaticVector<double,3> x;
         int p = par->triangles(curr[0].tri).vertices[i];
         int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
         //printf("p: %d   q: %d\n", p, q);
@@ -540,13 +539,13 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
                 int e = par->triangles(neighboringTri).getCorner(q);
                     
                 // the domain position of the new intersection node on this triangle
-                McVec2d dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
-                McVec2d dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
+                StaticVector<double,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
+                StaticVector<double,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
-                McVec3f image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
+                StaticVector<float,3> image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
 
-                McVec2f dom1Float(dom1.x, dom1.y);
-                McVec2f dom2Float(dom2.x, dom2.y);
+                McVec2f dom1Float(dom1[0], dom1[1]);
+                McVec2f dom2Float(dom2[0], dom2[1]);
                 NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1Float, dom2Float, i, e, image);
                 NodeIdx newNodeOut = par->triangles(neighboringTri).nodes.size()-1;
@@ -583,7 +582,7 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
 }
 
 void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par, 
-                                                 const std::vector<McVec3d>& normals,
+                                                 const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
@@ -604,7 +603,7 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
             continue;
             
         //   printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
-        McVec3d x;
+        StaticVector<double,3> x;
         int p = par->triangles(curr[0].tri).vertices[i];
         int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
         //printf("p: %d   q: %d\n", p, q);
@@ -655,7 +654,7 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
                 McVec2f dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
                 McVec2f dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
-                McVec3f image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
+                StaticVector<float,3> image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
                     
                 NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1, dom2, i, e, image);
@@ -694,7 +693,7 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
 }
 
 void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
-                                                 const std::vector<McVec3d>& normals,
+                                                 const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringTri)
@@ -721,7 +720,7 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
             if (j==currentEdge)
                 continue;
             
-            McVec3d x;
+            StaticVector<double,3> x;
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
@@ -764,7 +763,7 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                     McVec2f dom1((j==0)*(1-mu) + (j==2)*mu, (j==0)*mu + (j==1)*(1-mu));
                     McVec2f dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
-                    McVec3f image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
+                    StaticVector<float,3> image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
                     
                     NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[i].tri, neighboringTri,
                                                                         dom1, dom2, j, e, image);
@@ -814,7 +813,7 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
 
 
 void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
-                                               const std::vector<McVec3d>& normals, int from, int to, double &lambda,
+                                               const std::vector<StaticVector<double,3> >& normals, int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
 {
@@ -845,7 +844,7 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
         int thisCorner = par->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
         //printf("Testing Triangle %d\n", cT);
-        McVec3d x;
+        StaticVector<double,3> x;
         int p = par->triangles(cT).vertices[(thisCorner+1)%3];
         int q = par->triangles(cT).vertices[(thisCorner+2)%3];
         //printf("p: %d   q: %d\n", p, q);
@@ -890,7 +889,7 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
                 McVec2f dom1((oppEdge==0)*(1-mu) + (oppEdge==2)*mu, (oppEdge==0)*mu + (oppEdge==1)*(1-mu));
                 McVec2f dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                 
-                McVec3f image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
+                StaticVector<float,3> image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
                 
                 NodeIdx newNodeIn  = par->addIntersectionNodePair(cT, neighboringTri,
                                                                   dom1, dom2, oppEdge, e, image);
@@ -939,7 +938,7 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
 
 
 bool NormalProjector::edgeCanBeInserted(const Parametrization* par, 
-                                        const std::vector<McVec3d>& normals,
+                                        const std::vector<StaticVector<double,3> >& normals,
                                         int from, int to, 
                                         const std::vector<NodeBundle>& projectedTo)
 {
@@ -1007,7 +1006,7 @@ bool NormalProjector::edgeCanBeInserted(const Parametrization* par,
 }
 
 bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par, 
-                                                     const std::vector<McVec3d>& normals,
+                                                     const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
                                                      Node::NodeType& currType, int& currTri,
@@ -1022,7 +1021,7 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
             continue;
             
         //printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
-        McVec3d x;
+        StaticVector<double,3> x;
         int p = par->triangles(currTri).vertices[i];
         int q = par->triangles(currTri).vertices[(i+1)%3];
         //printf("p: %d   q: %d\n", p, q);
@@ -1089,7 +1088,7 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
 }
 
 bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* par, 
-                                                         const std::vector<McVec3d>& normals,
+                                                         const std::vector<StaticVector<double,3> >& normals,
                                                          int from, int to, double &lambda,
                                                          const std::vector<NodeBundle>& projectedTo,
                                                          Node::NodeType& currType, int& currTri,
@@ -1106,7 +1105,7 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
         if (i==enteringEdge)
             continue;
             
-        McVec3d x;
+        StaticVector<double,3> x;
         int p = par->triangles(currTri).vertices[i];
         int q = par->triangles(currTri).vertices[(i+1)%3];
         
@@ -1169,7 +1168,7 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
 
 
 bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
-                                                     const std::vector<McVec3d>& normals,
+                                                     const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
                                                      const NodeBundle& curr,
@@ -1190,7 +1189,7 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
             if (j==currentEdge)
                 continue;
         
-            McVec3d x;
+            StaticVector<double,3> x;
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
@@ -1253,7 +1252,7 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
 
 
 bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
-                                                   const std::vector<McVec3d>& normals, 
+                                                   const std::vector<StaticVector<double,3> >& normals, 
                                                    int from, int to, double &lambda,
                                                    const std::vector<NodeBundle>& projectedTo,
                                                    const NodeBundle& curr, 
@@ -1278,7 +1277,7 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
         int thisCorner = par->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
         //printf("Testing Triangle %d\n", cT);
-        McVec3d x;
+        StaticVector<double,3> x;
         int p = par->triangles(cT).vertices[(thisCorner+1)%3];
         int q = par->triangles(cT).vertices[(thisCorner+2)%3];
         //printf("p: %d   q: %d\n", p, q);
@@ -1362,16 +1361,16 @@ bool NormalProjector::onSameTriangle(const int& tri, const NodeBundle& b) const
 }
 
 void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v, 
-                                              int targetTri, const McVec2d& localTargetCoords)
+                                              int targetTri, const StaticVector<double,2>& localTargetCoords)
 {
     McSmallArray<int, 12> neighbors = par->getTrianglesPerVertex(v);
-    //printf("localtargetCoords (%f %f)\n", localTargetCoords.x, localTargetCoords.y);
+    //printf("localtargetCoords (%f %f)\n", localTargetCoords[0], localTargetCoords[1]);
     for (int i=0; i<neighbors.size(); i++) {
 
         const DomainTriangle& cT = par->triangles(neighbors[i]);
         
         int corner = cT.getCorner(v);
-        McVec2f lTC_Float(localTargetCoords.x, localTargetCoords.y);
+        McVec2f lTC_Float(localTargetCoords[0], localTargetCoords[1]);
         par->addGhostNode(neighbors[i], corner, targetTri, lTC_Float);
 
     }
@@ -1381,7 +1380,7 @@ void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v,
 void NormalProjector::addCornerNodeBundle(Parametrization* cS, int v, int nN)
 {
     McSmallArray<int, 12> neighbors = cS->getTrianglesPerVertex(v);
-    //printf("localtargetCoords (%f %f)\n", localTargetCoords.x, localTargetCoords.y);
+    //printf("localtargetCoords (%f %f)\n", localTargetCoords[0], localTargetCoords[1]);
     for (int i=0; i<neighbors.size(); i++) {
 
         const DomainTriangle& cT = cS->triangles(neighbors[i]);
@@ -1393,37 +1392,37 @@ void NormalProjector::addCornerNodeBundle(Parametrization* cS, int v, int nN)
         
 }
 
-bool NormalProjector::computeInverseNormalProjection(const McVec3f& p0_f, const McVec3f& p1_f, const McVec3f& p2_f,
-                                                     const McVec3d& n0, const McVec3d& n1, const McVec3d& n2,
-                                                     const McVec3f& target, McVec3d& x)
+bool NormalProjector::computeInverseNormalProjection(const StaticVector<float,3>& p0_f, const StaticVector<float,3>& p1_f, const StaticVector<float,3>& p2_f,
+                                                     const StaticVector<double,3>& n0, const StaticVector<double,3>& n1, const StaticVector<double,3>& n2,
+                                                     const StaticVector<float,3>& target, StaticVector<double,3>& x)
 {
     int i;
     const double eps = 1e-6;
     // Fix some initial value
-    x.setValue(1.0, 1.0, 1.0);
+    x.assign(1.0);
 
     // transform to double
-    McVec3d p0(p0_f[0], p0_f[1], p0_f[2]);
-    McVec3d p1(p1_f[0], p1_f[1], p1_f[2]);
-    McVec3d p2(p2_f[0], p2_f[1], p2_f[2]);
+    StaticVector<double,3> p0(p0_f[0], p0_f[1], p0_f[2]);
+    StaticVector<double,3> p1(p1_f[0], p1_f[1], p1_f[2]);
+    StaticVector<double,3> p2(p2_f[0], p2_f[1], p2_f[2]);
 
     for (i=0; i<10; i++) {
 
         // compute Newton correction
-        McVec3d Fxk = x[0]*(p0-p2) + x[1]*(p1-p2) + x[2]*x[0]*(n0-n2) + x[2]*x[1]*(n1-n2) + x[2]*n2 + p2;// - target;
+        StaticVector<double,3> Fxk = x[0]*(p0-p2) + x[1]*(p1-p2) + x[2]*x[0]*(n0-n2) + x[2]*x[1]*(n1-n2) + x[2]*n2 + p2;// - target;
         Fxk[0] -= target[0];
         Fxk[1] -= target[1];
         Fxk[2] -= target[2];
 
         //printf("Fxk = (%f %f %f)\n", Fxk[0], Fxk[1], Fxk[2]);
 
-        McMat3d FPrimexk(p0 - p2 + x[2]*(n0-n2),
+        StaticMatrix<double,3> FPrimexk(p0 - p2 + x[2]*(n0-n2),
                          p1 - p2 + x[2]*(n1-n2),
                          x[0]*(n0-n2) + x[1]*(n1-n2) + n2);
 
-        McMat3d FPrimexkInv = FPrimexk.inverse();
+        StaticMatrix<double,3> FPrimexkInv = FPrimexk.inverse();
 
-        McVec3d newtonCorrection; // = (-1) * FPrimexk.inverse() * Fxk;
+        StaticVector<double,3> newtonCorrection; // = (-1) * FPrimexk.inverse() * Fxk;
         
         FPrimexkInv.multMatrixVec(-Fxk, newtonCorrection);
 
@@ -1443,33 +1442,34 @@ bool NormalProjector::computeInverseNormalProjection(const McVec3f& p0_f, const 
     return false;
 }
 
-bool NormalProjector::edgeIntersectsNormalFan(const McVec3f& q0_f, const McVec3f& q1_f,
-                                              const McVec3f& p0_f, const McVec3f& p1_f,
-                                              const McVec3d& n0, const McVec3d& n1,
-                                              McVec3d& x)
+bool NormalProjector::edgeIntersectsNormalFan(const StaticVector<float,3>& q0_f, const StaticVector<float,3>& q1_f,
+                                              const StaticVector<float,3>& p0_f, const StaticVector<float,3>& p1_f,
+                                              const StaticVector<double,3>& n0, const StaticVector<double,3>& n1,
+                                              StaticVector<double,3>& x)
 {
     int i;
     // transform to double values
-    McVec3d q0(q0_f[0], q0_f[1], q0_f[2]);
-    McVec3d q1(q1_f[0], q1_f[1], q1_f[2]);
-    McVec3d p0(p0_f[0], p0_f[1], p0_f[2]);
-    McVec3d p1(p1_f[0], p1_f[1], p1_f[2]);
+    StaticVector<double,3> q0(q0_f[0], q0_f[1], q0_f[2]);
+    StaticVector<double,3> q1(q1_f[0], q1_f[1], q1_f[2]);
+    StaticVector<double,3> p0(p0_f[0], p0_f[1], p0_f[2]);
+    StaticVector<double,3> p1(p1_f[0], p1_f[1], p1_f[2]);
 
     // Fix some initial value
     // sometimes it only works when the initial value is an intersection...
-    x.setValue(0.5, 0.5, 1);
-    McVec3d newtonCorrection;
+    x[0] = x[1] = 0.5;
+    x[2] = 1;
+    StaticVector<double,3> newtonCorrection;
 
     //printf("--------- in Newton solver -----------\n");
     for (i=0; i<30; i++) {
 
         // compute Newton correction
 
-        McVec3d Fxk = p0-q0 + x[0]*(p1-p0) + x[2]*n0 + x[2]*x[0]*(n1-n0) - x[1]*(q1-q0);
+        StaticVector<double,3> Fxk = p0-q0 + x[0]*(p1-p0) + x[2]*n0 + x[2]*x[0]*(n1-n0) - x[1]*(q1-q0);
 
-        //printf("Fxk: (%f %f %f)\n", Fxk.x, Fxk.y, Fxk.z);
+        //printf("Fxk: (%f %f %f)\n", Fxk[0], Fxk[1], Fxk.z);
 
-        McMat3d FPrimexk(p1-p0 + x[2]*(n1-n0),
+        StaticMatrix<double,3> FPrimexk(p1-p0 + x[2]*(n1-n0),
                          q0-q1,
                          n0 + x[0]*(n1-n0));
 
@@ -1478,7 +1478,7 @@ bool NormalProjector::edgeIntersectsNormalFan(const McVec3f& q0_f, const McVec3f
 //         printf("          %f \t %f \t %f\n\n", FPrimexk[2][0],FPrimexk[2][1],FPrimexk[2][2]);
 
 //         printf("det: %f\n", FPrimexk.det());
-        McMat3d FPrimexkInv = FPrimexk.inverse();
+        StaticMatrix<double,3> FPrimexkInv = FPrimexk.inverse();
         
 //         printf("FPrimexkInv: %f \t %f \t %f\n", FPrimexkInv[0][0],FPrimexkInv[0][1],FPrimexkInv[0][2]);
 //         printf("             %f \t %f \t %f\n", FPrimexkInv[1][0],FPrimexkInv[1][1],FPrimexkInv[1][2]);
@@ -1496,7 +1496,7 @@ bool NormalProjector::edgeIntersectsNormalFan(const McVec3f& q0_f, const McVec3f
 //         printf("corr = (%f %f %f)\n", newtonCorrection[0], newtonCorrection[1], newtonCorrection[2]);
 //          printf("x = (%f %f %f)\n", x[0], x[1], x[2]);
     }
-    //assert(newtonCorrection.x > -50);
+    //assert(newtonCorrection[0] > -50);
     if (x[0]>=0 && x[0]<=1 && x[1]>=0 && x[1]<=1 && newtonCorrection.length()<1e-4){
         //printf("x = (%f %f %f)\n", x[0], x[1], x[2]);
         return true;
@@ -1505,35 +1505,35 @@ bool NormalProjector::edgeIntersectsNormalFan(const McVec3f& q0_f, const McVec3f
     return false;
 }
 
-bool NormalProjector::rayIntersectsTriangle(const McVec3d& basePoint, const McVec3d& direction,
-                                            const McVec3f& a_, const McVec3f& b_, const McVec3f& c_,
-                                            McVec2d& localCoords, double& normalDist, double eps)
+bool NormalProjector::rayIntersectsTriangle(const StaticVector<double,3>& basePoint, const StaticVector<double,3>& direction,
+                                            const StaticVector<float,3>& a_, const StaticVector<float,3>& b_, const StaticVector<float,3>& c_,
+                                            StaticVector<double,2>& localCoords, double& normalDist, double eps)
 {
-    const McVec3d &p = basePoint;
+    const StaticVector<double,3> &p = basePoint;
 
-    McVec3d a(a_[0], a_[1], a_[2]);
-    McVec3d b(b_[0], b_[1], b_[2]);
-    McVec3d c(c_[0], c_[1], c_[2]);
+    StaticVector<double,3> a(a_[0], a_[1], a_[2]);
+    StaticVector<double,3> b(b_[0], b_[1], b_[2]);
+    StaticVector<double,3> c(c_[0], c_[1], c_[2]);
 
-    McVec3d e1 = b-a;
-    McVec3d e2 = c-a;
+    StaticVector<double,3> e1 = b-a;
+    StaticVector<double,3> e2 = c-a;
     e1.normalize();
     e2.normalize();
-    bool parallel = fabs(McMat3d(e1, e2, direction).det()) <eps;
+    bool parallel = fabs(StaticMatrix<double,3>(e1, e2, direction).det()) <eps;
         
         // Cramer's rule
         
         if (!parallel){
 
-            double det = McMat3d(b-a, c-a, direction).det();
+            double det = StaticMatrix<double,3>(b-a, c-a, direction).det();
             
             // triangle and edge are not parallel
-            double nu = McMat3d(b-a, c-a, p-a).det() / det;
+            double nu = StaticMatrix<double,3>(b-a, c-a, p-a).det() / det;
 
-            double lambda = McMat3d(p-a, c-a, direction).det() / det;
+            double lambda = StaticMatrix<double,3>(p-a, c-a, direction).det() / det;
             if (lambda<-eps) return false;
 
-            double mu = McMat3d(b-a, p-a, direction).det() / det;
+            double mu = StaticMatrix<double,3>(b-a, p-a, direction).det() / det;
             if (mu<-eps) return false;
 
             if (lambda + mu > 1+eps) 
@@ -1547,19 +1547,19 @@ bool NormalProjector::rayIntersectsTriangle(const McVec3d& basePoint, const McVe
 //                 printf("lambda: %g,   mu %g\n", lambda, mu);
 //                 printf("a: (%g %g %g),  b (%g %g %g)  c (%g %g %g)\n",
 //                        a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
-                //McVec3d where = p + nu*(-direction);
-                //printf("where (%f %f %f)\n", where.x, where.y, where.z);
-                //McVec3d w6 = a*(1-localCoords[0]-localCoords[1]) + b*localCoords[1] + c*localCoords[0];
-                //McVec3d w6 = a*localCoords[0] + b*localCoords[1] + c*(1-localCoords[0]-localCoords[1]);
+                //StaticVector<double,3> where = p + nu*(-direction);
+                //printf("where (%f %f %f)\n", where[0], where[1], where.z);
+                //StaticVector<double,3> w6 = a*(1-localCoords[0]-localCoords[1]) + b*localCoords[1] + c*localCoords[0];
+                //StaticVector<double,3> w6 = a*localCoords[0] + b*localCoords[1] + c*(1-localCoords[0]-localCoords[1]);
 
-                //printf("w6: (%f %f %f)\n", w6.x, w6.y, w6.z);
+                //printf("w6: (%f %f %f)\n", w6[0], w6[1], w6.z);
                 return true;
             }
 
         } else {
 
             // triangle and edge are parallel
-            double alpha = McMat3d(b-a, c-a, p-a).det();
+            double alpha = StaticMatrix<double,3>(b-a, c-a, p-a).det();
             if (alpha<-eps || alpha>eps)
                 return false;
             else {

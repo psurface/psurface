@@ -94,7 +94,7 @@ void CircularPatch::getBoundingBox(Box<float,3> &bbox) const
 
 //////////////////////////////////////////////////////////////////
 // gives the distance of a point to the patch
-float CircularPatch::distanceTo(const McVec3f &p) const
+float CircularPatch::distanceTo(const StaticVector<float,3> &p) const
 {
     int i, j;
     float bestDist = std::numeric_limits<float>::max();
@@ -104,24 +104,24 @@ float CircularPatch::distanceTo(const McVec3f &p) const
 
         const DomainTriangle& cT = par->triangles(triangles[j]);
         
-        McVec3f triPoints[3];
+        StaticVector<float,3> triPoints[3];
         triPoints[0] = par->vertices(cT.vertices[0]);
         triPoints[1] = par->vertices(cT.vertices[1]);
         triPoints[2] = par->vertices(cT.vertices[2]);
         
         // local base
-        McVec3f a = triPoints[1] - triPoints[0];
-        McVec3f b = triPoints[2] - triPoints[0];
-        McVec3f c = a.cross(b);
+        StaticVector<float,3> a = triPoints[1] - triPoints[0];
+        StaticVector<float,3> b = triPoints[2] - triPoints[0];
+        StaticVector<float,3> c = a.cross(b);
         c.normalize();
         
-        McVec3f x = p - triPoints[0];
+        StaticVector<float,3> x = p - triPoints[0];
         
         // write x in the new base  (Cramer's rule)
-        McMat3f numerator(a, b, c);
-        McMat3f alphaMat(x, b, c);
-        McMat3f betaMat(a, x, c);
-        McMat3f gammaMat(a, b, x);
+        StaticMatrix<float,3> numerator(a, b, c);
+        StaticMatrix<float,3> alphaMat(x, b, c);
+        StaticMatrix<float,3> betaMat(a, x, c);
+        StaticMatrix<float,3> gammaMat(a, b, x);
         
         float alpha = alphaMat.det()/numerator.det();
         float beta  = betaMat.det()/numerator.det();
@@ -147,13 +147,13 @@ float CircularPatch::distanceTo(const McVec3f &p) const
 
             const DomainTriangle& cT = par->triangles(triangles[i]);
 
-            McVec3f from = par->vertices(cT.vertices[j]);
-            McVec3f to   = par->vertices(cT.vertices[(j+1)%3]);
+            StaticVector<float,3> from = par->vertices(cT.vertices[j]);
+            StaticVector<float,3> to   = par->vertices(cT.vertices[(j+1)%3]);
             
-            McVec3f edge = to - from;
+            StaticVector<float,3> edge = to - from;
             
             float projectLength = edge.dot(p - from)/edge.length();
-            McVec3f projection = edge/edge.length() * projectLength;
+            StaticVector<float,3> projection = edge/edge.length() * projectLength;
             
             float orthoDist = ((p-from) - projection).length();
             

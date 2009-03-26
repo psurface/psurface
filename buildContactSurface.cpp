@@ -63,7 +63,7 @@ void ContactToolBox::buildContactSurface(Parametrization* cPar,
     theNodes->dataColumns.resize(0);
 
     for (i=0; i<contactBoundary[0].vertices.size(); i++) {
-        theNodes->points[i] = McVec3f(contactBoundary[0].surf->points[contactBoundary[0].vertices[i]].x,
+        theNodes->points[i] = StaticVector<float,3>(contactBoundary[0].surf->points[contactBoundary[0].vertices[i]].x,
                                       contactBoundary[0].surf->points[contactBoundary[0].vertices[i]].y,
                                       contactBoundary[0].surf->points[contactBoundary[0].vertices[i]].z);
 
@@ -84,7 +84,7 @@ void ContactToolBox::buildContactSurface(Parametrization* cPar,
     theNodes->dataColumns.resize(0);
 
     for (i=0; i<contactBoundary[1].vertices.size(); i++) {
-        theNodes->points[i] = McVec3f(contactBoundary[1].surf->points[contactBoundary[1].vertices[i]].x,
+        theNodes->points[i] = StaticVector<float,3>(contactBoundary[1].surf->points[contactBoundary[1].vertices[i]].x,
                                       contactBoundary[1].surf->points[contactBoundary[1].vertices[i]].y,
                                       contactBoundary[1].surf->points[contactBoundary[1].vertices[i]].z);
 
@@ -174,10 +174,10 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     upper = bbox1.upper();
 
     Box<float, 3> mdBBox1(lower, upper);
-    MultiDimOctree<McVec3f, PointIntersectionFunctor, float, 3, true> mdOctree1(mdBBox1);
+    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor, float, 3, true> mdOctree1(mdBBox1);
     PointIntersectionFunctor intersectionFunctor;
 
-    std::vector<McVec3f> points1(surf1->points.size());        
+    std::vector<StaticVector<float,3> > points1(surf1->points.size());        
 
     for (int i=0; i<surf1->points.size(); i++) {
         points1[i] = surf1->points[i];
@@ -192,9 +192,9 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     upper = intersectBox.upper();
 
     Box<float, 3> mdIntersectBox(lower, upper);
-    MultiDimOctree<McVec3f, PointIntersectionFunctor, float, 3, true> mdOctree2(mdIntersectBox);
+    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor, float, 3, true> mdOctree2(mdIntersectBox);
 
-    std::vector<McVec3f> points2(surf2->points.size());        
+    std::vector<StaticVector<float,3> > points2(surf2->points.size());        
 
     for (int i=0; i<surf2->points.size(); i++){
         
@@ -225,9 +225,9 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     //  Loop over all triangles in surface1
     for (int i=0; i<surf1->triangles.size(); i++) {
 
-        const McVec3f& p0 = surf1->points[surf1->triangles[i].points[0]];
-        const McVec3f& p1 = surf1->points[surf1->triangles[i].points[1]];
-        const McVec3f& p2 = surf1->points[surf1->triangles[i].points[2]];
+        const StaticVector<float,3>& p0 = surf1->points[surf1->triangles[i].points[0]];
+        const StaticVector<float,3>& p1 = surf1->points[surf1->triangles[i].points[1]];
+        const StaticVector<float,3>& p2 = surf1->points[surf1->triangles[i].points[2]];
 
         //  Look up the octree for points in a conservative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
@@ -243,9 +243,9 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
             if (contactField2[result[j]])
                 continue;
 
-            const McVec3f& candidatePoint = surf2->points[result[j]];
+            const StaticVector<float,3>& candidatePoint = surf2->points[result[j]];
 
-            McVec3f q = getClosestPointOnTriangle(p0, p1, p2, candidatePoint);
+            StaticVector<float,3> q = getClosestPointOnTriangle(p0, p1, p2, candidatePoint);
 
             if ( (q-candidatePoint).length2() < epsSquared)
                 contactField2[result[j]] = true;
@@ -257,9 +257,9 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     //  Loop over all triangles in surface2
     for (int i=0; i<surf2->triangles.size(); i++) {
 
-        const McVec3f& p0 = surf2->points[surf2->triangles[i].points[0]];
-        const McVec3f& p1 = surf2->points[surf2->triangles[i].points[1]];
-        const McVec3f& p2 = surf2->points[surf2->triangles[i].points[2]];
+        const StaticVector<float,3>& p0 = surf2->points[surf2->triangles[i].points[0]];
+        const StaticVector<float,3>& p1 = surf2->points[surf2->triangles[i].points[1]];
+        const StaticVector<float,3>& p2 = surf2->points[surf2->triangles[i].points[2]];
 
         //  Look up the octree for points in a conversative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
@@ -300,26 +300,26 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
 }
 
-McVec3f ContactToolBox::getClosestPointOnTriangle(const McVec3f& p0,
-                                                  const McVec3f& p1,
-                                                  const McVec3f& p2,          
-                                                  const McVec3f& candidate)
+StaticVector<float,3> ContactToolBox::getClosestPointOnTriangle(const StaticVector<float,3>& p0,
+                                                  const StaticVector<float,3>& p1,
+                                                  const StaticVector<float,3>& p2,          
+                                                  const StaticVector<float,3>& candidate)
 {
         
     // local base
-    McVec3f a = p1 - p0;
-    McVec3f b = p2 - p0;
-    McVec3f c = a.cross(b);
+    StaticVector<float,3> a = p1 - p0;
+    StaticVector<float,3> b = p2 - p0;
+    StaticVector<float,3> c = a.cross(b);
     c.normalize();
         
-    McVec3f x = candidate - p0;
+    StaticVector<float,3> x = candidate - p0;
         
     // write x in the new base  (Cramer's rule)
-    //McMat3f numerator(a, b, c);
-    double denominatorDet = McMat3f(a, b, c).det();
-    McMat3f alphaMat(x, b, c);
-    McMat3f betaMat(a, x, c);
-    McMat3f gammaMat(a, b, x);
+    //StaticMatrix<float,3> numerator(a, b, c);
+    double denominatorDet = StaticMatrix<float,3>(a, b, c).det();
+    StaticMatrix<float,3> alphaMat(x, b, c);
+    StaticMatrix<float,3> betaMat(a, x, c);
+    StaticMatrix<float,3> gammaMat(a, b, x);
     
     float alpha = alphaMat.det()/denominatorDet;
     float beta  = betaMat.det()/denominatorDet;
@@ -338,10 +338,10 @@ McVec3f ContactToolBox::getClosestPointOnTriangle(const McVec3f& p0,
     // ////////////////////////////////////////////////////////////////////////////////
 
     float bestDist = std::numeric_limits<float>::max();
-    McVec3f bestPoint;
+    StaticVector<float,3> bestPoint;
 
     // I need the points in an array
-    McVec3f points[3];
+    StaticVector<float,3> points[3];
     points[0] = p0;
     points[1] = p1;
     points[2] = p2;
@@ -349,13 +349,13 @@ McVec3f ContactToolBox::getClosestPointOnTriangle(const McVec3f& p0,
     // check point against edges
     for (int i=0; i<3; i++){
         
-        McVec3f from = points[i];
-        McVec3f to   = points[(i+1)%3];
+        StaticVector<float,3> from = points[i];
+        StaticVector<float,3> to   = points[(i+1)%3];
         
-        McVec3f edge = to - from;
+        StaticVector<float,3> edge = to - from;
         
         float projectLength = edge.dot(candidate - from)/edge.length();
-        McVec3f projection = edge/edge.length() * projectLength;
+        StaticVector<float,3> projection = edge/edge.length() * projectLength;
         
         float orthoDist = ((candidate-from) - projection).length();
         

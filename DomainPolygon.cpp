@@ -824,7 +824,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
 //             McVec3f newImagePos  = linearInterpol(lambda,
 //                                                   nodes[currentTriNode].getImagePos(par->iPos),
 //                                                   nodes[currentPolyNode].getImagePos(par->iPos));  
-            McVec3f newImagePos  = linearInterpol(lambda,
+            StaticVector<float,3> newImagePos  = linearInterpol(lambda,
                                                   par->iPos[nodes[currentTriNode].getNodeNumber()],
                                                   par->iPos[nodes[currentPolyNode].getNodeNumber()]);
 
@@ -1063,9 +1063,9 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
     return newNode;
 }
 
-unsigned int DomainPolygon::createNodePosition(std::vector<McVec3f>& nodePositions, 
+unsigned int DomainPolygon::createNodePosition(std::vector<StaticVector<float,3> >& nodePositions, 
                                                std::vector<unsigned int>& nodeStack,
-                                               const McVec3f& newImagePos)
+                                               const StaticVector<float,3>& newImagePos)
 {
 
     if (nodeStack.size()!=0) {
@@ -1294,7 +1294,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
                 McVec2f newDomainPos = nodes[triNode].domainPos() + 
                     lambda*(nodes[polyNode].domainPos() - nodes[triNode].domainPos());
-                McVec3f newImagePos  = par->iPos[nodes[triNode].getNodeNumber()]  + 
+                StaticVector<float,3> newImagePos  = par->iPos[nodes[triNode].getNodeNumber()]  + 
                     lambda*(par->iPos[nodes[polyNode].getNodeNumber()]  - 
                              par->iPos[nodes[triNode].getNodeNumber()]);
 

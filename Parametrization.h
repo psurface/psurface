@@ -14,6 +14,7 @@
 
 #include <amiramesh/HxParamBundle.h>
 
+#include <psurface/StaticVector.h>
 #include "psurfaceAPI.h"
 
 #include "McSurfaceBase.h"
@@ -154,13 +155,13 @@ public:
     const Node& nodes(const GlobalNodeIdx& n) const {return triangles(n.tri).nodes[n.idx];}
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    McVec3f imagePos(const GlobalNodeIdx& n) const {
+    StaticVector<float,3> imagePos(const GlobalNodeIdx& n) const {
         return imagePos(n.tri, n.idx);
     }
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    McVec3f imagePos(int tri, NodeIdx node) const {
+    StaticVector<float,3> imagePos(int tri, NodeIdx node) const {
         const Node& cN = triangles(tri).nodes[node];
 
         switch (cN.type) {
@@ -222,7 +223,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int positionMap(int tri, McVec2f& p, McVec3f& result) const;
+    int positionMap(int tri, McVec2f& p, StaticVector<float,3>& result) const;
 
     /** \brief Convenience function for accessing the normals of the target surface.
      *
@@ -235,7 +236,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int directNormalMap(int tri, McVec2f& p, McVec3f& result) const;
+    int directNormalMap(int tri, McVec2f& p, StaticVector<float,3>& result) const;
 
     //@}
 
@@ -309,7 +310,7 @@ public:
      */
     void checkConsistency(const char* where) const;
 
-    NodeIdx addNode(int tri, const McVec3f& p);
+    NodeIdx addNode(int tri, const StaticVector<float,3>& p);
 
     NodeIdx addInteriorNode(int tri, const McVec2f& dom, int nodeNumber);
 
@@ -320,7 +321,7 @@ public:
     /** \todo Sollte vielleicht ein Bundle zurückgeben */
     NodeIdx addIntersectionNodePair(int tri1, int tri2,
                                     const McVec2f& dP1, const McVec2f& dP2, 
-                                    int edge1, int edge2, const McVec3f& range);
+                                    int edge1, int edge2, const StaticVector<float,3>& range);
 
     NodeIdx addTouchingNode(int tri, const McVec2f& dP, int edge, int nodeNumber);
 
@@ -370,7 +371,7 @@ public:
     bool hasOwnParamBundle;
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
-    std::vector<McVec3f> iPos;
+    std::vector<StaticVector<float,3> > iPos;
 
     /// The corresponding image surface
     Surface* surface;

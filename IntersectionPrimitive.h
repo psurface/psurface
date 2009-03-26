@@ -1,9 +1,8 @@
 #ifndef INTERSECTIONPRIMITIVE_H
 #define INTERSECTIONPRIMITIVE_H
 
-#include <mclib/McVec2f.h>
-#include <mclib/McVec3f.h>
-#include <mclib/McSArray.h>
+#include <tr1/array>
+#include <psurface/StaticVector.h>
 
 
 /** This class represents a part of the overlap of a basis function on the
@@ -29,13 +28,13 @@ public:
      * Therefore, its shape can be described as three vectors
      * from \f$ R^3\f$ each.
      */
-    McSArray<McVec3f, 3> points;
+    std::tr1::array<StaticVector<float,3>, 3> points;
 
     /** An IntersectionPrimitive always represents the overlap of two basis functions
      * restricted to the image of one mortar and one nonmortar triangle.
      * The indices of those two triangles are given in this array.
      */
-    McSArray<int, 2> tris;
+    std::tr1::array<int, 2> tris;
 
     /** This array marks the exact parts of the mortar and the nonmortar
      * triangles whose overlap is represented by a given IntersectionPrimitive.
@@ -46,7 +45,7 @@ public:
      * mortar side.  The second index tells which of the three points
      * of the IntersectionPrimitive is to be considered.  
      */
-    McSArray<McSArray<McVec2f, 3> , 2> localCoords;
+    std::tr1::array<std::tr1::array<StaticVector<float,2>, 3> , 2> localCoords;
 
 };
 

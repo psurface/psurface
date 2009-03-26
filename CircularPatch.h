@@ -141,7 +141,7 @@ public:
 
     //@}
 
-    float distanceTo(const class McVec3f &) const ;
+    float distanceTo(const class StaticVector<float,3> &) const ;
 
     McSmallArray<McSArray<int, 2>, 50> innerEdges;
 

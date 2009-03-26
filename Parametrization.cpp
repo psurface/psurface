@@ -213,7 +213,7 @@ McVec2f Parametrization::getLocalTargetCoords(const GlobalNodeIdx& n, int target
     case Node::GHOST_NODE:
     case Node::INTERSECTION_NODE: {
 
-        McVec3f iPos = imagePos(n.tri, n.idx);
+        StaticVector<float,3> iPos = imagePos(n.tri, n.idx);
         return triangles(n.tri).computeBarycentricCoords(iPos, surface->points[surface->triangles[targetTri].points[0]], 
                                             surface->points[surface->triangles[targetTri].points[1]], 
                                             surface->points[surface->triangles[targetTri].points[2]]);
@@ -463,7 +463,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     AmiraMesh::Location* vertices = new AmiraMesh::Location("BaseGridVertexCoords", numVertices);
     am.insert(vertices);
 
-    std::vector<McVec3f> baseGridVertexCoordsArray(numVertices);
+    std::vector<StaticVector<float,3> > baseGridVertexCoordsArray(numVertices);
     for (i=0; i<par->getNumVertices(); i++)
         baseGridVertexCoordsArray[i] = par->vertices(i);
 
@@ -750,7 +750,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
     
     int numPoints = AMvertices->location()->dims()[0];
 
-    const McVec3f* vertexCoords = (McVec3f*)AMvertices->dataPtr();
+    const StaticVector<float,3>* vertexCoords = (StaticVector<float,3>*)AMvertices->dataPtr();
 
     // copy points
     for (i=0; i<numPoints; i++)
@@ -761,7 +761,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
     iPos.resize(AMnodePos->location()->dims()[0]);
     
     for (i=0; i<iPos.size(); i++)
-        iPos[i] = ((McVec3f*)AMnodePos->dataPtr())[i];
+        iPos[i] = ((StaticVector<float,3>*)AMnodePos->dataPtr())[i];
     
     ////////////////////////////////////////////////////
     // copy triangles.  This takes care of the edges, too
@@ -936,7 +936,8 @@ void Parametrization::setupOriginalSurface()
     //
     surface->points.resize(getNumTrueNodes());
     for (i=0; i<surface->points.size(); i++)
-        surface->points[i] = iPos[i];
+        for (int j=0; j<3; j++)
+            surface->points[i][j] = iPos[i][j];
 
     ////////////////////////////////////////////
     //
@@ -1129,7 +1130,7 @@ int Parametrization::map(int triIdx, McVec2f& p, McVec3i& vertices,
 {
     int i;
     const DomainTriangle& tri = triangles(triIdx);
-    const std::vector<McVec3f>& nP = iPos;
+    const std::vector<StaticVector<float,3> >& nP = iPos;
 
     // this is boundary handling
     if (p.x < 0.001){
@@ -1195,7 +1196,7 @@ int Parametrization::map(int triIdx, McVec2f& p, McVec3i& vertices,
     if (!status)
         return 0;
 
-    McVec3f imagePos = PlaneParam::linearInterpol<McVec3f>(coords, nP[tri.nodes[v[0]].getNodeNumber()],
+    StaticVector<float,3> imagePos = PlaneParam::linearInterpol<StaticVector<float,3> >(coords, nP[tri.nodes[v[0]].getNodeNumber()],
                                                            nP[tri.nodes[v[1]].getNodeNumber()],
                                                            nP[tri.nodes[v[2]].getNodeNumber()]);
 
@@ -1421,7 +1422,7 @@ void Parametrization::handleMapOnEdge(int triIdx, const McVec2f& p, const McVec2
     const DomainTriangle& tri = triangles(triIdx);
     float lambda = (p-a).length() / (a-b).length();
 
-    McVec3f targetPos = PlaneParam::linearInterpol<McVec3f>(lambda, 
+    StaticVector<float,3> targetPos = PlaneParam::linearInterpol<StaticVector<float,3> >(lambda, 
                                                             imagePos(triIdx, tri.edgePoints[edge][edgePos]),
                                                             imagePos(triIdx, tri.edgePoints[edge][edgePos+1]));
 
@@ -1478,7 +1479,7 @@ void Parametrization::handleMapOnEdge(int triIdx, const McVec2f& p, const McVec2
 }
 
 
-int Parametrization::positionMap(int triIdx, McVec2f& p, McVec3f& result) const
+int Parametrization::positionMap(int triIdx, McVec2f& p, StaticVector<float,3>& result) const
 {
     McVec2f localCoords;
     McVec3i tri;
@@ -1492,14 +1493,14 @@ int Parametrization::positionMap(int triIdx, McVec2f& p, McVec3f& result) const
         return false;
     }
 
-    result = PlaneParam::linearInterpol<McVec3f>(localCoords, iPos[tri[0]], iPos[tri[1]], iPos[tri[2]]);
+    result = PlaneParam::linearInterpol<StaticVector<float,3> >(localCoords, iPos[tri[0]], iPos[tri[1]], iPos[tri[2]]);
 
     return true;
 }
 
 
 
-int Parametrization::directNormalMap(int triIdx, McVec2f& p, McVec3f& result) const
+int Parametrization::directNormalMap(int triIdx, McVec2f& p, StaticVector<float,3>& result) const
 {
     McVec2f localCoords;
     McVec3i tri;
@@ -1509,12 +1510,12 @@ int Parametrization::directNormalMap(int triIdx, McVec2f& p, McVec3f& result) co
     if (!status)
         return false;
 
-    const McVec3f a = iPos[tri[1]] - iPos[tri[0]];
-    const McVec3f b = iPos[tri[2]] - iPos[tri[0]];
+    const StaticVector<float,3> a = iPos[tri[1]] - iPos[tri[0]];
+    const StaticVector<float,3> b = iPos[tri[2]] - iPos[tri[0]];
     result = a.cross(b);
     result.normalize();
 
-    assert(!isnan(result.x) && !isnan(result.y) && !isnan(result.z));
+    assert(!isnan(result[0]) && !isnan(result[1]) && !isnan(result[2]));
 
     return true;
 }
@@ -1542,7 +1543,7 @@ int Parametrization::invertTriangles(int patch)
     return count;
 }
 
-// NodeIdx Parametrization::addNode(int tri, const McVec3f& p)
+// NodeIdx Parametrization::addNode(int tri, const StaticVector<float,3>& p)
 // {
 //     DomainTriangle& cT = pars[side].triangles(tri);
 
@@ -1579,7 +1580,7 @@ NodeIdx Parametrization::addCornerNode(int tri, int corner, int nodeNumber)
 // BUG: The node needs to be entered in the edgepoint arrays
 NodeIdx Parametrization::addIntersectionNodePair(int tri1, int tri2,
                                                 const McVec2f& dP1, const McVec2f& dP2, 
-                                                int edge1, int edge2, const McVec3f& range)
+                                                int edge1, int edge2, const StaticVector<float,3>& range)
 {
     DomainTriangle& cT1 = triangles(tri1);
     DomainTriangle& cT2 = triangles(tri2);

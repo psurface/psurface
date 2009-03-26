@@ -5,7 +5,10 @@
 #include <tr1/array>
 #include <algorithm>
 #include <limits>
+#include <iostream>
 
+#include <psurface/StaticVector.h>
+#include <psurface/StaticMatrix.h>
 #include "McPointerSurfaceParts.h"
 
 
@@ -122,7 +125,7 @@ public:
     }
 
 
-    int newVertex(const McVec3f& p) {
+    int newVertex(const StaticVector<float,3>& p) {
 
         if (freeVertexStack.size()){
             int newVertexIdx = freeVertexStack.back();
@@ -313,8 +316,8 @@ public:
         const McSArray<int, 3>& p = triangles(n).vertices;
 
         for (int i=0; i<3; i++){
-            McVec3f a = vertices(p[(i+1)%3]) - vertices(p[i]);
-            McVec3f b = vertices(p[(i+2)%3]) - vertices(p[i]);
+            StaticVector<float,3> a = vertices(p[(i+1)%3]) - vertices(p[i]);
+            StaticVector<float,3> b = vertices(p[(i+2)%3]) - vertices(p[i]);
 
             float angle = acosf(a.dot(b) / (a.length() * b.length()));
             if (angle<minAngle)
@@ -340,10 +343,10 @@ public:
     }
 
         /// returns the normal vector
-    McVec3f normal(int tri) const {
-        const McVec3f a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
-        const McVec3f b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
-        McVec3f n = a.cross(b);
+    StaticVector<float,3> normal(int tri) const {
+        const StaticVector<float,3> a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
+        const StaticVector<float,3> b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
+        StaticVector<float,3> n = a.cross(b);
         n.normalize();
         return n;
     }
@@ -360,16 +363,16 @@ public:
 
     /// gives the surface area
     float area(int tri) const { 
-        McVec3f a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
-        McVec3f b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
+        StaticVector<float,3> a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
+        StaticVector<float,3> b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
 
         return fabs(0.5 * (a.cross(b)).length());
     }
 
     /// gives the dihedral angle with a neighboring triangle
     float dihedralAngle(int first, int second) const {
-        McVec3f n1 = normal(first);
-        McVec3f n2 = normal(second);
+        StaticVector<float,3> n1 = normal(first);
+        StaticVector<float,3> n2 = normal(second);
 
         float scalProd = n1.dot(n2);
         if (scalProd < -1) scalProd = -1;
@@ -393,7 +396,7 @@ public:
                                   const McEdge<VertexType> *edge,
                                   float eps=0) const {
         bool parallel;
-        McVec3f where;
+        StaticVector<float,3> where;
         return intersectionTriangleEdge(tri, edge, where, parallel, eps);
     }
 
@@ -401,31 +404,31 @@ public:
         point if there is one. If not, the variable @c where is untouched. */
     bool intersectionTriangleEdge(int tri, 
                                   const McEdge<VertexType> *edge, 
-                                  McVec3f& where, 
+                                  StaticVector<float,3>& where, 
                                   bool& parallel, float eps=0) const{
 
         const TriangleType& cT = triangles(tri);
 
-        const McVec3f &p = vertices(edge->from);
-        const McVec3f &q = vertices(edge->to);
-        const McVec3f &a = vertices(cT.vertices[0]);
-        const McVec3f &b = vertices(cT.vertices[1]);
-        const McVec3f &c = vertices(cT.vertices[2]);
+        const StaticVector<float,3> &p = vertices(edge->from);
+        const StaticVector<float,3> &q = vertices(edge->to);
+        const StaticVector<float,3> &a = vertices(cT.vertices[0]);
+        const StaticVector<float,3> &b = vertices(cT.vertices[1]);
+        const StaticVector<float,3> &c = vertices(cT.vertices[2]);
 
         // Cramer's rule
-        float det = McMat3f(b-a, c-a, p-q).det();
+        float det = StaticMatrix<float,3>(b-a, c-a, p-q).det();
         if (det<-eps || det>eps){
             
             // triangle and edge are not parallel
             parallel = false;
 
-            float nu = McMat3f(b-a, c-a, p-a).det() / det;
+            float nu = StaticMatrix<float,3>(b-a, c-a, p-a).det() / det;
             if (nu<-eps || nu>1+eps) return false;
 
-            float lambda = McMat3f(p-a, c-a, p-q).det() / det;
+            float lambda = StaticMatrix<float,3>(p-a, c-a, p-q).det() / det;
             if (lambda<-eps) return false;
 
-            float mu = McMat3f(b-a, p-a, p-q).det() / det;
+            float mu = StaticMatrix<float,3>(b-a, p-a, p-q).det() / det;
             if (mu<-eps) return false;
 
             if (lambda+mu > 1+eps) 
@@ -440,7 +443,7 @@ public:
             // triangle and edge are parallel
             parallel = true;
             
-            float alpha = McMat3f(b-a, c-a, p-a).det();
+            float alpha = StaticMatrix<float,3>(b-a, c-a, p-a).det();
             if (alpha<-eps || alpha>eps)
                 return false;
             else {
@@ -450,7 +453,7 @@ public:
                 // 2D intersection test
 
                 // project onto the coordinate plane that is 'most parallel' to the triangle
-                McVec3f normal = (b-a).cross(c-a);
+                StaticVector<float,3> normal = (b-a).cross(c-a);
 
                 McVec2f a2D, b2D, c2D, p2D, q2D;
 

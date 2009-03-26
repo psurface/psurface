@@ -306,7 +306,7 @@ McVec2f PlaneParam::computeBarycentricCoords(const McVec2f &p, const McVec2f &a,
 // This routine computes the barycentric coordinates of a point in space with respect to
 // a triangle in space.  It tacitly assumes that the point is coplanar with the triangle.
 
-McVec2f PlaneParam::computeBarycentricCoords(const McVec3f &p, const McVec3f &a, const McVec3f &b, const McVec3f &c)
+McVec2f PlaneParam::computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c)
 {
     McVec2f result;
     
@@ -368,7 +368,7 @@ int PlaneParam::map(McVec2f &domainCoord, McSArray<NodeIdx, 3>& tri, McVec2f& lo
 }
 
 
-void PlaneParam::unflipTriangles(const std::vector<McVec3f>& nodePositions)
+void PlaneParam::unflipTriangles(const std::vector<StaticVector<float,3> >& nodePositions)
 {
     applyParametrization(nodePositions);
     return;
@@ -391,7 +391,7 @@ void PlaneParam::unflipTriangles(const std::vector<McVec3f>& nodePositions)
 // this routine installs the shape-preserving parametrization 
 // only INTERIOR_NODEs get moved
 ////////////////////////////////////////////////////////////////
-void PlaneParam::applyParametrization(const std::vector<McVec3f>& nodePositions)
+void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >& nodePositions)
 {
     int i;
     
@@ -441,7 +441,7 @@ void PlaneParam::applyParametrization(const std::vector<McVec3f>& nodePositions)
 ////////////////////////////////////////////////////////
 // computes lambda_ij for the Floater-Parametrization
 void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij, 
-                                       const std::vector<McVec3f>& nodePositions)
+                                       const std::vector<StaticVector<float,3> >& nodePositions)
 {
     int i, k, l;
     int N = nodes.size();
@@ -458,7 +458,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
             makeCyclicGeometrically(p);
             
             McSmallArray<int, 15>    p_k(p.degree());
-            McSmallArray<McVec3f, 15>  p_k_3DCoords(p.degree());
+            McSmallArray<StaticVector<float,3>, 15>  p_k_3DCoords(p.degree());
             McSmallArray<McVec2f, 15>  p_k_2DCoords(p.degree());
             McSmallArray<float, 15>    angle;
             
@@ -466,13 +466,13 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
                 p_k[k]          = (int)p.neighbors(k);
                 //p_k_3DCoords[k] = nodes[p_k[k]].getImagePos(nodePositions);
                 p_k_3DCoords[k] = nodePositions[nodes[p_k[k]].getNodeNumber()];
-                if (isnan(p_k_3DCoords[k].x)) {
+                if (isnan(p_k_3DCoords[k][0])) {
                     printf("iPos.size: %d,  nN: %d\n", nodePositions.size(), nodes[p_k[k]].getNodeNumber());
                     nodes[p_k[k]].print();
                 }
-                assert(!isnan(p_k_3DCoords[k].x));
-                assert(!isnan(p_k_3DCoords[k].y));
-                assert(!isnan(p_k_3DCoords[k].z));
+                assert(!isnan(p_k_3DCoords[k][0]));
+                assert(!isnan(p_k_3DCoords[k][1]));
+                assert(!isnan(p_k_3DCoords[k][2]));
             }
             
             if (!polarMap(nodePositions[p.getNodeNumber()], p_k_3DCoords, p_k_2DCoords, angle )) {
@@ -487,7 +487,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
                 
                 McVec2f lambdas = computeBarycentricCoords(McVec2f(0,0), p_k_2DCoords[0], p_k_2DCoords[1], p_k_2DCoords[2]);
                 
-                McVec3f l_ij;
+                StaticVector<float,3> l_ij;
                 l_ij[0] = lambdas.x;
                 l_ij[1] = lambdas.y;
                 l_ij[2] = 1-lambdas.x-lambdas.y;
@@ -514,7 +514,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
                     
                     McVec2f bCoords = computeBarycentricCoords(McVec2f(0,0), p_k_2DCoords[l], p_k_2DCoords[rl], p_k_2DCoords[rlPlus1]);
                     
-                    McVec3f delta(bCoords[0], bCoords[1], 1-bCoords[0]-bCoords[1]);
+                    StaticVector<float,3> delta(bCoords[0], bCoords[1], 1-bCoords[0]-bCoords[1]);
                     
                     lambda_ij.addToEntry(i, index[l],       delta[0] / p.degree());
                     lambda_ij.addToEntry(i, index[rl],      delta[1] / p.degree());
@@ -529,7 +529,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
             
 
 
-bool PlaneParam::polarMap(const McVec3f& center, const McSmallArray<McVec3f, 15> &threeDStarVertices, 
+bool PlaneParam::polarMap(const StaticVector<float,3>& center, const McSmallArray<StaticVector<float,3>, 15> &threeDStarVertices, 
                           McSmallArray<McVec2f, 15>& flattenedCoords, McSmallArray<float, 15>& theta)
 {
     /////////////////////////////////////
@@ -546,8 +546,8 @@ bool PlaneParam::polarMap(const McVec3f& center, const McSmallArray<McVec3f, 15>
     int k;
 
     for (k=1; k<K+1; k++){
-        McVec3f pLeft  = threeDStarVertices[k-1];
-        McVec3f pRight = threeDStarVertices[k%K];
+        StaticVector<float,3> pLeft  = threeDStarVertices[k-1];
+        StaticVector<float,3> pRight = threeDStarVertices[k%K];
 
         if ( (pLeft-center).length()==0 || (pRight-center).length()==0){
             printf("vertex coincides with its neighbor, aborting polar map\n");
@@ -556,12 +556,12 @@ bool PlaneParam::polarMap(const McVec3f& center, const McSmallArray<McVec3f, 15>
 
         theta[k] = theta[k-1] + (pLeft - center).angle(pRight - center);
         if (isnan(theta[k])){
-            printf("center (%f %f %f)\n", center.x, center.y, center.z);
+            printf("center (%f %f %f)\n", center[0], center[1], center[2]);
             printf("pLeft - center (%f %f %f) pRight - center (%f %f %f)\n", 
-                   pLeft.x - center.x, pLeft.y - center.y, pLeft.z - center.z, 
-                   pRight.x - center.x, pRight.y - center.y, pRight.z - center.z);
-            printf("pLeft (%f %f %f)   pRight(%f %f %f)\n", pLeft.x, pLeft.y, pLeft.z, 
-                   pRight.x, pRight.y, pRight.z);
+                   pLeft[0] - center[0], pLeft[1] - center[1], pLeft[2] - center[2], 
+                   pRight[0] - center[0], pRight[1] - center[1], pRight[2] - center[2]);
+            printf("pLeft (%f %f %f)   pRight(%f %f %f)\n", pLeft[0], pLeft[1], pLeft[2], 
+                   pRight[0], pRight[1], pRight[2]);
 
             printf("angle %f\n", (pLeft - center).angle(pRight - center));
             return false;

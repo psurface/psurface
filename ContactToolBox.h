@@ -2,7 +2,7 @@
 #define CONTACT_TOOLBOX_H
 
 #include <psurface/Box.h>
-#include <mclib/McVec3f.h>
+#include <psurface/StaticVector.h>
 #include <mclib/McVec3i.h>
 
 #include "Node.h"
@@ -27,10 +27,10 @@ namespace ContactToolBox {
                        std::vector<int>& contactNodes1, std::vector<int>& contactNodes2,
                        float epsilon);
 
-    McVec3f getClosestPointOnTriangle(const McVec3f& p0,
-                                                  const McVec3f& p1,
-                                                  const McVec3f& p2,          
-                                      const McVec3f& candidate);
+    StaticVector<float,3> getClosestPointOnTriangle(const StaticVector<float,3>& p0,
+                                                  const StaticVector<float,3>& p1,
+                                                  const StaticVector<float,3>& p2,          
+                                      const StaticVector<float,3>& candidate);
 
     void computeContactPatch(const Surface* surf, ContactBoundary& cBound);
 
@@ -41,9 +41,9 @@ namespace ContactToolBox {
 
     class IntersectionAlt {
     public:
-        McVec2f pos;
+        StaticVector<float,2> pos;
 
-        McVec2f localTargetCoords;
+        StaticVector<float,2> localTargetCoords;
 
     };
 

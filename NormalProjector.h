@@ -1,15 +1,12 @@
 #ifndef NORMAL_PROJECTOR_H
 #define NORMAL_PROJECTOR_H
 
-#include <mclib/McVec3d.h>
+#include <psurface/StaticVector.h>
 #include "Parametrization.h"
 
 #include <vector>
 
 class NodeBundle;
-class McVec3f;
-class McVec2f;
-class McVec2d;
 class Surface;
 class ContactBoundary;
 class GlobalNodeIdx;
@@ -26,32 +23,32 @@ public:
     void setupEdgePointArrays(Parametrization* par);
 
     void insertEdge(Parametrization* par,  
-                    const std::vector<McVec3d>& normals,
+                    const std::vector<StaticVector<double,3> >& normals,
                     int from, 
                     int to,
                     const std::vector<NodeBundle>& projectedTo
                     );
 
     void insertEdgeFromInteriorNode(Parametrization* par, 
-                                    const std::vector<McVec3d>& normals, 
+                                    const std::vector<StaticVector<double,3> >& normals, 
                                     int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
 
     void insertEdgeFromIntersectionNode(Parametrization* par, 
-                                        const std::vector<McVec3d>& normals, 
+                                        const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         NodeBundle& curr, int& enteringEdge);
 
     void insertEdgeFromTouchingNode(Parametrization* par, 
-                                    const std::vector<McVec3d>& normals, 
+                                    const std::vector<StaticVector<double,3> >& normals, 
                                     int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringTri);
 
     void insertEdgeFromCornerNode(Parametrization* par, 
-                                  const std::vector<McVec3d>& normals, 
+                                  const std::vector<StaticVector<double,3> >& normals, 
                                   int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
@@ -61,28 +58,28 @@ public:
     //   Methods needed to test whether an edge can be projected completely
     // ///////////////////////////////////////////////////////////////////////
     bool edgeCanBeInserted(const Parametrization* par,  
-                           const std::vector<McVec3d>& normals,
+                           const std::vector<StaticVector<double,3> >& normals,
                            int from, 
                            int to,
                            const std::vector<NodeBundle>& projectedTo
                            );
 
     bool testInsertEdgeFromInteriorNode(const Parametrization* par, 
-                                        const std::vector<McVec3d>& normals, 
+                                        const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         Node::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
     bool testInsertEdgeFromIntersectionNode(const Parametrization* par, 
-                                            const std::vector<McVec3d>& normals, 
+                                            const std::vector<StaticVector<double,3> >& normals, 
                                             int from, int to, double& lambda,
                                             const std::vector<NodeBundle>& projectedTo,
                                             Node::NodeType& currType, int& currTri,
                                             int& enteringEdge);
 
     bool testInsertEdgeFromTouchingNode(const Parametrization* par, 
-                                        const std::vector<McVec3d>& normals, 
+                                        const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         const NodeBundle& curr,
@@ -90,7 +87,7 @@ public:
                                         int& enteringEdge);
 
     bool testInsertEdgeFromCornerNode(const Parametrization* par, 
-                                      const std::vector<McVec3d>& normals, 
+                                      const std::vector<StaticVector<double,3> >& normals, 
                                       int from, int to, double& lambda,
                                       const std::vector<NodeBundle>& projectedTo,
                                       const NodeBundle& curr, 
@@ -100,7 +97,7 @@ public:
     void insertGhostNodeAtVertex(Parametrization* par, 
                                  int v, 
                                  int targetTri, 
-                                 const McVec2d& localTargetCoords
+                                 const StaticVector<double,2>& localTargetCoords
                                  );
 
     void addCornerNodeBundle(Parametrization* par, 
@@ -124,23 +121,23 @@ public:
      * \f$ F(x) := x_0 (p_0 - p_1) + x_1 (p_1 - p_2) + x_2 x_0(n_0 - n_2) + x_2 x_1 (n_1 - n_2)
      * + x_2 n_2 + p_2 - p = 0\f$ using standard Newton iteration.
      */
-    bool computeInverseNormalProjection(const McVec3f& p0, const McVec3f& p1, const McVec3f& p2,
-                                        const McVec3d& n0, const McVec3d& n1, const McVec3d& n2,
-                                        const McVec3f& target, McVec3d& x);
+    bool computeInverseNormalProjection(const StaticVector<float,3>& p0, const StaticVector<float,3>& p1, const StaticVector<float,3>& p2,
+                                        const StaticVector<double,3>& n0, const StaticVector<double,3>& n1, const StaticVector<double,3>& n2,
+                                        const StaticVector<float,3>& target, StaticVector<double,3>& x);
 
       
-    bool edgeIntersectsNormalFan(const McVec3f& p0, const McVec3f& p1,
-                                 const McVec3f& q0, const McVec3f& q1,
-                                 const McVec3d& n0, const McVec3d& n1,
-                                 McVec3d& x);
+    bool edgeIntersectsNormalFan(const StaticVector<float,3>& p0, const StaticVector<float,3>& p1,
+                                 const StaticVector<float,3>& q0, const StaticVector<float,3>& q1,
+                                 const StaticVector<double,3>& n0, const StaticVector<double,3>& n1,
+                                 StaticVector<double,3>& x);
     
     /** The case of parallel ray and triangle is not considered an intersection
      * no matter whether it is or not.
      */
-    bool rayIntersectsTriangle(const McVec3d& basePoint, 
-                               const McVec3d& direction,
-                               const McVec3f& a, const McVec3f& b, const McVec3f& c,
-                               McVec2d& localCoords,
+    bool rayIntersectsTriangle(const StaticVector<double,3>& basePoint, 
+                               const StaticVector<double,3>& direction,
+                               const StaticVector<float,3>& a, const StaticVector<float,3>& b, const StaticVector<float,3>& c,
+                               StaticVector<double,2>& localCoords,
                                double& normalDist,
                                double eps);
 
@@ -151,7 +148,7 @@ public:
     // Data members
 
     const ContactBoundary* contactBoundary[2];
-    std::vector<McVec3d> targetNormals;
+    std::vector<StaticVector<double, 3> > targetNormals;
 
 };
 

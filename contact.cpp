@@ -99,9 +99,9 @@ void getMergedGrid(std::vector<IntPrimitive>& overlaps)
 
     for (size_t i=0; i<mergedGrid.size(); i++) {
         
-        ((McVec3f*)overlaps[i].points)[0] = mergedGrid[i].points[0];
-        ((McVec3f*)overlaps[i].points)[1] = mergedGrid[i].points[1];
-        ((McVec3f*)overlaps[i].points)[2] = mergedGrid[i].points[2];
+        ((StaticVector<float,3>*)overlaps[i].points)[0] = mergedGrid[i].points[0];
+        ((StaticVector<float,3>*)overlaps[i].points)[1] = mergedGrid[i].points[1];
+        ((StaticVector<float,3>*)overlaps[i].points)[2] = mergedGrid[i].points[2];
     
         overlaps[i].tris[0] = mergedGrid[i].tris[0];
         overlaps[i].tris[1] = mergedGrid[i].tris[1];

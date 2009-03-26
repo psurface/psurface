@@ -6,8 +6,7 @@
 #ifndef PLANE_PARAM_H
 #define PLANE_PARAM_H
 
-#include <mclib/McVec3f.h>
-#include <mclib/McVec2f.h>
+#include <psurface/StaticVector.h>
 #include <mclib/McMat3f.h>
 #include <vector>
 #include <mclib/McSArray.h>
@@ -425,10 +424,10 @@ public:
     void installBarycentricCoordinates(const McVec2f &a, const McVec2f &b, const McVec2f &c);
 
     ///
-    void applyParametrization(const std::vector<McVec3f>& nodePositions);
+    void applyParametrization(const std::vector<StaticVector<float,3> >& nodePositions);
 
     ///
-    void unflipTriangles(const std::vector<McVec3f>& nodePositions);
+    void unflipTriangles(const std::vector<StaticVector<float,3> >& nodePositions);
 
     ///
     void augmentNeighborIdx(int d) {
@@ -450,9 +449,9 @@ public:
     void removeExtraEdges();
     
     void computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
-                               const std::vector<McVec3f>& nodePositions);
+                               const std::vector<StaticVector<float,3> >& nodePositions);
 
-    bool polarMap(const McVec3f& center, const McSmallArray<McVec3f, 15> &threeDStarVertices, 
+    bool polarMap(const StaticVector<float,3>& center, const McSmallArray<StaticVector<float,3>, 15> &threeDStarVertices, 
                   McSmallArray<McVec2f, 15>& flattenedCoords, McSmallArray<float, 15>& theta);
 
 public:
@@ -474,7 +473,7 @@ public:
      * with respect to a triangle in space.  It tacitly assumes that the point 
      * is coplanar with the triangle.
      */
-    static McVec2f computeBarycentricCoords(const McVec3f &p, const McVec3f &a, const McVec3f &b, const McVec3f &c);
+    static McVec2f computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c);
 
     ///
     DirectedEdgeIterator BFLocate(const McVec2f &p, int seed=-1) const;
@@ -503,6 +502,12 @@ public:
 
     template<class T>
     static T linearInterpol(const McVec2f& p, const T& a, const T& b, const T& c){
+        T result = p[0]*a + p[1]*b + (1-p[0]-p[1])*c;
+        return result;
+    }
+        
+    template<class T>
+    static T linearInterpol(const StaticVector<float,2>& p, const T& a, const T& b, const T& c){
         T result = p[0]*a + p[1]*b + (1-p[0]-p[1])*c;
         return result;
     }
