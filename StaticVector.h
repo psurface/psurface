@@ -3,9 +3,11 @@
 
 #include <tr1/array>
 #include <cmath>
+#include <assert.h>
 
+#ifndef PSURFACE_STANDALONE
 #include <mclib/McVec3f.h>
-#include <mclib/McVec2f.h>
+#endif
 
 template <class T, int N>
 class StaticVector
@@ -38,13 +40,24 @@ public:
         (*this)[2] = c;
     }
 
-    /** \brief For transition */
+#ifndef PSURFACE_STANDALONE
+    /** Construction from a McVec3f */
     StaticVector(const McVec3f& other) {
         assert(N==3);
-        this->operator[](0) = other[0];
-        this->operator[](1) = other[1];
-        this->operator[](2) = other[2];
+        (*this)[0] = other[0];
+        (*this)[1] = other[1];
+        (*this)[2] = other[2];
     }
+
+    /** Construction from a McVec3f */
+    StaticVector<T,N>& operator=(const McVec3f& other) {
+        assert(N==3);
+        (*this)[0] = other[0];
+        (*this)[1] = other[1];
+        (*this)[2] = other[2];
+        return *this;
+    }
+#endif
 
     /** \brief Vector product */
     T dot(const StaticVector<T,N>& a) const {
@@ -92,20 +105,6 @@ public:
 
     /** \brief Assignment */
     StaticVector<T,N>& operator=(const StaticVector<T,N>& other) {
-        for (size_t i=0; i<N; i++)
-            (*this)[i] = other[i];
-        return *this;
-    }
-
-    /** \brief Assignment from McVec3f */
-    StaticVector<T,N>& operator=(const McVec3f& other) {
-        for (size_t i=0; i<N; i++)
-            (*this)[i] = other[i];
-        return *this;
-    }
-
-    /** \brief Assignment from McVec2f */
-    StaticVector<T,N>& operator=(const McVec2f& other) {
         for (size_t i=0; i<N; i++)
             (*this)[i] = other[i];
         return *this;

@@ -30,7 +30,7 @@
 #include <hxsurface/HxSurfaceWinDLLApi.h>
 
 #include <vector>
-#include <McVec3f.h>
+#include <psurface/StaticVector.h>
 #include <McSmallArray.h>
 #include <amiramesh/HxParamBundle.h>
 #include <hxfield/oint.h>
@@ -198,7 +198,7 @@ class HXSURFACE_API Surface {
     int nContourPoints;
 
     /// Array of all surface points (required).
-    McDArray<McVec3f> points;
+    McDArray<StaticVector<float,3> > points;
 
     /// Array of point types (full surface only).
     McDArray<unsigned char> pointType;
@@ -230,7 +230,7 @@ class HXSURFACE_API Surface {
         @c outerRegion refer to this structure, e.g. @c materials[0]. */
     HxParamBundle* params;
 
-    McDArray<McVec3f> normals;
+    McDArray<StaticVector<float,3> > normals;
 
     enum NormalBinding { PER_TRIANGLE=0, PER_VERTEX, PER_VERTEX_INDEXED };
 

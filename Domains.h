@@ -132,9 +132,9 @@ public:
         this routines turns them into barycentric ones. */
     void installBarycentricCoordinates(){
 
-        const McVec2f a = nodes[cornerNode(0)].domainPos();
-        const McVec2f b = nodes[cornerNode(1)].domainPos();
-        const McVec2f c = nodes[cornerNode(2)].domainPos();
+        const StaticVector<float,2> a = nodes[cornerNode(0)].domainPos();
+        const StaticVector<float,2> b = nodes[cornerNode(1)].domainPos();
+        const StaticVector<float,2> c = nodes[cornerNode(2)].domainPos();
 
         PlaneParam::installBarycentricCoordinates(a, b, c);
     }

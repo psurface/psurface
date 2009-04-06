@@ -82,9 +82,9 @@ bool PlaneParam::TriangleIterator::isCorrectlyOriented() const
     DirectedEdgeIterator cEInv = cE;
     cEInv.invert();
 
-    return (McVec2f::orientation((*cE.nodes)[vertices(0)].domainPos(), 
+    return (PlaneParam::orientation((*cE.nodes)[vertices(0)].domainPos(), 
                                  (*cE.nodes)[vertices(1)].domainPos(), 
-                                 (*cE.nodes)[vertices(2)].domainPos(), 0) == 1);
+                                 (*cE.nodes)[vertices(2)].domainPos()) == 1);
 
     // This is a topological test and not well thought out
 //     int i, j;

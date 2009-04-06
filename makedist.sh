@@ -21,7 +21,6 @@ cp TargetSurface.h.standalone                         libpsurface/include/Target
 cp local_mclib/include/mclib/McDVector.h              libpsurface/include/mclib
 cp local_mclib/include/mclib/McFHeap.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McHandable.h             libpsurface/include/mclib
-cp local_mclib/include/mclib/McMat3f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McMat4f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McPrimType.h             libpsurface/include/mclib
 cp local_mclib/include/mclib/McProgressInterface.h    libpsurface/include/mclib
@@ -30,11 +29,6 @@ cp local_mclib/include/mclib/McSArray.h               libpsurface/include/mclib
 cp local_mclib/include/mclib/McSparseMatrix.h         libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdlib.h               libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdio.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McVec2f.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McVec3f.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McVec3f_impl.h           libpsurface/include/mclib
-cp local_mclib/include/mclib/McVec3d.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McVec3d_impl.h           libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec3i.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McVec4f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
@@ -60,6 +54,8 @@ cp SurfacePathSet.h         libpsurface/include/psurface
 cp Box.h                    libpsurface/include/psurface
 cp MultiDimOctree.h         libpsurface/include/psurface
 cp PointIntersectionFunctor.h  libpsurface/include/psurface
+cp StaticVector.h           libpsurface/include/psurface
+cp StaticMatrix.h           libpsurface/include/psurface
 cp psurfaceAPI.h            libpsurface/include/psurface
 
 cp local_mclib/McMat3f.cpp                libpsurface/src

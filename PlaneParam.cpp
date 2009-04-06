@@ -12,7 +12,7 @@ inline int random() {return rand();}
 
 PlaneParam::~PlaneParam() {}
 
-PlaneParam::DirectedEdgeIterator PlaneParam::BFLocate(const McVec2f &p, int seed) const
+PlaneParam::DirectedEdgeIterator PlaneParam::BFLocate(const StaticVector<float,2> &p, int seed) const
 {
 
     //printf("----- BFLocate -----\n");
@@ -31,13 +31,13 @@ PlaneParam::DirectedEdgeIterator PlaneParam::BFLocate(const McVec2f &p, int seed
 
     while (true){
 
-        McVec2f from = nodes[cE.from()].domainPos();
-        McVec2f to   = nodes[cE.to()].domainPos();
+        StaticVector<float,2> from = nodes[cE.from()].domainPos();
+        StaticVector<float,2> to   = nodes[cE.to()].domainPos();
 
         //printf("cE:  %d (%f %f) --> %d (%f %f)\n", cE.from(), from.x, from.y, cE.to(), to.x, to.y);
 
         if (abort++ >20000){
-            printf("loop found trying to map (%f %f)\n", p.x, p.y);
+            printf("loop found trying to map (%f %f)\n", p[0], p[1]);
             cE.fromNode = -1;
             return cE;
 
@@ -53,7 +53,7 @@ PlaneParam::DirectedEdgeIterator PlaneParam::BFLocate(const McVec2f &p, int seed
 
                 printf("cE:  %d --> %d\n", cE.from(), cE.to());
                 printf("Onext (%d) != Dprev(%d)\n", Onext.to(), Dprev.from());
-                printf("p = (%f %f)\n", p.x, p.y);
+                printf("p = (%f %f)\n", p[0], p[1]);
                 cE.fromNode = -1;
                 return cE;
 
@@ -133,12 +133,12 @@ void PlaneParam::makeCyclicGeometrically(Node& center)
     McSmallArray<float, 12> angles(center.degree());
 
     // compute angles
-    McVec2f edge0Vec = nodes[center.neighbors(0)].domainPos() - center.domainPos();
-    McVec2f normal   = McVec2f(-edge0Vec.y, edge0Vec.x);
+    StaticVector<float,2> edge0Vec = nodes[center.neighbors(0)].domainPos() - center.domainPos();
+    StaticVector<float,2> normal   = StaticVector<float,2>(-edge0Vec[1], edge0Vec[0]);
 
     for (i=0; i<center.degree(); i++){
 
-        McVec2f cEVec  = nodes[center.neighbors(i)].domainPos() - center.domainPos();
+        StaticVector<float,2> cEVec  = nodes[center.neighbors(i)].domainPos() - center.domainPos();
 
         float x = cEVec.dot(edge0Vec);
         float y = cEVec.dot(normal);
@@ -255,8 +255,8 @@ void PlaneParam::makeCyclicInteriorNode(Node &center)
     // The orientation needs to be consistent for all vertices in order to get
     // correctly oriented normals
 
-    McVec2f referenceVector = nodes[center.neighbors(0)].domainPos() - center.domainPos();
-    McVec2f normal          = McVec2f(-referenceVector.y, referenceVector.x);
+    StaticVector<float,2> referenceVector = nodes[center.neighbors(0)].domainPos() - center.domainPos();
+    StaticVector<float,2> normal          = StaticVector<float,2>(-referenceVector[1], referenceVector[0]);
     int i;
     int leastPosVector = -1;
     int mostPosVector  = -1;
@@ -265,7 +265,7 @@ void PlaneParam::makeCyclicInteriorNode(Node &center)
 
     for (i=1; i<center.degree(); i++) {
 
-        McVec2f testVector = nodes[center.neighbors(i)].domainPos() - center.domainPos();
+        StaticVector<float,2> testVector = nodes[center.neighbors(i)].domainPos() - center.domainPos();
         if (testVector.dot(normal) > maxDotProdukt) {
             maxDotProdukt = testVector.dot(normal);
             mostPosVector = i;
@@ -287,9 +287,9 @@ void PlaneParam::makeCyclicInteriorNode(Node &center)
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-McVec2f PlaneParam::computeBarycentricCoords(const McVec2f &p, const McVec2f &a, const McVec2f &b, const McVec2f &c)
+StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<float,2> &p, const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c)
 {
-    McVec2f result;
+    StaticVector<float,2> result;
     
     McMat3f area0(p[0], b[0], c[0],  p[1], b[1], c[1], 1, 1, 1);
     McMat3f area1(a[0], p[0], c[0],  a[1], p[1], c[1], 1, 1, 1);
@@ -306,9 +306,9 @@ McVec2f PlaneParam::computeBarycentricCoords(const McVec2f &p, const McVec2f &a,
 // This routine computes the barycentric coordinates of a point in space with respect to
 // a triangle in space.  It tacitly assumes that the point is coplanar with the triangle.
 
-McVec2f PlaneParam::computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c)
+StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c)
 {
-    McVec2f result;
+    StaticVector<float,2> result;
     
     float area0 = (p-b).cross(p-c).length();
     float area1 = (p-a).cross(p-c).length();
@@ -327,7 +327,7 @@ McVec2f PlaneParam::computeBarycentricCoords(const StaticVector<float,3> &p, con
     return result;
 }
 
-int PlaneParam::map(McVec2f &domainCoord, McSArray<NodeIdx, 3>& tri, McVec2f& localBarycentricCoords,
+int PlaneParam::map(StaticVector<float,2> &domainCoord, McSArray<NodeIdx, 3>& tri, StaticVector<float,2>& localBarycentricCoords,
                     int seed) const
 {
     DirectedEdgeIterator e = BFLocate(domainCoord);
@@ -416,7 +416,7 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
     for (i=0; i<nodes.size(); i++) 
         if (!nodes[i].isINTERIOR_NODE()) {
             // not elegant
-            b[i] = MC_complex<float>(nodes[i].domainPos().x, nodes[i].domainPos().y);
+            b[i] = MC_complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
         }
 
     // solve the system
@@ -425,13 +425,13 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
     McDVector<MC_complex<float> > result(nodes.size());
     
     for (i=0; i<nodes.size(); i++)
-        result[i] = MC_complex<float>(nodes[i].domainPos().x, nodes[i].domainPos().y);
+        result[i] = MC_complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
     
     lambda_ij.BiCGSTABC(b, result, residue, &maxIter, 1e-6);
     
     for (i=0; i<nodes.size(); i++)
         if (nodes[i].isINTERIOR_NODE())
-            nodes[i].setDomainPos(McVec2f(real(result[i]), imag(result[i])));
+            nodes[i].setDomainPos(StaticVector<float,2>(real(result[i]), imag(result[i])));
 
 }
 
@@ -459,7 +459,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
             
             McSmallArray<int, 15>    p_k(p.degree());
             McSmallArray<StaticVector<float,3>, 15>  p_k_3DCoords(p.degree());
-            McSmallArray<McVec2f, 15>  p_k_2DCoords(p.degree());
+            McSmallArray<StaticVector<float,2>, 15>  p_k_2DCoords(p.degree());
             McSmallArray<float, 15>    angle;
             
             for (k=0; k<p.degree(); k++){
@@ -485,12 +485,12 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
             
             if (p.degree()==3){
                 
-                McVec2f lambdas = computeBarycentricCoords(McVec2f(0,0), p_k_2DCoords[0], p_k_2DCoords[1], p_k_2DCoords[2]);
+                StaticVector<float,2> lambdas = computeBarycentricCoords(StaticVector<float,2>(0,0), p_k_2DCoords[0], p_k_2DCoords[1], p_k_2DCoords[2]);
                 
                 StaticVector<float,3> l_ij;
-                l_ij[0] = lambdas.x;
-                l_ij[1] = lambdas.y;
-                l_ij[2] = 1-lambdas.x-lambdas.y;
+                l_ij[0] = lambdas[0];
+                l_ij[1] = lambdas[1];
+                l_ij[2] = 1-lambdas[0]-lambdas[1];
                 
                 for (k=0; k<3; k++)
                     lambda_ij.setEntry(i, p_k[k], l_ij[k]);
@@ -512,7 +512,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
                     int rl = (rlPlus1 + p.degree()-1)%p.degree();
                     rlPlus1 = rlPlus1%p.degree();
                     
-                    McVec2f bCoords = computeBarycentricCoords(McVec2f(0,0), p_k_2DCoords[l], p_k_2DCoords[rl], p_k_2DCoords[rlPlus1]);
+                    StaticVector<float,2> bCoords = computeBarycentricCoords(StaticVector<float,2>(0,0), p_k_2DCoords[l], p_k_2DCoords[rl], p_k_2DCoords[rlPlus1]);
                     
                     StaticVector<float,3> delta(bCoords[0], bCoords[1], 1-bCoords[0]-bCoords[1]);
                     
@@ -530,7 +530,7 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
 
 
 bool PlaneParam::polarMap(const StaticVector<float,3>& center, const McSmallArray<StaticVector<float,3>, 15> &threeDStarVertices, 
-                          McSmallArray<McVec2f, 15>& flattenedCoords, McSmallArray<float, 15>& theta)
+                          McSmallArray<StaticVector<float,2>, 15>& flattenedCoords, McSmallArray<float, 15>& theta)
 {
     /////////////////////////////////////
     // computes the flattened coordinates
@@ -578,7 +578,7 @@ bool PlaneParam::polarMap(const StaticVector<float,3>& center, const McSmallArra
         float r = (threeDStarVertices[k] - center).length();
         float rPowA = powf(r, a);
 
-        flattenedCoords[k] = McVec2f(rPowA*cos(theta[k]), rPowA*sin(theta[k])); 
+        flattenedCoords[k] = StaticVector<float,2>(rPowA*cos(theta[k]), rPowA*sin(theta[k])); 
     }
 
     theta.removeLast();
@@ -633,19 +633,19 @@ void PlaneParam::makeCyclicBoundaryNode(Node& center, int next, int previous)
     center.nbs = outStar;
 }
 
-void PlaneParam::installWorldCoordinates(const McVec2f &a, const McVec2f &b, const McVec2f &c)
+void PlaneParam::installWorldCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c)
 {
     for (int i=0; i<nodes.size(); i++)
-        nodes[i].setDomainPos(a*nodes[i].domainPos().x + b*nodes[i].domainPos().y + 
-                              c*(1-nodes[i].domainPos().x-nodes[i].domainPos().y));
+        nodes[i].setDomainPos(a*nodes[i].domainPos()[0] + b*nodes[i].domainPos()[1] + 
+                              c*(1-nodes[i].domainPos()[0]-nodes[i].domainPos()[1]));
 }
 
 
-void PlaneParam::installBarycentricCoordinates(const McVec2f &a, const McVec2f &b, const McVec2f &c)
+void PlaneParam::installBarycentricCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c)
 {
     for (int i=0; i<nodes.size(); i++) {
-        //printf("node %d,  before (%f %f)  ", i, nodes[i].domainPos().x, nodes[i].domainPos().y);
+        //printf("node %d,  before (%f %f)  ", i, nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
         nodes[i].setDomainPos(computeBarycentricCoords(nodes[i].domainPos(), a, b, c));
-        //printf("after (%f %f) \n ", nodes[i].domainPos().x, nodes[i].domainPos().y);
+        //printf("after (%f %f) \n ", nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
     }
 }

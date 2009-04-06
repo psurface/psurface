@@ -6,7 +6,7 @@
 void Node::print(bool showNeighbors) const
 {
 #ifndef NDEBUG
-    printf("dom (%f %f) ", domainPos().x, domainPos().y);
+    printf("dom (%f %f) ", domainPos()[0], domainPos()[1]);
 
     switch(type){
     case INTERIOR_NODE:
@@ -200,7 +200,7 @@ void PlaneParam::checkConsistency(const char* where) const
         if (cN.isInvalid())
             continue;
 
-        if (isnan(cN.domainPos().x) || isnan(cN.domainPos().y)) {
+        if (isnan(cN.domainPos()[0]) || isnan(cN.domainPos()[1])) {
             printf(where);
             printf("\n****** A node mit NaN domainPos found! ******\n");
             cN.print();

@@ -8,7 +8,7 @@ inline int isnan(double x) {return _isnan(x);}
 
 static int counter = 0;
 
-void DomainPolygon::init(const DomainTriangle& tri, const McVec2f coords[3]){
+void DomainPolygon::init(const DomainTriangle& tri, const StaticVector<float,2> coords[3]){
 
     nodes = tri.nodes;     
     
@@ -30,7 +30,7 @@ void DomainPolygon::init(const DomainTriangle& tri, const McVec2f coords[3]){
     //print(false, false, true);
 }
 
-void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode,
+void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int& newCenterNode,
                                   std::vector<unsigned int>& nodeStack)
 {
 
@@ -328,20 +328,20 @@ void DomainPolygon::mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode
 // from Graphics Gems III, page 199
 // in our case we can safely assume that the denominator is not equal to zero
 
-float DomainPolygon::computeIntersection(float &mu, const McVec2f &p1, const McVec2f &p2, const McVec2f &p3, const McVec2f &p4)
+float DomainPolygon::computeIntersection(float &mu, const StaticVector<float,2> &p1, const StaticVector<float,2> &p2, const StaticVector<float,2> &p3, const StaticVector<float,2> &p4)
 {
 
-    McVec2f A = p2 - p1;
-    McVec2f B = p3 - p4;
-    McVec2f C = p1 - p3;
+    StaticVector<float,2> A = p2 - p1;
+    StaticVector<float,2> B = p3 - p4;
+    StaticVector<float,2> C = p1 - p3;
 
-    float det = A.y*B.x - A.x*B.y;
+    float det = A[1]*B[0] - A[0]*B[1];
 
     // if the determinant is zero we end up with a nan which is caught later
     //assert(det!=0);
     
-    mu = (A.x*C.y - A.y*C.x) / det;
-    return (B.y*C.x - B.x*C.y) / det;
+    mu = (A[0]*C[1] - A[1]*C[0]) / det;
+    return (B[1]*C[0] - B[0]*C[1]) / det;
 }
 
 
@@ -359,7 +359,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
     }
 
     for (i=0; i<nodes.size(); i++)
-        assert(!isnan(nodes[i].domainPos().x) && !isnan(nodes[i].domainPos().y));
+        assert(!isnan(nodes[i].domainPos()[0]) && !isnan(nodes[i].domainPos()[1]));
 
     for (i=0; i<fillIn.size()-1; i++){
 
@@ -388,7 +388,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
         // cut off one triangle from the polygon and update the parametrization
 
         // determine the planar world coordinates of the triangle about to be separated
-        McSArray<McVec2f, 3> newTriangleCoords;
+        McSArray<StaticVector<float,2>, 3> newTriangleCoords;
         int boundaryIdx;
         for (j=0; j<boundaryPoints.size(); j++)
             if (boundaryPoints[j] == par->triangles(fillIn[i]).vertices[0])
@@ -546,7 +546,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
 
         // ward off more degeneracies in the input
         for (j=0; j<cT.nodes.size(); j++)
-            if (isnan(cT.nodes[j].domainPos().x) || isnan(cT.nodes[j].domainPos().y)) {
+            if (isnan(cT.nodes[j].domainPos()[0]) || isnan(cT.nodes[j].domainPos()[1])) {
                 printf("[DomainPolygon::triangulate]  Rejecting this vertex because\n");
                 printf("  the domain position of one of its nodes contains NaNs.\n");
                 printf("  This can be due to a degeneracy in the input data or to a\n");
@@ -587,7 +587,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
 
     // ward off more degeneracies in the input
     for (j=0; j<cT.nodes.size(); j++)
-        if (isnan(cT.nodes[j].domainPos().x) || isnan(cT.nodes[j].domainPos().y)) {
+        if (isnan(cT.nodes[j].domainPos()[0]) || isnan(cT.nodes[j].domainPos()[1])) {
             printf("[DomainPolygon::triangulate]  Rejecting this vertex because\n");
             printf("  the domain position of one of its nodes contains NaNs.\n");
             printf("  This can be due to a degeneracy in the input data or to a\n");
@@ -607,7 +607,7 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
 void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
                                       std::vector<int>& nodeLocs,
                                       DomainTriangle& cT,
-                                      const McSArray<McVec2f, 3>& newTriangleCoords,
+                                      const McSArray<StaticVector<float,2>, 3>& newTriangleCoords,
                                       McSmallArray<int, 2>& triNewEdgePoints,
                                       McSmallArray<int, 2>& polyNewEdgePoints,
                                       std::vector<unsigned int>& nodeStack)
@@ -639,8 +639,8 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
 
 #ifdef PATHLOG
         fprintf(fp, "{\n");
-        fprintf(fp, "%f %f 0\n", nodes[currentPolyNode].domainPos.x, nodes[currentPolyNode].domainPos.y);
-        fprintf(fp, "%f %f 0\n", nodes[currentTriNode].domainPos.x, nodes[currentTriNode].domainPos.y);
+        fprintf(fp, "%f %f 0\n", nodes[currentPolyNode].domainPos[0], nodes[currentPolyNode].domainPos[1]);
+        fprintf(fp, "%f %f 0\n", nodes[currentTriNode].domainPos[0], nodes[currentTriNode].domainPos[1]);
         fprintf(fp, "} ");
 #endif
 
@@ -811,12 +811,12 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                                          nodes[currentPolyNode].domainPos(),
                                          newTriangleCoords[2], newTriangleCoords[0]);
                     
-            McVec2f newDomainPos = linearInterpol(lambda, 
+            StaticVector<float,2> newDomainPos = linearInterpol(lambda, 
                                                   nodes[currentTriNode].domainPos(),
                                                   nodes[currentPolyNode].domainPos());  
 
-//             printf("cTN (%f %f)\n", nodes[currentTriNode].domainPos().x, nodes[currentTriNode].domainPos().y);
-//             printf("cPN (%f %f)\n", nodes[currentPolyNode].domainPos().x, nodes[currentPolyNode].domainPos().y);
+//             printf("cTN (%f %f)\n", nodes[currentTriNode].domainPos()[0], nodes[currentTriNode].domainPos()[1]);
+//             printf("cPN (%f %f)\n", nodes[currentPolyNode].domainPos()[0], nodes[currentPolyNode].domainPos()[1]);
 //             nodes[currentTriNode].print();
 //             nodes[currentPolyNode].print();
 //             printf("lambda %f\n", lambda);
@@ -836,7 +836,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
             
             int newNodeNumber = createNodePosition(par->iPos, nodeStack, newImagePos);
             
-            //printf("newDomainPos:  (%f %f),  newNodeN: %d\n", newDomainPos.x, newDomainPos.y, newNodeNumber);
+            //printf("newDomainPos:  (%f %f),  newNodeN: %d\n", newDomainPos[0], newDomainPos[1], newNodeNumber);
             nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
             nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
             
@@ -1120,8 +1120,8 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
     int boundaryCutNode = cornerNode(bVertex);
 
-    McVec2f segmentFrom = nodes[centerNode].domainPos();
-    McVec2f segmentTo   = nodes[boundaryCutNode].domainPos();
+    StaticVector<float,2> segmentFrom = nodes[centerNode].domainPos();
+    StaticVector<float,2> segmentTo   = nodes[boundaryCutNode].domainPos();
         
 
     boundaryPoints.insert(boundaryPoints.begin() + bVertex, centerVertex);
@@ -1163,7 +1163,8 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
             } else
                 nodeLocs[cN] = ON_SEGMENT;
         else 
-            switch(McVec2f::orientation(segmentFrom, segmentTo, nodes[cN].domainPos())){
+            //switch(StaticVector<float,2>::orientation(segmentFrom, segmentTo, nodes[cN].domainPos())){
+            switch(PlaneParam::orientation(segmentFrom, segmentTo, nodes[cN].domainPos())){
             case  1:
             case  0:
                 nodeLocs[cN] = IN_POLYGON;
@@ -1182,7 +1183,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
     for (int cN=nodes.size()-1; cN>=0; cN--) {
 
-        //assert(!isnan(cN->domainPos.x) && !isnan(cN->domainPos.y));
+        //assert(!isnan(cN->domainPos[0]) && !isnan(cN->domainPos[1]));
 
         if (nodeLocs[cN]==ON_SEGMENT && cN!=centerNode) {
             //cN->location = ON_SEGMENT;
@@ -1241,8 +1242,8 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
                 float lambda = (nodes[newNode].domainPos() - segmentTo).length() /
                     (segmentFrom - segmentTo).length();
 
-//              printf("segmentFrom (%f %f) segmentTo (%f %f)\n", segmentFrom.x, segmentFrom.y, segmentTo.x, segmentTo.y);
-//              printf("newNode (%f %f) \n", nodes[newNode].domainPos.x, nodes[newNode].domainPos.y);
+//              printf("segmentFrom (%f %f) segmentTo (%f %f)\n", segmentFrom[0], segmentFrom[1], segmentTo[0], segmentTo[1]);
+//              printf("newNode (%f %f) \n", nodes[newNode].domainPos[0], nodes[newNode].domainPos[1]);
 //              printf("lambda %f\n", lambda);
                 
                 int j=0;
@@ -1292,7 +1293,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
                     continue;
             
 
-                McVec2f newDomainPos = nodes[triNode].domainPos() + 
+                StaticVector<float,2> newDomainPos = nodes[triNode].domainPos() + 
                     lambda*(nodes[polyNode].domainPos() - nodes[triNode].domainPos());
                 StaticVector<float,3> newImagePos  = par->iPos[nodes[triNode].getNodeNumber()]  + 
                     lambda*(par->iPos[nodes[polyNode].getNodeNumber()]  - 
@@ -1337,8 +1338,8 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
 //     for (i=0; i<lambda1.size(); i++){
 //      printf("%f    (%f %f) %d  (%f %f) %d\n", lambda1[i], 
-//             nodes[newEdgePoints1[i]].domainPos.x, nodes[newEdgePoints1[i]].domainPos.y, nodes[newEdgePoints1[i]].type,
-//             nodes[newEdgePoints2[i]].domainPos.x, nodes[newEdgePoints2[i]].domainPos.y, nodes[newEdgePoints2[i]].type);
+//             nodes[newEdgePoints1[i]].domainPos[0], nodes[newEdgePoints1[i]].domainPos[1], nodes[newEdgePoints1[i]].type,
+//             nodes[newEdgePoints2[i]].domainPos[0], nodes[newEdgePoints2[i]].domainPos[1], nodes[newEdgePoints2[i]].type);
 //     }
 
 //    printf("\n");

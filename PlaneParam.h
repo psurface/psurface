@@ -257,9 +257,9 @@ public:
     {
         nodes.resize(3);
 
-        nodes[0].setValue(McVec2f(1, 0), a, Node::CORNER_NODE);
-        nodes[1].setValue(McVec2f(0, 1), b, Node::CORNER_NODE);
-        nodes[2].setValue(McVec2f(0, 0), c, Node::CORNER_NODE);
+        nodes[0].setValue(StaticVector<float,2>(1, 0), a, Node::CORNER_NODE);
+        nodes[1].setValue(StaticVector<float,2>(0, 1), b, Node::CORNER_NODE);
+        nodes[2].setValue(StaticVector<float,2>(0, 0), c, Node::CORNER_NODE);
 
         addEdge(0, 1);
         addEdge(1, 2);
@@ -370,7 +370,7 @@ public:
     /**@name access methods */
     //@{
     ///
-    int map(McVec2f& domainCoord, McSArray<NodeIdx, 3>& vertices, McVec2f& coords,
+    int map(StaticVector<float,2>& domainCoord, McSArray<NodeIdx, 3>& vertices, StaticVector<float,2>& coords,
             int seed=-1) const;
     //@}
 
@@ -381,10 +381,10 @@ public:
      *   0 : collinear
      *   1 : counterclockwise
      */
-    signed char orientation(const DirectedEdgeIterator& cE, const McVec2f& p) const {
+    signed char orientation(const DirectedEdgeIterator& cE, const StaticVector<float,2>& p) const {
 
-        const McVec2f& f = nodes[cE.from()].domainPos();
-        const McVec2f& t = nodes[cE.to()].domainPos();
+        const StaticVector<float,2>& f = nodes[cE.from()].domainPos();
+        const StaticVector<float,2>& t = nodes[cE.to()].domainPos();
 
         return orientation(f, t, p);
     }
@@ -396,9 +396,9 @@ public:
      *   0 : collinear
      *   1 : counterclockwise
      */
-    signed char orientation(const McVec2f& a, const McVec2f& b, const McVec2f& c) const {
+    static signed char orientation(const StaticVector<float,2>& a, const StaticVector<float,2>& b, const StaticVector<float,2>& c) {
 
-        McVec2f n = McVec2f(a.y - b.y, b.x - a.x);
+        StaticVector<float,2> n = StaticVector<float,2>(a[1] - b[1], b[0] - a[0]);
 
         float scalarProd = n.dot(c-a);
         if (scalarProd > 0)
@@ -417,11 +417,11 @@ public:
      * is specified by supplying new coordinates for the three points
      * (1,0), (0,1), and (0, 0)
      */
-    void installWorldCoordinates(const McVec2f &a, const McVec2f &b, const McVec2f &c);
+    void installWorldCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c);
 
     /** assuming the domain coordinates are given as world coordinates
         this routines turns them into barycentric ones, given the vertices of a bounding triangle. */
-    void installBarycentricCoordinates(const McVec2f &a, const McVec2f &b, const McVec2f &c);
+    void installBarycentricCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c);
 
     ///
     void applyParametrization(const std::vector<StaticVector<float,3> >& nodePositions);
@@ -452,7 +452,7 @@ public:
                                const std::vector<StaticVector<float,3> >& nodePositions);
 
     bool polarMap(const StaticVector<float,3>& center, const McSmallArray<StaticVector<float,3>, 15> &threeDStarVertices, 
-                  McSmallArray<McVec2f, 15>& flattenedCoords, McSmallArray<float, 15>& theta);
+                  McSmallArray<StaticVector<float,2>, 15>& flattenedCoords, McSmallArray<float, 15>& theta);
 
 public:
     /**@name debug code */
@@ -465,7 +465,7 @@ public:
     //@}
 
     ///
-    static McVec2f computeBarycentricCoords(const McVec2f &p, const McVec2f &a, const McVec2f &b, const McVec2f &c);
+    static StaticVector<float,2> computeBarycentricCoords(const StaticVector<float,2> &p, const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c);
 
     /** \brief Computes the barycentric coordinates of a point.
      *
@@ -473,10 +473,10 @@ public:
      * with respect to a triangle in space.  It tacitly assumes that the point 
      * is coplanar with the triangle.
      */
-    static McVec2f computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c);
+    static StaticVector<float,2> computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c);
 
     ///
-    DirectedEdgeIterator BFLocate(const McVec2f &p, int seed=-1) const;
+    DirectedEdgeIterator BFLocate(const StaticVector<float,2> &p, int seed=-1) const;
 
     ///
     void makeCyclicGeometrically(Node& center);
@@ -499,13 +499,8 @@ public:
 public:
     ///////////////////////////////////////////////////////////////////////
     // These are interpolation methods for your programming convenience
+    ///////////////////////////////////////////////////////////////////////
 
-    template<class T>
-    static T linearInterpol(const McVec2f& p, const T& a, const T& b, const T& c){
-        T result = p[0]*a + p[1]*b + (1-p[0]-p[1])*c;
-        return result;
-    }
-        
     template<class T>
     static T linearInterpol(const StaticVector<float,2>& p, const T& a, const T& b, const T& c){
         T result = p[0]*a + p[1]*b + (1-p[0]-p[1])*c;

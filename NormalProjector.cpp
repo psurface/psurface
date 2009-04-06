@@ -250,7 +250,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                     
             //printf("newType: %d\n", newType);
 
-            McVec2f bestDPosFloat(bestDPos[0], bestDPos[1]);
+            StaticVector<float,2> bestDPosFloat(bestDPos[0], bestDPos[1]);
 
             if (newType==Node::TOUCHING_NODE) {
 
@@ -265,7 +265,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                     // find domain pos on other triangle
                     int commonEdge = par->triangles(bestTri).getCommonEdgeWith(par->triangles(neighboringTri));
                     int dir2 = par->triangles(neighboringTri).getEdge(commonEdge);
-                    McVec2f dP2((dir2==0)*(mu) + (dir2==2)*(1-mu), (dir2==0)*(1-mu) + (dir2==1)*(mu));
+                    StaticVector<float,2> dP2((dir2==0)*(mu) + (dir2==2)*(1-mu), (dir2==0)*(1-mu) + (dir2==1)*(mu));
 
                     // insert touching node pair
                     NodeIdx newNodeNumber = par->addTouchingNodePair(bestTri, neighboringTri, bestDPosFloat, dP2, 
@@ -342,9 +342,6 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             StaticVector<double,2> domainPos;
             double dist;
 
-//             const StaticVector<float,3>& p0 = surf->points[reducedContactPatch.triangles(j).points[0]];
-//             const StaticVector<float,3>& p1 = surf->points[reducedContactPatch.triangles(j).points[1]];
-//             const StaticVector<float,3>& p2 = surf->points[reducedContactPatch.triangles(j).points[2]];
             const StaticVector<float,3>& p0 = surf->points[contactPatch.triangles(j).points[0]];
             const StaticVector<float,3>& p1 = surf->points[contactPatch.triangles(j).points[1]];
             const StaticVector<float,3>& p2 = surf->points[contactPatch.triangles(j).points[2]];
@@ -544,8 +541,8 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
                     
                 StaticVector<float,3> image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
 
-                McVec2f dom1Float(dom1[0], dom1[1]);
-                McVec2f dom2Float(dom2[0], dom2[1]);
+                StaticVector<float,2> dom1Float(dom1[0], dom1[1]);
+                StaticVector<float,2> dom2Float(dom2[0], dom2[1]);
                 NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1Float, dom2Float, i, e, image);
                 NodeIdx newNodeOut = par->triangles(neighboringTri).nodes.size()-1;
@@ -651,8 +648,8 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
                 int e = par->triangles(neighboringTri).getCorner(q);
                     
                 // the domain position of the new intersection node on this triangle
-                McVec2f dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
-                McVec2f dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
+                StaticVector<float,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
+                StaticVector<float,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
                 StaticVector<float,3> image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
                     
@@ -760,8 +757,8 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                     int e = par->triangles(neighboringTri).getCorner(q);
 
                     // the domain position of the new intersection node on this triangle
-                    McVec2f dom1((j==0)*(1-mu) + (j==2)*mu, (j==0)*mu + (j==1)*(1-mu));
-                    McVec2f dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
+                    StaticVector<float,2> dom1((j==0)*(1-mu) + (j==2)*mu, (j==0)*mu + (j==1)*(1-mu));
+                    StaticVector<float,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
                     StaticVector<float,3> image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
                     
@@ -886,8 +883,8 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
                 int e = par->triangles(neighboringTri).getCorner(q);
 
                 // the domain position of the new intersection node on this triangle
-                McVec2f dom1((oppEdge==0)*(1-mu) + (oppEdge==2)*mu, (oppEdge==0)*mu + (oppEdge==1)*(1-mu));
-                McVec2f dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
+                StaticVector<float,2> dom1((oppEdge==0)*(1-mu) + (oppEdge==2)*mu, (oppEdge==0)*mu + (oppEdge==1)*(1-mu));
+                StaticVector<float,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                 
                 StaticVector<float,3> image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
                 
@@ -1370,7 +1367,7 @@ void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v,
         const DomainTriangle& cT = par->triangles(neighbors[i]);
         
         int corner = cT.getCorner(v);
-        McVec2f lTC_Float(localTargetCoords[0], localTargetCoords[1]);
+        StaticVector<float,2> lTC_Float(localTargetCoords[0], localTargetCoords[1]);
         par->addGhostNode(neighbors[i], corner, targetTri, lTC_Float);
 
     }

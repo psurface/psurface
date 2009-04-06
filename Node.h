@@ -25,9 +25,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <mclib/McVec3f.h>
-#include <mclib/McVec2f.h>
-#include <mclib/McMat3f.h>
+#include <psurface/StaticVector.h>
 #include <vector>
 #include <mclib/McSmallArray.h>
 
@@ -56,7 +54,7 @@ typedef int NodeIdx;
  * </ul>
  */
 class Node {
-    //friend McVec3f Parametrization::imagePos(TriangleIdx tri, NodeIdx node) const;
+
 public:
 
     /** \brief Encapsulates the neighborhood relationship between a node and others
@@ -123,7 +121,7 @@ public:
     Node() : valid(true) {}
         
     ///
-    Node(const McVec2f &domain, int number, NodeType nodeType) : valid(true) {
+    Node(const StaticVector<float,2> &domain, int number, NodeType nodeType) : valid(true) {
         setDomainPos(domain);
         nodeNumber = number;
 
@@ -137,7 +135,7 @@ public:
     ~Node() {}
 
     ///
-    void setValue(const McVec2f &domain, int nN, NodeType nodeType) {
+    void setValue(const StaticVector<float,2> &domain, int nN, NodeType nodeType) {
         setDomainPos(domain);
         nodeNumber = nN;
             
@@ -165,14 +163,14 @@ public:
         nodeNumber = nN;
         edge = corner;
         if (corner==0)
-            dP = McVec2f(1,0);
+            dP = StaticVector<float,2>(1,0);
         else if (corner==1)
-            dP = McVec2f(0,1);
+            dP = StaticVector<float,2>(0,1);
         else
-            dP = McVec2f(0,0);
+            dP = StaticVector<float,2>(0,0);
     }
 
-    void makeGhostNode(int corner, int targetTri, const McVec2f& localTargetCoords) {
+    void makeGhostNode(int corner, int targetTri, const StaticVector<float,2>& localTargetCoords) {
         assert(corner==0 || corner==1 || corner==2);
         type = GHOST_NODE;
         nodeNumber = targetTri;
@@ -187,7 +185,7 @@ public:
     }
 
     ///
-    bool isOnSegment(const McVec2f& a, const McVec2f& b, float eps) const {
+    bool isOnSegment(const StaticVector<float,2>& a, const StaticVector<float,2>& b, float eps) const {
         return ( (domainPos()-a).length() + (domainPos()-b).length()) / (a-b).length() <1.0 +eps;
     }
 
@@ -303,9 +301,9 @@ public:
     float getDomainEdgeCoord() const {
         assert(isINTERSECTION_NODE() || isTOUCHING_NODE());
         switch (getDomainEdge()) {
-        case 0: return domainPos().y;
-        case 1: return 1-domainPos().y;
-        case 2: return domainPos().x;
+        case 0: return domainPos()[1];
+        case 1: return 1-domainPos()[1];
+        case 2: return domainPos()[0];
         }
         print();
         assert(false);
@@ -314,9 +312,9 @@ public:
     float getDomainEdgeCoord(int edge) const {
         assert(!isINTERIOR_NODE());
         switch (edge) {
-        case 0: return domainPos().y;
-        case 1: return 1-domainPos().y;
-        case 2: return domainPos().x;
+        case 0: return domainPos()[1];
+        case 1: return 1-domainPos()[1];
+        case 2: return domainPos()[0];
         }
         
         assert(false);
@@ -398,22 +396,22 @@ public:
     void print(bool showNeighbors=true) const;
 
     /// query domain position
-    McVec2f domainPos() const {
+    StaticVector<float,2> domainPos() const {
         if (isGHOST_NODE())
             switch (edge) {
-            case 0: return McVec2f(1, 0);
-            case 1: return McVec2f(0, 1);
-            case 2: return McVec2f(0, 0);
+            case 0: return StaticVector<float,2>(1, 0);
+            case 1: return StaticVector<float,2>(0, 1);
+            case 2: return StaticVector<float,2>(0, 0);
             }
 
         return dP;
     }
 
     /// set domain position
-    void setDomainPos(const McVec2f& p) {dP = p;}
+    void setDomainPos(const StaticVector<float,2>& p) {dP = p;}
 
     //private:
-    McVec2f dP;
+    StaticVector<float,2> dP;
             
 public:    
     ///

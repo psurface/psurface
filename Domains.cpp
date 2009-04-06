@@ -76,8 +76,8 @@ void DomainTriangle::flip()
 
     // turn the parametrization
     /** \todo This is slow and should be reprogrammed! */
-    installWorldCoordinates(McVec2f(0,0), McVec2f(1,0), McVec2f(0,1));
-    PlaneParam::installBarycentricCoordinates(McVec2f(0,0), McVec2f(0,1), McVec2f(1,0));
+    installWorldCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(1,0), StaticVector<float,2>(0,1));
+    PlaneParam::installBarycentricCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(0,1), StaticVector<float,2>(1,0));
 }
 
 void DomainTriangle::rotate()
@@ -88,8 +88,8 @@ void DomainTriangle::rotate()
     
     // turn the parametrization
     /// \todo This is slow and should be replaced!
-    installWorldCoordinates(McVec2f(0,0), McVec2f(1,0), McVec2f(0,1));
-    PlaneParam::installBarycentricCoordinates(McVec2f(0,1), McVec2f(0,0), McVec2f(1,0));
+    installWorldCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(1,0), StaticVector<float,2>(0,1));
+    PlaneParam::installBarycentricCoordinates(StaticVector<float,2>(0,1), StaticVector<float,2>(0,0), StaticVector<float,2>(1,0));
 }
 
 
@@ -118,20 +118,20 @@ void DomainTriangle::adjustTouchingNodes()
 
     for (i=1; i<edgePoints[0].size()-1; i++)
         if (nodes[edgePoints[0][i]].isTOUCHING_NODE() || nodes[edgePoints[0][i]].isINTERSECTION_NODE()){
-            McVec2f tmp = nodes[edgePoints[0][i]].domainPos();
-            float diff = (1.0f - tmp.x - tmp.y);
-            tmp.x += 0.5*diff;
-            tmp.y += 0.5*diff;
+            StaticVector<float,2> tmp = nodes[edgePoints[0][i]].domainPos();
+            float diff = (1.0f - tmp[0] - tmp[1]);
+            tmp[0] += 0.5*diff;
+            tmp[1] += 0.5*diff;
             nodes[edgePoints[0][i]].setDomainPos(tmp);
         }
 
     for (i=1; i<edgePoints[1].size()-1; i++)
         if (nodes[edgePoints[1][i]].isTOUCHING_NODE() || nodes[edgePoints[1][i]].isINTERSECTION_NODE())
-            nodes[edgePoints[1][i]].setDomainPos(McVec2f(0, nodes[edgePoints[1][i]].domainPos().y));
+            nodes[edgePoints[1][i]].setDomainPos(StaticVector<float,2>(0, nodes[edgePoints[1][i]].domainPos()[1]));
     
     for (i=1; i<edgePoints[2].size()-1; i++)
         if (nodes[edgePoints[2][i]].isTOUCHING_NODE() || nodes[edgePoints[2][i]].isINTERSECTION_NODE())
-            nodes[edgePoints[2][i]].setDomainPos(McVec2f(nodes[edgePoints[2][i]].domainPos().x, 0));
+            nodes[edgePoints[2][i]].setDomainPos(StaticVector<float,2>(nodes[edgePoints[2][i]].domainPos()[0], 0));
 }
         
 

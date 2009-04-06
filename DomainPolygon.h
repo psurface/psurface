@@ -30,7 +30,7 @@ private:
 public:
         
     ///
-    void init(const DomainTriangle& tri, const McVec2f coords[3]);
+    void init(const DomainTriangle& tri, const StaticVector<float,2> coords[3]);
 
 
     enum NodeLocation {IN_TRIANGLE, ON_SEGMENT, IN_POLYGON};
@@ -95,7 +95,7 @@ public:
     void insertExtraEdges();
         
     /// merges the polygon with a triangle
-    void mergeTriangle(int tri, McVec2f coords[3], int& newCenterNode,
+    void mergeTriangle(int tri, StaticVector<float,2> coords[3], int& newCenterNode,
                        std::vector<unsigned int>& nodeStack);
 
     /** \brief This uses a given triangulation to cut a DomainPolygon into a
@@ -109,7 +109,7 @@ public:
     void cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
                            std::vector<int>& nodeLocs,
                            DomainTriangle& cT,
-                           const McSArray<McVec2f, 3>& newTriangleCoords,
+                           const McSArray<StaticVector<float,2>, 3>& newTriangleCoords,
                            McSmallArray<int, 2>& triNewEdgePoints,
                            McSmallArray<int, 2>& polyNewEdgePoints,
                            std::vector<unsigned int>& nodeStack);
@@ -131,8 +131,8 @@ public:
      *  combination of p1 and p2 
      *
      * \todo Rewrite this */
-    float computeIntersection(float &mu, const McVec2f &p1, const McVec2f &p2, 
-                              const McVec2f &p3, const McVec2f &p4);
+    float computeIntersection(float &mu, const StaticVector<float,2> &p1, const StaticVector<float,2> &p2, 
+                              const StaticVector<float,2> &p3, const StaticVector<float,2> &p4);
 
     /** \brief Transforms the domain positions into a world coordinate system
      *
@@ -149,10 +149,10 @@ public:
      * \param a, b, c : The new coordinates of the points \f$(1,0)\f$, 
      * \f$(0,1)\f$, and \f$(0,0)\f$, respectively.
      */
-    void installWorldCoordinates(int newNodeIdx, const McVec2f &a, const McVec2f &b, const McVec2f &c){
+    void installWorldCoordinates(int newNodeIdx, const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c){
         for (int i=newNodeIdx; i<nodes.size(); i++)
-            nodes[i].setDomainPos(a*nodes[i].domainPos().x + b*nodes[i].domainPos().y + 
-                c*(1-nodes[i].domainPos().x-nodes[i].domainPos().y));
+            nodes[i].setDomainPos(a*nodes[i].domainPos()[0] + b*nodes[i].domainPos()[1] + 
+                c*(1-nodes[i].domainPos()[0]-nodes[i].domainPos()[1]));
     }
 
     void augmentNeighborIdx(int newNodeIdx, McSmallArray<int, 2> edgePoints[3]) {

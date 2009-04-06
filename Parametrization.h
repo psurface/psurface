@@ -167,14 +167,25 @@ public:
         switch (cN.type) {
         case Node::GHOST_NODE: {
             const Surface::Triangle& cT = surface->triangles[cN.getNodeNumber()];
-            return PlaneParam::linearInterpol(cN.dP, surface->points[cT.points[0]],
-                                              surface->points[cT.points[1]], surface->points[cT.points[2]]);
+
+            StaticVector<float,3> p0(surface->points[cT.points[0]][0],surface->points[cT.points[0]][1],surface->points[cT.points[0]][2]);
+            StaticVector<float,3> p1(surface->points[cT.points[1]][0],surface->points[cT.points[1]][1],surface->points[cT.points[1]][2]);
+            StaticVector<float,3> p2(surface->points[cT.points[2]][0],surface->points[cT.points[2]][1],surface->points[cT.points[2]][2]);
+
+            return PlaneParam::linearInterpol(cN.dP, p0, p1, p2);
         }
         case Node::INTERSECTION_NODE:
             return iPos[cN.getNodeNumber()];
 
         default:
+#ifdef PSURFACE_STANDALONE
             return surface->points[cN.getNodeNumber()];
+#else 
+            StaticVector<float,3> result;
+            return StaticVector<float,3>(surface->points[cN.getNodeNumber()][0],
+                                         surface->points[cN.getNodeNumber()][1],
+                                         surface->points[cN.getNodeNumber()][2]);
+#endif
         }
 
     }
@@ -182,7 +193,7 @@ public:
     /** \brief Returns the local coordinates of the image of a node with
      * respect to a given image triangle.
      */
-    McVec2f getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
+    StaticVector<float,2> getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
 
     /**@name Mapping functions */
     //@{
@@ -206,9 +217,9 @@ public:
      * 
      */
     int map(int tri,                ///< The triangle of the input point \f$x\f$
-            McVec2f& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
+            StaticVector<float,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
             McVec3i& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
-            McVec2f& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
+            StaticVector<float,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
             int seed=-1                      
             ) const;
 
@@ -223,7 +234,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int positionMap(int tri, McVec2f& p, StaticVector<float,3>& result) const;
+    int positionMap(int tri, StaticVector<float,2>& p, StaticVector<float,3>& result) const;
 
     /** \brief Convenience function for accessing the normals of the target surface.
      *
@@ -236,7 +247,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int directNormalMap(int tri, McVec2f& p, StaticVector<float,3>& result) const;
+    int directNormalMap(int tri, StaticVector<float,2>& p, StaticVector<float,3>& result) const;
 
     //@}
 
@@ -312,22 +323,22 @@ public:
 
     NodeIdx addNode(int tri, const StaticVector<float,3>& p);
 
-    NodeIdx addInteriorNode(int tri, const McVec2f& dom, int nodeNumber);
+    NodeIdx addInteriorNode(int tri, const StaticVector<float,2>& dom, int nodeNumber);
 
-    NodeIdx addGhostNode(int tri, int corner, int targetTri, const McVec2f& localTargetCoords);
+    NodeIdx addGhostNode(int tri, int corner, int targetTri, const StaticVector<float,2>& localTargetCoords);
 
     NodeIdx addCornerNode(int tri, int corner, int nodeNumber);
 
     /** \todo Sollte vielleicht ein Bundle zurückgeben */
     NodeIdx addIntersectionNodePair(int tri1, int tri2,
-                                    const McVec2f& dP1, const McVec2f& dP2, 
+                                    const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
                                     int edge1, int edge2, const StaticVector<float,3>& range);
 
-    NodeIdx addTouchingNode(int tri, const McVec2f& dP, int edge, int nodeNumber);
+    NodeIdx addTouchingNode(int tri, const StaticVector<float,2>& dP, int edge, int nodeNumber);
 
     /** \todo Sollte vielleicht ein Bundle zurückgeben */
     NodeIdx addTouchingNodePair(int tri1, int tri2,
-                                const McVec2f& dP1, const McVec2f& dP2, 
+                                const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
                                 int edge1, int edge2, int nodeNumber);
 
     void addParTriangle(int tri, const McVec3i& p);
@@ -344,8 +355,8 @@ protected:
 
     /** \brief Internal routine used by map() 
      */
-    void handleMapOnEdge(int tri, const McVec2f& p, const McVec2f& a, const McVec2f& b,
-                         int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, McVec2f& coords) const;
+    void handleMapOnEdge(int tri, const StaticVector<float,2>& p, const StaticVector<float,2>& a, const StaticVector<float,2>& b,
+                         int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
     void appendTriangleToOriginalSurface(const McVec3i& v, int patch);

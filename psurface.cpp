@@ -96,9 +96,9 @@ int psurface::StartEditingDomain(const char* label)
 // This is the main access function
 int psurface::CallParametrization(int tri, double* p, int* res, double* coords, int seed)
 {
-    McVec2f input(p[0], p[1]);
+    StaticVector<float,2> input(p[0], p[1]);
     McVec3i result;
-    McVec2f localCoords;
+    StaticVector<float,2> localCoords;
 
     int status = currentDomain->map(tri, input, result, localCoords, seed);
 
@@ -116,7 +116,7 @@ int psurface::CallParametrization(int tri, double* p, int* res, double* coords, 
 // This is a shortcut function for the surface point position
 int psurface::CallPositionParametrization(int tri, double* p, double* res)
 {
-    McVec2f input(p[0], p[1]);
+    StaticVector<float,2> input(p[0], p[1]);
     StaticVector<float,3> result; 
 
     int status = currentDomain->positionMap(tri, input, result);
@@ -132,7 +132,7 @@ int psurface::CallPositionParametrization(int tri, double* p, double* res)
 // Here we can explicitly choose a parametrization from the list
 int psurface::CallPositionParametrizationForDomain(int domain, int tri, double* p, double* res)
 {
-    McVec2f input(p[0], p[1]);
+    StaticVector<float,2> input(p[0], p[1]);
     StaticVector<float,3> result; 
 
     int status = domains[domain].second->positionMap(tri, input, result);
@@ -147,7 +147,7 @@ int psurface::CallPositionParametrizationForDomain(int domain, int tri, double* 
 // This is the surface normals access function
 int psurface::CallDirectNormalParametrization(int tri, double* p, double* res)
 {
-    McVec2f input(p[0], p[1]);
+    StaticVector<float,2> input(p[0], p[1]);
     StaticVector<float,3> result; 
 
     int status = currentDomain->directNormalMap(tri, input, result);

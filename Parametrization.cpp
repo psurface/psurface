@@ -205,7 +205,7 @@ void Parametrization::init(const Parametrization* other)
     
 }
 
-McVec2f Parametrization::getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const
+StaticVector<float,2> Parametrization::getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const
 {
     const Node& cN = triangles(n.tri).nodes[n.idx];
     
@@ -220,11 +220,11 @@ McVec2f Parametrization::getLocalTargetCoords(const GlobalNodeIdx& n, int target
     }
     default:
         if (cN.getNodeNumber()==surface->triangles[targetTri].points[0])
-            return McVec2f(1, 0);
+            return StaticVector<float,2>(1, 0);
         else if (cN.getNodeNumber()==surface->triangles[targetTri].points[1])
-            return McVec2f(0, 1);
+            return StaticVector<float,2>(0, 1);
         else if (cN.getNodeNumber()==surface->triangles[targetTri].points[2])
-            return McVec2f(0, 0);
+            return StaticVector<float,2>(0, 0);
         else {
             printf("The node is not related to the targetTri!\n");
             throw ParamError();
@@ -555,7 +555,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     /////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
-    std::vector<McVec2f> domainPositions(numNodes);
+    std::vector<StaticVector<float,2> > domainPositions(numNodes);
     std::vector<int>     nodeNumbers(numNodes);
     std::vector<std::tr1::array<int,2> > parameterEdgeArray(numParamEdges);
     std::vector<int>     edgePointsArray(numEdgePoints);
@@ -804,7 +804,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
     }
 
     const int* numNodesAndEdgesData = (int*)numNodesAndEdges->dataPtr();
-    const McVec2f*   nodeData       = (McVec2f*)nodes->dataPtr();
+    const StaticVector<float,2>*   nodeData       = (StaticVector<float,2>*)nodes->dataPtr();
     const int* nodeNumbers          = (int*)AMnodeNumbers->dataPtr();
     const std::tr1::array<int,2>* edgeData  = (std::tr1::array<int,2>*)AMedges->dataPtr();
     const int*     edgePointData    = (int*)AMedgePoints->dataPtr();
@@ -836,17 +836,17 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
         triangles(newTriIdx).nodes.resize(numIntersectionNodes + numTouchingNodes + numInteriorNodes + 3);
 
         // three corner nodes
-        McVec2f domainPos(1, 0);
+        StaticVector<float,2> domainPos(1, 0);
         int nodeNumber = numNodesAndEdgesData[11*i+8];
         triangles(newTriIdx).nodes[0].setValue(domainPos, nodeNumber, Node::CORNER_NODE);
         cornerNodes[0] = 0;
 
-        domainPos = McVec2f(0, 1);
+        domainPos = StaticVector<float,2>(0, 1);
         nodeNumber = numNodesAndEdgesData[11*i+9];
         triangles(newTriIdx).nodes[1].setValue(domainPos, nodeNumber, Node::CORNER_NODE);
         cornerNodes[1] = 1;
 
-        domainPos = McVec2f(0, 0);
+        domainPos = StaticVector<float,2>(0, 0);
         nodeNumber = numNodesAndEdgesData[11*i+10];
         triangles(newTriIdx).nodes[2].setValue(domainPos, nodeNumber, Node::CORNER_NODE);
         cornerNodes[2] = 2;
@@ -855,7 +855,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
 
         // the intersection nodes
         for (j=0; j<numIntersectionNodes; j++, nodeCounter++, nodeArrayIdx++){
-            McVec2f domainPos = nodeData[nodeArrayIdx];
+            StaticVector<float,2> domainPos = nodeData[nodeArrayIdx];
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
 
             triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node::INTERSECTION_NODE);
@@ -863,7 +863,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
 
         // the touching nodes
         for (j=0; j<numTouchingNodes; j++, nodeCounter++, nodeArrayIdx++){
-            McVec2f domainPos = nodeData[nodeArrayIdx];
+            StaticVector<float,2> domainPos = nodeData[nodeArrayIdx];
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
             
             triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node::TOUCHING_NODE);
@@ -871,7 +871,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
 
         // the interior nodes
         for (j=0; j<numInteriorNodes; j++, nodeCounter++, nodeArrayIdx++){
-            McVec2f domainPos = nodeData[nodeArrayIdx];
+            StaticVector<float,2> domainPos = nodeData[nodeArrayIdx];
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
 
             triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node::INTERIOR_NODE);
@@ -1125,21 +1125,21 @@ void Parametrization::savePaths(HxParamBundle& parameters)
 
 
 
-int Parametrization::map(int triIdx, McVec2f& p, McVec3i& vertices, 
-                         McVec2f& coords, int seed) const
+int Parametrization::map(int triIdx, StaticVector<float,2>& p, McVec3i& vertices, 
+                         StaticVector<float,2>& coords, int seed) const
 {
     int i;
     const DomainTriangle& tri = triangles(triIdx);
     const std::vector<StaticVector<float,3> >& nP = iPos;
 
     // this is boundary handling
-    if (p.x < 0.001){
+    if (p[0] < 0.001){
         for (i=0; i<tri.edgePoints[1].size()-1; i++){
 
-            const McVec2f& a = tri.nodes[tri.edgePoints[1][i]].domainPos();
-            const McVec2f& b = tri.nodes[tri.edgePoints[1][i+1]].domainPos();
+            const StaticVector<float,2>& a = tri.nodes[tri.edgePoints[1][i]].domainPos();
+            const StaticVector<float,2>& b = tri.nodes[tri.edgePoints[1][i+1]].domainPos();
 
-            if (a.y+1e-5 > p.y && p.y > b.y-1e-5) {
+            if (a[1]+1e-5 > p[1] && p[1] > b[1]-1e-5) {
 
                 McSArray<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 1, i, targetNodes, coords);
@@ -1151,13 +1151,13 @@ int Parametrization::map(int triIdx, McVec2f& p, McVec3i& vertices,
             
         }
 
-    }else if (p.y < 0.001){
+    }else if (p[1] < 0.001){
 
         for (i=0; i<tri.edgePoints[2].size()-1; i++){
-            const McVec2f& a = tri.nodes[tri.edgePoints[2][i]].domainPos();
-            const McVec2f& b = tri.nodes[tri.edgePoints[2][i+1]].domainPos();
+            const StaticVector<float,2>& a = tri.nodes[tri.edgePoints[2][i]].domainPos();
+            const StaticVector<float,2>& b = tri.nodes[tri.edgePoints[2][i+1]].domainPos();
 
-            if (b.x+1e-5 > p.x && p.x > a.x-1e-5) {
+            if (b[0]+1e-5 > p[0] && p[0] > a[0]-1e-5) {
 
                 McSArray<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 2, i, targetNodes, coords);
@@ -1168,13 +1168,13 @@ int Parametrization::map(int triIdx, McVec2f& p, McVec3i& vertices,
             }
         }
 
-    }else if (p.x+p.y > 0.999) {
+    }else if (p[0]+p[1] > 0.999) {
 
         for (i=0; i<tri.edgePoints[0].size()-1; i++){
-            const McVec2f& a = tri.nodes[tri.edgePoints[0][i]].domainPos();
-            const McVec2f& b = tri.nodes[tri.edgePoints[0][i+1]].domainPos();
+            const StaticVector<float,2>& a = tri.nodes[tri.edgePoints[0][i]].domainPos();
+            const StaticVector<float,2>& b = tri.nodes[tri.edgePoints[0][i+1]].domainPos();
 
-            if (a.x+1e-5>p.x && p.x>b.x-1e-5) {
+            if (a[0]+1e-5>p[0] && p[0]>b[0]-1e-5) {
 
                 McSArray<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 0, i, targetNodes, coords);
@@ -1364,25 +1364,25 @@ McSmallArray<int, 6> Parametrization::getTargetTrianglesPerNode(const GlobalNode
 //                surface->triangles[cN.getNodeNumber()].points[0],
 //                surface->triangles[cN.getNodeNumber()].points[1],
 //                surface->triangles[cN.getNodeNumber()].points[2],
-//                cN.dP.x, cN.dP.y);
+//                cN.dP[0], cN.dP[1]);
         
         McSmallArray<int, 6> result(1);
         result[0] = cN.getNodeNumber();
-        if (cN.dP.x + cN.dP.y > 1-eps) {
+        if (cN.dP[0] + cN.dP[1] > 1-eps) {
             // append the triangles bordering on edge 0
             int p = surface->triangles[result[0]].points[0];
             int q = surface->triangles[result[0]].points[1];
             //printf("1) using:  p -> %d   q-> %d \n", p, q);
             getTrianglesPerEdge(p, q, result, result[0]);
 
-        } else if (cN.dP.x < eps) {
+        } else if (cN.dP[0] < eps) {
             // append the triangles bordering on edge 1
             int p = surface->triangles[result[0]].points[1];
             int q = surface->triangles[result[0]].points[2];
             //printf("2) using:  p -> %d   q-> %d \n", p, q);
             getTrianglesPerEdge(p, q, result, result[0]);
 
-        } else if (cN.dP.y < eps) {
+        } else if (cN.dP[1] < eps) {
             // append the triangles bordering on edge 2
             int p = surface->triangles[result[0]].points[2];
             int q = surface->triangles[result[0]].points[0];
@@ -1416,8 +1416,8 @@ void Parametrization::getTrianglesPerEdge(int from, int to, McSmallArray<int, 6>
 
 }
 
-void Parametrization::handleMapOnEdge(int triIdx, const McVec2f& p, const McVec2f& a, const McVec2f& b,
-                                      int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, McVec2f& coords) const
+void Parametrization::handleMapOnEdge(int triIdx, const StaticVector<float,2>& p, const StaticVector<float,2>& a, const StaticVector<float,2>& b,
+                                      int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const
 {
     const DomainTriangle& tri = triangles(triIdx);
     float lambda = (p-a).length() / (a-b).length();
@@ -1479,15 +1479,15 @@ void Parametrization::handleMapOnEdge(int triIdx, const McVec2f& p, const McVec2
 }
 
 
-int Parametrization::positionMap(int triIdx, McVec2f& p, StaticVector<float,3>& result) const
+int Parametrization::positionMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
 {
-    McVec2f localCoords;
+    StaticVector<float,2> localCoords;
     McVec3i tri;
 
     int status = map(triIdx, p, tri, localCoords);
     
     if (!status) {
-        printf("p: (%f %f)\n", p.x, p.y);
+        printf("p: (%f %f)\n", p[0], p[1]);
         triangles(triIdx).print(true, true, false);
         assert(false);
         return false;
@@ -1500,9 +1500,9 @@ int Parametrization::positionMap(int triIdx, McVec2f& p, StaticVector<float,3>& 
 
 
 
-int Parametrization::directNormalMap(int triIdx, McVec2f& p, StaticVector<float,3>& result) const
+int Parametrization::directNormalMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
 {
-    McVec2f localCoords;
+    StaticVector<float,2> localCoords;
     McVec3i tri;
 
     int status = map(triIdx, p, tri, localCoords);
@@ -1551,17 +1551,17 @@ int Parametrization::invertTriangles(int patch)
 
 //     int nodeNumber = pars[side].iPos.size()-1;
 
-//     return cT.nodes.append(Node(McVec2f(0,0), nodeNumber, Node::INTERIOR_NODE));  
+//     return cT.nodes.append(Node(StaticVector<float,2>(0,0), nodeNumber, Node::INTERIOR_NODE));  
 
 // }
 
-NodeIdx Parametrization::addInteriorNode(int tri, const McVec2f& dom, int nodeNumber)
+NodeIdx Parametrization::addInteriorNode(int tri, const StaticVector<float,2>& dom, int nodeNumber)
 {
     triangles(tri).nodes.push_back(Node(dom, nodeNumber, Node::INTERIOR_NODE));
     return triangles(tri).nodes.size()-1;
 }
 
-NodeIdx Parametrization::addGhostNode(int tri, int corner, int targetTri, const McVec2f& localTargetCoords)
+NodeIdx Parametrization::addGhostNode(int tri, int corner, int targetTri, const StaticVector<float,2>& localTargetCoords)
 {
     triangles(tri).nodes.push_back(Node());
     triangles(tri).nodes.back().makeGhostNode(corner, targetTri, localTargetCoords);
@@ -1579,7 +1579,7 @@ NodeIdx Parametrization::addCornerNode(int tri, int corner, int nodeNumber)
 
 // BUG: The node needs to be entered in the edgepoint arrays
 NodeIdx Parametrization::addIntersectionNodePair(int tri1, int tri2,
-                                                const McVec2f& dP1, const McVec2f& dP2, 
+                                                const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
                                                 int edge1, int edge2, const StaticVector<float,3>& range)
 {
     DomainTriangle& cT1 = triangles(tri1);
@@ -1601,7 +1601,7 @@ NodeIdx Parametrization::addIntersectionNodePair(int tri1, int tri2,
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
-NodeIdx Parametrization::addTouchingNode(int tri, const McVec2f& dP, int edge, int nodeNumber)
+NodeIdx Parametrization::addTouchingNode(int tri, const StaticVector<float,2>& dP, int edge, int nodeNumber)
 {
     DomainTriangle& cT = triangles(tri);
 
@@ -1614,7 +1614,7 @@ NodeIdx Parametrization::addTouchingNode(int tri, const McVec2f& dP, int edge, i
 
 // BUG: The node needs to be entered in the edgepoint arrays
 NodeIdx Parametrization::addTouchingNodePair(int tri1, int tri2,
-                                            const McVec2f& dP1, const McVec2f& dP2, 
+                                            const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
                                             int edge1, int edge2, int nodeNumber)
 {
     DomainTriangle& cT1 = triangles(tri1);
