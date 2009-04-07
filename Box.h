@@ -19,7 +19,9 @@
 
 #include <algorithm>
 #include <tr1/array>
+#ifndef PSURFACE_STANDALONE
 #include <mclib/McVec3f.h>
+#endif
 
 /** \brief A axis-parallel box in a Euclidean space
     \tparam C Type used for coordinate components
@@ -44,14 +46,16 @@ public:
         }
     }
 
-    /** \brief Set box from two points */
-    Box(const McVec3f& lower, const McVec3f& upper)
+#ifndef PSURFACE_STANDALONE
+    /** \brief Set box from two McVec3f */
+    Box(const McVec3f& lower, const McVec3f& upper) 
     {
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<dim; i++) {
             _lower[i] = std::min(lower[i],upper[i]);
             _upper[i] = std::max(lower[i],upper[i]);
         }
     }
+#endif
 
     /** \brief Copy constructor */
     Box(const Box& b) : _lower(b._lower), _upper(b._upper)
@@ -66,15 +70,6 @@ public:
         }
     }
 
-    /** \brief Set up box from to diagonal corners */
-    void set(const McVec3f& lower, const McVec3f& upper)
-    {
-        for (int i=0; i<3; i++) {
-            _lower[i] = std::min(lower[i],upper[i]);
-            _upper[i] = std::max(lower[i],upper[i]);
-        }
-    }
-
     /** \brief Test whether box contains a given point */
 	bool contains(const std::tr1::array<C,dim>& c) const
 	{
@@ -84,6 +79,7 @@ public:
 		return true;
 	}
 
+#ifndef PSURFACE_STANDALONE
     /** \brief Test whether box contains a given point */
     bool contains(const McVec3f& c) const
     {
@@ -92,6 +88,7 @@ public:
                 return false;
         return true;
     }
+#endif
 
 	bool intersects(const Box& b)
 	{
@@ -153,12 +150,14 @@ public:
         }
     }
 
+#ifndef PSURFACE_STANDALONE
     void extendBy(const McVec3f& point){
         for (int i=0; i<dim; i++) {
             _lower[i] = std::min(_lower[i], point[i]);
             _upper[i] = std::max(_upper[i], point[i]);
         }
     }
+#endif
 
     /// Enlarges the box by 'eps' to each side
     void extendByEps(float eps){

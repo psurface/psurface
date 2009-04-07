@@ -455,7 +455,7 @@ public:
                 // project onto the coordinate plane that is 'most parallel' to the triangle
                 StaticVector<float,3> normal = (b-a).cross(c-a);
 
-                McVec2f a2D, b2D, c2D, p2D, q2D;
+                StaticVector<float,2> a2D, b2D, c2D, p2D, q2D;
 
                 for (i=0; i<3; i++) 
                     if (normal[i]<0)
@@ -464,16 +464,16 @@ public:
                 for (i=0; i<3; i++)
                     if (normal[i]>=normal[(i+1)%3] && normal[i]>=normal[(i+2)%3]) {
 
-                        a2D = McVec2f(a[(i+1)%3], a[(i+2)%3]);
-                        b2D = McVec2f(b[(i+1)%3], b[(i+2)%3]);
-                        c2D = McVec2f(c[(i+1)%3], c[(i+2)%3]);
-                        p2D = McVec2f(p[(i+1)%3], p[(i+2)%3]);
-                        q2D = McVec2f(q[(i+1)%3], q[(i+2)%3]);
+                        a2D = StaticVector<float,2>(a[(i+1)%3], a[(i+2)%3]);
+                        b2D = StaticVector<float,2>(b[(i+1)%3], b[(i+2)%3]);
+                        c2D = StaticVector<float,2>(c[(i+1)%3], c[(i+2)%3]);
+                        p2D = StaticVector<float,2>(p[(i+1)%3], p[(i+2)%3]);
+                        q2D = StaticVector<float,2>(q[(i+1)%3], q[(i+2)%3]);
 
                     }
 
-                if (p2D.isInTriangle(a2D, b2D, c2D, eps) ||
-                    q2D.isInTriangle(a2D, b2D, c2D, eps))
+                if (pointInTriangle(p2D, a2D, b2D, c2D, eps) ||
+                    pointInTriangle(q2D, a2D, b2D, c2D, eps))
                     return true;
                 else
                     return (lineIntersection2D(p2D, q2D, a2D, b2D, eps) ||
@@ -487,12 +487,36 @@ public:
     }
         
 protected:
-    static bool lineIntersection2D(const McVec2f &p1, const McVec2f &p2, const McVec2f &p3, const McVec2f &p4, float eps=0) {
-        const McVec2f A = p2 - p1;
-        const McVec2f B = p3 - p4;
-        const McVec2f C = p1 - p3;
+
+    /// Tests whether the point is inside the triangle given by the three argument points.
+    static bool pointInTriangle(const StaticVector<float,2>& p,
+                                const StaticVector<float,2>& a, 
+                                const StaticVector<float,2>& b, 
+                                const StaticVector<float,2>& c, float eps=0) {
+         StaticVector<float,3> localBarycentricCoords;
+
+        // McMat3f(this->x, b.x, c.x,  this->y, b[1], c[1],  1, 1, 1).det();
+        float area0 = p[0] * (b[1]-c[1]) - b[0] * (p[1] - c[1]) + c[0] * (p[1] - b[1]);
+
+        // McMat3f(a[0], this->x, c[0],  a[1], this->y, c[1],  1, 1, 1).det();
+        float area1 = a[0] * (p[1]-c[1]) - p[0] * (a[1] - c[1]) + c[0] * (a[1] - p[1]);
+
+        // McMat3f(a[0], b[0], c[0],  a[1], b[1], c[1],  1, 1, 1).det();
+        float areaTotal = a[0] * (b[1]-c[1]) - b[0] * (a[1] - c[1]) + c[0] * (a[1] - b[1]);
+
+        localBarycentricCoords[0] = area0/areaTotal;
+        localBarycentricCoords[1] = area1/areaTotal;
+        localBarycentricCoords[2] = 1 - localBarycentricCoords[0] - localBarycentricCoords[1];
+
+        return (localBarycentricCoords[0]>=-eps && localBarycentricCoords[1]>=-eps && localBarycentricCoords[2]>=-eps);
+    }
+
+    static bool lineIntersection2D(const StaticVector<float,2> &p1, const StaticVector<float,2> &p2, const StaticVector<float,2> &p3, const StaticVector<float,2> &p4, float eps=0) {
+        const StaticVector<float,2> A = p2 - p1;
+        const StaticVector<float,2> B = p3 - p4;
+        const StaticVector<float,2> C = p1 - p3;
         
-        float det = A.y*B.x - A.x*B.y;
+        float det = A[1]*B[0] - A[0]*B[1];
 
         // 1D intersection
         if (det>=-eps && det<=eps)
@@ -501,8 +525,8 @@ protected:
                       ((p2-p3).length() + (p2-p4).length()) / (p3-p4).length() < 1+eps ||
                       ((p1-p3).length() + (p1-p4).length()) / (p3-p4).length() < 1+eps   );
         
-        float mu     = (A.x*C.y - A.y*C.x) / det;
-        float lambda = (B.y*C.x - B.x*C.y) / det;
+        float mu     = (A[0]*C[1] - A[1]*C[0]) / det;
+        float lambda = (B[1]*C[0] - B[0]*C[1]) / det;
 
         return (mu>-eps && mu<1+eps && lambda>-eps && lambda<1+eps);
     }
