@@ -1,4 +1,5 @@
 #include <psurface/PlaneParam.h>
+#include <psurface/StaticMatrix.h>
 #include <mclib/McSparseMatrix.h>
 #include <mclib/McDVector.h>
 
@@ -291,10 +292,10 @@ StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<fl
 {
     StaticVector<float,2> result;
     
-    McMat3f area0(p[0], b[0], c[0],  p[1], b[1], c[1], 1, 1, 1);
-    McMat3f area1(a[0], p[0], c[0],  a[1], p[1], c[1], 1, 1, 1);
+    StaticMatrix<float,3> area0(p[0], b[0], c[0],  p[1], b[1], c[1], 1, 1, 1);
+    StaticMatrix<float,3> area1(a[0], p[0], c[0],  a[1], p[1], c[1], 1, 1, 1);
     
-    McMat3f areaTotal(a[0], b[0], c[0], a[1], b[1], c[1], 1, 1, 1);
+    StaticMatrix<float,3> areaTotal(a[0], b[0], c[0], a[1], b[1], c[1], 1, 1, 1);
     float areaTotalDet = areaTotal.det();
     
     result[0] = area0.det()/areaTotalDet;

@@ -1,7 +1,6 @@
 #ifndef DOMAINS_H
 #define DOMAINS_H
 
-#include <mclib/McVec2f.h>
 #include <psurface/StaticVector.h>
 
 #include "McPointerSurfaceParts.h"

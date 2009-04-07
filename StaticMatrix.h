@@ -21,6 +21,18 @@ public:
 
     }
 
+    /** \brief Constructor for 3x3 matrices from separate scalars */
+    StaticMatrix( const T& a00, const T& a01, const T& a02,
+                  const T& a10, const T& a11, const T& a12,
+                  const T& a20, const T& a21, const T& a22 )
+    {
+        assert(N==3);
+        (*this)[0][0]=a00; (*this)[0][1]=a01; (*this)[0][2]=a02;
+        (*this)[1][0]=a10; (*this)[1][1]=a11; (*this)[1][2]=a12;
+        (*this)[2][0]=a20; (*this)[2][1]=a21; (*this)[2][2]=a22;
+    }
+
+
     /// Computes the determinant of the matrix.
     T det() const {
         T ad1 = (*this)[0][0] * ((*this)[1][1]*(*this)[2][2] - (*this)[1][2]*(*this)[2][1]);

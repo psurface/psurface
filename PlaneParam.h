@@ -7,7 +7,6 @@
 #define PLANE_PARAM_H
 
 #include <psurface/StaticVector.h>
-#include <mclib/McMat3f.h>
 #include <vector>
 #include <mclib/McSArray.h>
 #include <mclib/McSmallArray.h>
