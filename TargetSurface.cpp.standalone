@@ -809,7 +809,7 @@ void Surface::renumberPoints()
             newIdx[i] = cnt++;
     }
 
-    McDArray<McVec3f> tmpPointList(notInnerPoints);
+    McDArray<StaticVector<float,3> > tmpPointList(notInnerPoints);
     McDArray<McSmallArray<int,6> > tmpEdgeList;
     
     int hasEdgesPerPoint = (edgesPerPoint.size()==points.size());
@@ -871,7 +871,7 @@ void Surface::renumberPoints()
     }
     
     if (notInnerPoints)
-        memmove(&points[0], &tmpPointList[0], notInnerPoints*sizeof(McVec3f));
+        memmove(&points[0], &tmpPointList[0], notInnerPoints*sizeof(StaticVector<float,3>));
     if (hasEdgesPerPoint && notInnerPoints) {
         memmove(&edgesPerPoint[0], &tmpEdgeList[0],
             notInnerPoints*sizeof(tmpEdgeList[0]));
@@ -1175,12 +1175,14 @@ int Surface::tile(const McDArray<int>& v)
 int Surface::tileCenter(const McDArray<int>& v)
 {
     McDArray<int> v2(v);
-    McVec3f center(0,0,0);
+    StaticVector<float,3> center(0,0,0);
     
     int np = v2.size();
     for (int k=0; k<np; k++)
         center += points[v[k]];
-    center /= np;
+
+    for (int i=0; i<3; i++)
+        center[i] /= np;
     
     if (np>4) {
         int p = points.append(center);
@@ -1198,14 +1200,14 @@ int Surface::tileCenter(const McDArray<int>& v)
     int i=1;
     while (np>3) {
         i = (i+1) % np;
-        McVec3f p1 = points[v2[i]]; 
-        McVec3f p2 = points[v2[(i+1)%np]]; 
-        McVec3f p3 = points[v2[(i+2)%np]];
-        McVec3f p4 = points[v2[(i+3)%np]];
-        McVec3f n123=(p2-p1).cross(p3-p1);
-        McVec3f n234=(p3-p2).cross(p4-p2);
-        McVec3f n341=(p4-p3).cross(p1-p3);
-        McVec3f n412=(p1-p4).cross(p2-p4);
+        StaticVector<float,3> p1 = points[v2[i]]; 
+        StaticVector<float,3> p2 = points[v2[(i+1)%np]]; 
+        StaticVector<float,3> p3 = points[v2[(i+2)%np]];
+        StaticVector<float,3> p4 = points[v2[(i+3)%np]];
+        StaticVector<float,3> n123=(p2-p1).cross(p3-p1);
+        StaticVector<float,3> n234=(p3-p2).cross(p4-p2);
+        StaticVector<float,3> n341=(p4-p3).cross(p1-p3);
+        StaticVector<float,3> n412=(p1-p4).cross(p2-p4);
         n123.normalize(); 
         n234.normalize();
         n341.normalize(); 
