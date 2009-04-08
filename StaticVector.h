@@ -5,10 +5,6 @@
 #include <cmath>
 #include <assert.h>
 
-#ifndef PSURFACE_STANDALONE
-#include <mclib/McVec3f.h>
-#endif
-
 template <class T, int N>
 class StaticVector
     : public std::tr1::array<T,N>
@@ -39,25 +35,6 @@ public:
         (*this)[1] = b;
         (*this)[2] = c;
     }
-
-#ifndef PSURFACE_STANDALONE
-    /** Construction from a McVec3f */
-    StaticVector(const McVec3f& other) {
-        assert(N==3);
-        (*this)[0] = other[0];
-        (*this)[1] = other[1];
-        (*this)[2] = other[2];
-    }
-
-    /** Construction from a McVec3f */
-    StaticVector<T,N>& operator=(const McVec3f& other) {
-        assert(N==3);
-        (*this)[0] = other[0];
-        (*this)[1] = other[1];
-        (*this)[2] = other[2];
-        return *this;
-    }
-#endif
 
     /** \brief Vector product */
     T dot(const StaticVector<T,N>& a) const {

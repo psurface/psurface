@@ -214,9 +214,9 @@ StaticVector<float,2> Parametrization::getLocalTargetCoords(const GlobalNodeIdx&
     case Node::INTERSECTION_NODE: {
 
         StaticVector<float,3> iPos = imagePos(n.tri, n.idx);
-        return triangles(n.tri).computeBarycentricCoords(iPos, surface->points[surface->triangles[targetTri].points[0]], 
-                                            surface->points[surface->triangles[targetTri].points[1]], 
-                                            surface->points[surface->triangles[targetTri].points[2]]);
+        return triangles(n.tri).computeBarycentricCoords(iPos, *(StaticVector<float,3>*)&surface->points[surface->triangles[targetTri].points[0]][0], 
+                                                         *(StaticVector<float,3>*)&surface->points[surface->triangles[targetTri].points[1]][0], 
+                                                         *(StaticVector<float,3>*)&surface->points[surface->triangles[targetTri].points[2]][0]);
     }
     default:
         if (cN.getNodeNumber()==surface->triangles[targetTri].points[0])

@@ -93,9 +93,13 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
         int p1 = contactPatch.triangles(i).points[1];
         int p2 = contactPatch.triangles(i).points[2];
         
-        StaticVector<float,3> a_ = contactPatch.surf->points[p1] - contactPatch.surf->points[p0];
-        StaticVector<float,3> b_ = contactPatch.surf->points[p2] - contactPatch.surf->points[p0];
-        
+        StaticVector<float,3> a_, b_;
+
+        for (int j=0; j<3; j++) {
+            a_[j] = contactPatch.surf->points[p1][j] - contactPatch.surf->points[p0][j];
+            b_[j] = contactPatch.surf->points[p2][j] - contactPatch.surf->points[p0][j];
+        }        
+
         StaticVector<double,3> a(a_[0], a_[1], a_[2]);
         StaticVector<double,3> b(b_[0], b_[1], b_[2]);
         StaticVector<double,3> triNormal = a.cross(b);
@@ -150,7 +154,9 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             StaticVector<double,3> x; // the unknown...
 
             if (computeInverseNormalProjection(p0, p1, p2, n0, n1, n2, 
-                                               surf->points[contactPatch.vertices[i]], x)) {
+                                               // magic to use a McVec3f as the argument
+                                               *(StaticVector<float,3>*)&surf->points[contactPatch.vertices[i]][0], 
+                                               x)) {
 
                 // We want that the line from the domain surface to its projection
                 // approaches the target surface from the front side, i.e., it should
@@ -342,9 +348,10 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             StaticVector<double,2> domainPos;
             double dist;
 
-            const StaticVector<float,3>& p0 = surf->points[contactPatch.triangles(j).points[0]];
-            const StaticVector<float,3>& p1 = surf->points[contactPatch.triangles(j).points[1]];
-            const StaticVector<float,3>& p2 = surf->points[contactPatch.triangles(j).points[2]];
+            // magic to be able to take a reference of a McVec3f when compiled within Amira
+            const StaticVector<float,3>& p0 = *(StaticVector<float,3>*)&surf->points[contactPatch.triangles(j).points[0]][0];
+            const StaticVector<float,3>& p1 = *(StaticVector<float,3>*)&surf->points[contactPatch.triangles(j).points[1]][0];
+            const StaticVector<float,3>& p2 = *(StaticVector<float,3>*)&surf->points[contactPatch.triangles(j).points[2]][0];
 
             if (rayIntersectsTriangle(basePoint, normal, p0, p1, p2, domainPos, dist, eps)) {
 
@@ -494,7 +501,8 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
         const Surface* surf = par->surface;
 
 
-        if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+        if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0], 
+                                    *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
 
@@ -539,7 +547,11 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
                 StaticVector<double,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
                 StaticVector<double,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
-                StaticVector<float,3> image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
+                StaticVector<float,3> image;
+
+                // hack: within Amira this is assignment from a McVec3f
+                for (int j=0; j<3; j++)
+                    image[j] = surf->points[from][j] + newLambda*(surf->points[to][j]-surf->points[from][j]);
 
                 StaticVector<float,2> dom1Float(dom1[0], dom1[1]);
                 StaticVector<float,2> dom2Float(dom2[0], dom2[1]);
@@ -605,7 +617,8 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
         int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
         //printf("p: %d   q: %d\n", p, q);
         const Surface* surf = par->surface;
-        if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+        if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0], 
+                                    *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
 //             printf("Intersection found (%f %f)\n", x[0], x[1]);
@@ -651,7 +664,11 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
                 StaticVector<float,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
                 StaticVector<float,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
-                StaticVector<float,3> image = surf->points[from] + newLambda*(surf->points[to]-surf->points[from]);
+                StaticVector<float,3> image;
+
+                // trick: within Amira this is assignment from a McVec3f
+                for (int j=0; j<3; j++)
+                    image[j] = surf->points[from][j] + newLambda*(surf->points[to][j]-surf->points[from][j]);
                     
                 NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1, dom2, i, e, image);
@@ -721,7 +738,8 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
-            if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+            if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
+                                        *(StaticVector<float,3>*)&surf->points[to][0],
                                         par->vertices(p), par->vertices(q),
                                         normals[p], normals[q], x)) {
                 
@@ -760,7 +778,10 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                     StaticVector<float,2> dom1((j==0)*(1-mu) + (j==2)*mu, (j==0)*mu + (j==1)*(1-mu));
                     StaticVector<float,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
-                    StaticVector<float,3> image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
+                    StaticVector<float,3> image;
+
+                    for (int k=0; k<3; k++)
+                        image[k] = surf->points[from][k] + lambda*(surf->points[to][k]-surf->points[from][k]);
                     
                     NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[i].tri, neighboringTri,
                                                                         dom1, dom2, j, e, image);
@@ -845,7 +866,8 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
         int p = par->triangles(cT).vertices[(thisCorner+1)%3];
         int q = par->triangles(cT).vertices[(thisCorner+2)%3];
         //printf("p: %d   q: %d\n", p, q);
-        if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+        if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
+                                    *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
                                     //normals[from], normals[to], x)) {
                                     normals[p], normals[q], x)) {
@@ -886,7 +908,10 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
                 StaticVector<float,2> dom1((oppEdge==0)*(1-mu) + (oppEdge==2)*mu, (oppEdge==0)*mu + (oppEdge==1)*(1-mu));
                 StaticVector<float,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                 
-                StaticVector<float,3> image = surf->points[from] + lambda*(surf->points[to]-surf->points[from]);
+                StaticVector<float,3> image;
+
+                for (int j=0; j<3; j++)
+                    image[j] = surf->points[from][j] + lambda*(surf->points[to][j]-surf->points[from][j]);
                 
                 NodeIdx newNodeIn  = par->addIntersectionNodePair(cT, neighboringTri,
                                                                   dom1, dom2, oppEdge, e, image);
@@ -1025,7 +1050,8 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
         const Surface* surf = par->surface;
 
 
-        if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+        if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
+                                    *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
 
@@ -1107,7 +1133,8 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
         int q = par->triangles(currTri).vertices[(i+1)%3];
         
         const Surface* surf = par->surface;
-        if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+        if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
+                                    *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
 //             printf("Intersection found (%f %f)\n", x[0], x[1]);
@@ -1190,7 +1217,8 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
-            if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+            if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
+                                        *(StaticVector<float,3>*)&surf->points[to][0],
                                         par->vertices(p), par->vertices(q),
                                         normals[p], normals[q], x)) {
                 
@@ -1278,9 +1306,9 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
         int p = par->triangles(cT).vertices[(thisCorner+1)%3];
         int q = par->triangles(cT).vertices[(thisCorner+2)%3];
         //printf("p: %d   q: %d\n", p, q);
-        if (edgeIntersectsNormalFan(surf->points[from], surf->points[to],
+        if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
+                                    *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
-                                    //normals[from], normals[to], x)) {
                                     normals[p], normals[q], x)) {
             
             const double& newLambda = x[1];
