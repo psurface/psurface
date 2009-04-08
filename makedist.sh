@@ -32,7 +32,6 @@ cp local_mclib/include/mclib/McStdio.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
 
 cp local_mclib/McSmallArray.h             libpsurface/include/mclib
-cp local_mclib/McMat3d.h                  libpsurface/include/mclib
 
 cp psurface.h               libpsurface/include/psurface
 cp psurface.h               libpsurface/include/
@@ -55,8 +54,6 @@ cp StaticVector.h           libpsurface/include/psurface
 cp StaticMatrix.h           libpsurface/include/psurface
 cp psurfaceAPI.h            libpsurface/include/psurface
 
-cp local_mclib/McMat3f.cpp                libpsurface/src
-
 
 cp psurface.cpp                     libpsurface/src
 cp CircularPatch.cpp                libpsurface/src
@@ -75,7 +72,6 @@ cp ContactBoundary.h            libpsurface/include/psurface
 cp NormalProjector.h            libpsurface/include/psurface
 
 cp contact.cpp                  libpsurface/src
-cp local_mclib/McMat3d.cpp      libpsurface/src
 cp NormalProjector.cpp          libpsurface/src
 cp buildContactSurface.cpp      libpsurface/src
 cp extractMergedGrid.cpp        libpsurface/src
