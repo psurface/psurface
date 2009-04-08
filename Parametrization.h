@@ -218,7 +218,7 @@ public:
      */
     int map(int tri,                ///< The triangle of the input point \f$x\f$
             StaticVector<float,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
-            McVec3i& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
+            std::tr1::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
             StaticVector<float,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
             int seed=-1                      
             ) const;
@@ -341,7 +341,7 @@ public:
                                 const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
                                 int edge1, int edge2, int nodeNumber);
 
-    void addParTriangle(int tri, const McVec3i& p);
+    void addParTriangle(int tri, const std::tr1::array<int,3>& p);
     
     /** Not a fast implementation, but it works even if the edgePoint arrays
      * haven't been set up yet.
@@ -359,7 +359,7 @@ protected:
                          int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
-    void appendTriangleToOriginalSurface(const McVec3i& v, int patch);
+    void appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch);
 
 
     /////////////////////////////////////////////////////

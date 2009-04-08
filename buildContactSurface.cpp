@@ -395,14 +395,9 @@ void ContactToolBox::computeContactPatch(const Surface* surf, ContactBoundary& c
 
     for (int i=0; i<surf->triangles.size(); i++) {
         
-        const McVec3i& p = surf->triangles[i].points;
-        
-//         if (cBound.vertices.findSorted(p[0], mcStandardCompare)>=0 &&
-//             cBound.vertices.findSorted(p[1], mcStandardCompare)>=0 &&
-//             cBound.vertices.findSorted(p[2], mcStandardCompare)>=0) {
-        if (vertexSet.find(p[0]) != vertexSet.end() &&
-            vertexSet.find(p[1]) != vertexSet.end() &&
-            vertexSet.find(p[1]) != vertexSet.end()) {
+        if (vertexSet.find(surf->triangles[i].points[0]) != vertexSet.end() &&
+            vertexSet.find(surf->triangles[i].points[1]) != vertexSet.end() &&
+            vertexSet.find(surf->triangles[i].points[2]) != vertexSet.end()) {
             
             cBound.triIdx.push_back(i);
         }

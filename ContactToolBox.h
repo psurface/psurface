@@ -3,7 +3,6 @@
 
 #include <psurface/Box.h>
 #include <psurface/StaticVector.h>
-#include <mclib/McVec3i.h>
 
 #include "Node.h"
 #include "IntersectionPrimitive.h"

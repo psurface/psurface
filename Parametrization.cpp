@@ -771,7 +771,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
         return false;
     }
     
-    const McVec3i* triIdx = (McVec3i*)AMtriangles->dataPtr();
+    const std::tr1::array<int,3>* triIdx = (std::tr1::array<int,3>*)AMtriangles->dataPtr();
     const int numTriangles = AMtriangles->location()->dims()[0];
 
     AmiraMesh::Data* numNodesAndEdges = am->findData("NumNodesAndParameterEdgesPerTriangle", HxINT32, 11, 
@@ -815,7 +815,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
     
     for (i=0; i<numTriangles; i++){
         
-        int newTriIdx = createSpaceForTriangle(triIdx[i].i, triIdx[i].j, triIdx[i].k);
+        int newTriIdx = createSpaceForTriangle(triIdx[i][0], triIdx[i][1], triIdx[i][2]);
 
         triangles(newTriIdx).patch = numNodesAndEdgesData[11*i+4];
 
@@ -952,7 +952,7 @@ void Parametrization::setupOriginalSurface()
         for (i=0; i<numNodes; i++) {
 
             Node& cN = cT.nodes[i];
-            McVec3i v;
+            std::tr1::array<int,3> v;
 
             v[0] = cN.nodeNumber;
 
@@ -1068,7 +1068,7 @@ void Parametrization::setupOriginalSurface()
     }
 }
 
-void Parametrization::appendTriangleToOriginalSurface(const McVec3i& v, int patch)
+void Parametrization::appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch)
 {
     surface->triangles.appendSpace(1);
                         
@@ -1125,7 +1125,7 @@ void Parametrization::savePaths(HxParamBundle& parameters)
 
 
 
-int Parametrization::map(int triIdx, StaticVector<float,2>& p, McVec3i& vertices, 
+int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<int,3>& vertices, 
                          StaticVector<float,2>& coords, int seed) const
 {
     int i;
@@ -1482,7 +1482,7 @@ void Parametrization::handleMapOnEdge(int triIdx, const StaticVector<float,2>& p
 int Parametrization::positionMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
 {
     StaticVector<float,2> localCoords;
-    McVec3i tri;
+    std::tr1::array<int,3> tri;
 
     int status = map(triIdx, p, tri, localCoords);
     
@@ -1503,7 +1503,7 @@ int Parametrization::positionMap(int triIdx, StaticVector<float,2>& p, StaticVec
 int Parametrization::directNormalMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
 {
     StaticVector<float,2> localCoords;
-    McVec3i tri;
+    std::tr1::array<int,3> tri;
 
     int status = map(triIdx, p, tri, localCoords);
     
@@ -1632,7 +1632,7 @@ NodeIdx Parametrization::addTouchingNodePair(int tri1, int tri2,
     return cT1.nodes.size()-1;
 }
 
-void Parametrization::addParTriangle(int tri, const McVec3i& p)
+void Parametrization::addParTriangle(int tri, const std::tr1::array<int,3>& p)
 {
     DomainTriangle& cT = triangles(tri);
 

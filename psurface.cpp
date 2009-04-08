@@ -97,7 +97,7 @@ int psurface::StartEditingDomain(const char* label)
 int psurface::CallParametrization(int tri, double* p, int* res, double* coords, int seed)
 {
     StaticVector<float,2> input(p[0], p[1]);
-    McVec3i result;
+    std::tr1::array<int,3> result;
     StaticVector<float,2> localCoords;
 
     int status = currentDomain->map(tri, input, result, localCoords, seed);
