@@ -27,7 +27,8 @@ INCLUDES = -I../include -I../include/mclib -I../include/hxsurface -I$(AMIRAMESH_
 
 OBJS = psurface.o CircularPatch.o DomainPolygon.o Domains.o Iterators.o \
        Parametrization.o PlaneParam.o TargetSurface.o debugCode.o \
-       contact.o NormalProjector.o buildContactSurface.o extractMergedGrid.o
+       contact.o NormalProjector.o buildContactSurface.o extractMergedGrid.o \
+       ContactMapping.o
 
 all: ../lib/libpsurface.a
 

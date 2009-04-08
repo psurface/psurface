@@ -117,6 +117,13 @@ public:
         return *this;
     }
 
+    /** \brief Division */
+    StaticVector<T,N>& operator/=(const StaticVector<T,N>& other) {
+        for (size_t i=0; i<N; i++)
+            (*this)[i] /= other[i];
+        return *this;
+    }
+
     /** \brief Unary minus */
     friend StaticVector<T,N> operator-(const StaticVector<T,N>& a) {
         StaticVector<T,N> result;

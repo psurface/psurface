@@ -70,11 +70,13 @@ cp ContactToolBox.h             libpsurface/include/psurface
 cp IntersectionPrimitive.h      libpsurface/include/psurface
 cp ContactBoundary.h            libpsurface/include/psurface
 cp NormalProjector.h            libpsurface/include/psurface
+cp ContactMapping.h             libpsurface/include/psurface
 
 cp contact.cpp                  libpsurface/src
 cp NormalProjector.cpp          libpsurface/src
 cp buildContactSurface.cpp      libpsurface/src
 cp extractMergedGrid.cpp        libpsurface/src
+cp ContactMapping.cpp           libpsurface/src
 
 cp Makefile.standalone      libpsurface/src/Makefile
 

@@ -2,10 +2,10 @@
 #define CONTACT_MAPPING_HH
 
 #include <vector>
+#include <iostream>
 
-#include <dune/common/fvector.hh>
-
-#include <contact/contact.h>
+#include <psurface/StaticVector.h>
+#include <psurface/contact.h>
 
 template <int dim>
 class ContactMapping {};
@@ -28,24 +28,24 @@ private:
 
     bool isCompletelyCovered(int i) const;
 
-    static bool computeInverseNormalProjection(const Dune::FieldVector<double,2>& p0,
-                                               const Dune::FieldVector<double,2>& p1,
-                                               const Dune::FieldVector<double,2>& n0,
-                                               const Dune::FieldVector<double,2>& n1,
-                                               const Dune::FieldVector<double,2>& q,
+    static bool computeInverseNormalProjection(const StaticVector<double,2>& p0,
+                                               const StaticVector<double,2>& p1,
+                                               const StaticVector<double,2>& n0,
+                                               const StaticVector<double,2>& n1,
+                                               const StaticVector<double,2>& q,
                                                double& local);
 
-    bool normalProjection(const Dune::FieldVector<double,2>& base,
-                          const Dune::FieldVector<double,2>& direction,
+    bool normalProjection(const StaticVector<double,2>& base,
+                          const StaticVector<double,2>& direction,
                           int& bestSegment,
                           double& rangeLocalPosition,
                           const std::vector<int>& targetSegments,
                           const std::vector<double>& coords) const;
 
-    bool rayIntersectsLine(const Dune::FieldVector<double, 2>& basePoint, 
-                           const Dune::FieldVector<double, 2>& direction,
-                           const Dune::FieldVector<double, 2>& a, 
-                           const Dune::FieldVector<double, 2>& b, 
+    bool rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
+                           const StaticVector<double, 2>& direction,
+                           const StaticVector<double, 2>& a, 
+                           const StaticVector<double, 2>& b, 
                            double& distance, double& targetLocal) const;
 
     // /////////////////////////////////////////////
@@ -97,15 +97,15 @@ private:
         int neighbor[2];
     };
 
-    std::vector<Dune::FieldVector<double, 2> > vertices;
+    std::vector<StaticVector<double, 2> > vertices;
 
     std::vector<DomainSegment> domainSegments;
 
-    std::vector<Dune::FieldVector<double, 2> > domainNormals;
+    std::vector<StaticVector<double, 2> > domainNormals;
 
-    std::vector<Dune::FieldVector<double, 2> > targetVertices;
+    std::vector<StaticVector<double, 2> > targetVertices;
 
-    std::vector<Dune::FieldVector<double, 2> > targetNormals;
+    std::vector<StaticVector<double, 2> > targetNormals;
 
 };
 

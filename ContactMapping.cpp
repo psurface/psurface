@@ -1,8 +1,8 @@
-//#include <config.h>
+#include <limits>
+#include <stdexcept>
 
-//#include "contactmapping.hh"
-
-#include <dune/common/fmatrix.hh>
+#include <psurface/ContactMapping.h>
+#include <psurface/StaticMatrix.h>
 
 void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
                const std::vector<int>& tri1,       ///< The triangles of the first surface
@@ -12,8 +12,6 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
                void (*obsDirections)(const double* pos, double* dir)
                )
 {
-    using namespace Dune;
-
     int nVert1 = coords1.size() / 2;
     int nVert2 = coords2.size() / 2;
     int nTri1  = tri1.size() / 2;
@@ -81,15 +79,15 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
             int v0 = tri1[2*i];
             int v1 = tri1[2*i+1];
             /** \todo Simpler with expression templates */
-            FieldVector<double,2> segment;
+            StaticVector<double,2> segment;
             segment[0] = coords1[2*v1]   - coords1[2*v0];
             segment[1] = coords1[2*v1+1] - coords1[2*v0+1];
 
-            FieldVector<double,2> segmentNormal;
+            StaticVector<double,2> segmentNormal;
             segmentNormal[0] =  segment[1];
             segmentNormal[1] = -segment[0];
 
-            segmentNormal /= segmentNormal.two_norm();
+            segmentNormal /= segmentNormal.length();
 
             domainNormals[used1[tri1[2*i]]]   += segmentNormal;
             domainNormals[used1[tri1[2*i+1]]] += segmentNormal;
@@ -100,7 +98,7 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         }
 
         for (size_t i=0; i<domainNormals.size(); i++) {
-            domainNormals[i] /= domainNormals[i].two_norm();
+            domainNormals[i] /= domainNormals[i].length();
             //std::cout << "Normal " << i << ":   " << domainNormals[i] << std::endl;
         }
         
@@ -144,7 +142,7 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
     //   Build the segments-per-vertex arrays
     // /////////////////////////////////////////////////////
 
-    std::vector<array<int, 2> > segPerVertex1(vertices.size());
+    std::vector<std::tr1::array<int, 2> > segPerVertex1(vertices.size());
     for (size_t i=0; i<segPerVertex1.size(); i++)
         segPerVertex1[i][0] = segPerVertex1[i][1] = -1;
 
@@ -180,7 +178,7 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
     
 
     // Build the segments-per-vertex arrays for the target vertices
-    std::vector<array<int, 2> > segPerVertex2(targetVertices.size());
+    std::vector<std::tr1::array<int, 2> > segPerVertex2(targetVertices.size());
     for (size_t i=0; i<segPerVertex2.size(); i++)
         segPerVertex2[i][0] = segPerVertex2[i][1] = -1;
 
@@ -216,15 +214,15 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         // Compute segment normal
         int v0 = tri2[2*i];
         int v1 = tri2[2*i+1];
-        FieldVector<double,2> segment;
+        StaticVector<double,2> segment;
         segment[0] = coords2[2*v1]   - coords2[2*v0];
         segment[1] = coords2[2*v1+1] - coords2[2*v0+1];
 
-        FieldVector<double,2> segmentNormal;
+        StaticVector<double,2> segmentNormal;
         segmentNormal[0] =  segment[1];
         segmentNormal[1] = -segment[0];
 
-        segmentNormal /= segmentNormal.two_norm();
+        segmentNormal /= segmentNormal.length();
 
         targetNormals[used2[tri2[2*i]]]   += segmentNormal;
         targetNormals[used2[tri2[2*i+1]]] += segmentNormal;
@@ -235,7 +233,7 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
     }
 
     for (size_t i=0; i<targetNormals.size(); i++) {
-        targetNormals[i] /= targetNormals[i].two_norm();
+        targetNormals[i] /= targetNormals[i].length();
         //std::cout << "Normal " << i << ":   " << targetNormals[i] << std::endl;
     }
     //exit(0);
@@ -253,11 +251,11 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         
         for (int j=0; j<domainSegments.size(); j++) {
 
-            const FieldVector<double,2>& p0 = vertices[domainSegments[j].points[0]];
-            const FieldVector<double,2>& p1 = vertices[domainSegments[j].points[1]];
+            const StaticVector<double,2>& p0 = vertices[domainSegments[j].points[0]];
+            const StaticVector<double,2>& p1 = vertices[domainSegments[j].points[1]];
 
-            const FieldVector<double,2>& n0 = domainNormals[domainSegments[j].points[0]];
-            const FieldVector<double,2>& n1 = domainNormals[domainSegments[j].points[1]];
+            const StaticVector<double,2>& n0 = domainNormals[domainSegments[j].points[0]];
+            const StaticVector<double,2>& n1 = domainNormals[domainSegments[j].points[1]];
 
             double local; // the unknown...
 
@@ -271,9 +269,9 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
                 // with the normal at the target surface and the normal at the
                 // domain surface
                 /** \todo Rewrite this once we have expression templates */
-                FieldVector<double,2> base;
-                FieldVector<double, 2> baseNormal;
-                FieldVector<double, 2> segment;
+                StaticVector<double,2> base;
+                StaticVector<double, 2> baseNormal;
+                StaticVector<double, 2> segment;
 
                 for (int k=0; k<2; k++) {
                     base[k]       = (1-local)*p0[k] + local*p1[k];
@@ -281,10 +279,10 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
                     segment[k]    = targetVertices[i][k] - base[k];
                 }
 
-                double distance = segment.two_norm2();
+                double distance = segment.length2();
 
-                if (segment * targetNormals[i] > -0.0001
-                    && segment * baseNormal > -0.0001
+                if (segment.dot(targetNormals[i]) > -0.0001
+                    && segment.dot(baseNormal) > -0.0001
                     && distance > 1e-8) {
                     //printf("aborting %g %g %g\n", segment * targetNormals[i], segment * baseNormal, distance);
                     continue;
@@ -439,12 +437,10 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
             else if (nodes[j].rangeSegments[1] == nodes[j+1].rangeSegments[1])
                 nodes[j].rightRangeSegment = nodes[j].rangeSegments[1];
             else
-                DUNE_THROW(Dune::Exception, "Segment "
-                           << i << " of the Contact Mapping Data structure is inconsistent!");
-
+                throw(std::runtime_error("Segmentx of the Contact Mapping Data structure is inconsistent!"));
+            
             if (nodes[j].rightRangeSegment == -1)
-                DUNE_THROW(Dune::Exception, "Segment " 
-                           << i << " of the Contact Mapping Data structure is inconsistent!");
+                throw(std::runtime_error("Segmentx of the Contact Mapping Data structure is inconsistent!"));
 
         }
 
@@ -539,11 +535,11 @@ bool ContactMapping<2>::isCompletelyCovered(int i) const
     return true;
 }
 
-bool ContactMapping<2>::computeInverseNormalProjection(const Dune::FieldVector<double,2>& p0,
-                                                       const Dune::FieldVector<double,2>& p1,
-                                                       const Dune::FieldVector<double,2>& n0,
-                                                       const Dune::FieldVector<double,2>& n1,
-                                                       const Dune::FieldVector<double,2>& q,
+bool ContactMapping<2>::computeInverseNormalProjection(const StaticVector<double,2>& p0,
+                                                       const StaticVector<double,2>& p1,
+                                                       const StaticVector<double,2>& n0,
+                                                       const StaticVector<double,2>& n1,
+                                                       const StaticVector<double,2>& q,
                                                        double& local)
 {
     double a = (p1[1]-p0[1])*(n1[0]-n0[0]) - (p1[0]-p0[0])*(n1[1]-n0[1]);
@@ -572,8 +568,8 @@ bool ContactMapping<2>::computeInverseNormalProjection(const Dune::FieldVector<d
     return false;
 }
 
-bool ContactMapping<2>::normalProjection(const Dune::FieldVector<double,2>& base,
-                                         const Dune::FieldVector<double,2>& direction,
+bool ContactMapping<2>::normalProjection(const StaticVector<double,2>& base,
+                                         const StaticVector<double,2>& direction,
                                          int& bestSegment,
                                          double& rangeLocalPosition,
                                          const std::vector<int>& targetSegments,
@@ -585,7 +581,7 @@ bool ContactMapping<2>::normalProjection(const Dune::FieldVector<double,2>& base
 
     for (int i=0; i<nTargetSegments; i++) {
 
-        Dune::FieldVector<double,2> p0, p1;
+        StaticVector<double,2> p0, p1;
         p0[0] = coords[2*targetSegments[2*i]];
         p0[1] = coords[2*targetSegments[2*i]+1];
 
@@ -608,35 +604,38 @@ bool ContactMapping<2>::normalProjection(const Dune::FieldVector<double,2>& base
 }
 
 bool ContactMapping<2>::
-rayIntersectsLine(const Dune::FieldVector<double, 2>& basePoint, 
-                  const Dune::FieldVector<double, 2>& direction,
-                  const Dune::FieldVector<double, 2>& a, 
-                  const Dune::FieldVector<double, 2>& b, 
+rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
+                  const StaticVector<double, 2>& direction,
+                  const StaticVector<double, 2>& a, 
+                  const StaticVector<double, 2>& b, 
                   double& distance, double& targetLocal) const
 {
     // we solve the equation basePoint + x_0 * normal = a + x_1 * (b-a)
 
-    Dune::FieldMatrix<double,2,2> mat;
+    StaticMatrix<double,2> mat;
     mat[0][0] = direction[0];
     mat[1][0] = direction[1];
     mat[0][1] = a[0]-b[0];
     mat[1][1] = a[1]-b[1];
 
     /** \todo Easier with expression templates */
-    Dune::FieldVector<double,2> rhs;
+    StaticVector<double,2> rhs;
     rhs[0] = a[0]-basePoint[0];
     rhs[1] = a[1]-basePoint[1];
 
-    Dune::FieldVector<double,2> x;
+    StaticVector<double,2> x;
 
     // Solve the system.  If it is singular the normal and the segment
     // are parallel and there is no intersection
-    try {
-        mat.solve(x,rhs);
-    } catch(Dune::FMatrixError e) {
-        return false;
-    }
 
+    double detinv = mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0];
+    if (std::abs(detinv)<1e-80)
+        return false;
+    detinv = 1/detinv;
+    
+    x[0] = detinv*(mat[1][1]*rhs[0]-mat[0][1]*rhs[1]);
+    x[1] = detinv*(mat[0][0]*rhs[1]-mat[1][0]*rhs[0]);
+    
     // x[0] is the distance, x[1] is the intersection point 
     // in local coordinates on the segment
     if (x[1]<0 || x[1] > 1)
