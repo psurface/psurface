@@ -9,7 +9,9 @@
 #include <tr1/array>
 #include <vector>
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
+#endif
 
 #include <psurface/Parametrization.h>
 #include <psurface/GlobalNodeIdx.h>
@@ -293,6 +295,7 @@ void Parametrization::garbageCollection()
     }
     
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 {
     AmiraMesh am;
@@ -768,6 +771,8 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
 
     return true;
 }
+#endif
+
 
 void Parametrization::setupOriginalSurface()
 {

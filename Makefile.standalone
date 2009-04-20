@@ -6,8 +6,6 @@
 #
 ###########################################################################
 
-AMIRAMESH_DIR = /home/haile/sander/libamiramesh
-
 CXX = g++
 CFLAGS = -O
 CXXFLAGS = $(CFLAGS) -DHX_OS_LINUX -DHX_NO_MATHF -DHX_HAS_STDIOSTREAM -DNDEBUG -DNEWSTYLE_IOSTREAM -DHX_HAS_STDCOMPLEX
@@ -15,6 +13,11 @@ LDFLAGS = -O
 AR = ar
 
 CXXFLAGS += -DPSURFACE_STANDALONE
+
+# Uncomment the following two lines if you have libamiramesh installed
+# You can then read and write parametrized surfaces from/to disk.
+# AMIRAMESH_DIR = /home/haile/sander/libamiramesh
+# CXXFLAGS += -DHAVE_AMIRAMESH
 
 #### End of system configuration section. ####
 

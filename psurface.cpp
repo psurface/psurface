@@ -3,7 +3,10 @@
 
 #include <psurface/Parametrization.h>
 #include <psurface/psurface.h>
+
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
+#endif
 
 // Using a map instead of a vector here seems nice, but I need
 // the index operator once.
@@ -13,6 +16,10 @@ Parametrization* currentDomain;
 
 int psurface::LoadMesh(const char* label, const char* filename)
 {
+#if !defined HAVE_AMIRAMESH && defined PSURFACE_STANDALONE
+    std::cout << "You have to have libamiramesh installed in order to be able to use 'LoadMesh'" << std::endl;
+    return ERROR;
+#else
     AmiraMesh* am = AmiraMesh::read(filename);
     
     if (!am) {
@@ -33,8 +40,8 @@ int psurface::LoadMesh(const char* label, const char* filename)
     domains.push_back(std::pair<std::string, Parametrization*>(label, newDomain));
 
     return OK;    
+#endif
 }
-
 
 int psurface::RemoveDomain(const char* label)
 {

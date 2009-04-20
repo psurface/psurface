@@ -12,7 +12,9 @@
 #include "hxsurface/Surface.h"
 #endif
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/HxParamBundle.h>
+#endif
 
 #include <psurface/StaticVector.h>
 #include "psurfaceAPI.h"
@@ -23,7 +25,9 @@
 #include "GlobalNodeIdx.h"
 #include "NodeBundle.h"
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 class AmiraMesh;
+#endif
 
 /** The parametrization of an arbitrary surface over a simple base grid */
 class PSURFACE_API Parametrization : public McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>{
@@ -103,6 +107,7 @@ public:
     void garbageCollection();
 
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     /// Writes the parametrization in AmiraMesh format
     static int writeAmiraMesh(Parametrization* par, const char* filename);
 
@@ -111,6 +116,7 @@ public:
 
     /// AmiraMesh Reader using an existing AmiraMesh object (is used by derived classes)
     bool initFromAmiraMesh(AmiraMesh* am, const char* filename, Surface* surf);
+#endif
 
     /** \brief Creates an explicit Surface object from the information implicitly
      * given by the parametrization.
