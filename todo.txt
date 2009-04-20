@@ -120,7 +120,4 @@
 - Das Kontaktorakel muß Knoten-Fläche-Distanzen ausrechnen und nicht
   nur Knoten-Knoten.
 
-- MyMcVec3f unnötig machen
-
-- Die Zwischenfläche ist nicht konsistent orientiert!!
 */
