@@ -264,8 +264,8 @@ public:
      * \f$t\f$ is part of.
      */
     void getActualVertices(int tri,                     
-                           const McSArray<NodeIdx, 3>& nds,
-                           McSArray<GlobalNodeIdx, 3>& vertices   ///< The result nodes are returned here
+                           const std::tr1::array<NodeIdx, 3>& nds,
+                           std::tr1::array<GlobalNodeIdx, 3>& vertices   ///< The result nodes are returned here
                            ) const;
 
     /** \brief Given three nodes that form a triangle \f$t\f$ on a base grid triangle,
@@ -275,7 +275,7 @@ public:
      * \return A triangle index, -1 if the input data was invalid.
      */
     int getImageSurfaceTriangle(int tri,
-                                const McSArray<NodeIdx, 3>& nds
+                                const std::tr1::array<NodeIdx, 3>& nds
                                 ) const;
 
     /** \brief Returns the set of all target triangles that contain the image of a node.
@@ -285,7 +285,7 @@ public:
      * <b> Warning: </b> The method assumes that Surface::computeTrianglesPerPoint has
      * been called before.
      */
-    McSmallArray<int, 6> getTargetTrianglesPerNode(const GlobalNodeIdx& n) const;
+    std::vector<int> getTargetTrianglesPerNode(const GlobalNodeIdx& n) const;
 
 
 
@@ -357,12 +357,12 @@ public:
 protected:
 
     /// This is a service routine only for getTargetTrianglesPerNode
-    void getTrianglesPerEdge(int from, int to, McSmallArray<int, 6>& tris, int exception) const;
+    void getTrianglesPerEdge(int from, int to, std::vector<int>& tris, int exception) const;
 
     /** \brief Internal routine used by map() 
      */
     void handleMapOnEdge(int tri, const StaticVector<float,2>& p, const StaticVector<float,2>& a, const StaticVector<float,2>& b,
-                         int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const;
+                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
     void appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch);

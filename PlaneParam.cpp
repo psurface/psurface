@@ -131,7 +131,7 @@ void PlaneParam::makeCyclicGeometrically(Node& center)
 
     int i, j;
    
-    McSmallArray<float, 12> angles(center.degree());
+    std::vector<float> angles(center.degree());
 
     // compute angles
     StaticVector<float,2> edge0Vec = nodes[center.neighbors(0)].domainPos() - center.domainPos();
@@ -158,7 +158,10 @@ void PlaneParam::makeCyclicGeometrically(Node& center)
 
             if (angles[j] > angles[j+1]){
                 swapped = true;
-                angles.swap(j, j+1);
+                //angles.swap(j, j+1);
+                float tmp = angles[j];
+                angles[j] = angles[j+1];
+                angles[j+1] = tmp;
                 center.swapNeighbors(j, j+1);
             }
         }
@@ -172,8 +175,8 @@ void PlaneParam::makeCyclicGeometrically(Node& center)
 // makeCyclic and DFSVisit sort the star of a node, that is the list of all direct neighbors
 // in a cyclic order.  This is done by performing a depth-first search on the graph of these
 // neighbors and looking for a longest path.  See me for details
-bool PlaneParam::DFSVisit(const McSmallArray<Node::NeighborReference, 6> &star, const Node::NeighborReference& u, 
-                              McSmallArray<Node::NeighborReference, 6> &outStar)
+bool PlaneParam::DFSVisit(const std::vector<Node::NeighborReference> &star, const Node::NeighborReference& u, 
+                              std::vector<Node::NeighborReference> &outStar)
 {
     int i, j;
     
@@ -190,10 +193,12 @@ bool PlaneParam::DFSVisit(const McSmallArray<Node::NeighborReference, 6> &star, 
             }
 
         if (isNew){
-            outStar.append(v);
-            if (outStar.size()==star.size() && nodes[outStar.last()].isConnectedTo(outStar[0])) return true;
-            if (DFSVisit(star, v, outStar)) return true;
-            outStar.removeLast();
+            outStar.push_back(v);
+            if (outStar.size()==star.size() && nodes[outStar.back()].isConnectedTo(outStar[0])) 
+                return true;
+            if (DFSVisit(star, v, outStar)) 
+                return true;
+            outStar.pop_back();
         }
     }
 
@@ -204,9 +209,9 @@ bool PlaneParam::DFSVisit(const McSmallArray<Node::NeighborReference, 6> &star, 
 // in a cyclic order.  This is done by performing a depth-first search on the graph of these
 // neighbors and looking for a longest path.  See me for details
 // This is for the boundary case
-bool PlaneParam::DFSBoundaryVisit(const McSmallArray<Node::NeighborReference, 6> &star, 
+bool PlaneParam::DFSBoundaryVisit(const std::vector<Node::NeighborReference> &star, 
                                   const Node::NeighborReference& u, int endNode,
-                                  McSmallArray<Node::NeighborReference, 6> &outStar)
+                                  std::vector<Node::NeighborReference> &outStar)
 {
     int i, j;
 
@@ -229,10 +234,12 @@ bool PlaneParam::DFSBoundaryVisit(const McSmallArray<Node::NeighborReference, 6>
             }
 
         if (isNew){
-            outStar.append(v);
-            if (outStar.size()==star.size() && outStar.last()==endNode) return true;
-            if (DFSBoundaryVisit(star, v, endNode, outStar)) return true;
-            outStar.removeLast();
+            outStar.push_back(v);
+            if (outStar.size()==star.size() && outStar.back()==endNode) 
+                return true;
+            if (DFSBoundaryVisit(star, v, endNode, outStar)) 
+                return true;
+            outStar.pop_back();
         }
     }
 
@@ -242,7 +249,7 @@ bool PlaneParam::DFSBoundaryVisit(const McSmallArray<Node::NeighborReference, 6>
 
 void PlaneParam::makeCyclicInteriorNode(Node &center)
 {
-    McSmallArray<Node::NeighborReference, 6> outStar(1);
+    std::vector<Node::NeighborReference> outStar(1);
     outStar[0] = center.neighbors(0);
 
     if (!DFSVisit(center.nbs, center.neighbors(0), outStar)) {  // if not -> programming error
@@ -328,7 +335,7 @@ StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<fl
     return result;
 }
 
-int PlaneParam::map(StaticVector<float,2> &domainCoord, McSArray<NodeIdx, 3>& tri, StaticVector<float,2>& localBarycentricCoords,
+int PlaneParam::map(StaticVector<float,2> &domainCoord, std::tr1::array<NodeIdx, 3>& tri, StaticVector<float,2>& localBarycentricCoords,
                     int seed) const
 {
     DirectedEdgeIterator e = BFLocate(domainCoord);
@@ -458,10 +465,10 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
             Node& p = nodes[i];
             makeCyclicGeometrically(p);
             
-            McSmallArray<int, 15>    p_k(p.degree());
-            McSmallArray<StaticVector<float,3>, 15>  p_k_3DCoords(p.degree());
-            McSmallArray<StaticVector<float,2>, 15>  p_k_2DCoords(p.degree());
-            McSmallArray<float, 15>    angle;
+            std::vector<int>    p_k(p.degree());
+            std::vector<StaticVector<float,3> >  p_k_3DCoords(p.degree());
+            std::vector<StaticVector<float,2> >  p_k_2DCoords(p.degree());
+            std::vector<float>    angle;
             
             for (k=0; k<p.degree(); k++){
                 p_k[k]          = (int)p.neighbors(k);
@@ -530,8 +537,8 @@ void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
             
 
 
-bool PlaneParam::polarMap(const StaticVector<float,3>& center, const McSmallArray<StaticVector<float,3>, 15> &threeDStarVertices, 
-                          McSmallArray<StaticVector<float,2>, 15>& flattenedCoords, McSmallArray<float, 15>& theta)
+bool PlaneParam::polarMap(const StaticVector<float,3>& center, const std::vector<StaticVector<float,3> > &threeDStarVertices, 
+                          std::vector<StaticVector<float,2> >& flattenedCoords, std::vector<float >& theta)
 {
     /////////////////////////////////////
     // computes the flattened coordinates
@@ -582,7 +589,7 @@ bool PlaneParam::polarMap(const StaticVector<float,3>& center, const McSmallArra
         flattenedCoords[k] = StaticVector<float,2>(rPowA*cos(theta[k]), rPowA*sin(theta[k])); 
     }
 
-    theta.removeLast();
+    theta.pop_back();
 
     return true;
 }
@@ -607,7 +614,7 @@ void PlaneParam::makeCyclicBoundaryNode(Node& center, int next, int previous)
 //     printf("next %d    previous %d\n", next, previous);
 
     int i;
-    McSmallArray<Node::NeighborReference, 6> outStar(1);
+    std::vector<Node::NeighborReference> outStar(1);
 
     // look for the correct NeighborReference pointing to #next#
 

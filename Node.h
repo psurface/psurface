@@ -27,7 +27,6 @@
 
 #include <psurface/StaticVector.h>
 #include <vector>
-#include <mclib/McSmallArray.h>
 
 #include "psurfaceAPI.h"
 
@@ -210,12 +209,12 @@ public:
 
     ///
     void removeNeighbor(int i){
-        nbs.remove(i);
+        nbs.erase(nbs.begin() + i);
     }
 
     ///
     void appendNeighbor(const NeighborReference& newNeighbor){
-        nbs.append(newNeighbor);
+        nbs.push_back(newNeighbor);
     }
         
     /** \brief Remove the reference to the neighbor which has the index 'other' */
@@ -253,7 +252,7 @@ public:
 
     ///
     bool isLastNeighbor(NodeIdx n) const {
-        return (degree() && nbs.last() == n);
+        return (degree() && nbs.back() == n);
     }
 
     const NeighborReference& theInteriorNode() const {
@@ -279,7 +278,7 @@ public:
 
     void reverseNeighbors() {
         //   if (!isINTERSECTION_NODE())
-        nbs.reverse();
+        reverse(nbs);
     }
 
     NodeType getType() const {return type;}
@@ -412,7 +411,19 @@ public:
 
     //private:
     StaticVector<float,2> dP;
-            
+
+    template <class T>
+    static void reverse(std::vector<T>& vec) {
+        int n2 = vec.size()/2;
+        int s = vec.size();
+        for (int i=0 ; i<n2 ; i++) {
+            //swap(i,s-1-i);
+            T tmp = vec[i];
+            vec[i] = vec[s-1-i];
+            vec[s-1-i] = tmp;
+        }
+    }
+
 public:    
     ///
     int valid:1;
@@ -425,7 +436,7 @@ public:
 
     /// connectivity
 public:
-    McSmallArray<NeighborReference, 6> nbs;
+    std::vector<NeighborReference> nbs;
                 
     ///////////////////////////////////////
     // This is only for nodes on the boundary of a base grid triangle

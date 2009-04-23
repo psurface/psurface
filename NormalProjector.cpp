@@ -285,7 +285,7 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
                 addCornerNodeBundle(par, v, contactPatch.vertices[i]);
                 vertexHasBeenHandled[v] = true;
-                McSmallArray<int, 12> neighboringTris = par->getTrianglesPerVertex(v);
+                std::vector<int> neighboringTris = par->getTrianglesPerVertex(v);
                 projectedTo[contactPatch.vertices[i]].resize(neighboringTris.size());
                 for (j=0; j<neighboringTris.size(); j++) {
                     projectedTo[contactPatch.vertices[i]][j].setValue(neighboringTris[j],
@@ -430,7 +430,7 @@ void NormalProjector::insertEdge(Parametrization* par,
         if (onSameTriangle(curr, projectedTo[to])) {
             
             // Get the common triangle
-            McSmallArray<int, 2> commonTris = getCommonTris(curr, projectedTo[to]);
+            std::vector<int> commonTris = getCommonTris(curr, projectedTo[to]);
             for (int i=0; i<commonTris.size(); i++) {
                 par->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
                                                       projectedTo[to].triToIdx(commonTris[i]));
@@ -928,7 +928,7 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
 
                 // edge leaves through a corner
                 NodeBundle target = par->getNodeBundleAtVertex(par->triangles(cT).vertices[corner]);
-                McSmallArray<int, 2> commonTris = getCommonTris(curr, target);
+                std::vector<int> commonTris = getCommonTris(curr, target);
                 for (i=0; i<commonTris.size(); i++) {
                     par->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
                                                           target.triToIdx(commonTris[i]));
@@ -1388,7 +1388,7 @@ bool NormalProjector::onSameTriangle(const int& tri, const NodeBundle& b) const
 void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v, 
                                               int targetTri, const StaticVector<double,2>& localTargetCoords)
 {
-    McSmallArray<int, 12> neighbors = par->getTrianglesPerVertex(v);
+    std::vector<int> neighbors = par->getTrianglesPerVertex(v);
     //printf("localtargetCoords (%f %f)\n", localTargetCoords[0], localTargetCoords[1]);
     for (int i=0; i<neighbors.size(); i++) {
 
@@ -1404,7 +1404,7 @@ void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v,
 
 void NormalProjector::addCornerNodeBundle(Parametrization* cS, int v, int nN)
 {
-    McSmallArray<int, 12> neighbors = cS->getTrianglesPerVertex(v);
+    std::vector<int> neighbors = cS->getTrianglesPerVertex(v);
     //printf("localtargetCoords (%f %f)\n", localTargetCoords[0], localTargetCoords[1]);
     for (int i=0; i<neighbors.size(); i++) {
 
@@ -1625,14 +1625,14 @@ int NormalProjector::getCommonTri(const NodeBundle& a, const NodeBundle& b)
     return -1;
 }
 
-McSmallArray<int, 2> NormalProjector::getCommonTris(const NodeBundle& a, const NodeBundle& b)
+std::vector<int> NormalProjector::getCommonTris(const NodeBundle& a, const NodeBundle& b)
 {
-    McSmallArray<int, 2> result;
+    std::vector<int> result;
 
     for (int i=0; i<a.size(); i++)
         for (int j=0; j<b.size(); j++)
             if (a[i].tri==b[j].tri)
-                result.append(a[i].tri);
+                result.push_back(a[i].tri);
 
     return result;
 }
@@ -1659,21 +1659,21 @@ void NormalProjector::setupEdgePointArrays(Parametrization* par)
                 
             if (cN.isCORNER_NODE() || cN.isGHOST_NODE()) {
                 int corner = cN.getCorner();
-                cT.edgePoints[corner].insert(0, j);
-                cT.edgePoints[(corner+2)%3].append(j);
+                cT.edgePoints[corner].insert(cT.edgePoints[corner].begin(), j);
+                cT.edgePoints[(corner+2)%3].push_back(j);
                 continue;
             } 
                 
             double lambda = cN.getDomainEdgeCoord();
             int domainEdge = cN.getDomainEdge();
-            McSmallArray<int, 2>& cEP = cT.edgePoints[domainEdge];
+            std::vector<int>& cEP = cT.edgePoints[domainEdge];
             
             int idx = 0;
             while (idx<cEP.size() && cT.nodes[cEP[idx]].getDomainEdgeCoord(domainEdge)<lambda) {
                 idx++;
             }                
             
-            cEP.insert(idx, j);
+            cEP.insert(cEP.begin()+idx, j);
             
         }
         

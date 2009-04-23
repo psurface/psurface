@@ -109,9 +109,9 @@ public:
     void cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
                            std::vector<int>& nodeLocs,
                            DomainTriangle& cT,
-                           const McSArray<StaticVector<float,2>, 3>& newTriangleCoords,
-                           McSmallArray<int, 2>& triNewEdgePoints,
-                           McSmallArray<int, 2>& polyNewEdgePoints,
+                           const std::tr1::array<StaticVector<float,2>, 3>& newTriangleCoords,
+                           std::vector<int>& triNewEdgePoints,
+                           std::vector<int>& polyNewEdgePoints,
                            std::vector<unsigned int>& nodeStack);
 
     ///
@@ -155,7 +155,7 @@ public:
                 c*(1-nodes[i].domainPos()[0]-nodes[i].domainPos()[1]));
     }
 
-    void augmentNeighborIdx(int newNodeIdx, McSmallArray<int, 2> edgePoints[3]) {
+    void augmentNeighborIdx(int newNodeIdx, std::tr1::array<std::vector<int>, 3>& edgePoints) {
         int i,d = newNodeIdx;
 
         for (i=newNodeIdx; i<nodes.size(); i++)
@@ -167,13 +167,13 @@ public:
                 edgePoints[i][j] += d;
     }
 
-    void updateEdgePoints(McSmallArray<int, 2> edgePoints[3], int oldNode, int newNode) {
+    void updateEdgePoints(std::tr1::array<std::vector<int>,3>& edgePoints, int oldNode, int newNode) {
         int i;
         for (i=0; i<3; i++){
             if (edgePoints[i][0]==oldNode)
                 edgePoints[i][0] = newNode;
-            if (edgePoints[i].last()==oldNode)
-                edgePoints[i].last() = newNode;
+            if (edgePoints[i].back()==oldNode)
+                edgePoints[i].back() = newNode;
         }
     }
 
@@ -193,7 +193,7 @@ public:
     std::vector<int> boundaryPoints;
 
     /// for each edge of the polygon, a list of the mapping nodes that are right on this edge
-    std::vector<McSmallArray<int, 2> > edgePoints;
+    std::vector<std::vector<int> > edgePoints;
 
     Parametrization* par;
 

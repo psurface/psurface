@@ -575,7 +575,7 @@ void Surface::findBranchingPoints()
         }
     }
 
-    McSmallArray<int,6> triaList;
+    std::vector<int,6> triaList;
     McDArray<int> markTria;
 
     /* 1st (3rd) type of branching points: INNER points with nGroups > 1 */
@@ -810,7 +810,7 @@ void Surface::renumberPoints()
     }
 
     McDArray<StaticVector<float,3> > tmpPointList(notInnerPoints);
-    McDArray<McSmallArray<int,6> > tmpEdgeList;
+    McDArray<std::vector<int,6> > tmpEdgeList;
     
     int hasEdgesPerPoint = (edgesPerPoint.size()==points.size());
     if (hasEdgesPerPoint)
@@ -1702,7 +1702,7 @@ void Surface::computeTrianglesPerPoint()
     // This is a critical MEMORY LEAK:
     // memset(&trianglesPerPoint[0], 0, sizeof(trianglesPerPoint[0])*nPoints);
     
-    // Need to resize the McSmallArrays individually (Detlev 10 Jan 2003).
+    // Need to resize the std::vectors individually (Detlev 10 Jan 2003).
     // resize(0) frees any dynamically allocated memory.
     for (int k=0; k<nPoints; k++)
         trianglesPerPoint[k].resize(0);

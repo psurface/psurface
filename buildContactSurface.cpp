@@ -5,9 +5,6 @@
 #include <psurface/ContactToolBox.h>
 #include <psurface/ContactBoundary.h>
 #include <psurface/NormalProjector.h>
-
-#include <mclib/McSArray.h>
-
 #include <psurface/MultiDimOctree.h>
 #include <psurface/PointIntersectionFunctor.h>
 
@@ -26,7 +23,7 @@ void ContactToolBox::buildContactSurface(Parametrization* cPar,
     cPar->patches[0].boundaryId  = 0;
             
     // ///////
-    McSArray<ContactBoundary, 2> contactBoundary;
+    std::tr1::array<ContactBoundary, 2> contactBoundary;
     
     const_cast<Surface*>(surf1)->removeUnusedPoints();
     const_cast<Surface*>(surf2)->removeUnusedPoints();

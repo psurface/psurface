@@ -2,6 +2,7 @@
 #define MC__SURFACE_BASE
 
 #include <vector>
+#include <set>
 #include <tr1/array>
 #include <algorithm>
 #include <limits>
@@ -192,12 +193,12 @@ public:
                 vertices(pointA).edges.push_back(newEdgeIdx);
                 vertices(pointB).edges.push_back(newEdgeIdx);
                 
-                edges(newEdgeIdx).triangles.append(triIdx);
+                edges(newEdgeIdx).triangles.push_back(triIdx);
                 tri.edges[i] = newEdgeIdx;
             }
             else{
                 if (!edges(thisEdge).isConnectedToTriangle(triIdx))
-                    edges(thisEdge).triangles.append(triIdx);
+                    edges(thisEdge).triangles.push_back(triIdx);
 
                 tri.edges[i] = thisEdge;
             }
@@ -254,38 +255,49 @@ public:
     }
 
     /// 
-    McSmallArray<int, 12> getTrianglesPerVertex(int v) const {
+    std::vector<int> getTrianglesPerVertex(int v) const {
 
         const VertexType& cV = vertices(v);
 
-        McSmallArray<int, 12> result;
-        
+        // A temporary set for fast searching and insertion
+        std::set<int> resultSet;
+
         for (int i=0; i<cV.edges.size(); i++) {
 
             const EdgeType& cE = edges(cV.edges[i]);
 
             for (int j=0; j<cE.triangles.size(); j++) {
 
-                if (result.findSorted(cE.triangles[j], &mcStandardCompare)==-1)
-                    result.insertSorted(cE.triangles[j], &mcStandardCompare);
+//                 if (result.findSorted(cE.triangles[j], &mcStandardCompare)==-1)
+//                     result.insertSorted(cE.triangles[j], &mcStandardCompare);
+                resultSet.insert(cE.triangles[j]);
                 
             }
 
         }
 
+        // copy set to std::vector;
+        std::vector<int> result(resultSet.size());
+
+        std::set<int>::const_iterator setIt = resultSet.begin();
+        std::set<int>::const_iterator endIt = resultSet.end();
+        int idx = 0;
+        for (; setIt!=endIt; ++setIt, ++idx)
+            result[idx] = *setIt;
+
         return result;
     }
 
     ///
-    McSmallArray<int, 12> getNeighbors(int v) const {
+    std::vector<int> getNeighbors(int v) const {
 
         const VertexType& cV = vertices(v);
-        McSmallArray<int, 12> result;
+        std::vector<int> result;
         
         for (int i=0; i<cV.edges.size(); i++) {
             
             const EdgeType& cE = edges(cV.edges[i]);
-            result.append(cE.theOtherVertex(v));
+            result.push_back(cE.theOtherVertex(v));
 
         }
 
@@ -313,7 +325,7 @@ public:
     /// gives the smallest interior angle of a triangle
     float minInteriorAngle(int n) const {
         float minAngle = 2*M_PI;
-        const McSArray<int, 3>& p = triangles(n).vertices;
+        const std::tr1::array<int, 3>& p = triangles(n).vertices;
 
         for (int i=0; i<3; i++){
             StaticVector<float,3> a = vertices(p[(i+1)%3]) - vertices(p[i]);
@@ -330,7 +342,7 @@ public:
     /// returns the aspect ratio
     float aspectRatio(int n) const {
 
-        const McSArray<int, 3>& p = triangles(n).vertices;
+        const std::tr1::array<int, 3>& p = triangles(n).vertices;
 
         const float a = (vertices(p[1]) - vertices(p[0])).length();
         const float b = (vertices(p[2]) - vertices(p[1])).length();

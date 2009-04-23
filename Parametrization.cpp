@@ -339,7 +339,7 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
     AmiraMesh::Location* triangles = new AmiraMesh::Location("BaseGridTriangles", numTriangles);
     am.insert(triangles);
 
-    std::vector<McSArray<int, 3> > baseGridTriArray(numTriangles);
+    std::vector<std::tr1::array<int, 3> > baseGridTriArray(numTriangles);
 
     for (int i(0); i<par->getNumTriangles(); i++)
         baseGridTriArray[i] = par->triangles(i).vertices;
@@ -752,7 +752,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
             triangles(newTriIdx).edgePoints[j].resize(numNodesAndEdgesData[11*i+5+j] + 2);
 
             triangles(newTriIdx).edgePoints[j][0]     = j;
-            triangles(newTriIdx).edgePoints[j].last() = (j+1)%3;
+            triangles(newTriIdx).edgePoints[j].back() = (j+1)%3;
 
             for (int k=0; k<numNodesAndEdgesData[11*i+5+j]; k++){
                 triangles(newTriIdx).edgePoints[j][k+1] = edgePointData[edgePointCounter];
@@ -1005,7 +1005,7 @@ int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<i
 
             if (a[1]+1e-5 > p[1] && p[1] > b[1]-1e-5) {
 
-                McSArray<GlobalNodeIdx, 3> targetNodes;
+                std::tr1::array<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 1, i, targetNodes, coords);
                 vertices[0] = nodes(targetNodes[0]).getNodeNumber();
                 vertices[1] = nodes(targetNodes[1]).getNodeNumber();
@@ -1023,7 +1023,7 @@ int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<i
 
             if (b[0]+1e-5 > p[0] && p[0] > a[0]-1e-5) {
 
-                McSArray<GlobalNodeIdx, 3> targetNodes;
+                std::tr1::array<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 2, i, targetNodes, coords);
                 vertices[0] = nodes(targetNodes[0]).getNodeNumber();
                 vertices[1] = nodes(targetNodes[1]).getNodeNumber();
@@ -1040,7 +1040,7 @@ int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<i
 
             if (a[0]+1e-5>p[0] && p[0]>b[0]-1e-5) {
 
-                McSArray<GlobalNodeIdx, 3> targetNodes;
+                std::tr1::array<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 0, i, targetNodes, coords);
                 vertices[0] = nodes(targetNodes[0]).getNodeNumber();
                 vertices[1] = nodes(targetNodes[1]).getNodeNumber();
@@ -1054,7 +1054,7 @@ int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<i
 
     }
 
-    McSArray<NodeIdx, 3> v;
+    std::tr1::array<NodeIdx, 3> v;
     int status = tri.map(p, v, coords, seed);
 
     if (!status)
@@ -1066,7 +1066,7 @@ int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<i
 
     // ///////////////////////////////////////////////////////
     // make sure we don't return intersection nodes
-    McSArray<GlobalNodeIdx, 3> resultNodes;
+    std::tr1::array<GlobalNodeIdx, 3> resultNodes;
     getActualVertices(triIdx, v, resultNodes);
     vertices[0] = nodes(resultNodes[0]).getNodeNumber();
     vertices[1] = nodes(resultNodes[1]).getNodeNumber();
@@ -1077,8 +1077,8 @@ int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<i
     return true;
 }
 
-void Parametrization::getActualVertices(int tri, const McSArray<NodeIdx, 3>& nds,
-                                        McSArray<GlobalNodeIdx, 3>& vertices) const
+void Parametrization::getActualVertices(int tri, const std::tr1::array<NodeIdx, 3>& nds,
+                                        std::tr1::array<GlobalNodeIdx, 3>& vertices) const
 {
     const DomainTriangle& cT = triangles(tri);
     //cT.print(true, true, true);
@@ -1190,13 +1190,13 @@ void Parametrization::getActualVertices(int tri, const McSArray<NodeIdx, 3>& nds
 }
 
 int Parametrization::getImageSurfaceTriangle(int tri,
-                                             const McSArray<NodeIdx, 3>& nds
+                                             const std::tr1::array<NodeIdx, 3>& nds
                                              ) const
 {
     int i;
     
-    McSArray<GlobalNodeIdx, 3> actualVertices;
-    McSArray<McSmallArray<int, 6>, 3> trianglesPerNode;
+    std::tr1::array<GlobalNodeIdx, 3> actualVertices;
+    std::tr1::array<std::vector<int>, 3> trianglesPerNode;
 
     getActualVertices(tri, nds, actualVertices);
     
@@ -1216,7 +1216,7 @@ int Parametrization::getImageSurfaceTriangle(int tri,
     return -1;
 }
 
-McSmallArray<int, 6> Parametrization::getTargetTrianglesPerNode(const GlobalNodeIdx& n) const
+std::vector<int> Parametrization::getTargetTrianglesPerNode(const GlobalNodeIdx& n) const
 {
     assert(surface->trianglesPerPoint.size());
     const Node& cN = triangles(n.tri).nodes[n.idx];
@@ -1230,7 +1230,7 @@ McSmallArray<int, 6> Parametrization::getTargetTrianglesPerNode(const GlobalNode
 //                surface->triangles[cN.getNodeNumber()].points[2],
 //                cN.dP[0], cN.dP[1]);
         
-        McSmallArray<int, 6> result(1);
+        std::vector<int> result(1);
         result[0] = cN.getNodeNumber();
         if (cN.dP[0] + cN.dP[1] > 1-eps) {
             // append the triangles bordering on edge 0
@@ -1263,25 +1263,30 @@ McSmallArray<int, 6> Parametrization::getTargetTrianglesPerNode(const GlobalNode
         assert(false);
     }
 
-    return surface->trianglesPerPoint[cN.getNodeNumber()];
+    // Copying from a McSmallVector to a std::vector
+    std::vector<int> result(surface->trianglesPerPoint[cN.getNodeNumber()].size());
+    for (int i=0; i<result.size(); i++)
+        result[i] = surface->trianglesPerPoint[cN.getNodeNumber()][i];
+
+    return result;
     
 }
 
 /// This is a service routine only for getTargetTrianglesPerNode
-void Parametrization::getTrianglesPerEdge(int from, int to, McSmallArray<int, 6>& tris, int exception) const
+void Parametrization::getTrianglesPerEdge(int from, int to, std::vector<int>& tris, int exception) const
 {
     for (int i=0; i<surface->trianglesPerPoint[from].size(); i++) {
 
         if (mcSmallArray::index(surface->trianglesPerPoint[to], surface->trianglesPerPoint[from][i]) != -1 &&
             surface->trianglesPerPoint[from][i] != exception)
-            tris.append(surface->trianglesPerPoint[from][i]);
+            tris.push_back(surface->trianglesPerPoint[from][i]);
 
     }
 
 }
 
 void Parametrization::handleMapOnEdge(int triIdx, const StaticVector<float,2>& p, const StaticVector<float,2>& a, const StaticVector<float,2>& b,
-                                      int edge, int edgePos, McSArray<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const
+                                      int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const
 {
     const DomainTriangle& tri = triangles(triIdx);
     float lambda = (p-a).length() / (a-b).length();
@@ -1516,7 +1521,7 @@ void Parametrization::addParTriangle(int tri, const std::tr1::array<int,3>& p)
 NodeBundle Parametrization::getNodeBundleAtVertex(int v) const
 {
     NodeBundle result;
-    McSmallArray<int, 12> neighbors = getTrianglesPerVertex(v);
+    std::vector<int> neighbors = getTrianglesPerVertex(v);
 
     result.resize(neighbors.size());
 

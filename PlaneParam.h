@@ -8,8 +8,7 @@
 
 #include <psurface/StaticVector.h>
 #include <vector>
-#include <mclib/McSArray.h>
-#include <mclib/McSmallArray.h>
+#include <algorithm>
 
 #include "Node.h"
 
@@ -134,8 +133,8 @@ public:
         }
 
         /** \brief Make a copy of the three vertex indices  */
-        McSArray<NodeIdx, 3> vertices() const {
-            McSArray<NodeIdx, 3> result;
+        std::tr1::array<NodeIdx, 3> vertices() const {
+            std::tr1::array<NodeIdx, 3> result;
             result[0] = vertices(0);
             result[1] = vertices(1);
             result[2] = vertices(2);
@@ -233,10 +232,18 @@ public:
 
         edge.fromNode = from;
 
-        edge.neighborIdx = mcSmallArray::index(nodes[from].nbs, to);
+        //edge.neighborIdx = mcSmallArray::index(nodes[from].nbs, to);
+//         if (edge.neighborIdx == -1)
+//             edge.fromNode = -1;
 
-        if (edge.neighborIdx == -1)
+        std::vector<Node::NeighborReference>::const_iterator findIt = std::find(nodes[from].nbs.begin(), nodes[from].nbs.end(), to);
+
+        if (findIt ==nodes[from].nbs.end()) {
+            edge.neighborIdx = -1;
             edge.fromNode = -1;
+        } else
+            edge.neighborIdx = findIt-nodes[from].nbs.begin();
+        
 
         return edge;
     }
@@ -369,7 +376,7 @@ public:
     /**@name access methods */
     //@{
     ///
-    int map(StaticVector<float,2>& domainCoord, McSArray<NodeIdx, 3>& vertices, StaticVector<float,2>& coords,
+    int map(StaticVector<float,2>& domainCoord, std::tr1::array<NodeIdx, 3>& vertices, StaticVector<float,2>& coords,
             int seed=-1) const;
     //@}
 
@@ -450,8 +457,8 @@ public:
     void computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
                                const std::vector<StaticVector<float,3> >& nodePositions);
 
-    bool polarMap(const StaticVector<float,3>& center, const McSmallArray<StaticVector<float,3>, 15> &threeDStarVertices, 
-                  McSmallArray<StaticVector<float,2>, 15>& flattenedCoords, McSmallArray<float, 15>& theta);
+    bool polarMap(const StaticVector<float,3>& center, const std::vector<StaticVector<float,3> > &threeDStarVertices, 
+                  std::vector<StaticVector<float,2> >& flattenedCoords, std::vector<float>& theta);
 
 public:
     /**@name debug code */
@@ -487,13 +494,13 @@ public:
     //virtual void makeCyclicBoundaryNode(Node& center);
     
     ///
-    bool DFSBoundaryVisit(const McSmallArray<Node::NeighborReference, 6> &star, 
+    bool DFSBoundaryVisit(const std::vector<Node::NeighborReference> &star, 
                           const Node::NeighborReference& u, int endNode,
-                          McSmallArray<Node::NeighborReference, 6> &outStar);
+                          std::vector<Node::NeighborReference> &outStar);
 
     ///
-    bool DFSVisit(const McSmallArray<Node::NeighborReference, 6> &star, const Node::NeighborReference& u, 
-                              McSmallArray<Node::NeighborReference, 6> &outStar);
+    bool DFSVisit(const std::vector<Node::NeighborReference> &star, const Node::NeighborReference& u, 
+                  std::vector<Node::NeighborReference> &outStar);
 
 public:
     ///////////////////////////////////////////////////////////////////////

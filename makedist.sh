@@ -25,13 +25,10 @@ cp local_mclib/include/mclib/McMat4f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McPrimType.h             libpsurface/include/mclib
 cp local_mclib/include/mclib/McProgressInterface.h    libpsurface/include/mclib
 cp local_mclib/include/mclib/McRotation.h             libpsurface/include/mclib
-cp local_mclib/include/mclib/McSArray.h               libpsurface/include/mclib
 cp local_mclib/include/mclib/McSparseMatrix.h         libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdlib.h               libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdio.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
-
-cp local_mclib/McSmallArray.h             libpsurface/include/mclib
 
 cp psurface.h               libpsurface/include/psurface
 cp psurface.h               libpsurface/include/

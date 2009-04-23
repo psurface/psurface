@@ -1,11 +1,11 @@
 #ifndef NODE_BUNDLE_H
 #define NODE_BUNDLE_H
 
-#include <mclib/McSmallArray.h>
+#include <vector>
 #include "GlobalNodeIdx.h"
 
 /** \brief Set of graph nodes */
-class NodeBundle : public McSmallArray<GlobalNodeIdx, 2> {
+class NodeBundle : public std::vector<GlobalNodeIdx> {
 
 public:
 

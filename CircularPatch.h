@@ -2,10 +2,8 @@
 #define CIRCULAR_PATCH
 
 #include <psurface/Box.h>
-#include <mclib/McSArray.h>
-
-#include "Domains.h"
-#include "Parametrization.h"
+#include <psurface/Domains.h>
+#include <psurface/Parametrization.h>
 
 #include "psurfaceAPI.h"
 
@@ -38,12 +36,12 @@ public:
     ///
     CircularPatch(int size, Parametrization* param) {
         triangles.resize(size);
-        triangles.fill(-1U);
+        triangles.assign(size,-1U);
 
         innerEdges.resize(size-1);
-        McSArray<int, 2> emptyArray;
-        emptyArray.fill(-1U);
-        innerEdges.fill(emptyArray);
+        std::tr1::array<int, 2> emptyArray;
+        emptyArray.assign(-1U);
+        innerEdges.assign(innerEdges.size(),emptyArray);
 
         par = param;
     }
@@ -62,17 +60,17 @@ public:
     ///
     void resize(int size) {
         triangles.resize(size);
-        triangles.fill(-1);
+        triangles.assign(size,-1);
         
         innerEdges.resize(size-1);
-        McSArray<int, 2> emptyArray;
-        emptyArray.fill(-1);
-        innerEdges.fill(emptyArray);
+        std::tr1::array<int, 2> emptyArray;
+        emptyArray.assign(-1);
+        innerEdges.assign(innerEdges.size(), emptyArray);
     }
 
     ///
     int& last() {
-        return triangles.last();
+        return triangles.back();
     }
     
     ///
@@ -143,11 +141,11 @@ public:
 
     float distanceTo(const class StaticVector<float,3> &) const ;
 
-    McSmallArray<McSArray<int, 2>, 50> innerEdges;
+    std::vector<std::tr1::array<int, 2> > innerEdges;
 
 private:
 
-    McSmallArray<int, 50> triangles;
+    std::vector<int> triangles;
 public:
     Parametrization* par;
 

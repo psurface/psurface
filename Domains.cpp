@@ -50,17 +50,26 @@ void DomainTriangle::insertExtraEdges()
 void DomainTriangle::flip()
 {
     // flip points
-    vertices.swap(1,2);
+    //vertices.swap(1,2);
+    int tmp = vertices[1];
+    vertices[1] = vertices[2];
+    vertices[2] = tmp;
 
     // flip edges
-    edges.swap(0,2);
-    
+    //edges.swap(0,2);
+    tmp = edges[0];
+    edges[0] = edges[2];
+    edges[2] = tmp;
+
     // flip edgePoints array
-    edgePoints.swap(0,2);
-    
-    edgePoints[0].reverse();
-    edgePoints[1].reverse();
-    edgePoints[2].reverse();
+    //edgePoints.swap(0,2);
+    std::vector<NodeIdx> tmp1 = edgePoints[0];
+    edgePoints[0] = edgePoints[2];
+    edgePoints[2] = tmp1;
+
+    Node::reverse(edgePoints[0]);
+    Node::reverse(edgePoints[1]);
+    Node::reverse(edgePoints[2]);
     
     // Change the pointers of intersection nodes to their respective positions
     // in the edgePoints arrays.  This is just in case that the pointLocationStructure
@@ -82,9 +91,9 @@ void DomainTriangle::flip()
 
 void DomainTriangle::rotate()
 {
-    vertices.rotate(1);
-    edges.rotate(1);
-    edgePoints.rotate(1);
+    rotate(vertices,1);
+    rotate(edges,1);
+    rotate(edgePoints,1);
     
     // turn the parametrization
     /// \todo This is slow and should be replaced!
@@ -102,8 +111,8 @@ void DomainTriangle::updateEdgePoints(int oldNode, int newNode)
     for (i=0; i<3; i++){
         if (edgePoints[i][0]==oldNode)
             edgePoints[i][0] = newNode;
-        if (edgePoints[i].last()==oldNode)
-            edgePoints[i].last() = newNode;
+        if (edgePoints[i].back()==oldNode)
+            edgePoints[i].back() = newNode;
     }
 }
 

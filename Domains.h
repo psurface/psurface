@@ -94,6 +94,57 @@ public:
      */
     void rotate();
 
+    /** \brief Cyclically permute a std::vector */
+    template <class T>
+    static void rotate(std::vector<T>& vec, int offset) {
+        int i, s = vec.size();
+        T* data = &vec[0];
+        if (offset<0) {
+            int n = -offset;
+            T* tmp = (T*)alloca(n*sizeof(T));
+            for (i=0; i<n; i++)
+                tmp[i] = data[i];
+            for (i=0; i<s-n; i++)
+                data[i] = data[i+n];
+            for (i=0; i<n; i++)
+                data[i+s-n] = tmp[i];
+        } else if (offset>0) {
+            int n = offset;
+            T* tmp = (T*)alloca(n*sizeof(T));
+            for (i=0; i<n; i++)
+                tmp[i] = data[s-n+i];
+            for (i=s-n-1; i>=0; i--)
+                data[n+i] = data[i];
+            for (i=0; i<n; i++)
+                data[i] = tmp[i];
+        }
+    }
+
+    template <class T>
+    static void rotate(std::tr1::array<T,3>& vec, int offset) {
+        int i, s = vec.size();
+        T* data = &vec[0];
+        if (offset<0) {
+            int n = -offset;
+            T* tmp = (T*)alloca(n*sizeof(T));
+            for (i=0; i<n; i++)
+                tmp[i] = data[i];
+            for (i=0; i<s-n; i++)
+                data[i] = data[i+n];
+            for (i=0; i<n; i++)
+                data[i+s-n] = tmp[i];
+        } else if (offset>0) {
+            int n = offset;
+            T* tmp = (T*)alloca(n*sizeof(T));
+            for (i=0; i<n; i++)
+                tmp[i] = data[s-n+i];
+            for (i=s-n-1; i>=0; i--)
+                data[n+i] = data[i];
+            for (i=0; i<n; i++)
+                data[i] = tmp[i];
+        }
+    }
+
     void updateEdgePoints(int oldNode, int newNode);
 
     ///
@@ -152,7 +203,7 @@ public:
 
 
     /// a list of all nodes that are located exactly on the boundary of the triangle
-    McSArray<McSmallArray<NodeIdx, 2>, 3> edgePoints;
+    std::tr1::array<std::vector<NodeIdx>, 3> edgePoints;
 
     /// the patch number
     int patch;

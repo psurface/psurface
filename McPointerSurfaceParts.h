@@ -6,8 +6,6 @@
 #include <psurface/StaticVector.h>
 #include <psurface/StaticMatrix.h>
 #include <psurface/Box.h>
-#include <mclib/McSmallArray.h>
-#include <mclib/McSArray.h>
 
 
 class McTriangle;
@@ -106,7 +104,7 @@ public:
     bool removeReferenceTo(int tri){
         for(int i=0; i<triangles.size(); i++)
             if (triangles[i] == tri){
-                triangles.remove(i);
+                triangles.erase(triangles.begin() + i);
                 return true;
             }
 
@@ -209,7 +207,7 @@ public:
     int from, to;
 
     ///
-    McSmallArray<int, 2> triangles;
+    std::vector<int> triangles;
 
 };
 
@@ -358,9 +356,9 @@ public:
     //////////////////////////////////////////////////////////////
 public:
 
-    McSArray<int, 3> vertices;
+    std::tr1::array<int, 3> vertices;
 
-    McSArray<int, 3> edges;
+    std::tr1::array<int, 3> edges;
 
 };
 

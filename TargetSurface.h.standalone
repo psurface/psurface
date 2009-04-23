@@ -31,7 +31,6 @@
 
 #include <vector>
 #include <psurface/StaticVector.h>
-#include <McSmallArray.h>
 #include <amiramesh/HxParamBundle.h>
 #include <hxfield/oint.h>
 
@@ -69,10 +68,10 @@ class HXSURFACE_API Surface {
             format, the first point in the surface's point array is 1. In
             this data structure, the first point has the index 0.
             Conversion is done when writing and reading.*/
-        McDArray<int> points;
+        std::vector<int> points;
 
         /** The indices of the patches this contour belongs to. */
-        McDArray<int> patches;  
+        std::vector<int> patches;  
     };
     
     /// This class represents a surface triangle.
@@ -139,13 +138,13 @@ class HXSURFACE_API Surface {
         int boundaryId;
 
         /// Indices of all inner branching points.
-        McDArray<int> branchingPoints;
+        std::vector<int> branchingPoints;
 
         /// Indices of all the triangles of the patch.
-        McDArray<int> triangles;
+        std::vector<int> triangles;
 
         /// Indices of the patch's contours as well as their orientations.
-        McDArray<oint> contours;        
+        std::vector<oint> contours;        
 
         /// Stores information about segments, i.e. subsequent contours
         struct Segment {
@@ -157,7 +156,7 @@ class HXSURFACE_API Surface {
         };
         
         /// Contains all connected contour segments of the patch.
-        McDArray<Segment> segments;
+        std::vector<Segment> segments;
 
         /// Assignment operator
         Patch& operator=(const Patch& other);
@@ -179,7 +178,7 @@ class HXSURFACE_API Surface {
         int to;
 
         /// There are 2 triangles per edge, except for boundary edges.
-        McSmallArray<int,3> triangles;
+        std::vector<int,3> triangles;
 
         ///
         Edge() { from=to=0; };
@@ -198,39 +197,39 @@ class HXSURFACE_API Surface {
     int nContourPoints;
 
     /// Array of all surface points (required).
-    McDArray<StaticVector<float,3> > points;
+    std::vector<StaticVector<float,3> > points;
 
     /// Array of point types (full surface only).
-    McDArray<unsigned char> pointType;
+    std::vector<unsigned char> pointType;
 
     /// Array of all surface contours (full surface only).
-    McDArray<Contour*> contours;
+    std::vector<Contour*> contours;
 
     /// Array of all surface patches (at least 1 patch is required).
-    McDArray<Patch*> patches;
+    std::vector<Patch*> patches;
 
     /// Array of all surface triangles (required).
-    McDArray<Triangle> triangles;       
+    std::vector<Triangle> triangles;       
 
     /// All edges of the surface (temporary data).
-    McDArray<Edge> edges;    
+    std::vector<Edge> edges;    
 
     /// Stores for each point all edges incident at that point (temporary).
-    McDArray< McSmallArray<int,6> > edgesPerPoint;
+    std::vector< std::vector<int> > edgesPerPoint;
 
     ///Stores the edge ids for each triangle (optional and temporary).
-    McDArray< McSmallArray<int,3> > edgesPerTriangle;
+    std::vector< std::vector<int> > edgesPerTriangle;
   
     /** Stores for each point all incident triangles. To initialize this
         array the method @c computeTrianglesPerPoint() has to be called
         explicitely. The class @c HxSurfaceEditor uses this information. */
-    McDArray< McSmallArray<int,6> > trianglesPerPoint;
+    std::vector< std::vector<int> > trianglesPerPoint;
 
     /** Contains info about the regions. The indices @c innerRegion and
         @c outerRegion refer to this structure, e.g. @c materials[0]. */
     HxParamBundle* params;
 
-    McDArray<StaticVector<float,3> > normals;
+    std::vector<StaticVector<float,3> > normals;
 
     enum NormalBinding { PER_TRIANGLE=0, PER_VERTEX, PER_VERTEX_INDEXED };
 
@@ -303,13 +302,13 @@ class HXSURFACE_API Surface {
 #if 0
     /// Read surface information except header.
     int readSurfaceData(const char* file, FILE * in, int ascii, 
-                        McDArray<SurfaceData*>& additionalData);
+                        std::vector<SurfaceData*>& additionalData);
     
     /// Read the surface from a file.
     int readPLY(const char *);
 
     /// Alternative read method which also return optional surface data.
-    int read(const char *, McDArray<SurfaceData*>& additionalData);
+    int read(const char *, std::vector<SurfaceData*>& additionalData);
 #endif
 
     /// Write surface + header to a file.
@@ -439,12 +438,12 @@ class HXSURFACE_API Surface {
     /** Compute a triangulation for the polygon, consisting of the
       vertices v[]. Insert triangles into surfaces' triangle list.
       @return number of new triangles. This should be @c v.size()-2.*/
-    int tile(const McDArray<int>& pidx);
-    int tileCenter(const McDArray<int>& pidx);
-    int tileFan(const McDArray<int>& pidx, int anchor);
+    int tile(const std::vector<int>& pidx);
+    int tileCenter(const std::vector<int>& pidx);
+    int tileFan(const std::vector<int>& pidx, int anchor);
 
     /** Compute best fitting plane for a polygon usign Newells method.*/
-    void fitPlane(const McDArray<int>& pidx,float plane[4]);
+    void fitPlane(const std::vector<int>& pidx,float plane[4]);
 
     
     /// returns -1 if material is not found.
@@ -511,37 +510,37 @@ class HXSURFACE_API Surface {
     }
 
     /// Check intersection of triangle t with its neighbours.
-    int intersectionTest(int t, McDArray<int>& neighbours,
+    int intersectionTest(int t, std::vector<int>& neighbours,
 			 float eps, int selectNeighbours=0);
 
     /// Determine number of triangles of region adjacent to each edge.
     void classifyEdges(int iRegion, int &nOdd, 
                        int &nEdge0, int &nEdge2, int &nEdge4, 
-                       McDArray<signed char> &markEdges,
-                       McDArray<int> &triangleList);
+                       std::vector<signed char> &markEdges,
+                       std::vector<int> &triangleList);
     /// Create groups of connected triangles.
     int createTriangleGroups(const int iRegion, 
-                             McDArray<signed char> &markEdges,
-                             McDArray<short> &markTriangles);
+                             std::vector<signed char> &markEdges,
+                             std::vector<short> &markTriangles);
     /// Find inconsistent edges.
     void findInconsistentEdges(const int iRegion, 
-                               McDArray<signed char> &markEdges,
-                               McDArray<short> &markTriangles);
+                               std::vector<signed char> &markEdges,
+                               std::vector<short> &markTriangles);
     /// Create closed surfaces.
     int createClosedSurfaces(const int iRegion, int nGroups,
-                             McDArray<signed char> &markEdges,
-                             McDArray<short> &markTriangles);
+                             std::vector<signed char> &markEdges,
+                             std::vector<short> &markTriangles);
     /// Calculate volumes enclosed by surfaces.
     void calcEnclosedVolumes(const int iRegion, 
-                             McDArray<short> &markTriangles,
-                             McDArray<float> &enclosedVolumes);
+                             std::vector<short> &markTriangles,
+                             std::vector<float> &enclosedVolumes);
     /// Check enclosed volumes.
-    void checkEnclosedVolumes(McDArray<float> &enclosedVolumes,
-                              McDArray<signed char> &inclusionInfo,
-                              McDArray<short> &markTriangles,
+    void checkEnclosedVolumes(std::vector<float> &enclosedVolumes,
+                              std::vector<signed char> &inclusionInfo,
+                              std::vector<short> &markTriangles,
                               int insideOut,
                               int &groupsOf4,
-                              McDArray<int> &triangleList);
+                              std::vector<int> &triangleList);
 
     /// Calculate minimal, maximal and mean edge length.
     void calcMinMaxMeanEdgeLen(float *min, float *max, float *mean);
@@ -570,29 +569,29 @@ class HXSURFACE_API Surface {
     /// Compute neighboured nodes around given node.
 
     /// Compute neighboured nodes around given node for a general surface (not sorted).
-    void getNeighbouredNodesGeneralSurface(int node, McDArray<int>& notSorted);
+    void getNeighbouredNodesGeneralSurface(int node, std::vector<int>& notSorted);
 
     /// Compute neighboured nodes at all vertices for a general surface.
-    void getNeighbouredNodesGeneralSurface(McDArray<McDArray<int> >& neighs);
+    void getNeighbouredNodesGeneralSurface(std::vector<std::vector<int> >& neighs);
 
     /// Compute neighboured nodes around given node (sorted).
-    void getNeighbouredNodes(int node, McDArray<int>& sorted);
+    void getNeighbouredNodes(int node, std::vector<int>& sorted);
 
     /// Compute neighboured nodes at all vertices
-    void getNeighbouredNodes(McDArray<McDArray<int> >& neighs);
+    void getNeighbouredNodes(std::vector<std::vector<int> >& neighs);
 
     // surface paths given by an array of nodes
 
     /// Check if array of vertices form a closed loop on the surface
-    int isClosedLoop(const McDArray<McDArray<int> >& boundary);
+    int isClosedLoop(const std::vector<std::vector<int> >& boundary);
 
     /// Compute length of boundary line on surface
-    float getBoundaryLength(const McDArray<int>& boundary, 
-                            McDArray<float>& lengths);
+    float getBoundaryLength(const std::vector<int>& boundary, 
+                            std::vector<float>& lengths);
 
     /// Compute the shortest @c path on the surface from @c from to @c to.
     int findShortestPath(int from, int to, 
-                         McDArray<int>& path,
+                         std::vector<int>& path,
                          float* weights=0, float minWeight=0);
 
     //@}

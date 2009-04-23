@@ -113,7 +113,7 @@ public:
 
     int getCommonTri(const NodeBundle& a, const NodeBundle& b);
 
-    McSmallArray<int, 2> getCommonTris(const NodeBundle& a, const NodeBundle& b);
+    std::vector<int> getCommonTris(const NodeBundle& a, const NodeBundle& b);
 
     NodeIdx getCornerNode(const DomainTriangle& cT, int corner);
 

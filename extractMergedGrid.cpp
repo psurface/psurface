@@ -111,7 +111,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
             
             assert(targetTri>=0 && targetTri<cPar->surface->triangles.size());
 
-            McSArray<IntersectionAlt, 3> intersections;
+            std::tr1::array<IntersectionAlt, 3> intersections;
             for (j=0; j<3; j++) {
                 intersections[j].pos = cT.nodes[cPT.vertices(j)].domainPos();
                 intersections[j].localTargetCoords = cPar->getLocalTargetCoords(GlobalNodeIdx(i, cPT.vertices(j)), 
