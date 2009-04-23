@@ -3,16 +3,6 @@
  * $Id: TargetSurface.h.standalone,v 1.1 2007/10/17 13:16:55 sander Exp $
  *
  * $Log: TargetSurface.h.standalone,v $
- * Revision 1.1  2007/10/17 13:16:55  sander
- * moved here from the ZIB server
- *
- * Revision 1.2  2006/03/16 16:04:15  bzfsande
- * removed a few obsolete references to McBitfield
- * mailtoauthor: sander@zib.de
- *
- * Revision 1.1  2006/03/01 10:18:44  bzfsande
- * Trying to reduce the ties to Amira even more so I can use this package
- * more easily outside of Amira without technical and licensing trouble.
  *
  * This new class contains the few methods of Surface that I really need.
  * When this package is compiled with -DPSURFACE_STANDALONE, it is used
