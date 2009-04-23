@@ -20,7 +20,6 @@ cp TargetSurface.h.standalone                         libpsurface/include/Target
 
 cp local_mclib/include/mclib/McDVector.h              libpsurface/include/mclib
 cp local_mclib/include/mclib/McPrimType.h             libpsurface/include/mclib
-cp local_mclib/include/mclib/McProgressInterface.h    libpsurface/include/mclib
 cp local_mclib/include/mclib/McSparseMatrix.h         libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdlib.h               libpsurface/include/mclib
 cp local_mclib/include/mclib/McStdio.h                libpsurface/include/mclib
