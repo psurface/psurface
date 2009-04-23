@@ -55,7 +55,11 @@ public:
     };
 
     /// Default constructor
-    Parametrization(HxParamBundle* bundle=NULL);
+    Parametrization(
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
+                    HxParamBundle* bundle=NULL
+#endif
+                    );
 
     /// Destructor
     virtual ~Parametrization();
@@ -123,6 +127,7 @@ public:
      */
     void setupOriginalSurface();
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     /** \brief Copies the path information from the SurfacePathSet to the
      * parameters.
      *
@@ -136,6 +141,7 @@ public:
      * Parametrization's own SurfacePathSet.
      */
     void getPaths(const HxParamBundle& parameters);
+#endif
 
     /** \brief Adds the triangular closure on each triangle.
      *
@@ -382,10 +388,12 @@ public:
     /// All base grid patches
     std::vector<Patch> patches;
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     /// A set of arbitrary parameters
     HxParamBundle* params;
 
     bool hasOwnParamBundle;
+#endif
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
     std::vector<StaticVector<float,3> > iPos;

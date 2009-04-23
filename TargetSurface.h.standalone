@@ -18,13 +18,16 @@
 #define SURFACE_H
 
 #include <hxsurface/HxSurfaceWinDLLApi.h>
+#include <stdio.h>
 
 #include <vector>
 #include <psurface/StaticVector.h>
-#include <amiramesh/HxParamBundle.h>
-#include <hxfield/oint.h>
 
-#include <McFHeap.h>
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
+#include <amiramesh/HxParamBundle.h>
+#endif
+
+#include <hxfield/oint.h>
 
 /** This class implements structured, triangulated surfaces. A surface
     consists of a number of sub-surfaces, called @c patches. Each patch can
@@ -168,7 +171,7 @@ class HXSURFACE_API Surface {
         int to;
 
         /// There are 2 triangles per edge, except for boundary edges.
-        std::vector<int,3> triangles;
+        std::vector<int> triangles;
 
         ///
         Edge() { from=to=0; };
@@ -215,9 +218,11 @@ class HXSURFACE_API Surface {
         explicitely. The class @c HxSurfaceEditor uses this information. */
     std::vector< std::vector<int> > trianglesPerPoint;
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     /** Contains info about the regions. The indices @c innerRegion and
         @c outerRegion refer to this structure, e.g. @c materials[0]. */
     HxParamBundle* params;
+#endif
 
     std::vector<StaticVector<float,3> > normals;
 
@@ -232,7 +237,11 @@ class HXSURFACE_API Surface {
     /**@name Member methods */ //@{
 
     /// Constructor. If params is null an own parameter bundle is created.
-    Surface(HxParamBundle* params=0);
+    Surface(
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
+            HxParamBundle* params=0
+#endif
+           );
 
     /// Destructor.
     ~Surface();
@@ -463,14 +472,14 @@ class HXSURFACE_API Surface {
         contour is returned instead. */
     int contourFromPoint(oint contourIdx) {
         if (contourIdx.positive()) return contours[(int)contourIdx]->points[0];
-            else return contours[(int)contourIdx]->points.last();
+            else return contours[(int)contourIdx]->points.back();
     }
 
     /** Get last point of contour indexed by @c contourIdx. @c contourIdx is
         an oint. If it is negatively oriented, the first point of the
         contour is returned instead. */
     int contourToPoint(oint contourIdx) {
-        if (contourIdx.positive()) return contours[(int)contourIdx]->points.last();
+        if (contourIdx.positive()) return contours[(int)contourIdx]->points.back();
             else return contours[(int)contourIdx]->points[0];
     }
 
@@ -494,8 +503,8 @@ class HXSURFACE_API Surface {
 
     /// Appends a triangle and inserts it in given patch.
     void appendTriangle(int patchIdx, Triangle& triangle) {
-        int idx = triangles.append(triangle);
-        patches[patchIdx]->triangles.append(idx);
+        triangles.push_back(triangle);
+        patches[patchIdx]->triangles.push_back(triangles.size()-1);
         triangle.patch = patchIdx;
     }
 
@@ -590,6 +599,7 @@ class HXSURFACE_API Surface {
 
     /**@name Auxiliary methods */ //@{
 
+#if 0
     /// Class for the computation of shortest paths on a surface.
     class PointPath : public McFHeapElement {
       public:
@@ -608,6 +618,7 @@ class HXSURFACE_API Surface {
             return path < other.path;	    
         }
     };
+#endif
 
     //@}
 

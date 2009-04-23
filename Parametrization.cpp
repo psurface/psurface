@@ -16,6 +16,7 @@
 #include <psurface/Parametrization.h>
 #include <psurface/GlobalNodeIdx.h>
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 Parametrization::Parametrization(HxParamBundle* bundle)
 {
     if (bundle) {
@@ -26,19 +27,28 @@ Parametrization::Parametrization(HxParamBundle* bundle)
         hasOwnParamBundle = true;
     }
 }
+#else
+Parametrization::Parametrization()
+{}
+#endif
 
 Parametrization::~Parametrization() 
 { 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     if (hasOwnParamBundle)
         delete params;
+#endif
 }
 
 void Parametrization::clear()
 {
     surface = NULL;
     patches.clear();
+
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     if (hasOwnParamBundle)
         delete params;
+#endif
 
     iPos.clear();
     paths.clear();
@@ -934,17 +944,18 @@ void Parametrization::setupOriginalSurface()
 
 void Parametrization::appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch)
 {
-    surface->triangles.appendSpace(1);
+    surface->triangles.push_back(Surface::Triangle());
                         
-    surface->triangles.last().points[0] = v[0];
-    surface->triangles.last().points[1] = v[1];
-    surface->triangles.last().points[2] = v[2];
+    surface->triangles.back().points[0] = v[0];
+    surface->triangles.back().points[1] = v[1];
+    surface->triangles.back().points[2] = v[2];
     
-    surface->triangles.last().patch = patch;
-    surface->patches[patch]->triangles.append(surface->triangles.size()-1);
+    surface->triangles.back().patch = patch;
+    surface->patches[patch]->triangles.push_back(surface->triangles.size()-1);
 }
 
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 void Parametrization::getPaths(const HxParamBundle& parameters)
 {
     int i;
@@ -963,7 +974,6 @@ void Parametrization::getPaths(const HxParamBundle& parameters)
         }
     }
 }
-
 
 void Parametrization::savePaths(HxParamBundle& parameters)
 {
@@ -986,7 +996,7 @@ void Parametrization::savePaths(HxParamBundle& parameters)
         parameters.insert(p);
     }
 }
-
+#endif
 
 
 int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<int,3>& vertices, 
@@ -1207,9 +1217,19 @@ int Parametrization::getImageSurfaceTriangle(int tri,
     
     for (i=0; i<trianglesPerNode[0].size(); i++) {
 
+#ifdef PSURFACE_STANDALONE
+        if (std::find(trianglesPerNode[1].begin(), 
+                      trianglesPerNode[1].end(), 
+                      trianglesPerNode[0][i]) != trianglesPerNode[1].end() &&
+            std::find(trianglesPerNode[2].begin(),
+                      trianglesPerNode[2].end(),
+                      trianglesPerNode[0][i]) != trianglesPerNode[2].end())
+            return trianglesPerNode[0][i];
+#else
         if (mcSmallArray::index(trianglesPerNode[1], trianglesPerNode[0][i])!=-1 &&
             mcSmallArray::index(trianglesPerNode[2], trianglesPerNode[0][i])!=-1)
             return trianglesPerNode[0][i];
+#endif
 
     }
             
@@ -1277,8 +1297,16 @@ void Parametrization::getTrianglesPerEdge(int from, int to, std::vector<int>& tr
 {
     for (int i=0; i<surface->trianglesPerPoint[from].size(); i++) {
 
+#ifdef PSURFACE_STANDALONE
+        if (std::find(surface->trianglesPerPoint[to].begin(),
+                      surface->trianglesPerPoint[to].end(),
+                      surface->trianglesPerPoint[from][i]) != surface->trianglesPerPoint[to].end() &&
+            surface->trianglesPerPoint[from][i] != exception)
+
+#else
         if (mcSmallArray::index(surface->trianglesPerPoint[to], surface->trianglesPerPoint[from][i]) != -1 &&
             surface->trianglesPerPoint[from][i] != exception)
+#endif
             tris.push_back(surface->trianglesPerPoint[from][i]);
 
     }

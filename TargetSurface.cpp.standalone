@@ -38,7 +38,7 @@ Surface::Patch::Patch(const Surface::Patch& other)
     *this = other;
 }
 
-
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 Surface::Surface(HxParamBundle* bundle)
 {
     if (bundle) {
@@ -58,6 +58,7 @@ Surface::Surface(HxParamBundle* bundle)
     contourFlag = 0;
     normalBinding = PER_TRIANGLE;
 }
+#endif
 
 int Surface::getMaterialID(const char *mat)
 {

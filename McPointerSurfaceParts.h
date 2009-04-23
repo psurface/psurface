@@ -22,7 +22,7 @@ template<class VertexType>  class McEdge;
     @see McPointerSurface, McEdge, McTriangle
 */
 ///////////////////////////////////////////////////////////////
-class MCLIB_API McVertex: public StaticVector<float,3>
+class McVertex: public StaticVector<float,3>
 {
 public:
     McVertex() {}
@@ -62,7 +62,7 @@ public:
 */
 ///////////////////////////////////////////////////////////////
 template<class VertexType>
-class MCLIB_API McEdge
+class McEdge
 {
 public:
     ///
@@ -218,7 +218,7 @@ public:
  */
 ///////////////////////////////////////////////////////////////
 
-class MCLIB_API McTriangle 
+class McTriangle 
 {
 public:
     /// default constructor

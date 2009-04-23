@@ -23,7 +23,7 @@
     @see McVertex, McEdge, McTriangle
 */
 template <class VertexType, class EdgeType, class TriangleType>
-class MCLIB_API McSurfaceBase {
+class McSurfaceBase {
 
 public:
 

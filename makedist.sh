@@ -19,7 +19,6 @@ cp local_mclib/include/hxsurface/HxSurfaceWinDLLApi.h libpsurface/include/hxsurf
 cp TargetSurface.h.standalone                         libpsurface/include/TargetSurface.h
 
 cp local_mclib/include/mclib/McDVector.h              libpsurface/include/mclib
-cp local_mclib/include/mclib/McFHeap.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McHandable.h             libpsurface/include/mclib
 cp local_mclib/include/mclib/McMat4f.h                libpsurface/include/mclib
 cp local_mclib/include/mclib/McPrimType.h             libpsurface/include/mclib
