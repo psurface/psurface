@@ -135,7 +135,7 @@ void Surface::clear()
 
 void Surface::removePoint(int patch,int point)
 {
-    McDArray<int> tris;
+    std::vector<int> tris;
     int i;
     for (i=0 ; i<patches[patch]->triangles.size() ; i++) {
         Triangle& ta=triangles[patches[patch]->triangles[i]];
@@ -196,11 +196,11 @@ void Surface::createAllEdges(int  createEdgeIds)
                     Edge *edge = &edges[e];
                     edge->from = from;
                     edge->to = to;
-                    edge->triangles.append(patches[patch]->triangles[i]);
-                    edgesPerPoint[from].append(e);
-                    edgesPerPoint[to].append(e);
+                    edge->triangles.push_back(patches[patch]->triangles[i]);
+                    edgesPerPoint[from].push_back(e);
+                    edgesPerPoint[to].push_back(e);
                 } else {
-                    edges[edgesPerPoint[from][m]].triangles.append(patches[patch]->triangles[i]);
+                    edges[edgesPerPoint[from][m]].triangles.push_back(patches[patch]->triangles[i]);
                 }
             }
         }
@@ -222,12 +222,12 @@ void Surface::createAllEdges(int  createEdgeIds)
 
 void Surface::findContours()
 {
-    McDArray<unsigned char> edgeUsed(edges.size());
+    std::vector<unsigned char> edgeUsed(edges.size());
     edgeUsed.fill(0);
 
     int i;
-    McDArray<int> leftPoints;
-    McDArray<int> rightPoints;
+    std::vector<int> leftPoints;
+    std::vector<int> rightPoints;
 
     // Clear old contours:
     for (i=0 ; i<contours.size() ; i++)
@@ -253,7 +253,7 @@ void Surface::findContours()
             unsigned char closedContour = 0;
             for (currPoint=edges[currEdge].from; 
                  pointType[currPoint]!=BRANCHING && !closedContour;) {
-                leftPoints.append(currPoint);
+                leftPoints.push_back(currPoint);
                 assert(edgesPerPoint[currPoint].size()==2);
                 int e=edgesPerPoint[currPoint][0];
                 if (e==currEdge)
@@ -267,14 +267,14 @@ void Surface::findContours()
                 else
                     currPoint=edges[e].to;
             }
-            leftPoints.append(currPoint);
+            leftPoints.push_back(currPoint);
 
             if (!closedContour) {
                 // Now to the right.
                 currEdge=i;
                 for (currPoint=edges[currEdge].to;
                      pointType[currPoint]!=BRANCHING; ) {       
-                    rightPoints.append(currPoint);
+                    rightPoints.push_back(currPoint);
                     int e=edgesPerPoint[currPoint][0];
                     if (e==currEdge)
                         e=edgesPerPoint[currPoint][1];
@@ -286,25 +286,25 @@ void Surface::findContours()
                     else
                         currPoint=edges[e].to;
                 }
-                rightPoints.append(currPoint);
+                rightPoints.push_back(currPoint);
             }
             Contour *contour=new Contour;
             contour->points.remax(leftPoints.size()+rightPoints.size()+2);
             int j;
             for (j=leftPoints.size()-1 ; j>=0 ; j--) {
-                contour->points.append(leftPoints[j]);
+                contour->points.push_back(leftPoints[j]);
             }
             for (j=0 ; j<rightPoints.size() ; j++) {
-                contour->points.append(rightPoints[j]);
+                contour->points.push_back(rightPoints[j]);
             }
             int cn=contours.size();
-            contours.append(contour);
+            contours.push_back(contour);
             for (j=0 ; j<edges[i].triangles.size() ; j++) {
                 int patch=triangles[edges[i].triangles[j]].patch;
                 if (patches[patch]->contours.size()==0 ||
-                    patches[patch]->contours.last()!=cn) {                  
-                    contour->patches.append(patch);
-                    patches[patch]->contours.append(cn);
+                    patches[patch]->contours.back()!=cn) {                  
+                    contour->patches.push_back(patch);
+                    patches[patch]->contours.push_back(cn);
                 }
             }
         }
@@ -459,10 +459,10 @@ void Surface::createConnectivity(int patch)
         tri.patch = nPatches;
     }
     
-    McDArray<int> stack;
+    std::vector<int> stack;
 
     // this is a temporary array to speed up the search farther down
-    // McDArray<int> patchTriangles = patches[patch]->triangles;
+    // std::vector<int> patchTriangles = patches[patch]->triangles;
     // patchTriangles.sort(&mcStandardCompare);
 
     // Start with first triangle
@@ -570,8 +570,8 @@ void Surface::findBranchingPoints()
         }
     }
 
-    std::vector<int,6> triaList;
-    McDArray<int> markTria;
+    std::vector<int> triaList;
+    std::vector<int> markTria;
 
     /* 1st (3rd) type of branching points: INNER points with nGroups > 1 */
     for (i=0; i<nPoints; i++) {
@@ -728,7 +728,7 @@ void Surface::findBranchingPoints()
             markTria.resize(nTriangle);
             markTria.fill(0);
 
-            McDArray<int> stack;
+            std::vector<int> stack;
 
             int nGroups = 0;
             int startTriangle = triaList[0];
@@ -783,7 +783,7 @@ void Surface::findBranchingPoints()
 
 void Surface::renumberPoints()
 {
-    McDArray<int> newIdx(points.size());
+    std::vector<int> newIdx(points.size());
     int i, cnt=0;
 
     for (i=0; i<points.size(); i++) {
@@ -804,8 +804,8 @@ void Surface::renumberPoints()
             newIdx[i] = cnt++;
     }
 
-    McDArray<StaticVector<float,3> > tmpPointList(notInnerPoints);
-    McDArray<std::vector<int,6> > tmpEdgeList;
+    std::vector<StaticVector<float,3> > tmpPointList(notInnerPoints);
+    std::vector<std::vector<int,6> > tmpEdgeList;
     
     int hasEdgesPerPoint = (edgesPerPoint.size()==points.size());
     if (hasEdgesPerPoint)
@@ -1065,7 +1065,7 @@ void Surface::findBranchingPointsOfPatches()
   }
 }
 
-void Surface::fitPlane(const McDArray<int>& pidx,float plane[4])
+void Surface::fitPlane(const std::vector<int>& pidx,float plane[4])
 {
     int i;
     float refpt[3]={0,0,0};
@@ -1098,14 +1098,14 @@ void Surface::fitPlane(const McDArray<int>& pidx,float plane[4])
     plane[3]=-( refpt[0]*normal[0]+refpt[1]*normal[1]+refpt[2]*normal[2])/len;
 }
 
-int Surface::tile(const McDArray<int>& v)
+int Surface::tile(const std::vector<int>& v)
 {
     assert(v.size()>=3);
 #if 0
     int i;
 
     triangles.remax(triangles.size()+v.size()-2);
-    McDArray<int> v2(v);
+    std::vector<int> v2(v);
     int np=v2.size();
     i=1;
     while (np>3) {
@@ -1167,9 +1167,9 @@ int Surface::tile(const McDArray<int>& v)
 #endif
 }
 
-int Surface::tileCenter(const McDArray<int>& v)
+int Surface::tileCenter(const std::vector<int>& v)
 {
-    McDArray<int> v2(v);
+    std::vector<int> v2(v);
     StaticVector<float,3> center(0,0,0);
     
     int np = v2.size();
@@ -1180,14 +1180,14 @@ int Surface::tileCenter(const McDArray<int>& v)
         center[i] /= np;
     
     if (np>4) {
-        int p = points.append(center);
+        int p = points.push_back(center);
         
         for (int j=0; j<np; j++) {          
             Triangle tri;
             tri.points[0] = p; 
             tri.points[1] = v2[j]; 
             tri.points[2] = v2[(j+1)%np];
-            triangles.append(tri);
+            triangles.push_back(tri);
         }
         return np;
     }  
@@ -1214,22 +1214,22 @@ int Surface::tileCenter(const McDArray<int>& v)
             tri.points[0]=v2[i]; 
             tri.points[1]=v2[(i+1)%np]; 
             tri.points[2]=v2[(i+2)%np];
-            triangles.append(tri);
+            triangles.push_back(tri);
             
             tri.points[0]=v2[(i+2)%np]; 
             tri.points[1]=v2[(i+3)%np]; 
             tri.points[2]=v2[i];
-            triangles.append(tri);          
+            triangles.push_back(tri);          
         } else {
             tri.points[0]=v2[(i+1)%np]; 
             tri.points[1]=v2[(i+2)%np]; 
             tri.points[2]=v2[(i+3)%np];
-            triangles.append(tri);
+            triangles.push_back(tri);
             
             tri.points[0]=v2[(i+3)%np]; 
             tri.points[1]=v2[i]; 
             tri.points[2]=v2[(i+1)%np];
-            triangles.append(tri);          
+            triangles.push_back(tri);          
         }
         if ((i+2)%np > (i+1)%np) {
             v2.remove((i+2)%np);
@@ -1251,7 +1251,7 @@ int Surface::tileCenter(const McDArray<int>& v)
     return v.size()-2;
 }
 
-int Surface::tileFan(const McDArray<int>& v, int anchor)
+int Surface::tileFan(const std::vector<int>& v, int anchor)
 {
     int nPoints = v.size();
     int nTriangles = v.size()-2;
@@ -1272,7 +1272,7 @@ void Surface::check()
     int err=0;
 
     for (int i=0; i<patches.size(); i++) {
-        McDArray<oint>& contours = patches[i]->contours;
+        std::vector<oint>& contours = patches[i]->contours;
         int n = contours.size();
         for (int k=0; k<n; k++)
         {
@@ -1424,7 +1424,7 @@ void Surface::copyData(const Surface &source)
 
 void Surface::sortTriangles() {
     int nTriangles = triangles.size();
-    McDArray<int> newIndices(nTriangles);
+    std::vector<int> newIndices(nTriangles);
     int i,j,k=0;
     for (i=0; i<patches.size(); i++) {
         Patch *p = patches[i];
@@ -1434,7 +1434,7 @@ void Surface::sortTriangles() {
         }
     }
 
-    McDArray<int> invNewIndices(nTriangles);
+    std::vector<int> invNewIndices(nTriangles);
     for (i=0; i<nTriangles; i++) {
         invNewIndices[newIndices[i]] = i;
     }
@@ -1609,7 +1609,7 @@ int Surface::removeUnusedPoints()
     int nPoints = points.size();
     int nTriangles = triangles.size();
 
-    McDArray<int> newIndex(nPoints);
+    std::vector<int> newIndex(nPoints);
     newIndex.fill(-1);
 
     for (i=0; i<nTriangles; i++) {
@@ -1704,8 +1704,8 @@ void Surface::computeTrianglesPerPoint()
     
     for (int i=0; i<nTriangles; i++) {
         Surface::Triangle& tri = triangles[i];
-        trianglesPerPoint[tri.points[0]].append(i);
-        trianglesPerPoint[tri.points[1]].append(i);
-        trianglesPerPoint[tri.points[2]].append(i);
+        trianglesPerPoint[tri.points[0]].push_back(i);
+        trianglesPerPoint[tri.points[1]].push_back(i);
+        trianglesPerPoint[tri.points[2]].push_back(i);
     }
 }
