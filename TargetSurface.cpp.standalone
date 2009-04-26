@@ -17,6 +17,7 @@
 /////////////////////////////////////////////////////////////////
 #include <stdio.h>
 #include <ctype.h>
+#include <cstring>
 
 #include "TargetSurface.h"
 
@@ -60,30 +61,12 @@ Surface::Surface(HxParamBundle* bundle)
 }
 #endif
 
-int Surface::getMaterialID(const char *mat)
-{
-    HxParamBundle* materials = params->materials();
-    HxParamBundle* bundle = materials->bundle(mat,0);
-    if (bundle)
-        return materials->index(bundle);
-    return (-1);
-}
-
-int Surface::addMaterial(const char *name, int id)
-{
-    HxParamBundle* materials = params->materials();
-
-    if (id<0) id = materials->nBundles();
-    HxParamBundle* bundle = new HxParamBundle(name);
-    bundle->insert(new HxParameter("id",id));
-    materials->insert(bundle);
-    return id;
-}
-
 Surface::~Surface()
 {
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     if (hasOwnParamBundle)
         delete params;
+#endif
 
     int i;
     for (i=0; i<contours.size(); i++) {
@@ -127,7 +110,9 @@ void Surface::clear()
         delete contours[i];
     contours.resize(0);
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     params->materials()->removeAll();
+#endif
     nBranchingPoints = 0;
     nContourPoints = 0;
     contourFlag = 0;
@@ -140,7 +125,7 @@ void Surface::removePoint(int patch,int point)
     for (i=0 ; i<patches[patch]->triangles.size() ; i++) {
         Triangle& ta=triangles[patches[patch]->triangles[i]];
         if (point==ta.points[0] || point==ta.points[1] || point==ta.points[2])
-            tris.append(i);
+            tris.push_back(i);
     }
     if (tris.size()==0) {
         printf("ERROR: Surface::removePoint(%d,%d), no triangle found\n",
@@ -148,7 +133,7 @@ void Surface::removePoint(int patch,int point)
         return;
     }
     if (tris.size()==1) {
-        patches[patch]->triangles.remove(tris[0]);
+        patches[patch]->triangles.erase(patches[patch]->triangles.begin() + tris[0]);
         printf("WARNING: IMPLEMENT POINT TYPE SWITCH (inner->contour)\n");
         return;
     }
@@ -192,7 +177,8 @@ void Surface::createAllEdges(int  createEdgeIds)
                     }                   
                 }               
                 if (m==nEdges) {
-                    int e = edges.appendSpace(1);
+                    edges.push_back(Edge());
+                    int e = edges.size()-1;
                     Edge *edge = &edges[e];
                     edge->from = from;
                     edge->to = to;
@@ -210,7 +196,7 @@ void Surface::createAllEdges(int  createEdgeIds)
     if (createEdgeIds && (edgesPerTriangle.size() >= triangles.size())) {
         for (int eIdx = 0; eIdx < edges.size(); eIdx++) {
             for (int tIdx = (edges[eIdx].triangles.size() - 1); tIdx >= 0; tIdx--) {
-                edgesPerTriangle[edges[eIdx].triangles[tIdx]].append(eIdx);
+                edgesPerTriangle[edges[eIdx].triangles[tIdx]].push_back(eIdx);
             }
         }
     }
@@ -223,7 +209,7 @@ void Surface::createAllEdges(int  createEdgeIds)
 void Surface::findContours()
 {
     std::vector<unsigned char> edgeUsed(edges.size());
-    edgeUsed.fill(0);
+    edgeUsed.assign(edgeUsed.size(),0);
 
     int i;
     std::vector<int> leftPoints;
@@ -289,7 +275,8 @@ void Surface::findContours()
                 rightPoints.push_back(currPoint);
             }
             Contour *contour=new Contour;
-            contour->points.remax(leftPoints.size()+rightPoints.size()+2);
+            //contour->points.remax(leftPoints.size()+rightPoints.size()+2);
+            contour->points.reserve(leftPoints.size()+rightPoints.size()+2);
             int j;
             for (j=leftPoints.size()-1 ; j>=0 ; j--) {
                 contour->points.push_back(leftPoints[j]);
@@ -467,11 +454,11 @@ void Surface::createConnectivity(int patch)
 
     // Start with first triangle
     int first = patches[patch]->triangles[0];
-    stack.push(first);
+    stack.push_back(first);
 
     while (stack.size()) {
-        int tri;
-        stack.pop(tri);
+        int tri = stack.back();
+        stack.pop_back();
         //if (triangles[tri].patch<0) { // not yet touched
         if (triangles[tri].patch == nPatches) { // not yet touched
             n++;
@@ -504,7 +491,7 @@ void Surface::createConnectivity(int patch)
                         triangles[tri].neighbours[i].isContour=0;
                         //if (triangles[other].patch==-1)
                         if (triangles[other].patch==nPatches)
-                            stack.push(other);
+                            stack.push_back(other);
                        }
                     else  // found triangle belongs to other path => contour!
                        {
@@ -521,7 +508,8 @@ void Surface::createConnectivity(int patch)
                        "put in a new patch\n",n,
                patches[patch]->triangles.size());
         Patch *newPatch = new Patch;
-        newPatch->triangles.remax(patches[patch]->triangles.size()-n);
+        //newPatch->triangles.remax(patches[patch]->triangles.size()-n);
+        newPatch->triangles.reserve(patches[patch]->triangles.size()-n);
         int delta=0;
         for ( i=0 ; i<nTriangle ; i++) {
             //if (triangles[patches[patch]->triangles[i]].patch>-1) {
@@ -530,14 +518,14 @@ void Surface::createConnectivity(int patch)
                     patches[patch]->triangles[i];
             } else {
                 delta++;
-                newPatch->triangles.append(patches[patch]->triangles[i]);
+                newPatch->triangles.push_back(patches[patch]->triangles[i]);
             }
         }
         newPatch->innerRegion = patches[patch]->innerRegion;
         newPatch->outerRegion = patches[patch]->outerRegion;
         newPatch->boundaryId  = patches[patch]->boundaryId;
-        patches[patch]->triangles.remax(n,n);
-        patches.append(newPatch);
+        patches[patch]->triangles.resize(n,n);
+        patches.push_back(newPatch);
         createConnectivity(patches.size()-1);
     }
 }
@@ -553,7 +541,7 @@ void Surface::findBranchingPoints()
 
     /* initialize all points as inner points */
     pointType.resize(points.size());
-    pointType.fill(INNER);
+    pointType.assign(pointType.size(),INNER);
 
     /* mark points on contour edges */
     int nEdges = edges.size();
@@ -595,7 +583,7 @@ void Surface::findBranchingPoints()
                         }
                     }
                     if (triangleInList == 0)
-                        triaList.append(iTriangle);
+                        triaList.push_back(iTriangle);
                 }
             }
 
@@ -603,8 +591,7 @@ void Surface::findBranchingPoints()
             int nTriangle = triaList.size();
             if (nTriangle>0) {
                 markTria.resize(nTriangle);
-                markTria.fill(0);
-                
+                markTria.assign(markTria.size(),0);
                 int nGroups = 1;
                 markTria[0] = nGroups;
                 int iTriangle = triaList[0];
@@ -719,14 +706,14 @@ void Surface::findBranchingPoints()
                         }
                     }
                     if (triangleInList == 0)
-                        triaList.append(iTriangle);
+                        triaList.push_back(iTriangle);
                 }
             }
 
             // determine nGroups
             int nTriangle = triaList.size();
             markTria.resize(nTriangle);
-            markTria.fill(0);
+            markTria.assign(markTria.size(),0);
 
             std::vector<int> stack;
 
@@ -739,11 +726,11 @@ void Surface::findBranchingPoints()
                 markTria[iList] = nGroups;
 
                 stack.resize(0);
-                stack.push(startTriangle);
+                stack.push_back(startTriangle);
 
                 while (stack.size()) {
-                    int iTriangle;
-                    stack.pop(iTriangle);
+                    int iTriangle = stack.back();
+                    stack.pop_back();
 
                     for (j=0; j<3; j++) {
                         Triangle::Neighbour neighbour = 
@@ -756,7 +743,7 @@ void Surface::findBranchingPoints()
                                 if (jTriangle == triaList[iList]) {
                                     if (markTria[iList] == 0) {
                                         markTria[iList] = nGroups;
-                                        stack.push(jTriangle);
+                                        stack.push_back(jTriangle);
                                     }
                                 }
                             }
@@ -805,7 +792,7 @@ void Surface::renumberPoints()
     }
 
     std::vector<StaticVector<float,3> > tmpPointList(notInnerPoints);
-    std::vector<std::vector<int,6> > tmpEdgeList;
+    std::vector<std::vector<int> > tmpEdgeList;
     
     int hasEdgesPerPoint = (edgesPerPoint.size()==points.size());
     if (hasEdgesPerPoint)
@@ -824,7 +811,7 @@ void Surface::renumberPoints()
             }
         }
         else if (hasEdgesPerPoint && pointType[i]==UNUSED)
-            edgesPerPoint[i].remax(0,0);
+            edgesPerPoint[i].resize(0,0);
     }
 
     // Total number of new points (number of old points minus unused ones)
@@ -924,7 +911,7 @@ void Surface::clearInnerEdges(int renumber)
         if (edges[i].triangles.size() == 2 &&
             triangles[edges[i].triangles[0]].patch ==
             triangles[edges[i].triangles[1]].patch) {
-            edges[i].triangles.remax(0,0);
+            edges[i].triangles.resize(0,0);
         } else {
             if (nContourEdges != i) {
                 memmove(&edges[nContourEdges], &edges[i], sizeof(edges[i]));
@@ -933,21 +920,21 @@ void Surface::clearInnerEdges(int renumber)
             nContourEdges++;
         }
     }    
-    edges.remax(nContourEdges,nContourEdges);
+    edges.resize(nContourEdges);
     
     if (renumber) {
-        edgesPerPoint.remax(0,0);
+        edgesPerPoint.resize(0);
         renumberPoints(); 
         edgesPerPoint.resize(nBranchingPoints+nContourPoints);
     }
     else {
         for (i=0; i<points.size(); i++)
-            edgesPerPoint[i].remax(0,0);
+            edgesPerPoint[i].resize(0,0);
     }
 
     for (i=0; i<edges.size(); i++) {
-        edgesPerPoint[edges[i].from].append(i);
-        edgesPerPoint[edges[i].to].append(i);
+        edgesPerPoint[edges[i].from].push_back(i);
+        edgesPerPoint[edges[i].to].push_back(i);
     }
 }
 
@@ -958,16 +945,16 @@ void Surface::removeEmptyPatches()
     int i;
     for (i=0; i<nPatches; i++) {
         if (patches[i]->triangles.size() == 0) {
-            patches[i]->triangles.remax(0,0);
-            patches[i]->branchingPoints.remax(0,0);
-            patches[i]->contours.remax(0,0);
-            patches[i]->segments.remax(0,0);
+            patches[i]->triangles.resize(0);
+            patches[i]->branchingPoints.resize(0);
+            patches[i]->contours.resize(0);
+            patches[i]->segments.resize(0);
         } else {
             patches[nTruePatches]=patches[i];
             nTruePatches++;
         }
     }    
-    patches.remax(nTruePatches,nTruePatches);
+    patches.resize(nTruePatches);
 
     for (i=0; i<nTruePatches; i++) {
         Patch* patch = patches[i];
@@ -1058,7 +1045,7 @@ void Surface::findBranchingPointsOfPatches()
             if (contours[ic]->points[npoints-1] == ipoint) break;
           }
           if (k == patches[iPatch]->contours.size()) 
-            patches[iPatch]->branchingPoints.append(ipoint);
+            patches[iPatch]->branchingPoints.push_back(ipoint);
         }
       }
     }
@@ -1180,7 +1167,8 @@ int Surface::tileCenter(const std::vector<int>& v)
         center[i] /= np;
     
     if (np>4) {
-        int p = points.push_back(center);
+        points.push_back(center);
+        int p = points.size()-1;
         
         for (int j=0; j<np; j++) {          
             Triangle tri;
@@ -1232,11 +1220,11 @@ int Surface::tileCenter(const std::vector<int>& v)
             triangles.push_back(tri);          
         }
         if ((i+2)%np > (i+1)%np) {
-            v2.remove((i+2)%np);
-            v2.remove((i+1)%np);
+            v2.erase(v2.begin() + (i+2)%np);
+            v2.erase(v2.begin() + (i+1)%np);
         } else {
-            v2.remove((i+1)%np);
-            v2.remove((i+2)%np);
+            v2.erase(v2.begin() + (i+1)%np);
+            v2.erase(v2.begin() + (i+2)%np);
         }
         np-=2;
     }
@@ -1246,7 +1234,7 @@ int Surface::tileCenter(const std::vector<int>& v)
         tri.points[0]=v2[0]; 
         tri.points[1]=v2[1]; 
         tri.points[2]=v2[2];
-        triangles.append(tri);
+        triangles.push_back(tri);
     }
     return v.size()-2;
 }
@@ -1261,7 +1249,7 @@ int Surface::tileFan(const std::vector<int>& v, int anchor)
         tri.points[0] = v[anchor]; 
         tri.points[1] = v[(anchor+i+1)%nPoints]; 
         tri.points[2] = v[(anchor+i+2)%nPoints];
-        triangles.append(tri);
+        triangles.push_back(tri);
     }  
     
     return nTriangles;
@@ -1332,23 +1320,23 @@ void Surface::cleanup()
 {
     int i, n = edgesPerPoint.size();
 
-    edges.remax(0,0);
-    edgesPerPoint.remax(0,0);
-    pointType.remax(0,0);
+    edges.resize(0);
+    edgesPerPoint.resize(0);
+    pointType.resize(0);
 
     n = patches.size();
     for (i=0; i<n; i++) {
-        patches[i]->contours.remax(0,0);
-        patches[i]->segments.remax(0,0);
+        patches[i]->contours.resize(0);
+        patches[i]->segments.resize(0);
     }
 
     n = contours.size();
     for (i=0; i<n; i++) {
-        contours[i]->points.remax(0,0);
-        contours[i]->patches.remax(0,0);
+        contours[i]->points.resize(0);
+        contours[i]->patches.resize(0);
         delete contours[i];
     }
-    contours.remax(0,0);
+    contours.resize(0);
 
     contourFlag = 0;
 }
@@ -1369,7 +1357,9 @@ void Surface::copyData(const Surface &source)
     lastNeighbourIdx = source.lastNeighbourIdx;
     debug = source.debug;
     
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     params->operator=(*source.params);
+#endif
 
     edgesPerPoint = source.edgesPerPoint;
     edges = source.edges;
@@ -1441,8 +1431,16 @@ void Surface::sortTriangles() {
 
     for (i=0; i<nTriangles; i++) {
         if (newIndices[i] != i) {
-            triangles.swap(newIndices[i],i);
-            invNewIndices.swap(newIndices[i],i);
+            //triangles.swap(newIndices[i],i);
+            Triangle tmp = triangles[newIndices[i]];
+            triangles[newIndices[i]] = triangles[i];
+            triangles[i] = tmp;
+
+            //invNewIndices.swap(newIndices[i],i);
+            int tmpInt = invNewIndices[newIndices[i]];
+            invNewIndices[newIndices[i]] = invNewIndices[i];
+            invNewIndices[i] = tmpInt;
+
             j = invNewIndices[newIndices[i]];
             newIndices[j] = newIndices[i];
         }
@@ -1458,6 +1456,7 @@ void Surface::sortTriangles() {
 
 }
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 int Surface::write(const char *file, int ascii)
 {
     ascii = true;
@@ -1478,46 +1477,28 @@ int Surface::write(const char *file, int ascii)
 
 int Surface::writeSurfaceData(FILE *out, int ascii)
 {
+    assert(ascii);  // only works for ascii == true
     int err=0,i;
 //    fprintf(out, "Parameters ");
     params->print(out);
     fprintf(out, "\n");
         
     fprintf(out,"Vertices %d\n",points.size());
-    if (ascii) {
-        for ( i=0 ; i<points.size() && !err; i++)
-            fprintf(out,"\t%f %f %f\n",
-                    points[i][0], points[i][1], points[i][2]);
-    } else {
-#if 0
-        myFwriteBE(&points[0],sizeof(float),3*points.size(),out);
-        fprintf(out,"\n");
-#endif
-    }
+    for ( i=0 ; i<points.size() && !err; i++)
+        fprintf(out,"\t%f %f %f\n",
+                points[i][0], points[i][1], points[i][2]);
+
     fprintf(out,
             "NBranchingPoints %d\n"
             "NVerticesOnCurves %d\n"
             "BoundaryCurves %d\n",
             nBranchingPoints,nContourPoints,contours.size());
-    if (ascii) {
-        for ( i=0 ; i<contours.size() && !err; i++) {
-            fprintf(out,"{\n  Vertices %d\n  ",contours[i]->points.size());
-            for (int j=0 ; j<contours[i]->points.size() ; j++)
-                fprintf(out,"  %d",contours[i]->points[j]+1);
-            fprintf(out,"\n}\n");
-        }
-    } else {
-#if 0
-        for ( i=0 ; i<contours.size() && !err; i++) {
-            int n=contours[i]->points.size();
-            myFwriteBE(&n,sizeof(int),1,out);       
-            for (int j=0 ; j<contours[i]->points.size() ; j++) {
-                contours[i]->points[j]++;
-                myFwriteBE(&contours[i]->points[j],sizeof(int),1,out);
-                contours[i]->points[j]--;
-            }
-        }
-#endif
+
+    for ( i=0 ; i<contours.size() && !err; i++) {
+        fprintf(out,"{\n  Vertices %d\n  ",contours[i]->points.size());
+        for (int j=0 ; j<contours[i]->points.size() ; j++)
+            fprintf(out,"  %d",contours[i]->points[j]+1);
+        fprintf(out,"\n}\n");
     }
     
     fprintf(out,"Patches %d\n",patches.size());
@@ -1557,30 +1538,18 @@ int Surface::writeSurfaceData(FILE *out, int ascii)
         }
         
         fprintf(out,"\nTriangles %d\n",patches[i]->triangles.size());
-        if (ascii) {
-            for (int j=0 ; j<patches[i]->triangles.size() ; j++)
-                fprintf(out,"  %d %d %d\n",
-                        triangles[patches[i]->triangles[j]].points[0]+1,
-                        triangles[patches[i]->triangles[j]].points[1]+1,
-                        triangles[patches[i]->triangles[j]].points[2]+1);
-        } else {
-#if 0
-            for (int j=0 ; j<patches[i]->triangles.size() ; j++) {
-                int k;
-                for ( k=0 ; k<3 ; k++)
-                    triangles[patches[i]->triangles[j]].points[k]++;
-                myFwriteBE(&triangles[patches[i]->triangles[j]].points[0],
-                           sizeof(int),3,out);
-                for ( k=0 ; k<3 ; k++)
-                    triangles[patches[i]->triangles[j]].points[k]--;
-            }
-            fprintf(out,"\n");
-#endif
-        }
+
+        for (int j=0 ; j<patches[i]->triangles.size() ; j++)
+            fprintf(out,"  %d %d %d\n",
+                    triangles[patches[i]->triangles[j]].points[0]+1,
+                    triangles[patches[i]->triangles[j]].points[1]+1,
+                    triangles[patches[i]->triangles[j]].points[2]+1);
+
         fprintf(out,"}\n");
     }
     return(0);
 }
+#endif
 
 void Surface::getBoundingBox(float bbox[6]) const
 {
@@ -1589,7 +1558,7 @@ void Surface::getBoundingBox(float bbox[6]) const
         bbox[2] = bbox[3] = points[0][1];
         bbox[4] = bbox[5] = points[0][2];
     } else {
-        memset(bbox,0,6*sizeof(float));
+        std::memset(bbox,0,6*sizeof(float));
     }
 
     for (int i=0 ; i<points.size() ; i++) {
@@ -1610,7 +1579,7 @@ int Surface::removeUnusedPoints()
     int nTriangles = triangles.size();
 
     std::vector<int> newIndex(nPoints);
-    newIndex.fill(-1);
+    newIndex.assign(newIndex.size(), -1);
 
     for (i=0; i<nTriangles; i++) {
         Triangle& tri = triangles[i];
@@ -1643,10 +1612,10 @@ int Surface::removeUnusedPoints()
         tri.points[2] = newIndex[tri.points[2]];
     }
 
-    points.remax(k,k);
-    edges.remax(0,0);
-    edgesPerPoint.remax(0,0);
-    trianglesPerPoint.remax(0,0);
+    points.resize(k);
+    edges.resize(0);
+    edgesPerPoint.resize(0);
+    trianglesPerPoint.resize(0);
 
     if (normalBinding==PER_VERTEX)
         normals.resize(0);
@@ -1690,9 +1659,9 @@ void Surface::computeTrianglesPerPoint()
 {
     int nPoints = points.size();
     int nTriangles = triangles.size();
-    Surface::Triangle* triangles = this->triangles;
+    //Surface::Triangle* triangles = this->triangles;
 
-    trianglesPerPoint.remax(nPoints,nPoints);
+    trianglesPerPoint.resize(nPoints);
 
     // This is a critical MEMORY LEAK:
     // memset(&trianglesPerPoint[0], 0, sizeof(trianglesPerPoint[0])*nPoints);
