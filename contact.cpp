@@ -72,9 +72,11 @@ void buildContactMapping(const std::vector<double>& coords1,  ///< The vertices 
         surf2->patches[0]->triangles[i] = i;
     }
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     // For debugging
     surf1->write("testSurf1.surf", 1);
     surf2->write("testSurf2.surf", 1);
+#endif
 
     // Create the parametrization
     if (!cPar)
