@@ -419,7 +419,7 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
     // speedup.
     McDVector<MC_complex<float> > b(nodes.size());
     
-    b.fill(0);
+    b.assign(b.size(),0);
     
     for (i=0; i<nodes.size(); i++) 
         if (!nodes[i].isINTERIOR_NODE()) {
