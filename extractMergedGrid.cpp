@@ -65,11 +65,15 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
     cPar->surface->computeTrianglesPerPoint();
 
     // get the array that relates the base grid triangles with the whole nonmortar surface
+#if 0
     HxParameter* nonMortarTargetTriParam = cPar->params->find("targetTris");
     assert(nonMortarTargetTriParam);
     assert(nonMortarTargetTriParam->dim() == cPar->getNumTriangles());
     std::vector<int> nonMortarTargetTris(nonMortarTargetTriParam->dim());
     nonMortarTargetTriParam->getNum(&nonMortarTargetTris[0]);
+#else
+    std::vector<int> nonMortarTargetTris = cPar->domainSurfaceTriangleNumbers;
+#endif
 
     //
 #ifndef MY_DB

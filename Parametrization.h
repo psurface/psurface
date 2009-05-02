@@ -404,6 +404,10 @@ public:
     /// Surface paths on the base grid
     SurfacePathSet paths;
 
+    /// If the domain surface is part of the boundary of a 3d grid:
+    /// For each triangle store its number as part of the entire boundary
+    std::vector<int> domainSurfaceTriangleNumbers;
+
 };
 
 
