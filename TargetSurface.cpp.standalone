@@ -49,7 +49,10 @@ Surface::Surface(HxParamBundle* bundle)
         params = new HxParamBundle;
         hasOwnParamBundle = 1;
     }
-
+#else
+Surface::Surface()
+{
+#endif
     debug = 0;
     nBranchingPoints = 0;
     nContourPoints = 0;
@@ -59,7 +62,6 @@ Surface::Surface(HxParamBundle* bundle)
     contourFlag = 0;
     normalBinding = PER_TRIANGLE;
 }
-#endif
 
 Surface::~Surface()
 {
