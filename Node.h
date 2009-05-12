@@ -277,8 +277,7 @@ public:
     }
 
     void reverseNeighbors() {
-        //   if (!isINTERSECTION_NODE())
-        reverse(nbs);
+        std::reverse(nbs.begin(),nbs.end());
     }
 
     NodeType getType() const {return type;}
@@ -411,18 +410,6 @@ public:
 
     //private:
     StaticVector<float,2> dP;
-
-    template <class T>
-    static void reverse(std::vector<T>& vec) {
-        int n2 = vec.size()/2;
-        int s = vec.size();
-        for (int i=0 ; i<n2 ; i++) {
-            //swap(i,s-1-i);
-            T tmp = vec[i];
-            vec[i] = vec[s-1-i];
-            vec[s-1-i] = tmp;
-        }
-    }
 
 public:    
     ///

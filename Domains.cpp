@@ -67,9 +67,8 @@ void DomainTriangle::flip()
     edgePoints[0] = edgePoints[2];
     edgePoints[2] = tmp1;
 
-    Node::reverse(edgePoints[0]);
-    Node::reverse(edgePoints[1]);
-    Node::reverse(edgePoints[2]);
+    for (int i=0; i<3; i++)
+        std::reverse(edgePoints[i].begin(), edgePoints[i].end());
     
     // Change the pointers of intersection nodes to their respective positions
     // in the edgePoints arrays.  This is just in case that the pointLocationStructure

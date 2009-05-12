@@ -289,8 +289,8 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
             edgePoints.push_back(tmpEdgePoints[(theTriangleEdge[0]+2)%3]);
             edgePoints.push_back(tmpEdgePoints[(theTriangleEdge[0]+1)%3]);
 
-            Node::reverse(edgePoints.back());
-            Node::reverse(edgePoints[edgePoints.size()-2]);
+            std::reverse(edgePoints.back().begin(), edgePoints.back().end());
+            std::reverse(edgePoints[edgePoints.size()-2].begin(), edgePoints[edgePoints.size()-2].end());
         }
         
     }else{
@@ -311,8 +311,7 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
         
         edgePoints.push_back(tmpEdgePoints[thirdEdge]);
         if (!reverse)
-            //edgePoints.back().reverse();
-            Node::reverse(edgePoints.back());
+            std::reverse(edgePoints.back().begin(),edgePoints.back().end());
     }
 
     for (size_t i=0; i<edgePoints.size(); i++)
@@ -977,7 +976,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
     polyNewEdgePoints.push_back(currentPolyNode);
     triNewEdgePoints.push_back(currentTriNode);
 
-    Node::reverse(triNewEdgePoints);
+    std::reverse(triNewEdgePoints.begin(), triNewEdgePoints.end());
 
 #ifdef PATHLOG
     fclose(fp);
