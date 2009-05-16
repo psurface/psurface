@@ -1,7 +1,6 @@
 #include <psurface/PlaneParam.h>
 #include <psurface/StaticMatrix.h>
-#include <mclib/McSparseMatrix.h>
-#include <mclib/McDVector.h>
+#include <psurface/McSparseMatrix.h>
 
 #include <limits>
 
@@ -417,23 +416,23 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
     // Compute the right side. We use complex numbers for solving the systems
     // for both x- and y-components in one pass.  This leads to a considerable
     // speedup.
-    McDVector<MC_complex<float> > b(nodes.size());
+    std::vector<std::complex<float> > b(nodes.size());
     
-    b.assign(b.size(),0);
+    std::fill(b.begin(), b.end(), 0);
     
     for (i=0; i<nodes.size(); i++) 
         if (!nodes[i].isINTERIOR_NODE()) {
             // not elegant
-            b[i] = MC_complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
+            b[i] = std::complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
         }
 
     // solve the system
     int maxIter=3000;
-    McDVector<MC_complex<float> > residue;
-    McDVector<MC_complex<float> > result(nodes.size());
+    std::vector<std::complex<float> > residue;
+    std::vector<std::complex<float> > result(nodes.size());
     
     for (i=0; i<nodes.size(); i++)
-        result[i] = MC_complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
+        result[i] = std::complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
     
     lambda_ij.BiCGSTABC(b, result, residue, &maxIter, 1e-6);
     
