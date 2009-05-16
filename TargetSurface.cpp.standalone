@@ -29,7 +29,6 @@ Surface::Patch& Surface::Patch::operator=(const Surface::Patch& other)
     boundaryId  = other.boundaryId;
     branchingPoints = other.branchingPoints;
     triangles = other.triangles;
-    contours  = other.contours; 
     segments  = other.segments;
     return *this;
 }
@@ -223,12 +222,6 @@ void Surface::findContours()
             delete contours[i];
     contours.resize(0);
     
-    // Clear old contours of patches:
-    int iPatch;
-    for (iPatch=0; iPatch < patches.size(); iPatch++) {
-        patches[iPatch]->contours.resize(0);
-    }
-  
     for (i=0; i<edgeUsed.size(); i++) {
         if (!edgeUsed[i] && pointType[edges[i].from]!=INNER) {
             leftPoints.resize(0);
@@ -285,16 +278,6 @@ void Surface::findContours()
             }
             for (j=0 ; j<rightPoints.size() ; j++) {
                 contour->points.push_back(rightPoints[j]);
-            }
-            int cn=contours.size();
-            contours.push_back(contour);
-            for (j=0 ; j<edges[i].triangles.size() ; j++) {
-                int patch=triangles[edges[i].triangles[j]].patch;
-                if (patches[patch]->contours.size()==0 ||
-                    patches[patch]->contours.back()!=cn) {                  
-                    contour->patches.push_back(patch);
-                    patches[patch]->contours.push_back(cn);
-                }
             }
         }
     }
@@ -949,7 +932,6 @@ void Surface::removeEmptyPatches()
         if (patches[i]->triangles.size() == 0) {
             patches[i]->triangles.resize(0);
             patches[i]->branchingPoints.resize(0);
-            patches[i]->contours.resize(0);
             patches[i]->segments.resize(0);
         } else {
             patches[nTruePatches]=patches[i];
@@ -963,95 +945,6 @@ void Surface::removeEmptyPatches()
         for (int k=patch->triangles.size()-1; k>=0; k--)
             triangles[patch->triangles[k]].patch = i;
     }
-}
-
-void Surface::computeOrientationOfContours()
-{
-  /* contours of patches have already been defined in findContours;
-     here only the orientation is checked */
-  //    printf("findContoursOfPatches\n");
-
-  int iPatch;
-  for (iPatch=0; iPatch<patches.size(); iPatch++) {
-    int i;
-    for (i=0; i<patches[iPatch]->contours.size(); i++) {
-      int ic = patches[iPatch]->contours[i];
-      //      printf("patch %d, contour %d \n",iPatch,ic); 
-      int f = contours[ic]->points[0];
-      int t = contours[ic]->points[1];
-      //      printf("from %d, to %d \n",f,t); 
-      int j, e;
-      for (j=0; j<edgesPerPoint[f].size(); j++) {
-        e = edgesPerPoint[f][j];
-        if (edges[e].to == t || edges[e].from == t) break;
-      }
-      if (j == edgesPerPoint[f].size())
-        fprintf(stderr,"findContoursOfPatches: Error 1 \n");
-
-      int orientation = 1;
-      /* if (f == edges[e].from && t == edges[e].to) {
-        orientation = 1;
-      } else {
-        orientation = -1;
-      } */
-
-      int it;
-      for (j=0; j<edges[e].triangles.size(); j++) {
-        it = edges[e].triangles[j];
-        if (triangles[it].patch == iPatch) break;       
-      }
-      if (j == edges[e].triangles.size())
-        fprintf(stderr,"findContoursOfPatches: Error 2 \n");
-
-      int ied;
-      for (ied=0; ied<3; ied++) {
-        int i1 = (ied+1)%3;
-        int i2 = (ied+2)%3;
-        if (triangles[it].points[i1] == f && triangles[it].points[i2] == t)
-          break;
-        if (triangles[it].points[i1] == t && triangles[it].points[i2] == f) {
-          orientation = -orientation;
-          break;
-        }
-      }
-
-    if (orientation == -1) 
-      patches[iPatch]->contours[i] = oint(ic,-1);
-    else 
-      patches[iPatch]->contours[i] = oint(ic,1);
-
-    }
-  }
-}
-
-void Surface::findBranchingPointsOfPatches()
-{
-  /* only the 'non-trivial' branching points are collected */
-  //  printf("findBranchingPointsOfPatches\n");
-  int iPatch;
-  for (iPatch=0; iPatch<patches.size(); iPatch++) {
-    patches[iPatch]->branchingPoints.resize(0);
-    int i;
-    for (i=0; i<patches[iPatch]->triangles.size(); i++) {
-      int it = patches[iPatch]->triangles[i];
-      int j;
-      for (j=0; j<3; j++) {
-        int ipoint = triangles[it].points[j];
-        if (pointType[ipoint] == BRANCHING) {
-          int k;
-          for (k=0; k<patches[iPatch]->contours.size(); k++) {
-            int ic = patches[iPatch]->contours[k];
-            if (ic < 0) ic = -ic;
-            if (contours[ic]->points[0] == ipoint) break;
-            int npoints = contours[ic]->points.size();
-            if (contours[ic]->points[npoints-1] == ipoint) break;
-          }
-          if (k == patches[iPatch]->contours.size()) 
-            patches[iPatch]->branchingPoints.push_back(ipoint);
-        }
-      }
-    }
-  }
 }
 
 void Surface::fitPlane(const std::vector<int>& pidx,float plane[4])
@@ -1257,34 +1150,6 @@ int Surface::tileFan(const std::vector<int>& v, int anchor)
     return nTriangles;
 }
 
-void Surface::check()
-{
-    int err=0;
-
-    for (int i=0; i<patches.size(); i++) {
-        std::vector<oint>& contours = patches[i]->contours;
-        int n = contours.size();
-        for (int k=0; k<n; k++)
-        {
-            int from     = contourFromPoint(contours[k]);
-            int to       = contourToPoint(contours[k]);
-            int nextFrom = contourFromPoint(contours[(k+1)%n]);
-            int nextTo   = contourToPoint(contours[(k+1)%n]);
-
-            if (to != nextFrom) {
-                printf("patches[%d]->contours[%d] = %d -> %d\n",
-                    i, k, from, to);
-                printf("patches[%d]->contours[%d] = %d -> %d\n",
-                    i, (k+1)%n, nextFrom, nextTo);
-                err = 1;
-            }
-        }
-    }
-
-    if (!err) printf("Surface check ok!\n");
-        else printf("Surface inconsistent !\n");
-}
-
 void Surface::recompute()
 {
     //theWorkArea->startWorkingNoStop("computing surface connectivity");
@@ -1328,17 +1193,8 @@ void Surface::cleanup()
 
     n = patches.size();
     for (i=0; i<n; i++) {
-        patches[i]->contours.resize(0);
         patches[i]->segments.resize(0);
     }
-
-    n = contours.size();
-    for (i=0; i<n; i++) {
-        contours[i]->points.resize(0);
-        contours[i]->patches.resize(0);
-        delete contours[i];
-    }
-    contours.resize(0);
 
     contourFlag = 0;
 }
@@ -1384,26 +1240,9 @@ void Surface::copyData(const Surface &source)
             patches[i]->boundaryId = source.patches[i]->boundaryId;
             patches[i]->branchingPoints = source.patches[i]->branchingPoints;
             patches[i]->triangles = source.patches[i]->triangles;
-            patches[i]->contours = source.patches[i]->contours;
             patches[i]->segments = source.patches[i]->segments;
         }
         else patches[i] = NULL;
-    }
-
-    // Contours
-    size = contours.size();
-    for (i=0; i<size; i++)
-        if (contours[i]) delete contours[i];
-
-    size = source.contours.size();
-    contours.resize(size);
-    for (i=0; i<size; i++) {
-        if (source.contours[i]) {
-            contours[i] = new Contour();
-            contours[i]->points = source.contours[i]->points;
-            contours[i]->patches = source.contours[i]->patches;
-        }
-        else contours[i] = NULL;
     }
 
     // PointType and points
