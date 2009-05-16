@@ -4,26 +4,14 @@
 rm -rf libpsurface
 mkdir libpsurface
 mkdir libpsurface/include
-mkdir libpsurface/include/mclib
 mkdir libpsurface/include/psurface
 mkdir libpsurface/include/contact
-mkdir libpsurface/include/hxfield
-mkdir libpsurface/include/hxsurface
 mkdir libpsurface/src
 mkdir libpsurface/lib
 
-cp local_mclib/include/hxfield/HxFieldWinDLLApi.h     libpsurface/include/hxfield
-cp local_mclib/include/hxfield/oint.h                 libpsurface/include/hxfield
-
-cp local_mclib/include/hxsurface/HxSurfaceWinDLLApi.h libpsurface/include/hxsurface
 cp TargetSurface.h.standalone                         libpsurface/include/TargetSurface.h
 
-cp local_mclib/include/mclib/McDVector.h              libpsurface/include/mclib
-cp local_mclib/include/mclib/McPrimType.h             libpsurface/include/mclib
-cp local_mclib/include/mclib/McSparseMatrix.h         libpsurface/include/mclib
-cp local_mclib/include/mclib/McStdlib.h               libpsurface/include/mclib
-cp local_mclib/include/mclib/McStdio.h                libpsurface/include/mclib
-cp local_mclib/include/mclib/McWinDLLApi.h            libpsurface/include/mclib
+cp McSparseMatrix.h         libpsurface/include/psurface
 
 cp psurface.h               libpsurface/include/psurface
 cp psurface.h               libpsurface/include/
