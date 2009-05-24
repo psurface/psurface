@@ -545,7 +545,7 @@ protected:
 
 public:
     /// 
-    bool intersectionTriangleBox(int n, const Box<std::tr1::array<float,3>, 3>& box) {
+    bool intersectionTriangleBox(int n, const Box<float, 3>& box) {
         return box.contains(vertices(triangles(n).vertices[0])) ||
             box.contains(vertices(triangles(n).vertices[1])) ||
             box.contains(vertices(triangles(n).vertices[2]));

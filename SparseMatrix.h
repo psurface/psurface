@@ -234,8 +234,8 @@ startAgain:
 
 	std::vector<T> pi(N);
 	std::vector<T> vi(N);
-	pi.fill(T(0));
-	vi.fill(T(0));
+        std::fill(pi.begin(), pi.end(), T(0));
+        std::fill(vi.begin(), vi.end(), T(0));
 
 	double rhoiMin1    = 1;
 
