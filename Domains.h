@@ -6,29 +6,6 @@
 #include "McPointerSurfaceParts.h"
 #include "PlaneParam.h"
 
-class DomainTriangle;
-class DomainVertex;
-class DomainEdge;
-
-
-/** A vertex of the base domain */
-class DomainVertex: public McVertex {
-public:
-
-    DomainVertex() {}
-
-    DomainVertex(const StaticVector<float,3> &a) : McVertex(a) {}
-
-    ~DomainVertex() {}
-
-    DomainVertex& operator=(const StaticVector<float,3>& rhs) {
-        for (int i=0; i<3; i++)
-            (*this)[i] = rhs[i];
-        return *this;
-    }
-
-};
-
 
 /** A triangle containing a plane triangulation */
 class DomainTriangle : public McTriangle,
@@ -205,26 +182,6 @@ public:
 
     /// the patch number
     int patch;
-
-};
-
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-
-/** An edge in the base domain */
-class DomainEdge: public McEdge {
-public:
-    /// default constructor
-    DomainEdge() : McEdge() {}
-    
-    ///
-    DomainEdge(int a, int b) : McEdge(a, b) {}
-
-    ~DomainEdge() {}
 
 };
 

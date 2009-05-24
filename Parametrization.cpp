@@ -52,7 +52,7 @@ void Parametrization::clear()
 
     iPos.clear();
     paths.clear();
-    McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>::clear();
+    McSurfaceBase<McVertex, McEdge, DomainTriangle>::clear();
 }
 
 void Parametrization::getBoundingBox(Box<float,3>& bbox) const
@@ -297,7 +297,7 @@ void Parametrization::garbageCollection()
 
     }
 
-    McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>::garbageCollection();
+    McSurfaceBase<McVertex, McEdge, DomainTriangle>::garbageCollection();
     
 #ifndef NDEBUG
         printf("   ...Garbage collection finished!\n");

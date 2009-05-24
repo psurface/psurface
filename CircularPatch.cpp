@@ -21,7 +21,7 @@ bool CircularPatch::inducesTopologyChange() const
 }
 
 bool CircularPatch::hasSmallDihedralAngles(float threshold, const Parametrization* par, 
-                                           const DomainVertex* centerVertex) const
+                                           const McVertex* centerVertex) const
 {
     printf("hasSmallDihedralAngles has been commented out!\n");
 #if 0
@@ -213,7 +213,7 @@ bool CircularPatch::intersectsParametrization(const std::vector<int> &closeEdges
 
 bool CircularPatch::hasSelfintersections() const
 {
-    DomainEdge tmpEdge;
+    McEdge tmpEdge;
     
     for (size_t i=0; i<innerEdges.size(); i++){
         

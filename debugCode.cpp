@@ -153,7 +153,7 @@ void Parametrization::checkConsistency(const char* where) const
             triangles(i).checkConsistency("where");
 
             for (j=0; j<3; j++) {
-                const DomainEdge& cE = edges(triangles(i).edges[j]);
+                const McEdge& cE = edges(triangles(i).edges[j]);
                 if (!(cE.from == triangles(i).vertices[j] && cE.to == triangles(i).vertices[(j+1)%3]) &&
                     !(cE.to == triangles(i).vertices[j] && cE.from == triangles(i).vertices[(j+1)%3])){
                     printf(where);
@@ -165,7 +165,7 @@ void Parametrization::checkConsistency(const char* where) const
 
     // checks whether matching edgepoint arrays have the same size
     for (i=0; i<getNumEdges(); i++) {
-        const DomainEdge& cE = edges(i);
+        const McEdge& cE = edges(i);
 
         if (cE.triangles.size()!=2)
             continue;
