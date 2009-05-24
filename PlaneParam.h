@@ -12,8 +12,6 @@
 
 #include "Node.h"
 
-#include "psurfaceAPI.h"
-
 template<class T> class SparseMatrix;
 
 class Parametrization;
@@ -21,7 +19,7 @@ class Parametrization;
 /** The parametrization of a surface in space.  It is actually a planar graph
    having only triangular and unbounded faces.  The nodes of the graph store
    a 3D position, the rest is computed via linear interpolation. */
-class PSURFACE_API PlaneParam{
+class PlaneParam{
 public:
 
     class DirectedEdgeIterator {

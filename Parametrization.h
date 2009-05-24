@@ -17,7 +17,6 @@
 #endif
 
 #include <psurface/StaticVector.h>
-#include "psurfaceAPI.h"
 
 #include "McSurfaceBase.h"
 #include "Domains.h"

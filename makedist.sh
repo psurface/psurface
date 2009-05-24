@@ -31,7 +31,6 @@ cp PointIntersectionFunctor.h  libpsurface/include/psurface
 cp StaticVector.h           libpsurface/include/psurface
 cp StaticMatrix.h           libpsurface/include/psurface
 cp SparseMatrix.h           libpsurface/include/psurface
-cp psurfaceAPI.h            libpsurface/include/psurface
 
 
 cp psurface.cpp                     libpsurface/src

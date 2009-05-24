@@ -28,11 +28,6 @@
 #include <psurface/StaticVector.h>
 #include <vector>
 
-#include "psurfaceAPI.h"
-
-//#define NodeType unsigned int
-//#define NodeLocation unsigned int
-
 typedef int NodeIdx;
 
 
