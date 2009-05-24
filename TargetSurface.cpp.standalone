@@ -58,7 +58,6 @@ Surface::Surface()
     lastTriangleIdx = -1;
     lastWhich = -1;
     lastGlobal = 0;
-    contourFlag = 0;
     normalBinding = PER_TRIANGLE;
 }
 
@@ -69,13 +68,7 @@ Surface::~Surface()
         delete params;
 #endif
 
-    int i;
-    for (i=0; i<contours.size(); i++) {
-        if (contours[i])
-            delete contours[i];
-    }
-
-    for (i=0; i<patches.size(); i++) {
+    for (int i=0; i<patches.size(); i++) {
         if (patches[i])
             delete patches[i];
     }
@@ -85,8 +78,7 @@ int Surface::operator==(const Surface& other) const
 {
     if (points.size() !=other.points.size() ||
         nBranchingPoints !=other.nBranchingPoints ||
-        nContourPoints!=other.nContourPoints ||
-        contours.size() !=other.contours.size())
+        nContourPoints!=other.nContourPoints)
         return(0);
     return(1);
 }
@@ -107,16 +99,11 @@ void Surface::clear()
         delete patches[i];
     patches.resize(0);
     
-    for (i=0; i<contours.size(); i++)
-        delete contours[i];
-    contours.resize(0);
-
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     params->materials()->removeAll();
 #endif
     nBranchingPoints = 0;
     nContourPoints = 0;
-    contourFlag = 0;
 }
 
 void Surface::removePoint(int patch,int point)
@@ -206,83 +193,6 @@ void Surface::createAllEdges(int  createEdgeIds)
         fprintf(stderr,"number of edges: %ld\n",edges.size());
 }
 
-
-void Surface::findContours()
-{
-    std::vector<unsigned char> edgeUsed(edges.size());
-    edgeUsed.assign(edgeUsed.size(),0);
-
-    int i;
-    std::vector<int> leftPoints;
-    std::vector<int> rightPoints;
-
-    // Clear old contours:
-    for (i=0 ; i<contours.size() ; i++)
-        if (contours[i])
-            delete contours[i];
-    contours.resize(0);
-    
-    for (i=0; i<edgeUsed.size(); i++) {
-        if (!edgeUsed[i] && pointType[edges[i].from]!=INNER) {
-            leftPoints.resize(0);
-            rightPoints.resize(0);
-            edgeUsed[i]=1;
-            int currEdge=i;
-            /* Go to the left, until a branching point is found, 
-               or the starting edge is met again */
-            int currPoint;
-            unsigned char closedContour = 0;
-            for (currPoint=edges[currEdge].from; 
-                 pointType[currPoint]!=BRANCHING && !closedContour;) {
-                leftPoints.push_back(currPoint);
-                assert(edgesPerPoint[currPoint].size()==2);
-                int e=edgesPerPoint[currPoint][0];
-                if (e==currEdge)
-                    e=edgesPerPoint[currPoint][1];
-                currEdge=e;
-                if (edgeUsed[e])
-                    closedContour = 1;
-                edgeUsed[e]=1;
-                if (currPoint!=edges[e].from)
-                    currPoint=edges[e].from;
-                else
-                    currPoint=edges[e].to;
-            }
-            leftPoints.push_back(currPoint);
-
-            if (!closedContour) {
-                // Now to the right.
-                currEdge=i;
-                for (currPoint=edges[currEdge].to;
-                     pointType[currPoint]!=BRANCHING; ) {       
-                    rightPoints.push_back(currPoint);
-                    int e=edgesPerPoint[currPoint][0];
-                    if (e==currEdge)
-                        e=edgesPerPoint[currPoint][1];
-                    currEdge=e;
-                    assert(edgeUsed[e]==0);     
-                    edgeUsed[e]=1;
-                    if (currPoint!=edges[e].from)
-                        currPoint=edges[e].from;
-                    else
-                        currPoint=edges[e].to;
-                }
-                rightPoints.push_back(currPoint);
-            }
-            Contour *contour=new Contour;
-            //contour->points.remax(leftPoints.size()+rightPoints.size()+2);
-            contour->points.reserve(leftPoints.size()+rightPoints.size()+2);
-            int j;
-            for (j=leftPoints.size()-1 ; j>=0 ; j--) {
-                contour->points.push_back(leftPoints[j]);
-            }
-            for (j=0 ; j<rightPoints.size() ; j++) {
-                contour->points.push_back(rightPoints[j]);
-            }
-        }
-    }
-    //sortContoursOfPatches();
-}
 
 int Surface::getEdgeOfTriangle(int triangleIdx,int which)
 {
@@ -753,175 +663,6 @@ void Surface::findBranchingPoints()
     }
 }
 
-void Surface::renumberPoints()
-{
-    std::vector<int> newIdx(points.size());
-    int i, cnt=0;
-
-    for (i=0; i<points.size(); i++) {
-        if (pointType[i]==BRANCHING)
-            newIdx[i] = cnt++;
-    }
-    nBranchingPoints = cnt;
-
-    for (i=0; i<points.size(); i++) {
-        if (pointType[i]==CONTOUR)
-            newIdx[i] = cnt++;
-    }
-    nContourPoints = cnt-nBranchingPoints;
-
-    int notInnerPoints = cnt;
-    for (i=0; i<points.size(); i++) {
-        if (pointType[i]==INNER)
-            newIdx[i] = cnt++;
-    }
-
-    std::vector<StaticVector<float,3> > tmpPointList(notInnerPoints);
-    std::vector<std::vector<int> > tmpEdgeList;
-    
-    int hasEdgesPerPoint = (edgesPerPoint.size()==points.size());
-    if (hasEdgesPerPoint)
-        tmpEdgeList.resize(notInnerPoints);
-    
-    // Copy branching points and contour points into temporary array
-    for (i=0; i<points.size(); i++) {
-        if (pointType[i]==BRANCHING ||
-            pointType[i]==CONTOUR)
-        {
-            tmpPointList[newIdx[i]] = points[i];
-            if (hasEdgesPerPoint) {
-                memmove(&tmpEdgeList[newIdx[i]], &edgesPerPoint[i],
-                        sizeof(edgesPerPoint[i]));
-                memset(&edgesPerPoint[i], 0, sizeof(edgesPerPoint[i]));
-            }
-        }
-        else if (hasEdgesPerPoint && pointType[i]==UNUSED)
-            edgesPerPoint[i].resize(0,0);
-    }
-
-    // Total number of new points (number of old points minus unused ones)
-    int newNPoints = cnt;
-    cnt = 0;
-
-    if (newNPoints != points.size()) {
-        for (i=0; i<points.size(); i++) {
-            if (pointType[i]==INNER) {
-                points[cnt] = points[i];
-                if (hasEdgesPerPoint && cnt!=i) {
-                    memmove(&edgesPerPoint[cnt], &edgesPerPoint[i],
-                        sizeof(edgesPerPoint[i]));
-                    memset(&edgesPerPoint[i], 0, sizeof(edgesPerPoint[i]));
-                }
-                cnt++;
-            }
-        }
-        memmove(&points[notInnerPoints], &points[0],
-            (newNPoints-notInnerPoints)*sizeof(points[0]));
-        if (hasEdgesPerPoint) {
-            memmove(&edgesPerPoint[notInnerPoints], &edgesPerPoint[0],
-                (newNPoints-notInnerPoints)*sizeof(edgesPerPoint[0]));
-            memset(&edgesPerPoint[0], 0,
-                notInnerPoints*sizeof(edgesPerPoint[0]));
-        }
-    }
-    else { 
-        for (i=points.size()-1; i>=0 ; i--) {
-            if (pointType[i] == INNER) {
-                points[newIdx[i]] = points[i];
-                if (hasEdgesPerPoint && newIdx[i]!=i) {
-                    memmove(&edgesPerPoint[newIdx[i]], &edgesPerPoint[i],
-                        sizeof(edgesPerPoint[i]));
-                    memset(&edgesPerPoint[i], 0, sizeof(edgesPerPoint[i]));
-                }
-            }
-        }
-    }
-    
-    if (notInnerPoints)
-        memmove(&points[0], &tmpPointList[0], notInnerPoints*sizeof(StaticVector<float,3>));
-    if (hasEdgesPerPoint && notInnerPoints) {
-        memmove(&edgesPerPoint[0], &tmpEdgeList[0],
-            notInnerPoints*sizeof(tmpEdgeList[0]));
-        memset(&tmpEdgeList[0], 0, notInnerPoints*sizeof(tmpEdgeList[0]));
-        edgesPerPoint.resize(newNPoints);
-    }
-
-    int oldNum = points.size();
-    points.resize(newNPoints);
-    pointType.resize(newNPoints);
-
-    for (i=0; i<nBranchingPoints; i++)
-        pointType[i] = BRANCHING;
-
-    for ( ; i<nBranchingPoints+nContourPoints; i++)
-        pointType[i] = CONTOUR;
-
-    for ( ; i<pointType.size(); i++)
-        pointType[i] = INNER;
-
-    for (i=0; i<triangles.size(); i++) {
-        triangles[i].points[0] = newIdx[triangles[i].points[0]];
-        triangles[i].points[1] = newIdx[triangles[i].points[1]];
-        triangles[i].points[2] = newIdx[triangles[i].points[2]];
-    }
-
-    for (i=0; i<edges.size(); i++) {
-        edges[i].from = newIdx[edges[i].from];
-        edges[i].to = newIdx[edges[i].to];
-    }
-
-    for (i=0; i<contours.size(); i++) {
-        for (int j=0; j<contours[i]->points.size(); j++)
-            contours[i]->points[j]=newIdx[contours[i]->points[j]];
-    }
-
-    if (debug) {
-        printf("Surface::renumber(): %d points before, now %d "
-            "(%d branch, %d contour)\n",
-                oldNum,(int) points.size(), nBranchingPoints, nContourPoints);
-    }
-}
-
-void Surface::clearInnerEdges()
-{
-    clearInnerEdges(1);
-}
-
-void Surface::clearInnerEdges(int renumber)
-{
-    int nEdges = edges.size();
-    int nContourEdges = 0;
-    int i;
-    for (i=0; i<nEdges; i++) {
-        if (edges[i].triangles.size() == 2 &&
-            triangles[edges[i].triangles[0]].patch ==
-            triangles[edges[i].triangles[1]].patch) {
-            edges[i].triangles.resize(0,0);
-        } else {
-            if (nContourEdges != i) {
-                memmove(&edges[nContourEdges], &edges[i], sizeof(edges[i]));
-                memset(&edges[i], 0, sizeof(edges[i]));
-            }
-            nContourEdges++;
-        }
-    }    
-    edges.resize(nContourEdges);
-    
-    if (renumber) {
-        edgesPerPoint.resize(0);
-        renumberPoints(); 
-        edgesPerPoint.resize(nBranchingPoints+nContourPoints);
-    }
-    else {
-        for (i=0; i<points.size(); i++)
-            edgesPerPoint[i].resize(0,0);
-    }
-
-    for (i=0; i<edges.size(); i++) {
-        edgesPerPoint[edges[i].from].push_back(i);
-        edgesPerPoint[edges[i].to].push_back(i);
-    }
-}
 
 void Surface::removeEmptyPatches()
 {
@@ -947,240 +688,17 @@ void Surface::removeEmptyPatches()
     }
 }
 
-void Surface::fitPlane(const std::vector<int>& pidx,float plane[4])
-{
-    int i;
-    float refpt[3]={0,0,0};
-    float normal[3]={0,0,0};
-    float *u, *v, len;
-
-    /* compute the polygon normal and a reference point on
-       the plane. Note that the actual reference point is
-       refpt / nverts
-    */
-    for(i = 0; i < pidx.size(); i++) {
-        u = &points[pidx[i]][0];
-        v = &points[pidx[(i + 1) % pidx.size()]][0];
-        normal[0] += (u[1] - v[1]) * (u[2] + v[2]);
-        normal[1] += (u[2] - v[2]) * (u[0] + v[0]);
-        normal[2] += (u[0] - v[0]) * (u[1] + v[1]);
-        refpt[0]+=u[0];
-        refpt[1]+=u[1];
-        refpt[2]+=u[2];
-    }
-    /* normalize the polygon normal to obtain the first
-       three coefficients of the plane equation
-    */
-    len = sqrt(normal[0]*normal[0]+normal[1]*normal[1]+normal[2]+normal[2]);
-    plane[0] = normal[0] / len;
-    plane[1] = normal[1] / len;
-    plane[2] = normal[2] / len;
-    /* compute the last coefficient of the plane equation */
-    len *= pidx.size();
-    plane[3]=-( refpt[0]*normal[0]+refpt[1]*normal[1]+refpt[2]*normal[2])/len;
-}
-
-int Surface::tile(const std::vector<int>& v)
-{
-    assert(v.size()>=3);
-#if 0
-    int i;
-
-    triangles.remax(triangles.size()+v.size()-2);
-    std::vector<int> v2(v);
-    int np=v2.size();
-    i=1;
-    while (np>3) {
-        i=(i+1) % np;
-        SbVec3f p1((float *) &points[v2[i]]); 
-        SbVec3f p2((float *) &points[v2[(i+1)%np]]); 
-        SbVec3f p3((float *) &points[v2[(i+2)%np]]);
-        SbVec3f p4((float *) &points[v2[(i+3)%np]]);
-        SbVec3f n123=(p2-p1).cross(p3-p1);
-        SbVec3f n234=(p3-p2).cross(p4-p2);
-        SbVec3f n341=(p4-p3).cross(p1-p3);
-        SbVec3f n412=(p1-p4).cross(p2-p4);
-        n123.normalize(); 
-        n234.normalize();
-        n341.normalize(); 
-        n412.normalize();
-        float a1 = n123.dot(n341);
-        float a2 = n234.dot(n412);
-        Triangle tri;
-        if (a1<a2) {
-            tri.points[0]=v2[i]; 
-            tri.points[1]=v2[(i+1)%np]; 
-            tri.points[2]=v2[(i+2)%np];
-            triangles.append(tri);
-            
-            tri.points[0]=v2[(i+2)%np]; 
-            tri.points[1]=v2[(i+3)%np]; 
-            tri.points[2]=v2[i];
-            triangles.append(tri);          
-        } else {
-            tri.points[0]=v2[(i+1)%np]; 
-            tri.points[1]=v2[(i+2)%np]; 
-            tri.points[2]=v2[(i+3)%np];
-            triangles.append(tri);
-            
-            tri.points[0]=v2[(i+3)%np]; 
-            tri.points[1]=v2[i]; 
-            tri.points[2]=v2[(i+1)%np];
-            triangles.append(tri);          
-        }
-        if ((i+2)%np > (i+1)%np) {
-            v2.remove((i+2)%np);
-            v2.remove((i+1)%np);
-        } else {
-            v2.remove((i+1)%np);
-            v2.remove((i+2)%np);
-        }
-        np-=2;
-    }
-    
-    if (np>2) {
-        Triangle tri;
-        tri.points[0]=v2[0]; 
-        tri.points[1]=v2[1]; 
-        tri.points[2]=v2[2];
-        triangles.append(tri);
-    }
-    return(v.size()-2);
-#endif
-}
-
-int Surface::tileCenter(const std::vector<int>& v)
-{
-    std::vector<int> v2(v);
-    StaticVector<float,3> center(0,0,0);
-    
-    int np = v2.size();
-    for (int k=0; k<np; k++)
-        center += points[v[k]];
-
-    for (int i=0; i<3; i++)
-        center[i] /= np;
-    
-    if (np>4) {
-        points.push_back(center);
-        int p = points.size()-1;
-        
-        for (int j=0; j<np; j++) {          
-            Triangle tri;
-            tri.points[0] = p; 
-            tri.points[1] = v2[j]; 
-            tri.points[2] = v2[(j+1)%np];
-            triangles.push_back(tri);
-        }
-        return np;
-    }  
-    
-    int i=1;
-    while (np>3) {
-        i = (i+1) % np;
-        StaticVector<float,3> p1 = points[v2[i]]; 
-        StaticVector<float,3> p2 = points[v2[(i+1)%np]]; 
-        StaticVector<float,3> p3 = points[v2[(i+2)%np]];
-        StaticVector<float,3> p4 = points[v2[(i+3)%np]];
-        StaticVector<float,3> n123=(p2-p1).cross(p3-p1);
-        StaticVector<float,3> n234=(p3-p2).cross(p4-p2);
-        StaticVector<float,3> n341=(p4-p3).cross(p1-p3);
-        StaticVector<float,3> n412=(p1-p4).cross(p2-p4);
-        n123.normalize(); 
-        n234.normalize();
-        n341.normalize(); 
-        n412.normalize();
-        float a1 = n123.dot(n341);
-        float a2 = n234.dot(n412);
-        Triangle tri;
-        if (a1<a2) {
-            tri.points[0]=v2[i]; 
-            tri.points[1]=v2[(i+1)%np]; 
-            tri.points[2]=v2[(i+2)%np];
-            triangles.push_back(tri);
-            
-            tri.points[0]=v2[(i+2)%np]; 
-            tri.points[1]=v2[(i+3)%np]; 
-            tri.points[2]=v2[i];
-            triangles.push_back(tri);          
-        } else {
-            tri.points[0]=v2[(i+1)%np]; 
-            tri.points[1]=v2[(i+2)%np]; 
-            tri.points[2]=v2[(i+3)%np];
-            triangles.push_back(tri);
-            
-            tri.points[0]=v2[(i+3)%np]; 
-            tri.points[1]=v2[i]; 
-            tri.points[2]=v2[(i+1)%np];
-            triangles.push_back(tri);          
-        }
-        if ((i+2)%np > (i+1)%np) {
-            v2.erase(v2.begin() + (i+2)%np);
-            v2.erase(v2.begin() + (i+1)%np);
-        } else {
-            v2.erase(v2.begin() + (i+1)%np);
-            v2.erase(v2.begin() + (i+2)%np);
-        }
-        np-=2;
-    }
-    
-    if (np>2) {
-        Triangle tri;
-        tri.points[0]=v2[0]; 
-        tri.points[1]=v2[1]; 
-        tri.points[2]=v2[2];
-        triangles.push_back(tri);
-    }
-    return v.size()-2;
-}
-
-int Surface::tileFan(const std::vector<int>& v, int anchor)
-{
-    int nPoints = v.size();
-    int nTriangles = v.size()-2;
-
-    for (int i=0; i<nTriangles; i++) {
-        Triangle tri;
-        tri.points[0] = v[anchor]; 
-        tri.points[1] = v[(anchor+i+1)%nPoints]; 
-        tri.points[2] = v[(anchor+i+2)%nPoints];
-        triangles.push_back(tri);
-    }  
-    
-    return nTriangles;
-}
-
 void Surface::recompute()
 {
-    //theWorkArea->startWorkingNoStop("computing surface connectivity");
-
-    // theWorkArea->startWorkingNoStop("creating edges");
     createAllEdges();
 
-    // theWorkArea->setProgressInfo("creating connectivity");
     createConnectivity();
 
-    // theWorkArea->setProgressInfo("finding branching points");
     findBranchingPoints();
 
-    // theWorkArea->setProgressInfo("clearing inner edges");
-    clearInnerEdges();
-
-    // theWorkArea->setProgressInfo("finding contours");
-    findContours();
-
-    // theWorkArea->setProgressInfo("compute orientation of contours");
-    computeOrientationOfContours();
-
-    // theWorkArea->setProgressInfo("find branching points of patches");
     findBranchingPointsOfPatches();
 
-    // theWorkArea->setProgressInfo("removing empty patches");
     removeEmptyPatches();
-
-    //theWorkArea->stopWorking();
-
-    contourFlag = 1;
 }
 
 void Surface::cleanup()
@@ -1192,23 +710,14 @@ void Surface::cleanup()
     pointType.resize(0);
 
     n = patches.size();
-    for (i=0; i<n; i++) {
+    for (i=0; i<n; i++)
         patches[i]->segments.resize(0);
-    }
-
-    contourFlag = 0;
-}
-
-int Surface::hasContours()
-{
-    return contourFlag;
 }
 
 void Surface::copyData(const Surface &source)
 {
     int i, size;
 
-    contourFlag = source.contourFlag;
     lastTriangleIdx = source.lastTriangleIdx;
     lastWhich = source.lastWhich;
     lastGlobal = source.lastGlobal;
@@ -1333,15 +842,8 @@ int Surface::writeSurfaceData(FILE *out, int ascii)
             "NBranchingPoints %d\n"
             "NVerticesOnCurves %d\n"
             "BoundaryCurves %d\n",
-            nBranchingPoints,nContourPoints,contours.size());
+            nBranchingPoints,nContourPoints,0);
 
-    for ( i=0 ; i<contours.size() && !err; i++) {
-        fprintf(out,"{\n  Vertices %d\n  ",contours[i]->points.size());
-        for (int j=0 ; j<contours[i]->points.size() ; j++)
-            fprintf(out,"  %d",contours[i]->points[j]+1);
-        fprintf(out,"\n}\n");
-    }
-    
     fprintf(out,"Patches %d\n",patches.size());
     HxParamBundle* materials = params->materials();
     // don't write obsolete triangles !!!
@@ -1461,37 +963,6 @@ int Surface::removeUnusedPoints()
     if (normalBinding==PER_VERTEX)
         normals.resize(0);
 
-    /**********************************************************
-    Remove data values of connected fields as well
-    **********************************************************/
-
-    // First, try to locate the HxSurface in the object pool.
-    // Of course, it would be much better if removeUnusedPoints
-    // would be directly a member of HxSurface instead of Surface
-#if 0
-    for (int iObject=0; iObject<theObjectPool->nodeList.size(); iObject++) {
-        HxSurface* surface = dynamic_cast<HxSurface*>(theObjectPool->nodeList[iObject]);
-        if (surface && (&surface->parameters == params)) {
-            for (int iField=0; iField<surface->downStreamConnections.size(); iField++) {
-                HxSurfaceField* field = dynamic_cast<HxSurfaceField*>(
-                    surface->downStreamConnections[iField]->owner());
-                if (field && field->getEncoding()==HxSurfaceField::OnNodes) {
-                    int nDataVar = field->nDataVar();
-                    int n = field->nDataElements();
-                    if (nPoints<n) n = nPoints;
-                    float* src = field->dataPtr();
-                    float* dst = field->dataPtr();
-                    for (int i=0; i<n; i++, src += nDataVar) {
-                        if (newIndex[i]>=0) {
-                            for (int m=0; m<nDataVar; m++)
-                                *dst++ = src[m];
-                        }
-                    }
-                }
-            }
-        }
-    }
-#endif
     return nPoints-k;
 }
 
