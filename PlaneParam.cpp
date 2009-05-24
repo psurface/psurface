@@ -1,6 +1,6 @@
 #include <psurface/PlaneParam.h>
 #include <psurface/StaticMatrix.h>
-#include <psurface/McSparseMatrix.h>
+#include <psurface/SparseMatrix.h>
 
 #include <limits>
 
@@ -403,7 +403,7 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
     int i;
     
     // compute lambdas
-    McSparseMatrix<float, false> lambda_ij(nodes.size());
+    SparseMatrix<float> lambda_ij(nodes.size());
 
     computeFloaterLambdas(lambda_ij, nodePositions);
     
@@ -447,7 +447,7 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
             
 ////////////////////////////////////////////////////////
 // computes lambda_ij for the Floater-Parametrization
-void PlaneParam::computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij, 
+void PlaneParam::computeFloaterLambdas(SparseMatrix<float>& lambda_ij, 
                                        const std::vector<StaticVector<float,3> >& nodePositions)
 {
     int i, k, l;

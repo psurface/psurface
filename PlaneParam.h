@@ -14,7 +14,8 @@
 
 #include "psurfaceAPI.h"
 
-template<class T, bool SYMMETRIC> class McSparseMatrix;
+template<class T> class SparseMatrix;
+
 class Parametrization;
 
 /** The parametrization of a surface in space.  It is actually a planar graph
@@ -454,7 +455,7 @@ public:
 
     void removeExtraEdges();
     
-    void computeFloaterLambdas(McSparseMatrix<float, false>& lambda_ij,
+    void computeFloaterLambdas(SparseMatrix<float>& lambda_ij,
                                const std::vector<StaticVector<float,3> >& nodePositions);
 
     bool polarMap(const StaticVector<float,3>& center, const std::vector<StaticVector<float,3> > &threeDStarVertices, 

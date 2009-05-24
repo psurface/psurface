@@ -11,8 +11,6 @@ mkdir libpsurface/lib
 
 cp TargetSurface.h.standalone                         libpsurface/include/TargetSurface.h
 
-cp McSparseMatrix.h         libpsurface/include/psurface
-
 cp psurface.h               libpsurface/include/psurface
 cp psurface.h               libpsurface/include/
 cp CircularPatch.h          libpsurface/include/psurface
@@ -32,6 +30,7 @@ cp MultiDimOctree.h         libpsurface/include/psurface
 cp PointIntersectionFunctor.h  libpsurface/include/psurface
 cp StaticVector.h           libpsurface/include/psurface
 cp StaticMatrix.h           libpsurface/include/psurface
+cp SparseMatrix.h           libpsurface/include/psurface
 cp psurfaceAPI.h            libpsurface/include/psurface
 
 
