@@ -29,7 +29,7 @@ class AmiraMesh;
 #endif
 
 /** The parametrization of an arbitrary surface over a simple base grid */
-class PSURFACE_API Parametrization : public McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>{
+class Parametrization : public McSurfaceBase<DomainVertex, DomainEdge, DomainTriangle>{
 
 public:
 

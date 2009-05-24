@@ -10,7 +10,7 @@
 
 class McTriangle;
 class McVertex;
-template<class VertexType>  class McEdge;
+class McEdge;
 
 ///////////////////////////////////////////////////////////////
 /** This is the base class for vertices in a McSurfaceBase.  The template argument
@@ -61,7 +61,7 @@ public:
     @see McPointerSurface, McVertex, McTriangle
 */
 ///////////////////////////////////////////////////////////////
-template<class VertexType>
+
 class McEdge
 {
 public:

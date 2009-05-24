@@ -6,7 +6,7 @@
 #include <psurface/SurfacePath.h>
 
 
-class PSURFACE_API SurfacePathSet : public std::vector<SurfacePath> {
+class SurfacePathSet : public std::vector<SurfacePath> {
 
 public:
 

@@ -4,7 +4,6 @@
 #include <psurface/Domains.h>
 #include <psurface/PlaneParam.h>
 #include <psurface/Parametrization.h>
-#include "psurfaceAPI.h"
 
 class DomainTriangle;
 class DomainVertex;
@@ -13,7 +12,7 @@ class CircularPatch;
 
 
 /** A polygon carrying a plane triangulation */
-class PSURFACE_API DomainPolygon : public PlaneParam{
+class DomainPolygon : public PlaneParam{
 public:
     /// standard constructor
     DomainPolygon(Parametrization* _par) : par(_par) {};
