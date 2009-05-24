@@ -93,7 +93,7 @@ public:
 
     ///
     bool isConnectedToTriangle(int tri) const {
-        for (int i=0; i<triangles.size(); i++)
+        for (size_t i=0; i<triangles.size(); i++)
             if (triangles[i]==tri)
                 return true;
 
@@ -102,7 +102,7 @@ public:
 
     ///
     bool removeReferenceTo(int tri){
-        for(int i=0; i<triangles.size(); i++)
+        for(size_t i=0; i<triangles.size(); i++)
             if (triangles[i] == tri){
                 triangles.erase(triangles.begin() + i);
                 return true;
@@ -113,7 +113,7 @@ public:
 
     ///
     bool replaceReferenceTo(int a, int b){
-        for(int i=0; i<triangles.size(); i++)
+        for(size_t i=0; i<triangles.size(); i++)
             if (triangles[i] == a){
                 triangles[i] = b;
                 return true;
