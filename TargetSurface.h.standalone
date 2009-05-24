@@ -48,8 +48,6 @@ class Surface {
     // ==================== Subclass declaration ====================
 
     /**@name Subclass declaration */ //@{
-    /// Point type. Stored in separate array.
-    enum { INNER=0, CONTOUR, BRANCHING, DEADEND, UNUSED };
     
     /// This class represents a surface triangle.
     class Triangle {
@@ -142,48 +140,20 @@ class Surface {
         Patch(const Patch& other);
     };
 
-    /// This class represents a surface edge.
-    class Edge {
-      public:
-        /// Index of the first point of the edge.
-        int from;
-
-        /// Index of the second point of the edge.
-        int to;
-
-        /// There are 2 triangles per edge, except for boundary edges.
-        std::vector<int> triangles;
-
-        ///
-        Edge() { from=to=0; };
-    };
-
     //@}
 
     // ======================= Member variables =====================
 
     /**@name Member variables */ //@{
 
-    /// Branching points have indices [0...nBranchingPoints-1].
-    int nBranchingPoints;
-
-    /// Contour points start with index @c nBranchingPoints.
-    int nContourPoints;
-
     /// Array of all surface points (required).
     std::vector<StaticVector<float,3> > points;
-
-    /// Array of point types (full surface only).
-    std::vector<unsigned char> pointType;
 
     /// Array of all surface patches (at least 1 patch is required).
     std::vector<Patch*> patches;
 
     /// Array of all surface triangles (required).
     std::vector<Triangle> triangles;       
-
-    /// All edges of the surface (temporary data).
-    std::vector<Edge> edges;    
 
     /// Stores for each point all edges incident at that point (temporary).
     std::vector< std::vector<int> > edgesPerPoint;
@@ -201,12 +171,6 @@ class Surface {
         @c outerRegion refer to this structure, e.g. @c materials[0]. */
     HxParamBundle* params;
 #endif
-
-    std::vector<StaticVector<float,3> > normals;
-
-    enum NormalBinding { PER_TRIANGLE=0, PER_VERTEX, PER_VERTEX_INDEXED };
-
-    NormalBinding normalBinding;
 
     //@}
 
@@ -238,40 +202,15 @@ class Surface {
     /// Remove all triangles with patchid<0, returns number of removed tris.
     int removeObsoleteTriangles();
 
-    /** Remove coplanar triangles. The methods uses an iterative
-        reduction scheme. It stops when no more coplanar triangles
-        are found after an iteration or if the maximum number of
-        iterations is reached (@c maxIter). If checkQuads is set
-        also coplanar intersecting quad configurations are removed.
-        The method returns the number of removed triangles. */
-    int removeCoplanarTriangles(int nMaxIter=4, int checkQuads=0);
-
     /// Removes all points not referenced by any triangle.
     int removeUnusedPoints();
 
-    /** Simplify almost planar 3-star and 4-star configurations.
-        The number of removed triangles is returned. Removed triangles
-        are not actually deleted but only marked as obsolete. */
-    int simplify34();
-    
     /** Discards the contour information. This method should be called after
         the surface topology has been changed. */
     void cleanup();
 
     /// Returns bounding box of point coordinates.
     void getBoundingBox(float box[6]) const;
-
-    /// Returns center of the surface (= average of all point coordinates).
-    void getCenter(float center[3]);
-
-    /// Modifies the coordinates of the surface points.
-    void setCenter(const float center[3]);
-
-    /// Copies points, triangles, and patches from other surface into this.
-    void add(const Surface* other);
-
-    /// Read the surface from a file.
-    int read(const char *);
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     /// Write surface + header to a file.
@@ -281,30 +220,6 @@ class Surface {
     int writeSurfaceData(FILE *out, int ascii=0);
 #endif
 
-    ///
-    void computeNormalsPerTriangle();
-
-    ///
-    void computeNormalsPerVertexIndexed();
-
-    ///
-    void computeNormalsPerVertex(float creaseAngle);
-
-    /** Refine surface. If mode==0, every edge is divided in two and
-    each triangle into 4. If mode==1 an inner point is inserted into each
-    triangle, dividing it into 3 triangles. */
-    void refine(int mode); 
-
-    /** Makes orientation of triangles in patch consistent, by
-        inverting some if necessary. You have to call @c createConnectivity
-        before.
-    @return Number of inverted triangles*/
-    int fixOrientation(int patch);
-
-    /** Invert the triangles of patch @c patch or all triangles, if
-        #patch==-1.*/
-    void invertTriangles(int patch=-1);
-    
     //@}
 
     // ====================== Internal methods ======================
@@ -314,39 +229,9 @@ class Surface {
     /** Initializes the array @c trianglePerPoint. */
     void computeTrianglesPerPoint();
 
-    /** Fills the edges and edgesPerPoint arrays
-        optional: when @param createEdgeIds is set  the edgesPerTriangle array.is filled
-        otherwise the edgesPerTriangle array is resized to zero */
-    void createAllEdges(int  createEdgeIds = 0);
-
-    /** Fills the neighbour array for each triangle in patch. This method
-      needs the arrays @c edges and @c edgesPerPoint, which can be generated
-      by calling @c createAllEdges(). If not all triangles in this patch
-      are connected, the unconnected ones are put into a new patch.
-      @c createConnectivity() for this new patch is called automatically.*/
-    void createConnectivity(int patch);
-    
-    /** Fills the neighbour array for  all triangles.
-      @see #createConnectivity */
-    void createConnectivity();
-    
     /** Fills the neighbour array for  all triangles without 
 	decomposing patches. */
     void createNeighbours();
-    
-    /** This methods initializes the @c type field in all
-      point-structures with the correct value. This method relies on
-      the arrays @c edges and @c edgesPerPoint, which can be generated by
-      calling @c createAllEdges().*/
-    void findBranchingPoints();
-
-    void deleteDeadEnds();
-
-    /// sort triangle list according to patch order
-    void sortTriangles();
-
-    ///
-    void findBranchingPointsOfPatches();
     
     ///
     void removePoint(int patch,int point);
@@ -360,11 +245,6 @@ class Surface {
     int removeDegenerateTriangles();
 
     ///
-    int isInnerPoint(int idx) {
-        return(idx>=nBranchingPoints+nContourPoints);
-    }
-
-    ///
     int getEdgeOfTriangle(int triangleIdx,int which);
 
     ///
@@ -373,12 +253,6 @@ class Surface {
     ///
     int getNextNeighbourTriangle();
         
-    int debug;
-
-    int operator==(const Surface& other) const;
-
-    virtual void print();
-
     /// Copies the whole data set
     void copyData(const Surface &source);
 
