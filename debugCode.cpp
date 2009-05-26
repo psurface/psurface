@@ -141,11 +141,11 @@ void Parametrization::checkConsistency(const char* where) const
     int i, j;
     // first checks whether all triangles are consistent
     // sorts out invalid triangles
-    McBitfield isInvalid(triangleArray.size());
-    isInvalid.unsetAll();
+    std::vector<bool> isInvalid(triangleArray.size());
+    std::fill(isInvalid.begin(), isInvalid.end(), false);
 
     for (i=0; i<freeTriangleStack.size(); i++)
-        isInvalid.set(freeTriangleStack[i]);
+        isInvalid[freeTriangleStack[i]] = true;
 
     for (i=0; i<getNumTriangles(); i++)
         if (!isInvalid[i]){
