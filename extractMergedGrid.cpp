@@ -177,8 +177,6 @@ bool ContactToolBox::isCompletelyCovered(Parametrization* cPar, int tri, const D
             cT->nodes[i].isGHOST_NODE())
             nCorners++;
 
-    // debug count
-    static int count = 0;
     // Count number of parametrization triangles
     PlaneParam::TriangleIterator cPT;
     int nTris = 0;
@@ -190,11 +188,6 @@ bool ContactToolBox::isCompletelyCovered(Parametrization* cPar, int tri, const D
             nTris++;
     }
 
-    count++;
-
-    //     printf("nCorners; %d   True number of triangles: %d,    expected: %d\n",
-    //            nCorners, nTris, 1 - cT->nodes.size() + cT->getNumEdges());
-    
     // compare with expected number of triangles (by Euler's formula)
     return nCorners==3 && (nTris == 1 - cT->nodes.size() + cT->getNumEdges());
 }
