@@ -3,7 +3,7 @@
 
 #include <psurface/StaticVector.h>
 
-/** \brief Functor class needed to insert McVec3f objects into a MultiDimOctree
+/** \brief Functor class needed to insert StaticVector<float,3> objects into a MultiDimOctree
  */
 struct PointIntersectionFunctor
 {
