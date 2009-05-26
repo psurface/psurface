@@ -75,8 +75,6 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
     }
     
-//     for (i=0; i<normals.size(); i++)
-//         printf("normal %d:  %g %g %g\n", i, normals[i][0], normals[i][1], normals[i][2]);
     // /////////////////////////////////////////////////////////////
     //   Compute the vertex normals of the target side
     // /////////////////////////////////////////////////////////////
@@ -115,17 +113,13 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
     }
     
-    for (i=0; i<contactPatch.vertices.size(); i++) {
+    for (i=0; i<contactPatch.vertices.size(); i++)
         if (hasTargetNormal[contactPatch.vertices[i]])
             targetNormals[contactPatch.vertices[i]].normalize();
-//             printf("targetNormal %d:  %g %g %g\n", i, 
-//                    targetNormals[contactPatch.vertices[i]][0],
-//                    targetNormals[contactPatch.vertices[i]][1],
-//                    targetNormals[contactPatch.vertices[i]][2]);
-    }
 
-    // //////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////////////////
     // Insert the vertices of the contact boundary as nodes on the intermediate manifold
+    // /////////////////////////////////////////////////////////////////////////////////////
 
     // This array stores the preimages of each vertex in the target surface
     std::vector<NodeBundle> projectedTo(surf->points.size());
@@ -170,22 +164,11 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                                 surf->points[contactPatch.vertices[i]][1] - base[1],
                                 surf->points[contactPatch.vertices[i]][2] - base[2]);
                 
-//                 printf("------------------\n");
-//                 printf("base:     %g %g %g\n", base[0], base[1], base[2]);
-//                 printf("target:   %g %g %g\n", surf->points[contactPatch.vertices[i]][0],
-//                        surf->points[contactPatch.vertices[i]][1],
-//                        surf->points[contactPatch.vertices[i]][2]);
-//                 printf("normal: %g %g %g\n", targetNormals[contactPatch.vertices[i]][0],
-//                        targetNormals[contactPatch.vertices[i]][1],
-//                        targetNormals[contactPatch.vertices[i]][2]);
-//                 printf("scalar product %g\n", segment.dot(targetNormals[contactPatch.vertices[i]]));
                 double distance = segment.length() * segment.length();
 
                 if (segment.dot(targetNormals[contactPatch.vertices[i]]) > -eps
                     && segment.dot(baseNormal) > 0
                     && distance > 1e-10) {
-                    //printf("aborting %g %g %g\n", segment.dot(targetNormals[contactPatch.vertices[i]]), 
-                    //       segment.dot(baseNormal), distance);
                     continue;
                 }
 
@@ -204,8 +187,6 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
         }
         
-        //printf("vertex: %d, bestTri: %d,  bestDPos %g %g\n", i, bestTri, bestDPos[0], bestDPos[1]);
-
         if (bestTri != -1) {
 
             // determine which type of node to add
@@ -254,15 +235,13 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
                 }
             }
                     
-            //printf("newType: %d\n", newType);
-
             StaticVector<float,2> bestDPosFloat(bestDPos[0], bestDPos[1]);
 
             if (newType==Node::TOUCHING_NODE) {
 
                 // find the other triangle, if there is one
                 int neighboringTri = par->getNeighboringTriangle(bestTri, dir);
-                //printf("dir: %d, bestTri: %d,  neighboringTri: %d\n", dir, bestTri, neighboringTri);
+
                 if (neighboringTri == -1) {
                     NodeIdx newNodeNumber = par->addTouchingNode(bestTri, bestDPosFloat, dir, contactPatch.vertices[i]);
                     projectedTo[contactPatch.vertices[i]].resize(1);
@@ -365,8 +344,6 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
             
             // ...
             if (bestTri != -1) {
-                //printf("Insert ghostNode at (%f %f)\n", bestDPos[0], bestDPos[1]);
-                //insertGhostNodeAtVertex(par, i, reducedContactPatch.triIdx[bestTri], bestDPos);
                 insertGhostNodeAtVertex(par, i, contactPatch.triIdx[bestTri], bestDPos);
                 break;
             }
@@ -374,10 +351,11 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
         }
 
     }
-    //return;
+
     // ////////////////////////////////////////////////////////////
     // Insert the edges
     // ////////////////////////////////////////////////////////////
+
     //for (i=0; i<reducedContactPatch.triIdx.size(); i++) {
     for (i=0; i<contactPatch.triIdx.size(); i++) {
 
@@ -411,13 +389,6 @@ void NormalProjector::insertEdge(Parametrization* par,
                                  int from, int to, 
                                  const std::vector<NodeBundle>& projectedTo)
 {
-    //printf("------------------------------\n");
-    //printf("Entering insertEdge, from = %d, to = %d\n", from, to);
-
-//     Node::NodeType fromType = par->nodes(projectedTo[from][0]).type;
-//     Node::NodeType toType   = par->nodes(projectedTo[to][0]).type;
-//     printf("FromType: %d,   toType: %d\n", fromType, toType);
-
     int enteringEdge=-1;
     NodeBundle curr = projectedTo[from];
 
@@ -450,9 +421,7 @@ void NormalProjector::insertEdge(Parametrization* par,
                 
             case Node::GHOST_NODE:
             case Node::CORNER_NODE:
-                //printf("** corner\n");
                 insertEdgeFromCornerNode(par, normals, from, to, lambda, projectedTo, curr, enteringEdge);
-                //printf("-- corner\n");
                 break;
                 
             case Node::INTERSECTION_NODE:
@@ -460,9 +429,7 @@ void NormalProjector::insertEdge(Parametrization* par,
                 break;
                 
             case Node::INTERIOR_NODE:
-                //printf("** interior\n");
                 insertEdgeFromInteriorNode(par, normals, from, to, lambda, projectedTo, curr, enteringEdge);
-                //printf("-- interior\n");
                 break;
                 
             }
@@ -484,8 +451,6 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
     int i;
     int cT = curr[0].tri;
 
-    //curr.print();
-
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
     for (i=0; i<3; i++) {
@@ -493,11 +458,10 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
         if (i==enteringEdge)
             continue;
             
-        //printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
         StaticVector<double,3> x;
         int p = par->triangles(curr[0].tri).vertices[i];
         int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
-        //printf("p: %d   q: %d\n", p, q);
+
         const Surface* surf = par->surface;
 
 
@@ -506,14 +470,10 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
 
-//             printf("Intersection found (%f %f)\n", x[0], x[1]);
-//             printf("p: %d, q: %d\n", p, q);
-//             printf("i: %d  entEdge: %d\n", i, enteringEdge);
             const double& newLambda = x[1];
             const double& mu        = x[0];
                 
             if (newLambda < lambda) {
-                //printf("newLambda: %f   lambda: %f\n", newLambda, lambda);
                 throw(std::runtime_error("[FromInteriorNode] Error: the normal projection is not continuous!"));
             }
 
@@ -523,8 +483,8 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
             else if (mu>9.9999)
                 corner = (i+1)%3;
 
-//             printf("corner: %d\n", corner);
             if (corner==-1) {
+
                 // get neighboring triangle
                 int neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
                     
@@ -572,8 +532,6 @@ void NormalProjector::insertEdgeFromInteriorNode(Parametrization* par,
                 enteringEdge = curr[0].tri;
                 par->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(par->triangles(cT), corner));
                 curr = par->getNodeBundleAtVertex(par->triangles(cT).vertices[corner]);
-                
-                //printf("the vertex in question %d\n", cSurf->triangles(cT).vertices[corner]);
             }
             break;
         }
@@ -599,8 +557,6 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
     int i;
     int cTIdx = curr[0].tri;
 
-    //curr.print();
-
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
     //int currentEdge = cT.nodes[curr[0].idx].getDomainEdge();
@@ -611,27 +567,21 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
         if (i==enteringEdge)
             continue;
             
-        //   printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
         StaticVector<double,3> x;
         int p = par->triangles(curr[0].tri).vertices[i];
         int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
-        //printf("p: %d   q: %d\n", p, q);
+
         const Surface* surf = par->surface;
         if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0], 
                                     *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
-//             printf("Intersection found (%f %f)\n", x[0], x[1]);
-//             printf("p: %d, q: %d\n", p, q);
-//             printf("i: %d  entEdge: %d\n", i, enteringEdge);
+
             const double& newLambda = x[1];
             const double& mu        = x[0];
                 
-            if (newLambda < lambda) {
-                //printf("newLambda: %f   lambda: %f\n", newLambda, lambda);
+            if (newLambda < lambda)
                 throw(std::runtime_error("[FromIntersectionNode] Error: the normal projection is not continuous!"));
-                    
-            }
 
             int corner = -1;
             if (mu<0.00001) 
@@ -639,7 +589,6 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
             else if (mu>9.9999)
                 corner = (i+1)%3;
 
-//             printf("corner: %d\n", corner);
             if (corner==-1) {
                 // get neighboring triangle
                 int neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
@@ -687,8 +636,6 @@ void NormalProjector::insertEdgeFromIntersectionNode(Parametrization* par,
                 enteringEdge = curr[0].tri;
                 par->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(par->triangles(cTIdx), corner));
                 curr = par->getNodeBundleAtVertex(par->triangles(cTIdx).vertices[corner]);
-                
-                //printf("the vertex in question %d\n", cSurf->triangles(cT).vertices[corner]);
             }
             break;
         }
@@ -712,12 +659,8 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringTri)
 {
-    //printf("Edge from TouchingNode\n");
     const Surface* surf = par->surface;
 
-//     printf("curr:\n");
-//     curr.print();
-//     printf("enteringEdge: %d\n", enteringEdge);
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
 
@@ -761,7 +704,7 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                     
                     // get neighboring triangle
                     int neighboringTri = par->getNeighboringTriangle(curr[i].tri, j);
-                    //printf("neighboringTri = %d\n", neighboringTri);
+
                     // if no neighboring triangle --> error
                     if (neighboringTri==-1) {
                         
@@ -795,20 +738,16 @@ void NormalProjector::insertEdgeFromTouchingNode(Parametrization* par,
                     enteringTri = e;
                     
                 } else if (corner== ((currentEdge+2)%3)) {
-                    //printf("opp Vertex\n");
+
                     // parameter polyedge leaves BG triangle through the opposite vertex
-                    //cSurf->addParEdge(side, curr[i].tri, curr[i].idx, getCornerNode(cT, corner));
                     par->triangles(curr[i].tri).addEdge(curr[i].idx, getCornerNode(cT, corner));
                     enteringTri = curr[i].tri;
                     curr = par->getNodeBundleAtVertex(cT.vertices[corner]);
 
                 } else {
                     // parameter polyedge leaves BG triangle through an adjacent vertex
-                    //printf("adj vertex\n");
                     NodeBundle target = par->getNodeBundleAtVertex(cT.vertices[corner]);
-                    //target.print();
                     for (int k=0; k<curr.size(); k++)
-                        //cSurf->addParEdge(side, curr[k].tri, curr[k].idx, target.triToIdx(curr[k].tri));
                         par->triangles(curr[k].tri).addEdge(curr[k].idx, target.triToIdx(curr[k].tri));
 
                     curr = target;
@@ -835,23 +774,10 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
 {
-    int i;
-
-//     printf("Edge from CornerNode\n");
-//      printf("enteringTri: %d\n", enteringEdge);
-//      printf("curr:\n");
-//      curr.print();
-//      printf("++++++++++\n");
-
     const Surface* surf = par->surface;
 
-//     printf("from:\n");
-//     projectedTo[from].print();
-//     printf("to:\n");
-//     projectedTo[to].print();
-    
     // The other end of the edge is *not* on this triangle
-    for (i=0; i<curr.size(); i++) {
+    for (int i=0; i<curr.size(); i++) {
         
         int cT = curr[i].tri;
 
@@ -861,18 +787,16 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
 
         int thisCorner = par->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
-        //printf("Testing Triangle %d\n", cT);
+
         StaticVector<double,3> x;
         int p = par->triangles(cT).vertices[(thisCorner+1)%3];
         int q = par->triangles(cT).vertices[(thisCorner+2)%3];
-        //printf("p: %d   q: %d\n", p, q);
+
         if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
                                     *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
-                                    //normals[from], normals[to], x)) {
                                     normals[p], normals[q], x)) {
             
-            //printf("newLambda %f   lambda %f\n", x[0], lambda);
             if (x[1] < lambda) {
                 continue;
             }
@@ -885,14 +809,12 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
             else if (x[0]>0.99999)
                 corner = (thisCorner+2)%3;
             
-            //printf("Corner! %d\n", corner);
             if (corner==-1) {
                 // parameter polyedge is leaving basegrid triangle 
                 // through the opposite edge
                 
                 // get neighboring triangle
                 int neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
-                //printf("neighboringTri = %d\n", neighboringTri);
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
                     
@@ -949,14 +871,6 @@ void NormalProjector::insertEdgeFromCornerNode(Parametrization* par,
 #endif
     curr = projectedTo[to];
 }
-
-
-
-
-
-
-
-
 
 
 bool NormalProjector::edgeCanBeInserted(const Parametrization* par, 
@@ -1042,11 +956,10 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
         if (i==enteringEdge)
             continue;
             
-        //printf("i = %d, enteringEdge = %d \n", i, enteringEdge);
         StaticVector<double,3> x;
         int p = par->triangles(currTri).vertices[i];
         int q = par->triangles(currTri).vertices[(i+1)%3];
-        //printf("p: %d   q: %d\n", p, q);
+
         const Surface* surf = par->surface;
 
 
@@ -1055,14 +968,10 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
 
-//             printf("Intersection found (%f %f)\n", x[0], x[1]);
-//             printf("p: %d, q: %d\n", p, q);
-//             printf("i: %d  entEdge: %d\n", i, enteringEdge);
             const double& newLambda = x[1];
             const double& mu        = x[0];
                 
             if (newLambda < lambda) {
-                //printf("newLambda: %f   lambda: %f\n", newLambda, lambda);
                 // Error: the normal projection is not continuous!
                 return false;
             }
@@ -1073,7 +982,6 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const Parametrization* par,
             else if (mu>9.9999)
                 corner = (i+1)%3;
 
-//             printf("corner: %d\n", corner);
             if (corner==-1) {
                 // get neighboring triangle
                 int neighboringTri = par->getNeighboringTriangle(currTri, i);
@@ -1119,9 +1027,6 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
-    //int currentEdge = cT.nodes[curr[0].idx].getDomainEdge();
-    //printf("currentEdge: %d\n", currentEdge);
-
     int i;
     for (i=0; i<3; i++) {
             
@@ -1137,14 +1042,11 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const Parametrization* 
                                     *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
                                     normals[p], normals[q], x)) {
-//             printf("Intersection found (%f %f)\n", x[0], x[1]);
-//             printf("p: %d, q: %d\n", p, q);
-//             printf("i: %d  entEdge: %d\n", i, enteringEdge);
+
             const double& newLambda = x[1];
             const double& mu        = x[0];
                 
             if (newLambda < lambda) {
-                //printf("newLambda: %f   lambda: %f\n", newLambda, lambda);
                 // Error: the normal projection is not continuous!
                 return false;                    
             }
@@ -1199,7 +1101,6 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const Parametrization* par,
                                                      Node::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
-    //printf("Edge from TouchingNode\n");
     const Surface* surf = par->surface;
 
     // The other end of the edge is *not* on this triangle
@@ -1301,11 +1202,11 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
 
         int thisCorner = par->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
-        //printf("Testing Triangle %d\n", cT);
+
         StaticVector<double,3> x;
         int p = par->triangles(cT).vertices[(thisCorner+1)%3];
         int q = par->triangles(cT).vertices[(thisCorner+2)%3];
-        //printf("p: %d   q: %d\n", p, q);
+
         if (edgeIntersectsNormalFan(*(StaticVector<float,3>*)&surf->points[from][0],
                                     *(StaticVector<float,3>*)&surf->points[to][0],
                                     par->vertices(p), par->vertices(q),
@@ -1324,14 +1225,13 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const Parametrization* par,
             else if (x[0]>0.99999)
                 corner = (thisCorner+2)%3;
             
-            //printf("Corner! %d\n", corner);
             if (corner==-1) {
                 // parameter polyedge is leaving basegrid triangle 
                 // through the opposite edge
                 
                 // get neighboring triangle
                 int neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
-                //printf("neighboringTri = %d\n", neighboringTri);
+
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1)
                     return false;
@@ -1389,7 +1289,7 @@ void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v,
                                               int targetTri, const StaticVector<double,2>& localTargetCoords)
 {
     std::vector<int> neighbors = par->getTrianglesPerVertex(v);
-    //printf("localtargetCoords (%f %f)\n", localTargetCoords[0], localTargetCoords[1]);
+
     for (int i=0; i<neighbors.size(); i++) {
 
         const DomainTriangle& cT = par->triangles(neighbors[i]);
@@ -1405,7 +1305,7 @@ void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v,
 void NormalProjector::addCornerNodeBundle(Parametrization* cS, int v, int nN)
 {
     std::vector<int> neighbors = cS->getTrianglesPerVertex(v);
-    //printf("localtargetCoords (%f %f)\n", localTargetCoords[0], localTargetCoords[1]);
+
     for (int i=0; i<neighbors.size(); i++) {
 
         const DomainTriangle& cT = cS->triangles(neighbors[i]);
@@ -1439,8 +1339,6 @@ bool NormalProjector::computeInverseNormalProjection(const StaticVector<float,3>
         Fxk[1] -= target[1];
         Fxk[2] -= target[2];
 
-        //printf("Fxk = (%f %f %f)\n", Fxk[0], Fxk[1], Fxk[2]);
-
         StaticMatrix<double,3> FPrimexk(p0 - p2 + x[2]*(n0-n2),
                          p1 - p2 + x[2]*(n1-n2),
                          x[0]*(n0-n2) + x[1]*(n1-n2) + n2);
@@ -1453,14 +1351,9 @@ bool NormalProjector::computeInverseNormalProjection(const StaticVector<float,3>
 
         x += newtonCorrection;
 
-        //if (debug) {
-            //printf("corr = (%f %f %f)\n", newtonCorrection[0], newtonCorrection[1], newtonCorrection[2]);
-        //  printf("x = (%f %f %f)\n", x[0], x[1], x[2]);
-        //}
     }
 
     if (x[0]>=-eps && x[1]>=-eps && (x[0]+x[1] <=1+eps)){
-        //printf("x = (%f %f %f)\n", x[0], x[1], x[2]);
         return true;
     } 
         
@@ -1485,45 +1378,25 @@ bool NormalProjector::edgeIntersectsNormalFan(const StaticVector<float,3>& q0_f,
     x[2] = 1;
     StaticVector<double,3> newtonCorrection;
 
-    //printf("--------- in Newton solver -----------\n");
     for (i=0; i<30; i++) {
 
         // compute Newton correction
 
         StaticVector<double,3> Fxk = p0-q0 + x[0]*(p1-p0) + x[2]*n0 + x[2]*x[0]*(n1-n0) - x[1]*(q1-q0);
 
-        //printf("Fxk: (%f %f %f)\n", Fxk[0], Fxk[1], Fxk.z);
-
         StaticMatrix<double,3> FPrimexk(p1-p0 + x[2]*(n1-n0),
                          q0-q1,
                          n0 + x[0]*(n1-n0));
 
-//         printf("FPrimexk: %f \t %f \t %f\n", FPrimexk[0][0],FPrimexk[0][1],FPrimexk[0][2]);
-//         printf("          %f \t %f \t %f\n", FPrimexk[1][0],FPrimexk[1][1],FPrimexk[1][2]);
-//         printf("          %f \t %f \t %f\n\n", FPrimexk[2][0],FPrimexk[2][1],FPrimexk[2][2]);
-
-//         printf("det: %f\n", FPrimexk.det());
         StaticMatrix<double,3> FPrimexkInv = FPrimexk.inverse();
         
-//         printf("FPrimexkInv: %f \t %f \t %f\n", FPrimexkInv[0][0],FPrimexkInv[0][1],FPrimexkInv[0][2]);
-//         printf("             %f \t %f \t %f\n", FPrimexkInv[1][0],FPrimexkInv[1][1],FPrimexkInv[1][2]);
-//         printf("             %f \t %f \t %f\n\n", FPrimexkInv[2][0],FPrimexkInv[2][1],FPrimexkInv[2][2]);
-
-//         McMat3f Id = FPrimexk*FPrimexkInv;
-//         printf("Id: %f \t %f \t %f\n", Id[0][0],Id[0][1],Id[0][2]);
-//         printf("    %f \t %f \t %f\n", Id[1][0],Id[1][1],Id[1][2]);
-//         printf("    %f \t %f \t %f\n\n", Id[2][0],Id[2][1],Id[2][2]);
-
         FPrimexkInv.multMatrixVec(-Fxk, newtonCorrection);
 
         x += newtonCorrection;
 
-//         printf("corr = (%f %f %f)\n", newtonCorrection[0], newtonCorrection[1], newtonCorrection[2]);
-//          printf("x = (%f %f %f)\n", x[0], x[1], x[2]);
     }
-    //assert(newtonCorrection[0] > -50);
+
     if (x[0]>=0 && x[0]<=1 && x[1]>=0 && x[1]<=1 && newtonCorrection.length()<1e-4){
-        //printf("x = (%f %f %f)\n", x[0], x[1], x[2]);
         return true;
     } 
            
@@ -1567,17 +1440,7 @@ bool NormalProjector::rayIntersectsTriangle(const StaticVector<double,3>& basePo
                 localCoords[0] = 1-lambda-mu;
                 localCoords[1] = lambda;
                 normalDist     = -nu;
-//                 printf("---------------------\n");
-//                 printf("det: %g\n", det);
-//                 printf("lambda: %g,   mu %g\n", lambda, mu);
-//                 printf("a: (%g %g %g),  b (%g %g %g)  c (%g %g %g)\n",
-//                        a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
-                //StaticVector<double,3> where = p + nu*(-direction);
-                //printf("where (%f %f %f)\n", where[0], where[1], where.z);
-                //StaticVector<double,3> w6 = a*(1-localCoords[0]-localCoords[1]) + b*localCoords[1] + c*localCoords[0];
-                //StaticVector<double,3> w6 = a*localCoords[0] + b*localCoords[1] + c*(1-localCoords[0]-localCoords[1]);
 
-                //printf("w6: (%f %f %f)\n", w6[0], w6[1], w6.z);
                 return true;
             }
 
