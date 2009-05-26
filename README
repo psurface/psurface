@@ -5,6 +5,7 @@
 # SURFACE EXTENSIONS FOR AMIRA
 #
 # written by Oliver Sander on 12.18.01
+# revision by Oliver Sander on 26.6.09
 #
 ##################################################################
 ##################################################################
@@ -12,89 +13,10 @@
 This is a brief text explaining some details about the installation
 and use of parametrized surfaces in Amira and the separate
 standalone library that goes with it.  Details about the theory
-and the implementation can be found in my diploma thesis
-available at www.zib.de/????????. 
+and the implementation can be found in my diploma thesis.
 
-This text contains three parts:
+This text contains:  A description of the file-format.
 
-1) Information on how to add the code for the parametrized
-   surfaces to Amira 2.3.
-2) Information on installation and usage of the parametrization
-   standalone library.
-4) A description of the file-format.
-
-
-
-##########################################################
-# EXTENSIONS FOR AMIRA
-##########################################################
-
-In order to extend Amira Release 2.3 to handle parametrized 
-surfaces, the following things are necessary:
-
-1)  You need the packages parametrization, hxparamtools and
-    hxparamedit, of course together with all .rc, .doc, and
-    .xpm files.
-
-2)  You also need a new version of the mclib, since the
-    packages above need a few extensions that have entered
-    mclib since the release of Amira 2.3.
-
-3)  The AmiraMesh library shipped with Amira 2.3 contained
-    a bug that made it impossible to read AmiraMesh files
-    containing an empty data section.  This is necessary,
-    however, if you want to save and reload base grids with
-    an identity function (cf. the description of the file
-    format below).  The bug has been fixed and you'll need
-    a version AmiraMesh containing that fix.
-
-4)  If you want to parametrize surface over explicitly given
-    base grids, you'll use the 'on given Grid' function of
-    the Parametrizer-Module.  This function depends on the
-    correct behaviour of the HxSurface::recompute() method.
-    However, in Amira 2.3, this method didn't work properly.
-    The bug has been fixed, too.  However, by now, the
-    region-of-interest (ROI) support has been built into
-    the hxsurface-package.  Therefore, you'll either have
-    to get a new Amira kernel together with a new hxsurface
-    package or you have to do without the 'on given Grid'
-    method.
-
-
-###########################################################
-# THE PARAMETRIZATION STANDALONE LIBRARY
-###########################################################
-
-The Parametrization standalone library contains everything
-you need to use parametrized surface created by Amira in
-your own code.  It consists of a single dynamic shared
-object together with suitable header files for C and C++.
-
-In order to create the lates version, all you have to do
-is to invoke gmake in the Amira2000/packages/parametrization/solo/
-directory.  All necessary code from the parametrization package,
-the mclib and amiramesh are assembled into a single
-dso file that doesn't need linking against anything else.
-This has been tested successfully on RedHat 7.1 Linux.
-You can increase your popularity by perfecting the
-GNUmakefile for other platforms.
-
-For both C and C++ programmers, I recommend the use of the
-C-header AmiraParamAccess.h.  It implements a basic object
-management that handles an arbitrary number of parametrized
-surfaces.  It is quite self-explanatory.  'Handling'
-includes reading a parametrized surface in AmiraMesh format
-from disk and evaluation the function defined on it at
-any point specified by a base grid triangle number and
-barycentric coordinates on that triangle.  C++ programmers
-can also create and work with Parametrization objects directly.
-However, I dissuade from this since it is somewhat more
-involved that the C-interface, it doesn't lead to any
-performance benefits, and, most important of all, I will
-most likely change the internal data structure form 
-small separate objects and pointers to object-arrays and
-indices.  The C-header will remain more or less as it
-is, though.
 
 
 ############################################################
