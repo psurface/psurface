@@ -91,8 +91,6 @@ void buildContactMapping(const std::vector<double>& coords1,  ///< The vertices 
 
 void getMergedGrid(std::vector<IntPrimitive>& overlaps)
 {
-    /** \todo Do without IntersectionPrimitive altogether
-        because it uses mclib-stuff */
     std::vector<IntersectionPrimitive> mergedGrid;
     
     ContactToolBox::extractMergedGrid(cPar, mergedGrid);
