@@ -201,8 +201,6 @@ int Surface::removeUnusedPoints()
 
     for (i=0; i<nTriangles; i++) {
         Triangle& tri = triangles[i];
-        if (tri.patch<0)
-            continue;
 
         newIndex[tri.points[0]] = 1;
         newIndex[tri.points[1]] = 1;
@@ -222,8 +220,6 @@ int Surface::removeUnusedPoints()
 
     for (i=0; i<nTriangles; i++) {
         Triangle& tri = triangles[i];
-        if (tri.patch<0)
-            continue;
 
         tri.points[0] = newIndex[tri.points[0]];
         tri.points[1] = newIndex[tri.points[1]];

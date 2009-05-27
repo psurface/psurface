@@ -56,10 +56,7 @@ class Surface {
             file format, the first point in the surface's point array is 1.
             In this data structure, the first point has the index 0.
             Conversion is done when writing and reading. */
-        int points[3];
-
-        /// Index of the patch this triangle belongs to.
-        int patch;
+        std::tr1::array<int,3> points;
 
         /// This struct is used to store neighbourhood information.
         struct Neighbour {
@@ -79,68 +76,8 @@ class Surface {
         /// One neighbour struct for each of the three triangle edges.
         Neighbour neighbours[3];
         
-        inline void invert() {
-            int p = points[1];
-            points[1] = points[2];
-            points[2] = p;
-            Neighbour n = neighbours[1];
-            neighbours[1] = neighbours[2];
-            neighbours[2] = n;
-        }
-
-        inline int hasPoint(int p) {
-            return (p==points[0] || p==points[1] || p==points[2]);
-        }
-
-        inline int pointIndex(int p) {
-            if (p==points[0]) return 0;
-            if (p==points[1]) return 1;
-            if (p==points[2]) return 2;
-            return -1;
-        }
     };
     
-#if 0
-    /// This class represents a patch of connected triangles.
-    class Patch {
-      public:
-        /// Index of the inner region (starting from zero).
-        int innerRegion;
-
-        /// Index of the outer region (starting from zero).
-        int outerRegion;
-
-        /// Additional id which defines some kind of material properties.
-        int boundaryId;
-
-        /// Indices of all inner branching points.
-        std::vector<int> branchingPoints;
-
-        /// Indices of all the triangles of the patch.
-        std::vector<int> triangles;
-
-        /// Stores information about segments, i.e. subsequent contours
-        struct Segment {
-            /// Index of the first contour of a segment.
-            int first;
-
-            /// Index of the last contour (for closed segments first==last).
-            int last;
-        };
-        
-        /// Contains all connected contour segments of the patch.
-        std::vector<Segment> segments;
-
-        /// Assignment operator
-        Patch& operator=(const Patch& other);
-        
-        /// Default constructor.
-        Patch() { innerRegion=outerRegion=boundaryId=0; }
-        
-        /// Copy constructor.
-        Patch(const Patch& other);
-    };
-#endif
     //@}
 
     // ======================= Member variables =====================
@@ -149,11 +86,6 @@ class Surface {
 
     /// Array of all surface points (required).
     std::vector<StaticVector<float,3> > points;
-
-#if 0
-    /// Array of all surface patches (at least 1 patch is required).
-    std::vector<Patch*> patches;
-#endif
 
     /// Array of all surface triangles (required).
     std::vector<Triangle> triangles;       
@@ -194,9 +126,6 @@ class Surface {
     /// Deletes all points, triangles, patches, materials, etc.
     virtual void clear();
 
-    /// Remove all triangles with patchid<0, returns number of removed tris.
-    int removeObsoleteTriangles();
-
     /// Removes all points not referenced by any triangle.
     int removeUnusedPoints();
 
@@ -224,18 +153,6 @@ class Surface {
     /** Initializes the array @c trianglePerPoint. */
     void computeTrianglesPerPoint();
 
-    /** Fills the neighbour array for  all triangles without 
-	decomposing patches. */
-    void createNeighbours();
-    
-    /** Remove triangles containing the same three points. 
-        @return Number of removed triangles. */
-    int removeDuplicateTriangles();
-    
-    /** Remove triangles with two or three identical points. 
-        @return Number of removed triangles. */
-    int removeDegenerateTriangles();
-
     ///
     int getEdgeOfTriangle(int triangleIdx,int which);
 
@@ -251,13 +168,9 @@ class Surface {
     /// Appends a triangle and inserts it in given patch.
     void appendTriangle(int patchIdx, Triangle& triangle) {
         triangles.push_back(triangle);
-        triangle.patch = patchIdx;
     }
 
     // basic surface properties
-
-    /// Make one patch.
-    void makeOnePatch();
 
     /// Compute index of edge between given vertices
     int getEdgeIdx(int v1, int v2);

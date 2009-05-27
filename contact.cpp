@@ -23,12 +23,15 @@ void buildContactMapping(const std::vector<std::tr1::array<double,3> >& coords1,
 
     // Create a first Surface object
     surf1 = new Surface;
-    
+
+#ifndef PSURFACE_STANDALONE
+    // Amira Surface class needs a 'patch' structure
     surf1->patches.resize(1);
     surf1->patches[0] = new Surface::Patch;
     surf1->patches[0]->innerRegion = 0;
     surf1->patches[0]->outerRegion = 1;
     surf1->patches[0]->boundaryId  = 0;
+#endif
 
     surf1->points.resize(nVert1);
     for (int i=0; i<nVert1; i++) 
@@ -36,25 +39,31 @@ void buildContactMapping(const std::vector<std::tr1::array<double,3> >& coords1,
             surf1->points[i][j] = coords1[i][j];
 
     surf1->triangles.resize(nTri1);
+#ifndef PSURFACE_STANDALONE
     surf1->patches[0]->triangles.resize(nTri1);
+#endif
     for (int i=0; i<nTri1; i++) {
 
         surf1->triangles[i].points[0] = tri1[i][0];
         surf1->triangles[i].points[1] = tri1[i][1];
         surf1->triangles[i].points[2] = tri1[i][2];
 
+#ifndef PSURFACE_STANDALONE
         surf1->triangles[i].patch = 0;
         surf1->patches[0]->triangles[i] = i;
+#endif
     }
 
     // Create a second Surface object
     surf2 = new Surface;
     
+#ifndef PSURFACE_STANDALONE
     surf2->patches.resize(1);
     surf2->patches[0] = new Surface::Patch;
     surf2->patches[0]->innerRegion = 0;
     surf2->patches[0]->outerRegion = 1;
     surf2->patches[0]->boundaryId  = 0;
+#endif
 
     surf2->points.resize(nVert2);
     for (int i=0; i<nVert2; i++)
@@ -62,15 +71,19 @@ void buildContactMapping(const std::vector<std::tr1::array<double,3> >& coords1,
             surf2->points[i][j] = coords2[i][j];
 
     surf2->triangles.resize(nTri2);
+#ifndef PSURFACE_STANDALONE
     surf2->patches[0]->triangles.resize(nTri2);
+#endif
     for (int i=0; i<nTri2; i++) {
 
         surf2->triangles[i].points[0] = tri2[i][0];
         surf2->triangles[i].points[1] = tri2[i][1];
         surf2->triangles[i].points[2] = tri2[i][2];
 
+#ifndef PSURFACE_STANDALONE
         surf2->triangles[i].patch = 0;
         surf2->patches[0]->triangles[i] = i;
+#endif
     }
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE

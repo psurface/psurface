@@ -795,8 +795,8 @@ void Parametrization::setupOriginalSurface()
 
     
 
-    // create patches
-
+#ifndef PSURFACE_STANDALONE
+    // create patches.  Only the Amira Surface class needs this
     surface->patches.resize(numPatches());
 
     for (i=0; i<surface->patches.size(); i++){
@@ -805,7 +805,7 @@ void Parametrization::setupOriginalSurface()
         surface->patches[i]->outerRegion = patches[i].outerRegion;
         surface->patches[i]->boundaryId  = patches[i].boundaryId;
     }
-    
+#endif
     ////////////////////////////////////////////
     //
     surface->points.resize(getNumTrueNodes());
@@ -949,9 +949,12 @@ void Parametrization::appendTriangleToOriginalSurface(const std::tr1::array<int,
     surface->triangles.back().points[0] = v[0];
     surface->triangles.back().points[1] = v[1];
     surface->triangles.back().points[2] = v[2];
-    
+
+#ifndef PSURFACE_STANDALONE    
+    // The Amira Surface class needs a consistent 'patch' structure
     surface->triangles.back().patch = patch;
     surface->patches[patch]->triangles.push_back(surface->triangles.size()-1);
+#endif
 }
 
 
