@@ -30,7 +30,8 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
         // the standard insertExtraEdges can miss edges if ghost nodes are present.  
         // We insert them now
         for (k=0; k<3; k++){
-            for (l=0; l<cT.edgePoints[k].size()-1; l++) {
+            // size() returns an unsigned type, which underflows if edgePoints[k] is empty
+            for (l=0; l<((int)cT.edgePoints[k].size())-1; l++) {
 
                 PlaneParam::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
 
