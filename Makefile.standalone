@@ -23,8 +23,7 @@ CXXFLAGS += -DPSURFACE_STANDALONE
 
 VPATH = ./zlib
 
-INCLUDES = -I../include -I../include/mclib -I../include/hxsurface -I$(AMIRAMESH_DIR)/include \
-           -I$(AMIRAMESH_DIR)/include/amiramesh
+INCLUDES = -I../include -I$(AMIRAMESH_DIR)/include -I$(AMIRAMESH_DIR)/include/amiramesh
 
 .SUFFIXES: .cpp .c .d
 
