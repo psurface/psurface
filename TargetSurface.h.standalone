@@ -14,8 +14,8 @@
  *
  */
 /////////////////////////////////////////////////////////////////
-#ifndef SURFACE_H
-#define SURFACE_H
+#ifndef TARGET_SURFACE_H
+#define TARGET_SURFACE_H
 
 #include <stdio.h>
 
@@ -100,6 +100,7 @@ class Surface {
         }
     };
     
+#if 0
     /// This class represents a patch of connected triangles.
     class Patch {
       public:
@@ -139,7 +140,7 @@ class Surface {
         /// Copy constructor.
         Patch(const Patch& other);
     };
-
+#endif
     //@}
 
     // ======================= Member variables =====================
@@ -149,8 +150,10 @@ class Surface {
     /// Array of all surface points (required).
     std::vector<StaticVector<float,3> > points;
 
+#if 0
     /// Array of all surface patches (at least 1 patch is required).
     std::vector<Patch*> patches;
+#endif
 
     /// Array of all surface triangles (required).
     std::vector<Triangle> triangles;       
@@ -191,14 +194,6 @@ class Surface {
     /// Deletes all points, triangles, patches, materials, etc.
     virtual void clear();
 
-    /** This method recomputes the connectivity information of a surface.
-        Surface contours and point types are inewly determined. Patches
-        containing disconnected triangles are separated into new patches. */
-    void recompute();
-
-    /// Removes patches containing no triangles.
-    void removeEmptyPatches();
-
     /// Remove all triangles with patchid<0, returns number of removed tris.
     int removeObsoleteTriangles();
 
@@ -233,9 +228,6 @@ class Surface {
 	decomposing patches. */
     void createNeighbours();
     
-    ///
-    void removePoint(int patch,int point);
-
     /** Remove triangles containing the same three points. 
         @return Number of removed triangles. */
     int removeDuplicateTriangles();
@@ -259,7 +251,6 @@ class Surface {
     /// Appends a triangle and inserts it in given patch.
     void appendTriangle(int patchIdx, Triangle& triangle) {
         triangles.push_back(triangle);
-        patches[patchIdx]->triangles.push_back(triangles.size()-1);
         triangle.patch = patchIdx;
     }
 

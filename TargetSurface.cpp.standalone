@@ -22,22 +22,6 @@
 #include "TargetSurface.h"
 
 
-Surface::Patch& Surface::Patch::operator=(const Surface::Patch& other)
-{
-    innerRegion = other.innerRegion;
-    outerRegion = other.outerRegion;
-    boundaryId  = other.boundaryId;
-    branchingPoints = other.branchingPoints;
-    triangles = other.triangles;
-    segments  = other.segments;
-    return *this;
-}
-
-Surface::Patch::Patch(const Surface::Patch& other)
-{ 
-    *this = other;
-}
-
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 Surface::Surface(HxParamBundle* bundle)
 {
@@ -63,11 +47,6 @@ Surface::~Surface()
     if (hasOwnParamBundle)
         delete params;
 #endif
-
-    for (int i=0; i<patches.size(); i++) {
-        if (patches[i])
-            delete patches[i];
-    }
 }
 
 void Surface::clear()
@@ -76,34 +55,9 @@ void Surface::clear()
     points.resize(0);
     triangles.resize(0);
 
-    for (i=0; i<patches.size(); i++)
-        delete patches[i];
-    patches.resize(0);
-    
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     params->materials()->removeAll();
 #endif
-}
-
-void Surface::removePoint(int patch,int point)
-{
-    std::vector<int> tris;
-    int i;
-    for (i=0 ; i<patches[patch]->triangles.size() ; i++) {
-        Triangle& ta=triangles[patches[patch]->triangles[i]];
-        if (point==ta.points[0] || point==ta.points[1] || point==ta.points[2])
-            tris.push_back(i);
-    }
-    if (tris.size()==0) {
-        printf("ERROR: Surface::removePoint(%d,%d), no triangle found\n",
-               patch,point);
-        return;
-    }
-    if (tris.size()==1) {
-        patches[patch]->triangles.erase(patches[patch]->triangles.begin() + tris[0]);
-        printf("WARNING: IMPLEMENT POINT TYPE SWITCH (inner->contour)\n");
-        return;
-    }
 }
 
 int Surface::getNeighbourTriangle(int triangleIdx, int which, int global)
@@ -124,45 +78,9 @@ int Surface::getNeighbourTriangle(int triangleIdx, int which, int global)
     return ret;
 }
 
-
-void Surface::removeEmptyPatches()
-{
-    int nPatches = patches.size();
-    int nTruePatches = 0;
-    int i;
-    for (i=0; i<nPatches; i++) {
-        if (patches[i]->triangles.size() == 0) {
-            patches[i]->triangles.resize(0);
-            patches[i]->branchingPoints.resize(0);
-            patches[i]->segments.resize(0);
-        } else {
-            patches[nTruePatches]=patches[i];
-            nTruePatches++;
-        }
-    }    
-    patches.resize(nTruePatches);
-
-    for (i=0; i<nTruePatches; i++) {
-        Patch* patch = patches[i];
-        for (int k=patch->triangles.size()-1; k>=0; k--)
-            triangles[patch->triangles[k]].patch = i;
-    }
-}
-
-void Surface::recompute()
-{
-    removeEmptyPatches();
-}
-
 void Surface::cleanup()
 {
-    int i, n = edgesPerPoint.size();
-
     edgesPerPoint.resize(0);
-
-    n = patches.size();
-    for (i=0; i<n; i++)
-        patches[i]->segments.resize(0);
 }
 
 void Surface::copyData(const Surface &source)
@@ -180,28 +98,6 @@ void Surface::copyData(const Surface &source)
 
     edgesPerPoint = source.edgesPerPoint;
     triangles = source.triangles;
-
-    // Patches
-    size = patches.size();
-    for (i=0; i<size; i++)
-        if (patches[i]) delete patches[i];
-
-    size = source.patches.size();
-    patches.resize(size);
-    for (i=0; i<size; i++) {
-        if (source.patches[i]) {
-            patches[i] = new Patch();
-
-            // I don't want to add a copy assignment operator to Patch..
-            patches[i]->innerRegion = source.patches[i]->innerRegion;
-            patches[i]->outerRegion = source.patches[i]->outerRegion;
-            patches[i]->boundaryId = source.patches[i]->boundaryId;
-            patches[i]->branchingPoints = source.patches[i]->branchingPoints;
-            patches[i]->triangles = source.patches[i]->triangles;
-            patches[i]->segments = source.patches[i]->segments;
-        }
-        else patches[i] = NULL;
-    }
 
     // PointType and points
     points = source.points;
@@ -245,52 +141,30 @@ int Surface::writeSurfaceData(FILE *out, int ascii)
             "BoundaryCurves %d\n",
             0,0,0);
 
-    fprintf(out,"Patches %d\n",patches.size());
+    fprintf(out,"Patches %d\n",1);   // 1 dummy patch
     HxParamBundle* materials = params->materials();
-    // don't write obsolete triangles !!!
-    for (i=0 ; i<patches.size() ; i++) {
-        int nTriangles = 0;
-        for (int j=0 ; j<patches[i]->triangles.size() ; j++) {
-            int iTri = patches[i]->triangles[j];
-            if (triangles[iTri].patch > -1)   // == i ?
-                patches[i]->triangles[nTriangles++] = iTri;
-        }
-        patches[i]->triangles.resize(nTriangles);
-    }
+
+    // //////////////////////////
+    //   Write one dummy patch
+    // //////////////////////////
+    fprintf(out,"{\n");
     
-    for (i=0 ; i<patches.size() ; i++) {
-        fprintf(out,"{\n");
-        
-        if (patches[i]->innerRegion >= 0) {
-            HxParamBundle* inner = materials->bundle(patches[i]->innerRegion);
-            if (inner) fprintf(out,"InnerRegion %s\n", inner->name());
-        }
-        
-        if (patches[i]->outerRegion >= 0) {
-            HxParamBundle* outer = materials->bundle(patches[i]->outerRegion);
-            if (outer) fprintf(out,"OuterRegion %s\n", outer->name());
-        }
-        
-        fprintf(out,
-                "BoundaryID %d\n"
-                "BranchingPoints %d\n    ",
-                patches[i]->boundaryId,
-                patches[i]->branchingPoints.size());
-        
-        for (int j=0 ; j<patches[i]->branchingPoints.size() ; j++) {
-            fprintf(out,"  %d",patches[i]->branchingPoints[j]);
-        }
-        
-        fprintf(out,"\nTriangles %d\n",patches[i]->triangles.size());
+    fprintf(out,
+            "BoundaryID %d\n"
+            "BranchingPoints %d\n    ",
+            0,
+            0);
+    
+    fprintf(out,"\nTriangles %d\n",triangles.size());
+    
+    for (int j=0 ; j<triangles.size() ; j++)
+        fprintf(out,"  %d %d %d\n",
+                triangles[j].points[0]+1,
+                triangles[j].points[1]+1,
+                triangles[j].points[2]+1);
+    
+    fprintf(out,"}\n");
 
-        for (int j=0 ; j<patches[i]->triangles.size() ; j++)
-            fprintf(out,"  %d %d %d\n",
-                    triangles[patches[i]->triangles[j]].points[0]+1,
-                    triangles[patches[i]->triangles[j]].points[1]+1,
-                    triangles[patches[i]->triangles[j]].points[2]+1);
-
-        fprintf(out,"}\n");
-    }
     return(0);
 }
 #endif
