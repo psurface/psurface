@@ -4,21 +4,22 @@
 #include <psurface/IntersectionPrimitive.h>
 
 #include <vector>
+#include <tr1/array>
 
 static Parametrization* cPar;
 static Surface* surf1;
 static Surface* surf2;
 
-void buildContactMapping(const std::vector<double>& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
-                         const std::vector<int>& tri1,       ///< The triangles of the first surface
-                         const std::vector<double>& coords2,  ///< The vertices of the second surface
-                         const std::vector<int>& tri2,
+void buildContactMapping(const std::vector<std::tr1::array<double,3> >& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
+                         const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
+                         const std::vector<std::tr1::array<double,3> >& coords2,  ///< The vertices of the second surface
+                         const std::vector<std::tr1::array<int,3> >& tri2,
                          float epsilon, void (*obsDirections)(const double* pos, double* dir))
 {
-    int nVert1 = coords1.size()/3;
-    int nVert2 = coords2.size()/3;
-    int nTri1  = tri1.size()/3;
-    int nTri2  = tri2.size()/3;
+    int nVert1 = coords1.size();
+    int nVert2 = coords2.size();
+    int nTri1  = tri1.size();
+    int nTri2  = tri2.size();
 
     // Create a first Surface object
     surf1 = new Surface;
@@ -32,15 +33,15 @@ void buildContactMapping(const std::vector<double>& coords1,  ///< The vertices 
     surf1->points.resize(nVert1);
     for (int i=0; i<nVert1; i++) 
         for (int j=0; j<3; j++)
-            surf1->points[i][j] = coords1[3*i+j];
+            surf1->points[i][j] = coords1[i][j];
 
     surf1->triangles.resize(nTri1);
     surf1->patches[0]->triangles.resize(nTri1);
     for (int i=0; i<nTri1; i++) {
 
-        surf1->triangles[i].points[0] = tri1[3*i];
-        surf1->triangles[i].points[1] = tri1[3*i+1];
-        surf1->triangles[i].points[2] = tri1[3*i+2];
+        surf1->triangles[i].points[0] = tri1[i][0];
+        surf1->triangles[i].points[1] = tri1[i][1];
+        surf1->triangles[i].points[2] = tri1[i][2];
 
         surf1->triangles[i].patch = 0;
         surf1->patches[0]->triangles[i] = i;
@@ -58,15 +59,15 @@ void buildContactMapping(const std::vector<double>& coords1,  ///< The vertices 
     surf2->points.resize(nVert2);
     for (int i=0; i<nVert2; i++)
         for (int j=0; j<3; j++)
-            surf2->points[i][j] = coords2[3*i+j];
+            surf2->points[i][j] = coords2[i][j];
 
     surf2->triangles.resize(nTri2);
     surf2->patches[0]->triangles.resize(nTri2);
     for (int i=0; i<nTri2; i++) {
 
-        surf2->triangles[i].points[0] = tri2[3*i];
-        surf2->triangles[i].points[1] = tri2[3*i+1];
-        surf2->triangles[i].points[2] = tri2[3*i+2];
+        surf2->triangles[i].points[0] = tri2[i][0];
+        surf2->triangles[i].points[1] = tri2[i][1];
+        surf2->triangles[i].points[2] = tri2[i][2];
 
         surf2->triangles[i].patch = 0;
         surf2->patches[0]->triangles[i] = i;

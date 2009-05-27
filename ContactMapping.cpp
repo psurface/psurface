@@ -4,18 +4,18 @@
 #include <psurface/ContactMapping.h>
 #include <psurface/StaticMatrix.h>
 
-void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
-               const std::vector<int>& tri1,       ///< The triangles of the first surface
-               const std::vector<double>& coords2,  ///< The vertices of the second surface
-               const std::vector<int>& tri2,
+void ContactMapping<2>::build(const std::vector<std::tr1::array<double,2> >& coords1,  ///< The vertex coordinates of the first surface
+               const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface
+               const std::vector<std::tr1::array<double,2> >& coords2,  ///< The vertices of the second surface
+               const std::vector<std::tr1::array<int,2> >& tri2,
                float epsilon,
                void (*obsDirections)(const double* pos, double* dir)
                )
 {
-    int nVert1 = coords1.size() / 2;
-    int nVert2 = coords2.size() / 2;
-    int nTri1  = tri1.size() / 2;
-    int nTri2  = tri2.size() / 2;
+    int nVert1 = coords1.size();
+    int nVert2 = coords2.size();
+    int nTri1  = tri1.size();
+    int nTri2  = tri2.size();
 
 #if 0
     printf("----- 1 -----\n");
@@ -39,8 +39,8 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         used1[i] = -1;
 
     for (int i=0; i<nTri1; i++) {
-        used1[tri1[2*i+0]] = 1;
-        used1[tri1[2*i+1]] = 1;
+        used1[tri1[i][0]] = 1;
+        used1[tri1[i][1]] = 1;
     }
 
     int numVertices1 = 0;
@@ -52,13 +52,13 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
     for (int i=0; i<nVert1; i++) 
         if (used1[i]!=-1)
             for (int j=0; j<2; j++)
-                vertices[used1[i]][j] = coords1[2*i+j];
+                vertices[used1[i]][j] = coords1[i][j];
 
     // Build the domain segments
     domainSegments.resize(nTri1);
     for (int i=0; i<nTri1; i++) {
-        domainSegments[i].points[0] = used1[tri1[2*i+0]];
-        domainSegments[i].points[1] = used1[tri1[2*i+1]];
+        domainSegments[i].points[0] = used1[tri1[i][0]];
+        domainSegments[i].points[1] = used1[tri1[i][1]];
     }
 
     // ///////////////////////////////
@@ -76,12 +76,12 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         for (int i=0; i<nTri1; i++) {
 
             // Compute segment normal
-            int v0 = tri1[2*i];
-            int v1 = tri1[2*i+1];
-            /** \todo Simpler with expression templates */
+            int v0 = tri1[i][0];
+            int v1 = tri1[i][1];
+
             StaticVector<double,2> segment;
-            segment[0] = coords1[2*v1]   - coords1[2*v0];
-            segment[1] = coords1[2*v1+1] - coords1[2*v0+1];
+            segment[0] = coords1[v1][0] - coords1[v0][0];
+            segment[1] = coords1[v1][1] - coords1[v0][1];
 
             StaticVector<double,2> segmentNormal;
             segmentNormal[0] =  segment[1];
@@ -89,8 +89,8 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
 
             segmentNormal /= segmentNormal.length();
 
-            domainNormals[used1[tri1[2*i]]]   += segmentNormal;
-            domainNormals[used1[tri1[2*i+1]]] += segmentNormal;
+            domainNormals[used1[tri1[i][0]]]   += segmentNormal;
+            domainNormals[used1[tri1[i][1]]] += segmentNormal;
 
 //             std::cout << "Normal: " << segmentNormal << "   ";
 //             printf("added to %d %d   ---   %d %d\n", tri1[2*i], tri1[2*i+1],
@@ -123,8 +123,8 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         used2[i] = -1;
 
     for (int i=0; i<nTri2; i++) {
-        used2[tri2[2*i+0]] = 1;
-        used2[tri2[2*i+1]] = 1;
+        used2[tri2[i][0]] = 1;
+        used2[tri2[i][1]] = 1;
     }
 
     int numVertices2 = 0;
@@ -136,7 +136,7 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
     for (int i=0; i<nVert2; i++) 
         if (used2[i]!=-1)
             for (int j=0; j<2; j++)
-                targetVertices[used2[i]][j] = coords2[2*i+j];
+                targetVertices[used2[i]][j] = coords2[i][j];
 
     // /////////////////////////////////////////////////////
     //   Build the segments-per-vertex arrays
@@ -151,7 +151,7 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         //printf("segment %d:  %d %d  --  %d %d\n", i, tri2[2*i], tri2[2*i+1], used2[tri2[2*i]],used2[tri2[2*i+1]]);
         for (int j=0; j<2; j++) {
 
-            int p = used1[tri1[2*i+j]];
+            int p = used1[tri1[i][j]];
             if (segPerVertex1[p][0]==-1)
                 segPerVertex1[p][0] = i;
             else
@@ -187,7 +187,7 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
         //printf("segment %d:  %d %d  --  %d %d\n", i, tri2[2*i], tri2[2*i+1], used2[tri2[2*i]],used2[tri2[2*i+1]]);
         for (int j=0; j<2; j++) {
 
-            int p = used2[tri2[2*i+j]];
+            int p = used2[tri2[i][j]];
             if (segPerVertex2[p][0]==-1)
                 segPerVertex2[p][0] = i;
             else
@@ -212,11 +212,11 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
     for (int i=0; i<nTri2; i++) {
 
         // Compute segment normal
-        int v0 = tri2[2*i];
-        int v1 = tri2[2*i+1];
+        int v0 = tri2[i][0];
+        int v1 = tri2[i][1];
         StaticVector<double,2> segment;
-        segment[0] = coords2[2*v1]   - coords2[2*v0];
-        segment[1] = coords2[2*v1+1] - coords2[2*v0+1];
+        segment[0] = coords2[v1][0] - coords2[v0][0];
+        segment[1] = coords2[v1][1] - coords2[v0][1];
 
         StaticVector<double,2> segmentNormal;
         segmentNormal[0] =  segment[1];
@@ -224,12 +224,9 @@ void ContactMapping<2>::build(const std::vector<double>& coords1,  ///< The vert
 
         segmentNormal /= segmentNormal.length();
 
-        targetNormals[used2[tri2[2*i]]]   += segmentNormal;
-        targetNormals[used2[tri2[2*i+1]]] += segmentNormal;
+        targetNormals[used2[tri2[i][0]]] += segmentNormal;
+        targetNormals[used2[tri2[i][1]]] += segmentNormal;
 
-        //std::cout << "Normal: " << segmentNormal << "   ";
-//         printf("added to %d %d   ---   %d %d\n", tri2[2*i], tri2[2*i+1],
-//                used2[tri2[2*i]], used2[tri2[2*i+1]]);
     }
 
     for (size_t i=0; i<targetNormals.size(); i++) {
@@ -572,8 +569,8 @@ bool ContactMapping<2>::normalProjection(const StaticVector<double,2>& base,
                                          const StaticVector<double,2>& direction,
                                          int& bestSegment,
                                          double& rangeLocalPosition,
-                                         const std::vector<int>& targetSegments,
-                                         const std::vector<double>& coords) const
+                                         const std::vector<std::tr1::array<int,2> >& targetSegments,
+                                         const std::vector<std::tr1::array<double, 2> >& coords) const
 {
     bestSegment = -1;
     int nTargetSegments = targetSegments.size()/2;
@@ -582,11 +579,11 @@ bool ContactMapping<2>::normalProjection(const StaticVector<double,2>& base,
     for (int i=0; i<nTargetSegments; i++) {
 
         StaticVector<double,2> p0, p1;
-        p0[0] = coords[2*targetSegments[2*i]];
-        p0[1] = coords[2*targetSegments[2*i]+1];
+        p0[0] = coords[targetSegments[i][0]][0];
+        p0[1] = coords[targetSegments[i][0]][1];
 
-        p1[0] = coords[2*targetSegments[2*i+1]];
-        p1[1] = coords[2*targetSegments[2*i+1]+1];
+        p1[0] = coords[targetSegments[i][1]][0];
+        p1[1] = coords[targetSegments[i][1]][1];
 
         double distance, targetLocal;
         if (!rayIntersectsLine(base, direction, p0, p1, distance, targetLocal))

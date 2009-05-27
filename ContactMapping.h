@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <tr1/array>
 
 #include <psurface/StaticVector.h>
 #include <psurface/contact.h>
@@ -14,10 +15,10 @@ template <>
 class ContactMapping<2>
 {
 public:
-    void build(const std::vector<double>& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
-               const std::vector<int>& tri1,       ///< The triangles of the first surface
-               const std::vector<double>& coords2,  ///< The vertices of the second surface
-               const std::vector<int>& tri2,
+    void build(const std::vector<std::tr1::array<double,2> >& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
+               const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface
+               const std::vector<std::tr1::array<double,2> >& coords2,  ///< The vertices of the second surface
+               const std::vector<std::tr1::array<int,2> >& tri2,
                float epsilon,   ///< The estimate maximum deformation for the contact oracle
                void (*obsDirections)(const double* pos, double* dir)
                );
@@ -39,8 +40,8 @@ private:
                           const StaticVector<double,2>& direction,
                           int& bestSegment,
                           double& rangeLocalPosition,
-                          const std::vector<int>& targetSegments,
-                          const std::vector<double>& coords) const;
+                          const std::vector<std::tr1::array<int,2> >& targetSegments,
+                          const std::vector<std::tr1::array<double, 2> >& coords) const;
 
     bool rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
                            const StaticVector<double, 2>& direction,
@@ -120,10 +121,10 @@ public:
         deleteContactSurface();
     }
 
-    void build(const std::vector<double>& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
-               const std::vector<int>& tri1,       ///< The triangles of the first surface
-               const std::vector<double>& coords2,  ///< The vertices of the second surface
-               const std::vector<int>& tri2,       ///< The triangles of the second surface
+    void build(const std::vector<std::tr1::array<double,3> >& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
+               const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
+               const std::vector<std::tr1::array<double,3> >& coords2,  ///< The vertices of the second surface
+               const std::vector<std::tr1::array<int,3> >& tri2,       ///< The triangles of the second surface
                float epsilon,   ///< The estimate maximum deformation for the contact oracle
                void (*obsDirections)(const double* pos, double* dir)
                ) {
