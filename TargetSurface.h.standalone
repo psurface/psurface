@@ -22,24 +22,11 @@
 #include <vector>
 #include <psurface/StaticVector.h>
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-#include <amiramesh/HxParamBundle.h>
-#endif
-
-/** This class implements structured, triangulated surfaces. A surface
-    consists of a number of sub-surfaces, called @c patches. Each patch can
-    have different regions on its two sides: @c innerRegion and
-    @c outerRegion. Patches are bounded by @c contours.
-    
-    Points can have different @c pointTypes. Points not lying on a contour
-    are @c INNER points. Points lying on more than one contour, or being the
-    first or last point of a contour are @c BRANCHING points. All other
-    points are @c CONTOUR points.
+/** This class implements unstructured, triangulated surfaces.
     
     This implementation works with indices instead of pointers, this allows
-    easy realloc. The surface contains one big array of @c points, of
-    @c triangles, of @c patches, of @c contours and for temporary use of
-    @c edges and lists of @c edgesPerPoint for each point. */
+    easy realloc. The surface contains one big array of @c points, and of
+    @c triangles. */
 
 class Surface { 
 
@@ -58,24 +45,6 @@ class Surface {
             Conversion is done when writing and reading. */
         std::tr1::array<int,3> points;
 
-        /// This struct is used to store neighbourhood information.
-        struct Neighbour {
-            /// Set if there is no neighbouring triangle in the same patch.
-            unsigned int isEmpty:1;
-
-            /// Set if the triangle touches a contour.
-            unsigned int isContour:1;
-
-            /// Index of neighbouring triangle, or index of boundary edge.
-            int neighbourIdx:30;
-
-            /// Constructor.
-            Neighbour() { isEmpty=1; isContour=0; neighbourIdx=0; }
-        };
-
-        /// One neighbour struct for each of the three triangle edges.
-        Neighbour neighbours[3];
-        
     };
     
     //@}
@@ -90,38 +59,16 @@ class Surface {
     /// Array of all surface triangles (required).
     std::vector<Triangle> triangles;       
 
-    /// Stores for each point all edges incident at that point (temporary).
-    std::vector< std::vector<int> > edgesPerPoint;
-
-    ///Stores the edge ids for each triangle (optional and temporary).
-    std::vector< std::vector<int> > edgesPerTriangle;
-  
     /** Stores for each point all incident triangles. To initialize this
         array the method @c computeTrianglesPerPoint() has to be called
-        explicitely. The class @c HxSurfaceEditor uses this information. */
+        explicitely. */
     std::vector< std::vector<int> > trianglesPerPoint;
-
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    /** Contains info about the regions. The indices @c innerRegion and
-        @c outerRegion refer to this structure, e.g. @c materials[0]. */
-    HxParamBundle* params;
-#endif
 
     //@}
 
     // ======================== Member methods ======================
 
     /**@name Member methods */ //@{
-
-    /// Constructor. If params is null an own parameter bundle is created.
-    Surface(
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-            HxParamBundle* params=0
-#endif
-           );
-
-    /// Destructor.
-    ~Surface();
 
     /// Removes all points not referenced by any triangle.
     int removeUnusedPoints();
@@ -148,8 +95,6 @@ class Surface {
 
     //@}
 
-  private:
-    bool hasOwnParamBundle;
 };
 
 #endif

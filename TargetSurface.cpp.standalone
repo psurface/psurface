@@ -20,40 +20,12 @@
 
 #include "TargetSurface.h"
 
-
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-Surface::Surface(HxParamBundle* bundle)
-{
-    if (bundle) {
-        params = bundle;
-        hasOwnParamBundle=false;
-    } else {
-        params = new HxParamBundle;
-        hasOwnParamBundle = true;
-    }
-}
-#else
-Surface::Surface()
-{
-}
-#endif
-
-Surface::~Surface()
-{
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    if (hasOwnParamBundle)
-        delete params;
-#endif
-}
-
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 int Surface::write(const char *file, int ascii)
 {
     ascii = true;
 
     FILE *out=fopen(file,"wb");
     if (!out) {
-        //theMsg->ioError(file);
         return(1);
     }
     fprintf(out,"# %s 0.1 %s\n\n","HyperSurface",ascii ? "ASCII" : "BINARY");
@@ -69,8 +41,7 @@ int Surface::writeSurfaceData(FILE *out, int ascii)
 {
     assert(ascii);  // only works for ascii == true
     int err=0,i;
-//    fprintf(out, "Parameters ");
-    params->print(out);
+
     fprintf(out, "\n");
         
     fprintf(out,"Vertices %d\n",points.size());
@@ -85,7 +56,6 @@ int Surface::writeSurfaceData(FILE *out, int ascii)
             0,0,0);
 
     fprintf(out,"Patches %d\n",1);   // 1 dummy patch
-    HxParamBundle* materials = params->materials();
 
     // //////////////////////////
     //   Write one dummy patch
@@ -110,7 +80,6 @@ int Surface::writeSurfaceData(FILE *out, int ascii)
 
     return(0);
 }
-#endif
 
 void Surface::getBoundingBox(float bbox[6]) const
 {
@@ -119,7 +88,8 @@ void Surface::getBoundingBox(float bbox[6]) const
         bbox[2] = bbox[3] = points[0][1];
         bbox[4] = bbox[5] = points[0][2];
     } else {
-        std::memset(bbox,0,6*sizeof(float));
+        for (int i=0; i<6; i++)
+            bbox[i] = 0;
     }
 
     for (int i=0 ; i<points.size() ; i++) {
@@ -170,7 +140,6 @@ int Surface::removeUnusedPoints()
     }
 
     points.resize(k);
-    edgesPerPoint.resize(0);
     trianglesPerPoint.resize(0);
 
     return nPoints-k;
