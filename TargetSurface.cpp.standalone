@@ -17,7 +17,6 @@
 /////////////////////////////////////////////////////////////////
 #include <stdio.h>
 #include <ctype.h>
-#include <cstring>
 
 #include "TargetSurface.h"
 
@@ -27,19 +26,17 @@ Surface::Surface(HxParamBundle* bundle)
 {
     if (bundle) {
         params = bundle;
-        hasOwnParamBundle=0;
+        hasOwnParamBundle=false;
     } else {
         params = new HxParamBundle;
-        hasOwnParamBundle = 1;
+        hasOwnParamBundle = true;
     }
+}
 #else
 Surface::Surface()
 {
-#endif
-    lastTriangleIdx = -1;
-    lastWhich = -1;
-    lastGlobal = 0;
 }
+#endif
 
 Surface::~Surface()
 {
@@ -47,60 +44,6 @@ Surface::~Surface()
     if (hasOwnParamBundle)
         delete params;
 #endif
-}
-
-void Surface::clear()
-{
-    int i;
-    points.resize(0);
-    triangles.resize(0);
-
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    params->materials()->removeAll();
-#endif
-}
-
-int Surface::getNeighbourTriangle(int triangleIdx, int which, int global)
-{
-    lastGlobal = global;
-    lastTriangleIdx = lastWhich = -1;
-
-    if (triangleIdx >= triangles.size() || which < 0 || which > 2)
-        return -1;
-
-    int ret = -1;
-    Triangle tri = triangles[triangleIdx];
-    if (tri.neighbours[which].isEmpty)
-        return -1;
-
-    ret = tri.neighbours[which].neighbourIdx;
-       
-    return ret;
-}
-
-void Surface::cleanup()
-{
-    edgesPerPoint.resize(0);
-}
-
-void Surface::copyData(const Surface &source)
-{
-    int i, size;
-
-    lastTriangleIdx = source.lastTriangleIdx;
-    lastWhich = source.lastWhich;
-    lastGlobal = source.lastGlobal;
-    lastNeighbourIdx = source.lastNeighbourIdx;
-    
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    params->operator=(*source.params);
-#endif
-
-    edgesPerPoint = source.edgesPerPoint;
-    triangles = source.triangles;
-
-    // PointType and points
-    points = source.points;
 }
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
@@ -241,11 +184,6 @@ void Surface::computeTrianglesPerPoint()
 
     trianglesPerPoint.resize(nPoints);
 
-    // This is a critical MEMORY LEAK:
-    // memset(&trianglesPerPoint[0], 0, sizeof(trianglesPerPoint[0])*nPoints);
-    
-    // Need to resize the std::vectors individually (Detlev 10 Jan 2003).
-    // resize(0) frees any dynamically allocated memory.
     for (int k=0; k<nPoints; k++)
         trianglesPerPoint[k].resize(0);
     

@@ -123,15 +123,8 @@ class Surface {
     /// Destructor.
     ~Surface();
 
-    /// Deletes all points, triangles, patches, materials, etc.
-    virtual void clear();
-
     /// Removes all points not referenced by any triangle.
     int removeUnusedPoints();
-
-    /** Discards the contour information. This method should be called after
-        the surface topology has been changed. */
-    void cleanup();
 
     /// Returns bounding box of point coordinates.
     void getBoundingBox(float box[6]) const;
@@ -153,42 +146,10 @@ class Surface {
     /** Initializes the array @c trianglePerPoint. */
     void computeTrianglesPerPoint();
 
-    ///
-    int getEdgeOfTriangle(int triangleIdx,int which);
-
-    ///
-    int getNeighbourTriangle(int triangleIdx, int which, int global = 0);
-
-    ///
-    int getNextNeighbourTriangle();
-        
-    /// Copies the whole data set
-    void copyData(const Surface &source);
-
-    /// Appends a triangle and inserts it in given patch.
-    void appendTriangle(int patchIdx, Triangle& triangle) {
-        triangles.push_back(triangle);
-    }
-
-    // basic surface properties
-
-    /// Compute index of edge between given vertices
-    int getEdgeIdx(int v1, int v2);
-
-    /// Compute index of triangle with given vertices.
-    int getTriangleIdx(int v1, int v2, int v3);
-
-    /// Compute neighboured nodes around given node.
-
-
     //@}
 
   private:
-    int lastTriangleIdx;
-    int lastWhich;
-    int lastGlobal;
-    int lastNeighbourIdx;
-    unsigned int hasOwnParamBundle;
+    bool hasOwnParamBundle;
 };
 
 #endif
