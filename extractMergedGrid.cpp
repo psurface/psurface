@@ -80,8 +80,10 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
         if (cT.nodes.size()<3)
             continue;
 
+#ifdef PSURFACE_EXTRACT_ONLY_COMPLETELY_COVERED_FACES
         if (!isCompletelyCovered(cPar, i, &cT))
             continue;
+#endif
 
         ////////////////////////////////
         PlaneParam::TriangleIterator cPT;
@@ -145,6 +147,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
     }
 }
 
+#ifdef PSURFACE_EXTRACT_ONLY_COMPLETELY_COVERED_FACES
 bool ContactToolBox::isCompletelyCovered(Parametrization* cPar, int tri, const DomainTriangle* cT)
 {
     // Count number of CORNER/GHOST-nodes
@@ -168,3 +171,4 @@ bool ContactToolBox::isCompletelyCovered(Parametrization* cPar, int tri, const D
     // compare with expected number of triangles (by Euler's formula)
     return nCorners==3 && (nTris == 1 - cT->nodes.size() + cT->getNumEdges());
 }
+#endif
