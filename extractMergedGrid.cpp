@@ -13,17 +13,16 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
         return;
 
 
-    ////////////////////////////////////////////
+    // ///////////////////////////////////////////////////
     // Set up point location structure
     // Can we use the routine in Parametrization ???
+    // ///////////////////////////////////////////////////
     for (i=0; i<cPar->getNumTriangles(); i++) {
 
         DomainTriangle& cT = cPar->triangles(i);
-        //             if (i==206)
-        //                 ParamToolBox::display(cT, i);
+
         cT.insertExtraEdges();
-        //             if (i==206)
-        //                 ParamToolBox::display(cT, i);
+
         for (k=0; k<cT.nodes.size(); k++)
             cT.makeCyclicGeometrically(cT.nodes[k]);
 
@@ -46,9 +45,6 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
         for (k=0; k<cT.nodes.size(); k++)
             cT.makeCyclicGeometrically(cT.nodes[k]);
         
-        //            if (i==206)
-        //                 ParamToolBox::display(cT, i);
-        
         //
         for (k=0; k<3; k++){
             for (l=0; l<cT.edgePoints[k].size(); l++) {
@@ -62,7 +58,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
         }
         
     }
-//     return;
+
     cPar->surface->computeTrianglesPerPoint();
 
     // get the array that relates the base grid triangles with the whole nonmortar surface
@@ -77,27 +73,16 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
 #endif
 
     //
-#ifndef MY_DB
     for (i=0; i<cPar->getNumTriangles(); i++) {
-#else
-    for (i=0; i<1; i++) {
-#endif   
+
         const DomainTriangle& cT = cPar->triangles(i);
-#ifdef MY_DB
-        printf("merging triangle %d,  %d nodes\n", i, cT.nodes.size());
-#endif
+
         if (cT.nodes.size()<3)
             continue;
-
-#ifdef MY_DB
-        ParamToolBox::display(cT, i);
-        cT.print(true, true, true);
-#endif
 
         if (!isCompletelyCovered(cPar, i, &cT))
             continue;
 
-        //break;
         ////////////////////////////////
         PlaneParam::TriangleIterator cPT;
         for (cPT = cT.firstTriangle(); cPT.isValid(); ++cPT) {
@@ -137,7 +122,6 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
             mergedGrid.back().localCoords[1][1] = intersections[1].localTargetCoords;
             mergedGrid.back().localCoords[1][2] = intersections[2].localTargetCoords;
             
-#ifndef MY_DB
             // world coordinate function
             mergedGrid.back().points[0] = 
                 PlaneParam::linearInterpol<StaticVector<float,3> >(intersections[0].pos,
@@ -154,14 +138,6 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
                                                     cPar->vertices(cT.vertices[0]), 
                                                     cPar->vertices(cT.vertices[1]), 
                                                     cPar->vertices(cT.vertices[2]));           
-            
-            
-#else
-            // output in barycentric coordinates (for debugging)
-            mergedGrid[newTri].points[0] = StaticVector<float,3>(intersections[0].pos.x, intersections[0].pos.y, 0);
-            mergedGrid[newTri].points[1] = StaticVector<float,3>(intersections[1].pos.x, intersections[1].pos.y, 0);
-            mergedGrid[newTri].points[2] = StaticVector<float,3>(intersections[2].pos.x, intersections[2].pos.y, 0);
-#endif
             
             
         }
