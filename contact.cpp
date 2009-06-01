@@ -129,9 +129,20 @@ void getMergedGrid(std::vector<IntPrimitive>& overlaps)
 
 void deleteContactSurface()
 {
-    delete surf1;
-    delete surf2;
-    delete cPar;
+    if (surf1 != NULL) {
+        delete surf1;
+        surf1 = NULL;
+    }
+
+    if (surf2 != NULL) {
+        delete surf2;
+        surf2 = NULL;
+    }
+
+    if (cPar != NULL) {
+        delete cPar;
+        cPar = NULL;
+    }
 }
 
 
