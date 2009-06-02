@@ -23,7 +23,7 @@ public:
                void (*obsDirections)(const double* pos, double* dir)
                );
 
-    void getOverlaps(std::vector<IntPrimitive>& overlaps);
+    void getOverlaps(std::vector<IntersectionPrimitive<float> >& overlaps);
 
 private:
 
@@ -133,7 +133,7 @@ public:
                             obsDirections);
     }
 
-    void getOverlaps(std::vector<IntPrimitive>& overlaps) {
+    void getOverlaps(std::vector<IntersectionPrimitive<float> >& overlaps) {
         getMergedGrid(overlaps);
     }
 

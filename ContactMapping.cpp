@@ -445,7 +445,7 @@ void ContactMapping<2>::build(const std::vector<std::tr1::array<double,2> >& coo
 
 }
 
-void ContactMapping<2>::getOverlaps(std::vector<IntPrimitive>& overlaps)
+void ContactMapping<2>::getOverlaps(std::vector<IntersectionPrimitive<float> >& overlaps)
 {
     for (int i=0; i<domainSegments.size(); i++) {
 
@@ -466,7 +466,7 @@ void ContactMapping<2>::getOverlaps(std::vector<IntPrimitive>& overlaps)
             // //////////////////////////////////////////////
             // Assemble new overlap
             // //////////////////////////////////////////////
-            IntPrimitive newOverlap;
+            IntersectionPrimitive<float> newOverlap;
             newOverlap.tris[0] = i;
             newOverlap.tris[1] = nodes[j].rightRangeSegment;
             

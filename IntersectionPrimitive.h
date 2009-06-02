@@ -18,6 +18,7 @@
  *
  * \see IntPrimitive
  */
+template <class ctype>
 class IntersectionPrimitive {
 
 public:
@@ -28,7 +29,7 @@ public:
      * Therefore, its shape can be described as three vectors
      * from \f$ R^3\f$ each.
      */
-    std::tr1::array<StaticVector<float,3>, 3> points;
+    std::tr1::array<StaticVector<ctype,3>, 3> points;
 
     /** An IntersectionPrimitive always represents the overlap of two basis functions
      * restricted to the image of one mortar and one nonmortar triangle.
@@ -45,7 +46,7 @@ public:
      * mortar side.  The second index tells which of the three points
      * of the IntersectionPrimitive is to be considered.  
      */
-    std::tr1::array<std::tr1::array<StaticVector<float,2>, 3> , 2> localCoords;
+    std::tr1::array<std::tr1::array<StaticVector<ctype,2>, 3> , 2> localCoords;
 
 };
 

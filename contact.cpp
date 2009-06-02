@@ -103,28 +103,9 @@ void buildContactMapping(const std::vector<std::tr1::array<double,3> >& coords1,
 }
 
 
-void getMergedGrid(std::vector<IntPrimitive>& overlaps)
+void getMergedGrid(std::vector<IntersectionPrimitive<float> >& overlaps)
 {
-    std::vector<IntersectionPrimitive> mergedGrid;
-    
-    ContactToolBox::extractMergedGrid(cPar, mergedGrid);
-
-    overlaps.resize(mergedGrid.size());
-
-    for (size_t i=0; i<mergedGrid.size(); i++) {
-        
-        ((StaticVector<float,3>*)overlaps[i].points)[0] = mergedGrid[i].points[0];
-        ((StaticVector<float,3>*)overlaps[i].points)[1] = mergedGrid[i].points[1];
-        ((StaticVector<float,3>*)overlaps[i].points)[2] = mergedGrid[i].points[2];
-    
-        overlaps[i].tris[0] = mergedGrid[i].tris[0];
-        overlaps[i].tris[1] = mergedGrid[i].tris[1];
-        
-        for (int j=0; j<12; j++)
-            overlaps[i].localCoords[0][0][j] = ((float*)&(mergedGrid[i].localCoords))[j];
-        
-    }
-
+    ContactToolBox::extractMergedGrid(cPar, overlaps);
 }
 
 void deleteContactSurface()

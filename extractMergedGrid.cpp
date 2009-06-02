@@ -5,7 +5,7 @@
 //#define MY_DB
 
 void ContactToolBox::extractMergedGrid(Parametrization* cPar,
-                                       std::vector<IntersectionPrimitive>& mergedGrid)
+                                       std::vector<IntersectionPrimitive<float> >& mergedGrid)
 {
     int i, j, k, l;
 
@@ -112,7 +112,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
 
             // //////////////////////////////////////////////
             // Assemble the triangles
-            mergedGrid.push_back(IntersectionPrimitive());
+            mergedGrid.push_back(IntersectionPrimitive<float>());
             mergedGrid.back().tris[0] = nonMortarTargetTris[i];
             mergedGrid.back().tris[1] = targetTri;
             
