@@ -23,7 +23,7 @@ CXXFLAGS += -DPSURFACE_STANDALONE
 # Uncomment the following two lines if you have libamiramesh installed
 # You can then read and write parametrized surfaces from/to disk.
 # AMIRAMESH_DIR = /home/haile/sander/libamiramesh
-# CXXFLAGS += -DHAVE_AMIRAMESH
+# CXXFLAGS += -DHAVE_AMIRAMESH -DHX_HAS_STDIOSTREAM 
 
 #### End of system configuration section. ####
 
