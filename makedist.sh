@@ -1,64 +1,66 @@
 #!/bin/bash
 
+BASENAME=libpsurface-1.0
+
 # Clean directory structure
-rm -rf libpsurface
-mkdir libpsurface
-mkdir libpsurface/include
-mkdir libpsurface/include/psurface
-mkdir libpsurface/include/contact
-mkdir libpsurface/src
-mkdir libpsurface/lib
+rm -rf $BASENAME
+mkdir $BASENAME
+mkdir $BASENAME/include
+mkdir $BASENAME/include/psurface
+mkdir $BASENAME/include/contact
+mkdir $BASENAME/src
+mkdir $BASENAME/lib
 
 # Copy the licence file
-cp COPYING                  libpsurface
+cp COPYING                      $BASENAME
 
-cp TargetSurface.h.standalone                         libpsurface/include/TargetSurface.h
+cp TargetSurface.h.standalone   $BASENAME/include/TargetSurface.h
 
-cp psurface.h               libpsurface/include/psurface
-cp psurface.h               libpsurface/include/
-cp CircularPatch.h          libpsurface/include/psurface
-cp DomainPolygon.h          libpsurface/include/psurface
-cp Domains.h                libpsurface/include/psurface
-cp GlobalNodeIdx.h          libpsurface/include/psurface
-cp McPointerSurfaceParts.h  libpsurface/include/psurface
-cp McSurfaceBase.h          libpsurface/include/psurface
-cp Node.h                   libpsurface/include/psurface
-cp NodeBundle.h             libpsurface/include/psurface
-cp Parametrization.h        libpsurface/include/psurface
-cp PlaneParam.h             libpsurface/include/psurface
-cp SurfacePath.h            libpsurface/include/psurface
-cp SurfacePathSet.h         libpsurface/include/psurface
-cp Box.h                    libpsurface/include/psurface
-cp MultiDimOctree.h         libpsurface/include/psurface
-cp PointIntersectionFunctor.h  libpsurface/include/psurface
-cp StaticVector.h           libpsurface/include/psurface
-cp StaticMatrix.h           libpsurface/include/psurface
-cp SparseMatrix.h           libpsurface/include/psurface
+cp psurface.h                   $BASENAME/include/psurface
+cp psurface.h                   $BASENAME/include/
+cp CircularPatch.h              $BASENAME/include/psurface
+cp DomainPolygon.h              $BASENAME/include/psurface
+cp Domains.h                    $BASENAME/include/psurface
+cp GlobalNodeIdx.h              $BASENAME/include/psurface
+cp McPointerSurfaceParts.h      $BASENAME/include/psurface
+cp McSurfaceBase.h              $BASENAME/include/psurface
+cp Node.h                       $BASENAME/include/psurface
+cp NodeBundle.h                 $BASENAME/include/psurface
+cp Parametrization.h            $BASENAME/include/psurface
+cp PlaneParam.h                 $BASENAME/include/psurface
+cp SurfacePath.h                $BASENAME/include/psurface
+cp SurfacePathSet.h             $BASENAME/include/psurface
+cp Box.h                        $BASENAME/include/psurface
+cp MultiDimOctree.h             $BASENAME/include/psurface
+cp PointIntersectionFunctor.h   $BASENAME/include/psurface
+cp StaticVector.h               $BASENAME/include/psurface
+cp StaticMatrix.h               $BASENAME/include/psurface
+cp SparseMatrix.h               $BASENAME/include/psurface
 
 
-cp psurface.cpp                     libpsurface/src
-cp CircularPatch.cpp                libpsurface/src
-cp DomainPolygon.cpp                libpsurface/src
-cp Domains.cpp                      libpsurface/src
-cp Iterators.cpp                    libpsurface/src
-cp Parametrization.cpp              libpsurface/src
-cp PlaneParam.cpp                   libpsurface/src
-cp TargetSurface.cpp.standalone     libpsurface/src/TargetSurface.cpp
-cp debugCode.cpp                    libpsurface/src
+cp psurface.cpp                 $BASENAME/src
+cp CircularPatch.cpp            $BASENAME/src
+cp DomainPolygon.cpp            $BASENAME/src
+cp Domains.cpp                  $BASENAME/src
+cp Iterators.cpp                $BASENAME/src
+cp Parametrization.cpp          $BASENAME/src
+cp PlaneParam.cpp               $BASENAME/src
+cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
+cp debugCode.cpp                $BASENAME/src
 
-cp contact.h                    libpsurface/include/psurface
-cp ContactToolBox.h             libpsurface/include/psurface
-cp IntersectionPrimitive.h      libpsurface/include/psurface
-cp ContactBoundary.h            libpsurface/include/psurface
-cp NormalProjector.h            libpsurface/include/psurface
-cp ContactMapping.h             libpsurface/include/psurface
+cp contact.h                    $BASENAME/include/psurface
+cp ContactToolBox.h             $BASENAME/include/psurface
+cp IntersectionPrimitive.h      $BASENAME/include/psurface
+cp ContactBoundary.h            $BASENAME/include/psurface
+cp NormalProjector.h            $BASENAME/include/psurface
+cp ContactMapping.h             $BASENAME/include/psurface
 
-cp contact.cpp                  libpsurface/src
-cp NormalProjector.cpp          libpsurface/src
-cp buildContactSurface.cpp      libpsurface/src
-cp extractMergedGrid.cpp        libpsurface/src
-cp ContactMapping.cpp           libpsurface/src
+cp contact.cpp                  $BASENAME/src
+cp NormalProjector.cpp          $BASENAME/src
+cp buildContactSurface.cpp      $BASENAME/src
+cp extractMergedGrid.cpp        $BASENAME/src
+cp ContactMapping.cpp           $BASENAME/src
 
-cp Makefile.standalone      libpsurface/src/Makefile
+cp Makefile.standalone          $BASENAME/src/Makefile
 
-tar zvcf libpsurface.tar.gz libpsurface
+tar zvcf $BASENAME.tar.gz $BASENAME
