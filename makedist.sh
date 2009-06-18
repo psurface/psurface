@@ -9,6 +9,9 @@ mkdir libpsurface/include/contact
 mkdir libpsurface/src
 mkdir libpsurface/lib
 
+# Copy the licence file
+cp COPYING                  libpsurface
+
 cp TargetSurface.h.standalone                         libpsurface/include/TargetSurface.h
 
 cp psurface.h               libpsurface/include/psurface
