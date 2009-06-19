@@ -20,6 +20,7 @@
 
 #include "TargetSurface.h"
 
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 int Surface::write(const char *file, int ascii)
 {
     ascii = true;
@@ -80,6 +81,7 @@ int Surface::writeSurfaceData(FILE *out, int ascii)
 
     return(0);
 }
+#endif
 
 void Surface::getBoundingBox(float bbox[6]) const
 {
