@@ -573,7 +573,7 @@ bool ContactMapping<2>::normalProjection(const StaticVector<double,2>& base,
                                          const std::vector<std::tr1::array<double, 2> >& coords) const
 {
     bestSegment = -1;
-    int nTargetSegments = targetSegments.size()/2;
+    int nTargetSegments = targetSegments.size();
     double bestDistance = std::numeric_limits<double>::max();
 
     for (int i=0; i<nTargetSegments; i++) {
