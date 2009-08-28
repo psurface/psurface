@@ -494,7 +494,7 @@ public:
     
     ///
     bool DFSBoundaryVisit(const std::vector<Node::NeighborReference> &star, 
-                          const Node::NeighborReference& u, int endNode,
+                          Node::NeighborReference u, int endNode,
                           std::vector<Node::NeighborReference> &outStar);
 
     ///

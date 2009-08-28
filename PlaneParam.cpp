@@ -208,17 +208,16 @@ bool PlaneParam::DFSVisit(const std::vector<Node::NeighborReference> &star, cons
 // in a cyclic order.  This is done by performing a depth-first search on the graph of these
 // neighbors and looking for a longest path.  See me for details
 // This is for the boundary case
+
+// The parameter u needs to be handed over by value, because this method is used with
+// u = outStar[0].  However the outStar.push_back in this method may lead to a relocation
+// of the outStar content, and the reference to outStar[0] (in u) will dangle.
 bool PlaneParam::DFSBoundaryVisit(const std::vector<Node::NeighborReference> &star, 
-                                  const Node::NeighborReference& u, int endNode,
+                                  Node::NeighborReference u, int endNode,
                                   std::vector<Node::NeighborReference> &outStar)
 {
     int i, j;
 
-//     for (i=0; i<outStar.size(); i++)
-//      printf("  %d", (int)outStar[i]);
-
-//     printf("\n");
-    
     for (i=0; i<star.size(); i++){
         //printf("i = %d   star.size = %d\n", i, star.size());
         if (!nodes[u].isConnectedTo(star[i])) continue;
