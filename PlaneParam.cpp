@@ -216,28 +216,21 @@ bool PlaneParam::DFSBoundaryVisit(const std::vector<Node::NeighborReference> &st
                                   Node::NeighborReference u, int endNode,
                                   std::vector<Node::NeighborReference> &outStar)
 {
-    int i, j;
+    for (int i=0; i<star.size(); i++){
 
-    for (i=0; i<star.size(); i++){
-        //printf("i = %d   star.size = %d\n", i, star.size());
         if (!nodes[u].isConnectedTo(star[i])) continue;
         const Node::NeighborReference& v = star[i];
 
-        // a cycle?
-        bool isNew = true;
-        for (j=0; j<outStar.size(); j++)
-            if (outStar[j]==v){
-                isNew=false;
-                break;
-            }
+        // no cycle yet
+        if (std::find(outStar.begin(), outStar.end(), v) == outStar.end()) {
 
-        if (isNew){
             outStar.push_back(v);
             if (outStar.size()==star.size() && outStar.back()==endNode) 
                 return true;
             if (DFSBoundaryVisit(star, v, endNode, outStar)) 
                 return true;
             outStar.pop_back();
+
         }
     }
 
