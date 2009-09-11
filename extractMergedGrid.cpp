@@ -7,8 +7,6 @@
 void ContactToolBox::extractMergedGrid(Parametrization* cPar,
                                        std::vector<IntersectionPrimitive<float> >& mergedGrid)
 {
-    int i, j, k, l;
-
     if (cPar->getNumTriangles()==0)
         return;
 
@@ -17,20 +15,20 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
     // Set up point location structure
     // Can we use the routine in Parametrization ???
     // ///////////////////////////////////////////////////
-    for (i=0; i<cPar->getNumTriangles(); i++) {
+    for (int i=0; i<cPar->getNumTriangles(); i++) {
 
         DomainTriangle& cT = cPar->triangles(i);
 
         cT.insertExtraEdges();
 
-        for (k=0; k<cT.nodes.size(); k++)
+        for (int k=0; k<cT.nodes.size(); k++)
             cT.makeCyclicGeometrically(cT.nodes[k]);
 
         // the standard insertExtraEdges can miss edges if ghost nodes are present.  
         // We insert them now
-        for (k=0; k<3; k++){
+        for (int k=0; k<3; k++){
             // size() returns an unsigned type, which underflows if edgePoints[k] is empty
-            for (l=0; l<((int)cT.edgePoints[k].size())-1; l++) {
+            for (int l=0; l<((int)cT.edgePoints[k].size())-1; l++) {
 
                 PlaneParam::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
 
@@ -42,12 +40,12 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
         }
 
         // and since we have added more edges, we have to redo the cyclic ordering
-        for (k=0; k<cT.nodes.size(); k++)
+        for (int k=0; k<cT.nodes.size(); k++)
             cT.makeCyclicGeometrically(cT.nodes[k]);
         
         //
-        for (k=0; k<3; k++){
-            for (l=0; l<cT.edgePoints[k].size(); l++) {
+        for (int k=0; k<3; k++){
+            for (int l=0; l<cT.edgePoints[k].size(); l++) {
                 
                 if (!cT.nodes[cT.edgePoints[k][l]].isOnCorner()) {
                     cT.nodes[cT.edgePoints[k][l]].setDomainEdge(k);
@@ -73,7 +71,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
 #endif
 
     //
-    for (i=0; i<cPar->getNumTriangles(); i++) {
+    for (int i=0; i<cPar->getNumTriangles(); i++) {
 
         const DomainTriangle& cT = cPar->triangles(i);
 
@@ -104,7 +102,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
             assert(targetTri>=0 && targetTri<cPar->surface->triangles.size());
 
             std::tr1::array<IntersectionAlt, 3> intersections;
-            for (j=0; j<3; j++) {
+            for (int j=0; j<3; j++) {
                 intersections[j].pos = cT.nodes[cPT.vertices(j)].domainPos();
                 intersections[j].localTargetCoords = cPar->getLocalTargetCoords(GlobalNodeIdx(i, cPT.vertices(j)), 
                                                                                 targetTri);
