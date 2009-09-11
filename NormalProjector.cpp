@@ -356,17 +356,16 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
     // Insert the edges
     // ////////////////////////////////////////////////////////////
 
-    //for (i=0; i<reducedContactPatch.triIdx.size(); i++) {
     for (i=0; i<contactPatch.triIdx.size(); i++) {
 
         for (j=0; j<3; j++) {
             
-//             int from = reducedContactPatch.triangles(i).points[j];
-//             int to   = reducedContactPatch.triangles(i).points[(j+1)%3];
             int from = contactPatch.triangles(i).points[j];
             int to   = contactPatch.triangles(i).points[(j+1)%3];
 
-            //if (from < to || reducedContactPatch.containsEdge(from, to)==1) {
+            // If (from, to) is an inner edge we pass it twice, but want to
+            // test it only once.  That's before the ||.  The second clause
+            // tests for boundary edges
             if (from < to || contactPatch.containsEdge(from, to)==1) {
                 
                 if (edgeCanBeInserted(par, normals, from, to, projectedTo))
@@ -1292,9 +1291,7 @@ void NormalProjector::insertGhostNodeAtVertex(Parametrization* par, int v,
 
     for (int i=0; i<neighbors.size(); i++) {
 
-        const DomainTriangle& cT = par->triangles(neighbors[i]);
-        
-        int corner = cT.getCorner(v);
+        int corner = par->triangles(neighbors[i]).getCorner(v);
         StaticVector<float,2> lTC_Float(localTargetCoords[0], localTargetCoords[1]);
         par->addGhostNode(neighbors[i], corner, targetTri, lTC_Float);
 
@@ -1308,9 +1305,7 @@ void NormalProjector::addCornerNodeBundle(Parametrization* cS, int v, int nN)
 
     for (int i=0; i<neighbors.size(); i++) {
 
-        const DomainTriangle& cT = cS->triangles(neighbors[i]);
-        
-        int corner = cT.getCorner(v);
+        int corner = cS->triangles(neighbors[i]).getCorner(v);
         cS->addCornerNode(neighbors[i], corner, nN);
 
     }
