@@ -157,10 +157,7 @@ void PlaneParam::makeCyclicGeometrically(Node& center)
 
             if (angles[j] > angles[j+1]){
                 swapped = true;
-                //angles.swap(j, j+1);
-                float tmp = angles[j];
-                angles[j] = angles[j+1];
-                angles[j+1] = tmp;
+                std::swap(angles[j], angles[j+1]);
                 center.swapNeighbors(j, j+1);
             }
         }
