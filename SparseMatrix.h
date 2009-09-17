@@ -45,9 +45,8 @@ public:
 
     /// Multiplication with a scalar
     void operator*=(const T& scalar) {
-	int i, j;
-	for (i=0; i<data.size(); i++)
-	    for (j=0; j<data[i].size(); j++)
+	for (size_t i=0; i<data.size(); i++)
+	    for (size_t j=0; j<data[i].size(); j++)
 		data[i][j].value *= scalar;
     }
 
@@ -86,14 +85,13 @@ public:
     /// Multiply real sparse matrix with complex vector.
     void multVecC(const std::vector< std::complex<T> >& v,
 		  std::vector< std::complex<T> >& result) const {
-	int i,j,k;
 
 	assert(v.size()==nCols());
 	result.resize(nRows());
 	result.assign(result.size(), std::complex<T>(0.));
 
-        for (i=0; i<nRows(); i++)
-            for (j=0; j<data[i].size(); j++)
+        for (int i=0; i<nRows(); i++)
+            for (size_t j=0; j<data[i].size(); j++)
                 result[i] += data[i][j].value * v[data[i][j].col];
 
     }
@@ -247,7 +245,7 @@ startAgain:
 
 	std::complex<T> sum = std::complex<T>(0);
 
-	for (int i=0; i<a.size(); i++)
+	for (size_t i=0; i<a.size(); i++)
 	    sum += a[i]*std::conj(b[i]);
 
 	return sum;
@@ -259,7 +257,7 @@ startAgain:
 
 	std::complex<double> sum = std::complex<double>(0);
 
-	for (int i=0; i<a.size(); i++)
+	for (size_t i=0; i<a.size(); i++)
 	    sum += std::complex<double>( (double)std::real(a[i])*std::real(b[i]) , (double)std::imag(a[i])*std::imag(b[i]) );
 
 	return sum;
