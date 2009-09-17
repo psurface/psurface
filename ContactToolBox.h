@@ -35,17 +35,7 @@ namespace ContactToolBox {
 
     bool isCompletelyCovered(Parametrization* cPar, int tri, const DomainTriangle* cT);
 
-    /**@name Routines for the extraction of the merged grid */
-    //@{
-
-    class IntersectionAlt {
-    public:
-        StaticVector<float,2> pos;
-
-        StaticVector<float,2> localTargetCoords;
-
-    };
-
+    /** \brief Extraction of the merged grid */
     void extractMergedGrid(Parametrization* cPar,
                            std::vector<IntersectionPrimitive<float> >& mergedGrid);
 

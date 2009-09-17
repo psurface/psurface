@@ -101,44 +101,30 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
             
             assert(targetTri>=0 && targetTri<cPar->surface->triangles.size());
 
-            std::tr1::array<IntersectionAlt, 3> intersections;
-            for (int j=0; j<3; j++) {
-                intersections[j].pos = cT.nodes[cPT.vertices(j)].domainPos();
-                intersections[j].localTargetCoords = cPar->getLocalTargetCoords(GlobalNodeIdx(i, cPT.vertices(j)), 
-                                                                                targetTri);
-            }
 
             // //////////////////////////////////////////////
             // Assemble the triangles
+            // //////////////////////////////////////////////
             mergedGrid.push_back(IntersectionPrimitive<float>());
             mergedGrid.back().tris[0] = nonMortarTargetTris[i];
             mergedGrid.back().tris[1] = targetTri;
+
+            for (int j=0; j<3; j++) {
+
+                // Local coordinates in the domain triangle
+                mergedGrid.back().localCoords[0][j] = cT.nodes[cPT.vertices(j)].domainPos();
             
-            mergedGrid.back().localCoords[0][0] = intersections[0].pos;
-            mergedGrid.back().localCoords[0][1] = intersections[1].pos;
-            mergedGrid.back().localCoords[0][2] = intersections[2].pos;
+                // Local coordinates in the target triangle
+                mergedGrid.back().localCoords[1][j] = cPar->getLocalTargetCoords(GlobalNodeIdx(i, cPT.vertices(j)), targetTri);
             
-            mergedGrid.back().localCoords[1][0] = intersections[0].localTargetCoords;
-            mergedGrid.back().localCoords[1][1] = intersections[1].localTargetCoords;
-            mergedGrid.back().localCoords[1][2] = intersections[2].localTargetCoords;
-            
-            // world coordinate function
-            mergedGrid.back().points[0] = 
-                PlaneParam::linearInterpol<StaticVector<float,3> >(intersections[0].pos,
-                                                    cPar->vertices(cT.vertices[0]), 
-                                                    cPar->vertices(cT.vertices[1]), 
-                                                    cPar->vertices(cT.vertices[2]));
-            mergedGrid.back().points[1] = 
-                PlaneParam::linearInterpol<StaticVector<float,3> >(intersections[1].pos, 
-                                                    cPar->vertices(cT.vertices[0]), 
-                                                    cPar->vertices(cT.vertices[1]),
-                                                    cPar->vertices(cT.vertices[2]));
-            mergedGrid.back().points[2] = 
-                PlaneParam::linearInterpol<StaticVector<float,3> >(intersections[2].pos, 
-                                                    cPar->vertices(cT.vertices[0]), 
-                                                    cPar->vertices(cT.vertices[1]), 
-                                                    cPar->vertices(cT.vertices[2]));           
-            
+                // world coordinates in the domain triangle
+                mergedGrid.back().points[j] = 
+                    PlaneParam::linearInterpol<StaticVector<float,3> >(cT.nodes[cPT.vertices(j)].domainPos(),
+                                                                       cPar->vertices(cT.vertices[0]), 
+                                                                       cPar->vertices(cT.vertices[1]), 
+                                                                       cPar->vertices(cT.vertices[2]));
+
+            }            
             
         }
         
