@@ -342,13 +342,11 @@ void NormalProjector::handleSide(Parametrization* par, const ContactBoundary& co
 
             }
             
-            // ...
-            if (bestTri != -1) {
-                insertGhostNodeAtVertex(par, i, contactPatch.triIdx[bestTri], bestDPos);
-                break;
-            }
-
         }
+
+        // Set ghost node mapping to the closest triangle intersected by the normal ray
+        if (bestTri != -1)
+            insertGhostNodeAtVertex(par, i, contactPatch.triIdx[bestTri], bestDPos);
 
     }
 
