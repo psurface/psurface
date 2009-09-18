@@ -8,10 +8,6 @@
 #include <psurface/Box.h>
 
 
-class McTriangle;
-class McVertex;
-class McEdge;
-
 ///////////////////////////////////////////////////////////////
 /** This is the base class for vertices in a McSurfaceBase.  The template argument
     @c VertexType that you instantiate McSurfaceBase with has to be derived from it.  
