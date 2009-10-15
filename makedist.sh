@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASENAME=libpsurface-1.0.4
+BASENAME=libpsurface-1.1svn
 
 # Clean directory structure
 rm -rf $BASENAME
@@ -26,7 +26,7 @@ cp McPointerSurfaceParts.h      $BASENAME/include/psurface
 cp McSurfaceBase.h              $BASENAME/include/psurface
 cp Node.h                       $BASENAME/include/psurface
 cp NodeBundle.h                 $BASENAME/include/psurface
-cp Parametrization.h            $BASENAME/include/psurface
+cp PSurface.h                   $BASENAME/include/psurface
 cp PlaneParam.h                 $BASENAME/include/psurface
 cp SurfacePath.h                $BASENAME/include/psurface
 cp SurfacePathSet.h             $BASENAME/include/psurface
@@ -43,7 +43,7 @@ cp CircularPatch.cpp            $BASENAME/src
 cp DomainPolygon.cpp            $BASENAME/src
 cp Domains.cpp                  $BASENAME/src
 cp Iterators.cpp                $BASENAME/src
-cp Parametrization.cpp          $BASENAME/src
+cp PSurface.cpp                 $BASENAME/src
 cp PlaneParam.cpp               $BASENAME/src
 cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
 cp debugCode.cpp                $BASENAME/src
