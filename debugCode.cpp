@@ -135,7 +135,8 @@ void DomainTriangle::print(bool showEdgePoints, bool showParamEdges, bool showNo
 #endif
 }
 
-void Parametrization::checkConsistency(const char* where) const
+template <int dim, class ctype>
+void PSurface<dim,ctype>::checkConsistency(const char* where) const
 {
 #ifndef NDEBUG
     int i, j;
@@ -440,45 +441,3 @@ void DomainPolygon::checkConsistency(const char* where)
     }
 #endif
 }
-
-
-
-// void Parametrization::tNodeTest()
-// {
-//     int i, j;
-//     McBitfield isInvalid(triangleArray.size());
-//     isInvalid.unsetAll();
-
-//     for (i=0; i<freeTriangleStack.size(); i++)
-//         isInvalid.set(freeTriangleStack[i]);
-
-//     for (i=0; i<getNumTriangles(); i++)
-//         if (!isInvalid[i]){
-   
-//             for (j=0; j<triangles(i).nodes.size(); j++) {
-
-//                 const Node& cN = triangles(i).nodes[j];
-
-//                 if (!cN.isTOUCHING_NODE())
-//                     continue;
-                
-
-//                 McVec3f iPos = imagePos[cN.nodeNumber];
-//                 const McVec2f& t  = cN.domainPos;
-//                 McVec3f dPos = PlaneParam::linearInterpol<McVec3f>(t, vertices(triangles(i).vertices[0]), 
-//                                                                    vertices(triangles(i).vertices[1]), 
-//                                                                    vertices(triangles(i).vertices[2]));
-
-//                 if (iPos.x> -4.5 && iPos.x < 4.5 && iPos.y>-4.5 && iPos.y < 4.5)
-//                     continue;
-
-//                 printf("image (%f %f %f)   domain (%f %f %f)\n", iPos.x, iPos.y, iPos.z, dPos.x, dPos.y, dPos.z);
-
-//             }
-
-//         }
-
-
-
-
-// }

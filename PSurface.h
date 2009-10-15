@@ -28,8 +28,13 @@
 class AmiraMesh;
 #endif
 
-/** The parametrization of an arbitrary surface over a simple base grid */
-class Parametrization : public McSurfaceBase<McVertex, McEdge, DomainTriangle>{
+/** The parametrization of an arbitrary surface over a simple base grid 
+    \tparam dim Dimension of the surface
+    \tparam ctype The type used for coordinates
+*/
+template <int dim, class ctype>
+class PSurface
+    : public McSurfaceBase<McVertex, McEdge, DomainTriangle>{
 
 public:
 
@@ -54,20 +59,20 @@ public:
     };
 
     /// Default constructor
-    Parametrization(
+    PSurface(
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
                     HxParamBundle* bundle=NULL
 #endif
                     );
 
     /// Destructor
-    virtual ~Parametrization();
+    virtual ~PSurface();
 
     /** \brief Initializes the parametrization from a given second one.
      */
-    void init(const Parametrization* other);
+    void init(const PSurface* other);
 
-    /** \brief Empties the Parametrization object
+    /** \brief Empties the PSurface object
      */
     void clear();
 
@@ -112,10 +117,10 @@ public:
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     /// Writes the parametrization in AmiraMesh format
-    static int writeAmiraMesh(Parametrization* par, const char* filename);
+    static int writeAmiraMesh(PSurface* par, const char* filename);
 
     /// Reads the parametrization from an AmiraMesh object
-    static Parametrization* readAmiraMesh(AmiraMesh* am, const char* filename);
+    static PSurface* readAmiraMesh(AmiraMesh* am, const char* filename);
 
     /// AmiraMesh Reader using an existing AmiraMesh object (is used by derived classes)
     bool initFromAmiraMesh(AmiraMesh* am, const char* filename, Surface* surf);
@@ -131,13 +136,13 @@ public:
      * parameters.
      *
      * Copies the path information from the SurfacePathSet to the
-     * parameters.  This routine is   called before writing a Parametrization
+     * parameters.  This routine is   called before writing a PSurface
      * to disk, because on disk paths are stored together with the parameters.
      */
     void savePaths(HxParamBundle& parameters);
 
     /** \brief Reads paths from the parameters HxParamBundle into the
-     * Parametrization's own SurfacePathSet.
+     * PSurface's own SurfacePathSet.
      */
     void getPaths(const HxParamBundle& parameters);
 #endif
@@ -212,7 +217,7 @@ public:
     /** \brief The main routine to evaluate the parametrization function.
      *
      * The routine evaluates the parametrization function embodied by the
-     * Parametrization class.  It takes a point \f$x\f$ on the domain grid (specified
+     * PSurface class.  It takes a point \f$x\f$ on the domain grid (specified
      * by giving a triangle number and barycentric coordinates on that triangle)
      * and returns the corresponding image point \f$\phi(x)\f$.  That image point is 
      * given via the three vertices of the triangle \f$t\f$ it's on and its position
@@ -408,6 +413,9 @@ public:
     std::vector<int> domainSurfaceTriangleNumbers;
 
 };
+
+/** \brief Typedef for backward compatibility */
+typedef PSurface<2,float> Parametrization;
 
 
 #endif

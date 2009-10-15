@@ -6,7 +6,8 @@
 #include <psurface/PSurface.h>
 
 
-class Parametrization;
+template <int dim, class ctype>
+class PSurface;
 
 /** This class represents the retriangulation of a small hole in a surface.
     It's basically a bunch of triangles.  The feature of this class are the

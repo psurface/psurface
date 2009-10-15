@@ -14,7 +14,8 @@
 
 template<class T> class SparseMatrix;
 
-class Parametrization;
+template <int dim, class ctype>
+class PSurface;
 
 /** The parametrization of a surface in space.  It is actually a planar graph
    having only triangular and unbounded faces.  The nodes of the graph store

@@ -17,7 +17,8 @@
 #include <psurface/GlobalNodeIdx.h>
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-Parametrization::Parametrization(HxParamBundle* bundle)
+template <int dim, class ctype>
+PSurface<dim,ctype>::PSurface(HxParamBundle* bundle)
 {
     if (bundle) {
         params = bundle;
@@ -28,11 +29,13 @@ Parametrization::Parametrization(HxParamBundle* bundle)
     }
 }
 #else
-Parametrization::Parametrization()
+template <int dim, class ctype>
+PSurface<dim,ctype>::PSurface()
 {}
 #endif
 
-Parametrization::~Parametrization() 
+template <int dim, class ctype>
+PSurface<dim,ctype>::~PSurface() 
 { 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     if (hasOwnParamBundle)
@@ -40,7 +43,8 @@ Parametrization::~Parametrization()
 #endif
 }
 
-void Parametrization::clear()
+template <int dim, class ctype>
+void PSurface<dim,ctype>::clear()
 {
     surface = NULL;
     patches.clear();
@@ -55,7 +59,8 @@ void Parametrization::clear()
     McSurfaceBase<McVertex, McEdge, DomainTriangle>::clear();
 }
 
-void Parametrization::getBoundingBox(Box<float,3>& bbox) const
+template <int dim, class ctype>
+void PSurface<dim,ctype>::getBoundingBox(Box<float,3>& bbox) const
 {
     if (getNumVertices()==0)
         return;
@@ -66,7 +71,8 @@ void Parametrization::getBoundingBox(Box<float,3>& bbox) const
         bbox.extendBy(vertices(i));
 }
 
-void Parametrization::init(const Parametrization* other)
+template <int dim, class ctype>
+void PSurface<dim,ctype>::init(const PSurface* other)
 {
     // copy domain surface.  
     *this = *other;
@@ -76,7 +82,8 @@ void Parametrization::init(const Parametrization* other)
     
 }
 
-StaticVector<float,2> Parametrization::getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const
+template <int dim, class ctype>
+StaticVector<float,2> PSurface<dim,ctype>::getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const
 {
     const Node& cN = triangles(n.tri).nodes[n.idx];
     
@@ -104,7 +111,8 @@ StaticVector<float,2> Parametrization::getLocalTargetCoords(const GlobalNodeIdx&
 }
 
 
-GlobalNodeIdx Parametrization::getOtherEndNode(int triIdx, NodeIdx cN) const
+template <int dim, class ctype>
+GlobalNodeIdx PSurface<dim,ctype>::getOtherEndNode(int triIdx, NodeIdx cN) const
 {
     int i;
     
@@ -176,7 +184,8 @@ GlobalNodeIdx Parametrization::getOtherEndNode(int triIdx, NodeIdx cN) const
     return GlobalNodeIdx(triIdx, cN);
 }
 
-int Parametrization::getNumNodes() const
+template <int dim, class ctype>
+int PSurface<dim,ctype>::getNumNodes() const
 {
     int n = 0;
     for (int i=0; i<getNumTriangles(); i++)
@@ -184,7 +193,8 @@ int Parametrization::getNumNodes() const
     return n;
 }
 
-int Parametrization::getNumTrueNodes() 
+template <int dim, class ctype>
+int PSurface<dim,ctype>::getNumTrueNodes() 
 {
     int highestTrueNodeNumber = -1;
 
@@ -203,7 +213,8 @@ int Parametrization::getNumTrueNodes()
     return highestTrueNodeNumber+1;
 }
 
-void Parametrization::removeExtraEdges()
+template <int dim, class ctype>
+void PSurface<dim,ctype>::removeExtraEdges()
 {
 
     for (int i(0); i<getNumTriangles(); i++) {
@@ -213,18 +224,8 @@ void Parametrization::removeExtraEdges()
     hasUpToDatePointLocationStructure = false;
 }
 
-#if 0
-void Parametrization::insertExtraEdges()
-{
-    DomainTriangle *cT = triangles.first();
-    while (cT){
-        cT->insertExtraEdges();
-        cT = triangles.succ(cT);
-    }
-}
-#endif
-
-void Parametrization::createPointLocationStructure()
+template <int dim, class ctype>
+void PSurface<dim,ctype>::createPointLocationStructure()
 {
     for (int i(0); i<getNumTriangles(); i++){
         //        printf("######## Triangle: %d\n", i);
@@ -239,7 +240,8 @@ void Parametrization::createPointLocationStructure()
 }
 
     /// \todo The copying could be sped up considerably...
-void Parametrization::garbageCollection()
+template <int dim, class ctype>
+void PSurface<dim,ctype>::garbageCollection()
 {
     int i, j;
 #ifndef NDEBUG
@@ -306,7 +308,8 @@ void Parametrization::garbageCollection()
     
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
+template <int dim, class ctype>
+int PSurface<dim,ctype>::writeAmiraMesh(PSurface<dim,ctype>* par, const char* filename)
 {
     AmiraMesh am;
     am.parameters = *(par->params);
@@ -560,9 +563,10 @@ int Parametrization::writeAmiraMesh(Parametrization* par, const char* filename)
 
 }
 
-Parametrization* Parametrization::readAmiraMesh(AmiraMesh* am, const char* filename)
+template <int dim, class ctype>
+PSurface<dim,ctype>* PSurface<dim,ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
 {
-    Parametrization* par = new Parametrization;
+    PSurface<dim,ctype>* par = new PSurface<dim,ctype>;
 
     Surface* surf = new Surface;
 
@@ -579,7 +583,8 @@ Parametrization* Parametrization::readAmiraMesh(AmiraMesh* am, const char* filen
 }
 
 
-bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Surface* surf)
+template <int dim, class ctype>
+bool PSurface<dim,ctype>::initFromAmiraMesh(AmiraMesh* am, const char* filename, Surface* surf)
 {
 
     surface = surf;
@@ -609,7 +614,7 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
     patches.resize(AMpatches->location()->dims()[0]);
 
     for (i=0; i<patches.size(); i++){
-        patches[i] = ((Parametrization::Patch*)AMpatches->dataPtr())[i];
+        patches[i] = ((Patch*)AMpatches->dataPtr())[i];
     }
     
     ///////////////////////////////
@@ -784,7 +789,8 @@ bool Parametrization::initFromAmiraMesh(AmiraMesh* am, const char* filename, Sur
 #endif
 
 
-void Parametrization::setupOriginalSurface()
+template <int dim, class ctype>
+void PSurface<dim,ctype>::setupOriginalSurface()
 {
     int i, j, k;
     
@@ -942,7 +948,8 @@ void Parametrization::setupOriginalSurface()
     }
 }
 
-void Parametrization::appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch)
+template <int dim, class ctype>
+void PSurface<dim,ctype>::appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch)
 {
     surface->triangles.push_back(Surface::Triangle());
                         
@@ -959,7 +966,8 @@ void Parametrization::appendTriangleToOriginalSurface(const std::tr1::array<int,
 
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-void Parametrization::getPaths(const HxParamBundle& parameters)
+template <int dim, class ctype>
+void PSurface<dim,ctype>::getPaths(const HxParamBundle& parameters)
 {
     int i;
     paths.resize(0);
@@ -978,7 +986,8 @@ void Parametrization::getPaths(const HxParamBundle& parameters)
     }
 }
 
-void Parametrization::savePaths(HxParamBundle& parameters)
+template <int dim, class ctype>
+void PSurface<dim,ctype>::savePaths(HxParamBundle& parameters)
 {
     int i;
 
@@ -1002,7 +1011,8 @@ void Parametrization::savePaths(HxParamBundle& parameters)
 #endif
 
 
-int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<int,3>& vertices, 
+template <int dim, class ctype>
+int PSurface<dim,ctype>::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<int,3>& vertices, 
                          StaticVector<float,2>& coords, int seed) const
 {
     int i;
@@ -1090,7 +1100,8 @@ int Parametrization::map(int triIdx, StaticVector<float,2>& p, std::tr1::array<i
     return true;
 }
 
-void Parametrization::getActualVertices(int tri, const std::tr1::array<NodeIdx, 3>& nds,
+template <int dim, class ctype>
+void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeIdx, 3>& nds,
                                         std::tr1::array<GlobalNodeIdx, 3>& vertices) const
 {
     const DomainTriangle& cT = triangles(tri);
@@ -1202,7 +1213,8 @@ void Parametrization::getActualVertices(int tri, const std::tr1::array<NodeIdx, 
     }
 }
 
-int Parametrization::getImageSurfaceTriangle(int tri,
+template <int dim, class ctype>
+int PSurface<dim,ctype>::getImageSurfaceTriangle(int tri,
                                              const std::tr1::array<NodeIdx, 3>& nds
                                              ) const
 {
@@ -1239,7 +1251,8 @@ int Parametrization::getImageSurfaceTriangle(int tri,
     return -1;
 }
 
-std::vector<int> Parametrization::getTargetTrianglesPerNode(const GlobalNodeIdx& n) const
+template <int dim, class ctype>
+std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNodeIdx& n) const
 {
     assert(surface->trianglesPerPoint.size());
     const Node& cN = triangles(n.tri).nodes[n.idx];
@@ -1296,7 +1309,8 @@ std::vector<int> Parametrization::getTargetTrianglesPerNode(const GlobalNodeIdx&
 }
 
 /// This is a service routine only for getTargetTrianglesPerNode
-void Parametrization::getTrianglesPerEdge(int from, int to, std::vector<int>& tris, int exception) const
+template <int dim, class ctype>
+void PSurface<dim,ctype>::getTrianglesPerEdge(int from, int to, std::vector<int>& tris, int exception) const
 {
     for (int i=0; i<surface->trianglesPerPoint[from].size(); i++) {
 
@@ -1316,7 +1330,8 @@ void Parametrization::getTrianglesPerEdge(int from, int to, std::vector<int>& tr
 
 }
 
-void Parametrization::handleMapOnEdge(int triIdx, const StaticVector<float,2>& p, const StaticVector<float,2>& a, const StaticVector<float,2>& b,
+template <int dim, class ctype>
+void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<float,2>& p, const StaticVector<float,2>& a, const StaticVector<float,2>& b,
                                       int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const
 {
     const DomainTriangle& tri = triangles(triIdx);
@@ -1379,7 +1394,8 @@ void Parametrization::handleMapOnEdge(int triIdx, const StaticVector<float,2>& p
 }
 
 
-int Parametrization::positionMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
+template <int dim, class ctype>
+int PSurface<dim,ctype>::positionMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
 {
     StaticVector<float,2> localCoords;
     std::tr1::array<int,3> tri;
@@ -1400,7 +1416,8 @@ int Parametrization::positionMap(int triIdx, StaticVector<float,2>& p, StaticVec
 
 
 
-int Parametrization::directNormalMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
+template <int dim, class ctype>
+int PSurface<dim,ctype>::directNormalMap(int triIdx, StaticVector<float,2>& p, StaticVector<float,3>& result) const
 {
     StaticVector<float,2> localCoords;
     std::tr1::array<int,3> tri;
@@ -1420,7 +1437,8 @@ int Parametrization::directNormalMap(int triIdx, StaticVector<float,2>& p, Stati
     return true;
 }
 
-int Parametrization::invertTriangles(int patch)
+template <int dim, class ctype>
+int PSurface<dim,ctype>::invertTriangles(int patch)
 {
     
     int i;
@@ -1443,32 +1461,23 @@ int Parametrization::invertTriangles(int patch)
     return count;
 }
 
-// NodeIdx Parametrization::addNode(int tri, const StaticVector<float,3>& p)
-// {
-//     DomainTriangle& cT = pars[side].triangles(tri);
-
-//     pars[side].iPos.append(p);
-
-//     int nodeNumber = pars[side].iPos.size()-1;
-
-//     return cT.nodes.append(Node(StaticVector<float,2>(0,0), nodeNumber, Node::INTERIOR_NODE));  
-
-// }
-
-NodeIdx Parametrization::addInteriorNode(int tri, const StaticVector<float,2>& dom, int nodeNumber)
+template <int dim, class ctype>
+NodeIdx PSurface<dim,ctype>::addInteriorNode(int tri, const StaticVector<float,2>& dom, int nodeNumber)
 {
     triangles(tri).nodes.push_back(Node(dom, nodeNumber, Node::INTERIOR_NODE));
     return triangles(tri).nodes.size()-1;
 }
 
-NodeIdx Parametrization::addGhostNode(int tri, int corner, int targetTri, const StaticVector<float,2>& localTargetCoords)
+template <int dim, class ctype>
+NodeIdx PSurface<dim,ctype>::addGhostNode(int tri, int corner, int targetTri, const StaticVector<float,2>& localTargetCoords)
 {
     triangles(tri).nodes.push_back(Node());
     triangles(tri).nodes.back().makeGhostNode(corner, targetTri, localTargetCoords);
     return triangles(tri).nodes.size()-1;
 }
 
-NodeIdx Parametrization::addCornerNode(int tri, int corner, int nodeNumber)
+template <int dim, class ctype>
+NodeIdx PSurface<dim,ctype>::addCornerNode(int tri, int corner, int nodeNumber)
 {
     DomainTriangle& cT = triangles(tri);
 
@@ -1478,7 +1487,8 @@ NodeIdx Parametrization::addCornerNode(int tri, int corner, int nodeNumber)
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
-NodeIdx Parametrization::addIntersectionNodePair(int tri1, int tri2,
+template <int dim, class ctype>
+NodeIdx PSurface<dim,ctype>::addIntersectionNodePair(int tri1, int tri2,
                                                 const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
                                                 int edge1, int edge2, const StaticVector<float,3>& range)
 {
@@ -1501,7 +1511,8 @@ NodeIdx Parametrization::addIntersectionNodePair(int tri1, int tri2,
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
-NodeIdx Parametrization::addTouchingNode(int tri, const StaticVector<float,2>& dP, int edge, int nodeNumber)
+template <int dim, class ctype>
+NodeIdx PSurface<dim,ctype>::addTouchingNode(int tri, const StaticVector<float,2>& dP, int edge, int nodeNumber)
 {
     DomainTriangle& cT = triangles(tri);
 
@@ -1513,7 +1524,8 @@ NodeIdx Parametrization::addTouchingNode(int tri, const StaticVector<float,2>& d
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
-NodeIdx Parametrization::addTouchingNodePair(int tri1, int tri2,
+template <int dim, class ctype>
+NodeIdx PSurface<dim,ctype>::addTouchingNodePair(int tri1, int tri2,
                                             const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
                                             int edge1, int edge2, int nodeNumber)
 {
@@ -1532,7 +1544,8 @@ NodeIdx Parametrization::addTouchingNodePair(int tri1, int tri2,
     return cT1.nodes.size()-1;
 }
 
-void Parametrization::addParTriangle(int tri, const std::tr1::array<int,3>& p)
+template <int dim, class ctype>
+void PSurface<dim,ctype>::addParTriangle(int tri, const std::tr1::array<int,3>& p)
 {
     DomainTriangle& cT = triangles(tri);
 
@@ -1549,7 +1562,8 @@ void Parametrization::addParTriangle(int tri, const std::tr1::array<int,3>& p)
 
 }
 
-NodeBundle Parametrization::getNodeBundleAtVertex(int v) const
+template <int dim, class ctype>
+NodeBundle PSurface<dim,ctype>::getNodeBundleAtVertex(int v) const
 {
     NodeBundle result;
     std::vector<int> neighbors = getTrianglesPerVertex(v);
@@ -1574,3 +1588,12 @@ NodeBundle Parametrization::getNodeBundleAtVertex(int v) const
     return result;
 
 }
+
+
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
+
+template class PSurface<2,float>;
+template class PSurface<2,double>;
