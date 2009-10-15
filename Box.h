@@ -132,6 +132,16 @@ public:
 		return _upper[i]-_lower[i];
 	}
 
+        std::tr1::array<C,dim>& lower()
+	{
+		return _lower;
+	}
+
+	std::tr1::array<C,dim>& upper()
+	{
+		return _upper;
+	}
+
 	const std::tr1::array<C,dim>& lower() const
 	{
 		return _lower;
