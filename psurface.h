@@ -83,11 +83,6 @@ namespace psurface {
     /** \brief Returns the patch number of a given base grid triangle. */
     int GetPatchNoOfSegment(int tri);
 
-    /** \brief Returns four lists containing the patches that belong to
-     * a given part.
-     */
-    void GetPartLists(int *partLists[4], int partListLength[4]);
-
 }
 
 #endif 
