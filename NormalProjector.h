@@ -2,7 +2,7 @@
 #define NORMAL_PROJECTOR_H
 
 #include <psurface/StaticVector.h>
-#include "Parametrization.h"
+#include "PSurface.h"
 
 #include <vector>
 

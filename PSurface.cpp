@@ -13,7 +13,7 @@
 #include <amiramesh/AmiraMesh.h>
 #endif
 
-#include <psurface/Parametrization.h>
+#include <psurface/PSurface.h>
 #include <psurface/GlobalNodeIdx.h>
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE

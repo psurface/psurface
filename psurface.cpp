@@ -1,7 +1,7 @@
 #include <vector>
 #include <string>
 
-#include <psurface/Parametrization.h>
+#include <psurface/PSurface.h>
 #include <psurface/psurface.h>
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE

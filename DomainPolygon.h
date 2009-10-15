@@ -3,7 +3,7 @@
 
 #include <psurface/Domains.h>
 #include <psurface/PlaneParam.h>
-#include <psurface/Parametrization.h>
+#include <psurface/PSurface.h>
 
 class DomainTriangle;
 class DomainVertex;

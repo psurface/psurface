@@ -1,7 +1,7 @@
 #include <limits>
 
 #include <psurface/CircularPatch.h>
-#include <psurface/Parametrization.h>
+#include <psurface/PSurface.h>
 
 
 bool CircularPatch::inducesTopologyChange() const

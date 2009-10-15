@@ -1,4 +1,4 @@
-#include <psurface/Parametrization.h>
+#include <psurface/PSurface.h>
 #include <psurface/contact.h>
 #include <psurface/ContactToolBox.h>
 #include <psurface/IntersectionPrimitive.h>

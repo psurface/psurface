@@ -3,7 +3,7 @@
 
 #include <psurface/Box.h>
 #include <psurface/Domains.h>
-#include <psurface/Parametrization.h>
+#include <psurface/PSurface.h>
 
 
 class Parametrization;
