@@ -31,7 +31,7 @@ public:
 
         Box<float,3> box(surf->points[vertices[0]], surf->points[vertices[0]]);
         
-        for (int i=1; i<vertices.size(); i++)
+        for (size_t i=1; i<vertices.size(); i++)
             box.extendBy(surf->points[vertices[i]]);
 
         return box; 
@@ -44,7 +44,7 @@ public:
     std::vector<int> getVertexOffsets() const {
         std::vector<int> result(surf->points.size());
         result.assign(result.size(), -1);
-        for (int i=0; i<vertices.size(); i++)
+        for (size_t i=0; i<vertices.size(); i++)
             result[vertices[i]] = i;
 
         return result;
@@ -53,7 +53,7 @@ public:
     /// \todo Should be faster
     int containsEdge(int from, int to) const {
         int counter=0;
-        for (int i=0; i<triIdx.size(); i++)
+        for (size_t i=0; i<triIdx.size(); i++)
             for (int j=0; j<3; j++)
                 if ((triangles(i).points[j]==from && triangles(i).points[(j+1)%3]==to) ||
                     (triangles(i).points[j]==to && triangles(i).points[(j+1)%3]==from))

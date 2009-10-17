@@ -39,7 +39,7 @@ namespace ContactToolBox {
 
     /** \brief Extraction of the merged grid */
     void extractMergedGrid(PSurface<2,float>* cPar,
-                           std::vector<IntersectionPrimitive<float> >& mergedGrid);
+                           std::vector<IntersectionPrimitive<2,float> >& mergedGrid);
 
     //@}
 };

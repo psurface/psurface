@@ -32,7 +32,7 @@ void buildContactMapping(const std::vector<std::tr1::array<double,3> >& coords1,
  * Computes the overlaps of the images of contact surface triangles on the 
  * nonmortar side. They are returned as an array of IntPrimitives.
  */
-void getMergedGrid(std::vector<IntersectionPrimitive<float> >& overlaps);
+void getMergedGrid(std::vector<IntersectionPrimitive<2,float> >& overlaps);
 
 /** \brief Properly removes the current intermediate surface.
  *
