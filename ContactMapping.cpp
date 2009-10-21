@@ -4,7 +4,8 @@
 #include <psurface/ContactMapping.h>
 #include <psurface/StaticMatrix.h>
 
-void ContactMapping<2>::build(const std::vector<std::tr1::array<double,2> >& coords1,  ///< The vertex coordinates of the first surface
+template <class ctype>
+void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<double,2> >& coords1,  ///< The vertex coordinates of the first surface
                const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface
                const std::vector<std::tr1::array<double,2> >& coords2,  ///< The vertices of the second surface
                const std::vector<std::tr1::array<int,2> >& tri2,
@@ -445,7 +446,8 @@ void ContactMapping<2>::build(const std::vector<std::tr1::array<double,2> >& coo
 
 }
 
-void ContactMapping<2>::getOverlaps(std::vector<IntersectionPrimitive<1,float> >& overlaps)
+template <class ctype>
+void ContactMapping<2,ctype>::getOverlaps(std::vector<IntersectionPrimitive<1,float> >& overlaps)
 {
     for (int i=0; i<domainSegments.size(); i++) {
 
@@ -507,7 +509,8 @@ void ContactMapping<2>::getOverlaps(std::vector<IntersectionPrimitive<1,float> >
 //     exit(0);
 }
 
-bool ContactMapping<2>::isCompletelyCovered(int i) const
+template <class ctype>
+bool ContactMapping<2,ctype>::isCompletelyCovered(int i) const
 {
     // A domain segment is completely covered by the mapping if the first
     // and last node coincide with the ends of the domain boundary segment and if
@@ -532,7 +535,8 @@ bool ContactMapping<2>::isCompletelyCovered(int i) const
     return true;
 }
 
-bool ContactMapping<2>::computeInverseNormalProjection(const StaticVector<double,2>& p0,
+template <class ctype>
+bool ContactMapping<2,ctype>::computeInverseNormalProjection(const StaticVector<double,2>& p0,
                                                        const StaticVector<double,2>& p1,
                                                        const StaticVector<double,2>& n0,
                                                        const StaticVector<double,2>& n1,
@@ -565,7 +569,8 @@ bool ContactMapping<2>::computeInverseNormalProjection(const StaticVector<double
     return false;
 }
 
-bool ContactMapping<2>::normalProjection(const StaticVector<double,2>& base,
+template <class ctype>
+bool ContactMapping<2,ctype>::normalProjection(const StaticVector<double,2>& base,
                                          const StaticVector<double,2>& direction,
                                          int& bestSegment,
                                          double& rangeLocalPosition,
@@ -600,7 +605,8 @@ bool ContactMapping<2>::normalProjection(const StaticVector<double,2>& base,
     return bestSegment != -1;
 }
 
-bool ContactMapping<2>::
+template <class ctype>
+bool ContactMapping<2,ctype>::
 rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
                   const StaticVector<double, 2>& direction,
                   const StaticVector<double, 2>& a, 
@@ -644,3 +650,10 @@ rayIntersectsLine(const StaticVector<double, 2>& basePoint,
     return true;
 
 }
+
+// ///////////////////////////////////////////////////////////////////////
+//   Explicitly instantiate 'float' and 'double' versions of this code
+// ///////////////////////////////////////////////////////////////////////
+
+template class ContactMapping<2,float>;
+template class ContactMapping<2,double>;

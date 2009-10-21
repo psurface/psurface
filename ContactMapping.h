@@ -8,11 +8,11 @@
 #include <psurface/StaticVector.h>
 #include <psurface/contact.h>
 
-template <int dim>
+template <int dim, class ctype>
 class ContactMapping {};
 
-template <>
-class ContactMapping<2>
+template <class ctype>
+class ContactMapping<2,ctype>
 {
 public:
     void build(const std::vector<std::tr1::array<double,2> >& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
@@ -111,8 +111,8 @@ private:
 };
 
 
-template <>
-class ContactMapping<3>
+template <class ctype>
+class ContactMapping<3,ctype>
 {
 public:	
 
