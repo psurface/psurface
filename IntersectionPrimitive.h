@@ -49,10 +49,10 @@ public:
      * overlap in barycentric coordinates.
      *
      * Interpret it like this:  The first index selects nonmortar resp.
-     * mortar side.  The second index tells which of the three points
+     * mortar side.  The second index tells which of the simplex points
      * of the IntersectionPrimitive is to be considered.  
      */
-    std::tr1::array<std::tr1::array<StaticVector<ctype,2>, nPoints> , dim> localCoords;
+    std::tr1::array<std::tr1::array<StaticVector<ctype,dim>, nPoints> , 2> localCoords;
 
 };
 
