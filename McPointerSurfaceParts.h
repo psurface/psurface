@@ -36,21 +36,16 @@ public:
 
     ///
     void removeReferenceTo(int edge){
-        /** \todo Can be implemented more elegantly using the find() method */
-        for (size_t i=0; i<edges.size(); i++)
-            if (edges[i] == edge){
-                edges.erase(edges.begin() + i);
-                break;
-            }
+        typename std::vector<int>::iterator it = std::find(edges.begin(), edges.end(), edge);
+        if (it != edges.end())
+            edges.erase(it);
     }
 
     ///
     void replaceReferenceTo(int a, int b){
-        for (size_t i=0; i<edges.size(); i++)
-            if (edges[i] == a){
-                edges[i] = b;
-                break;
-            }
+        typename std::vector<int>::iterator it = std::find(edges.begin(), edges.end(), a);
+        if (it != edges.end())
+            *it = b;
     }
 };
 
@@ -97,11 +92,11 @@ public:
 
     ///
     bool removeReferenceTo(int tri){
-        for(size_t i=0; i<triangles.size(); i++)
-            if (triangles[i] == tri){
-                triangles.erase(triangles.begin() + i);
-                return true;
-            }
+        std::vector<int>::iterator it = std::find(triangles.begin(), triangles.end(), tri);
+        if (it != triangles.end()) {
+            triangles.erase(it);
+            return true;
+        }
 
         return false;
     }
