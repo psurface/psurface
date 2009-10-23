@@ -8,21 +8,24 @@
 #include <psurface/Box.h>
 
 
-///////////////////////////////////////////////////////////////
-/** This is the base class for vertices in a McSurfaceBase.  The template argument
-    @c VertexType that you instantiate McSurfaceBase with has to be derived from it.  
-    You cannot use it directly because this class has itself as a template parameter.  (You 
-    would get 
-    <tt>McVertex &lt McVertex &lt McVertex &lt ... &gt &gt &gt, YourEdgeType, YourTriangleType &gt </tt>)
-    However, any derived class will do.
+/** This is the base class for vertices in a McSurfaceBase.  
+
+\tparam ctype The type used for coordinates
+
     @see McPointerSurface, McEdge, McTriangle
 */
-///////////////////////////////////////////////////////////////
-class McVertex: public StaticVector<float,3>
+template <class ctype>
+class McVertex: public StaticVector<ctype,3>
 {
 public:
+
+    /** \brief Default constructor */
     McVertex() {}
-    McVertex(const StaticVector<float,3> &a) : StaticVector<float,3>(a) {}
+
+    /** \brief Constructor for a given position */
+    McVertex(const StaticVector<ctype,3> &a) 
+        : StaticVector<ctype,3>(a) 
+    {}
 
     ~McVertex() {}
 
@@ -36,7 +39,6 @@ public:
         /** \todo Can be implemented more elegantly using the find() method */
         for (size_t i=0; i<edges.size(); i++)
             if (edges[i] == edge){
-                //edges.remove(i);
                 edges.erase(edges.begin() + i);
                 break;
             }
@@ -64,9 +66,6 @@ public:
     ///
     McEdge(){}
 
-    ///
-    ~McEdge(){}
-    
     ///
     McEdge(int a, int b)
         {

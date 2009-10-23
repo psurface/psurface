@@ -21,7 +21,7 @@ bool CircularPatch::inducesTopologyChange() const
 }
 
 bool CircularPatch::hasSmallDihedralAngles(float threshold, const Parametrization* par, 
-                                           const McVertex* centerVertex) const
+                                           const McVertex<float>* centerVertex) const
 {
     printf("hasSmallDihedralAngles has been commented out!\n");
 #if 0

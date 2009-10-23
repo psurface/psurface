@@ -34,7 +34,7 @@ class AmiraMesh;
 */
 template <int dim, class ctype>
 class PSurface
-    : public McSurfaceBase<McVertex, McEdge, DomainTriangle>{
+    : public McSurfaceBase<McVertex<float>, McEdge, DomainTriangle>{
 
 public:
 

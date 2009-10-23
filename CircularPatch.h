@@ -112,7 +112,7 @@ public:
 
     ///
     bool hasSmallDihedralAngles(float threshold, const Parametrization* par, 
-                                 const McVertex* centerVertex) const;
+                                 const McVertex<float>* centerVertex) const;
 
     /// returns the largest triangle aspect ratio
     float maxAspectRatio() const {
