@@ -31,9 +31,6 @@ public:
     McSurfaceBase(){}
 
     ///
-    ~McSurfaceBase(){}
-
-    ///
     void clear() {
         triangleArray.resize(0);
         freeTriangleStack.resize(0);
