@@ -27,6 +27,9 @@ class McSurfaceBase {
 
 public:
 
+    /** \brief The type used for coordinates */
+    typedef typename VertexType::coordtype ctype;
+
     ///
     McSurfaceBase(){}
 
@@ -123,7 +126,7 @@ public:
     }
 
 
-    int newVertex(const StaticVector<float,3>& p) {
+    int newVertex(const StaticVector<ctype,3>& p) {
 
         if (freeVertexStack.size()){
             int newVertexIdx = freeVertexStack.back();
@@ -320,15 +323,15 @@ public:
     //@{
 
     /// gives the smallest interior angle of a triangle
-    float minInteriorAngle(int n) const {
-        float minAngle = 2*M_PI;
+    ctype minInteriorAngle(int n) const {
+        ctype minAngle = 2*M_PI;
         const std::tr1::array<int, 3>& p = triangles(n).vertices;
 
         for (int i=0; i<3; i++){
-            StaticVector<float,3> a = vertices(p[(i+1)%3]) - vertices(p[i]);
-            StaticVector<float,3> b = vertices(p[(i+2)%3]) - vertices(p[i]);
+            StaticVector<ctype,3> a = vertices(p[(i+1)%3]) - vertices(p[i]);
+            StaticVector<ctype,3> b = vertices(p[(i+2)%3]) - vertices(p[i]);
 
-            float angle = acosf(a.dot(b) / (a.length() * b.length()));
+            ctype angle = acosf(a.dot(b) / (a.length() * b.length()));
             if (angle<minAngle)
                 minAngle = angle;
         }
@@ -337,32 +340,32 @@ public:
     }
 
     /// returns the aspect ratio
-    float aspectRatio(int n) const {
+    ctype aspectRatio(int n) const {
 
         const std::tr1::array<int, 3>& p = triangles(n).vertices;
 
-        const float a = (vertices(p[1]) - vertices(p[0])).length();
-        const float b = (vertices(p[2]) - vertices(p[1])).length();
-        const float c = (vertices(p[0]) - vertices(p[2])).length();
+        const ctype a = (vertices(p[1]) - vertices(p[0])).length();
+        const ctype b = (vertices(p[2]) - vertices(p[1])).length();
+        const ctype c = (vertices(p[0]) - vertices(p[2])).length();
 
-        const float aR = 2*a*b*c/((-a+b+c)*(a-b+c)*(a+b-c));
+        const ctype aR = 2*a*b*c/((-a+b+c)*(a-b+c)*(a+b-c));
 
         // might be negative due to inexact arithmetic
         return fabs(aR);
     }
 
         /// returns the normal vector
-    StaticVector<float,3> normal(int tri) const {
-        const StaticVector<float,3> a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
-        const StaticVector<float,3> b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
-        StaticVector<float,3> n = a.cross(b);
+    StaticVector<ctype,3> normal(int tri) const {
+        const StaticVector<ctype,3> a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
+        const StaticVector<ctype,3> b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
+        StaticVector<ctype,3> n = a.cross(b);
         n.normalize();
         return n;
     }
 
     ///
-    float smallestDihedralAngle(int edge) const {
-        float minAngle = std::numeric_limits<float>::max();
+    ctype smallestDihedralAngle(int edge) const {
+        ctype minAngle = std::numeric_limits<ctype>::max();
         for (int i=0; i<edges(edge).triangles.size(); i++)
             for (int j=i+1; j<edges(edge).triangles.size(); j++)
                 minAngle = std::min(minAngle,dihedralAngle(edges(edge).triangles[i], edges(edge).triangles[j]));
@@ -371,26 +374,26 @@ public:
     }
 
     /// gives the surface area
-    float area(int tri) const { 
-        StaticVector<float,3> a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
-        StaticVector<float,3> b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
+    ctype area(int tri) const { 
+        StaticVector<ctype,3> a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
+        StaticVector<ctype,3> b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
 
         return fabs(0.5 * (a.cross(b)).length());
     }
 
     /// gives the dihedral angle with a neighboring triangle
-    float dihedralAngle(int first, int second) const {
-        StaticVector<float,3> n1 = normal(first);
-        StaticVector<float,3> n2 = normal(second);
+    ctype dihedralAngle(int first, int second) const {
+        StaticVector<ctype,3> n1 = normal(first);
+        StaticVector<ctype,3> n2 = normal(second);
 
-        float scalProd = n1.dot(n2);
+        ctype scalProd = n1.dot(n2);
         if (scalProd < -1) scalProd = -1;
         if (scalProd >  1) scalProd =  1;
 
         return (triangles(first).isCorrectlyOriented(triangles(second))) ? acos(-scalProd) : acos(scalProd);
     }
 
-    float length(int e) const {
+    ctype length(int e) const {
         return (vertices(edges(e).from) - vertices(edges(e).to)).length();
     }
 
@@ -403,9 +406,9 @@ public:
         faster than the one that returns the intersection point. */
     bool intersectionTriangleEdge(int tri, 
                                   const McEdge*edge,
-                                  float eps=0) const {
+                                  ctype eps=0) const {
         bool parallel;
-        StaticVector<float,3> where;
+        StaticVector<ctype,3> where;
         return intersectionTriangleEdge(tri, edge, where, parallel, eps);
     }
 
@@ -413,31 +416,31 @@ public:
         point if there is one. If not, the variable @c where is untouched. */
     bool intersectionTriangleEdge(int tri, 
                                   const McEdge *edge, 
-                                  StaticVector<float,3>& where, 
-                                  bool& parallel, float eps=0) const{
+                                  StaticVector<ctype,3>& where, 
+                                  bool& parallel, ctype eps=0) const{
 
         const TriangleType& cT = triangles(tri);
 
-        const StaticVector<float,3> &p = vertices(edge->from);
-        const StaticVector<float,3> &q = vertices(edge->to);
-        const StaticVector<float,3> &a = vertices(cT.vertices[0]);
-        const StaticVector<float,3> &b = vertices(cT.vertices[1]);
-        const StaticVector<float,3> &c = vertices(cT.vertices[2]);
+        const StaticVector<ctype,3> &p = vertices(edge->from);
+        const StaticVector<ctype,3> &q = vertices(edge->to);
+        const StaticVector<ctype,3> &a = vertices(cT.vertices[0]);
+        const StaticVector<ctype,3> &b = vertices(cT.vertices[1]);
+        const StaticVector<ctype,3> &c = vertices(cT.vertices[2]);
 
         // Cramer's rule
-        float det = StaticMatrix<float,3>(b-a, c-a, p-q).det();
+        ctype det = StaticMatrix<ctype,3>(b-a, c-a, p-q).det();
         if (det<-eps || det>eps){
             
             // triangle and edge are not parallel
             parallel = false;
 
-            float nu = StaticMatrix<float,3>(b-a, c-a, p-a).det() / det;
+            ctype nu = StaticMatrix<ctype,3>(b-a, c-a, p-a).det() / det;
             if (nu<-eps || nu>1+eps) return false;
 
-            float lambda = StaticMatrix<float,3>(p-a, c-a, p-q).det() / det;
+            ctype lambda = StaticMatrix<ctype,3>(p-a, c-a, p-q).det() / det;
             if (lambda<-eps) return false;
 
-            float mu = StaticMatrix<float,3>(b-a, p-a, p-q).det() / det;
+            ctype mu = StaticMatrix<ctype,3>(b-a, p-a, p-q).det() / det;
             if (mu<-eps) return false;
 
             if (lambda+mu > 1+eps) 
@@ -452,7 +455,7 @@ public:
             // triangle and edge are parallel
             parallel = true;
             
-            float alpha = StaticMatrix<float,3>(b-a, c-a, p-a).det();
+            ctype alpha = StaticMatrix<ctype,3>(b-a, c-a, p-a).det();
             if (alpha<-eps || alpha>eps)
                 return false;
             else {
@@ -462,9 +465,9 @@ public:
                 // 2D intersection test
 
                 // project onto the coordinate plane that is 'most parallel' to the triangle
-                StaticVector<float,3> normal = (b-a).cross(c-a);
+                StaticVector<ctype,3> normal = (b-a).cross(c-a);
 
-                StaticVector<float,2> a2D, b2D, c2D, p2D, q2D;
+                StaticVector<ctype,2> a2D, b2D, c2D, p2D, q2D;
 
                 for (i=0; i<3; i++) 
                     if (normal[i]<0)
@@ -473,11 +476,11 @@ public:
                 for (i=0; i<3; i++)
                     if (normal[i]>=normal[(i+1)%3] && normal[i]>=normal[(i+2)%3]) {
 
-                        a2D = StaticVector<float,2>(a[(i+1)%3], a[(i+2)%3]);
-                        b2D = StaticVector<float,2>(b[(i+1)%3], b[(i+2)%3]);
-                        c2D = StaticVector<float,2>(c[(i+1)%3], c[(i+2)%3]);
-                        p2D = StaticVector<float,2>(p[(i+1)%3], p[(i+2)%3]);
-                        q2D = StaticVector<float,2>(q[(i+1)%3], q[(i+2)%3]);
+                        a2D = StaticVector<ctype,2>(a[(i+1)%3], a[(i+2)%3]);
+                        b2D = StaticVector<ctype,2>(b[(i+1)%3], b[(i+2)%3]);
+                        c2D = StaticVector<ctype,2>(c[(i+1)%3], c[(i+2)%3]);
+                        p2D = StaticVector<ctype,2>(p[(i+1)%3], p[(i+2)%3]);
+                        q2D = StaticVector<ctype,2>(q[(i+1)%3], q[(i+2)%3]);
 
                     }
 
@@ -498,20 +501,20 @@ public:
 protected:
 
     /// Tests whether the point is inside the triangle given by the three argument points.
-    static bool pointInTriangle(const StaticVector<float,2>& p,
-                                const StaticVector<float,2>& a, 
-                                const StaticVector<float,2>& b, 
-                                const StaticVector<float,2>& c, float eps=0) {
-         StaticVector<float,3> localBarycentricCoords;
+    static bool pointInTriangle(const StaticVector<ctype,2>& p,
+                                const StaticVector<ctype,2>& a, 
+                                const StaticVector<ctype,2>& b, 
+                                const StaticVector<ctype,2>& c, ctype eps=0) {
+         StaticVector<ctype,3> localBarycentricCoords;
 
         // McMat3f(this->x, b.x, c.x,  this->y, b[1], c[1],  1, 1, 1).det();
-        float area0 = p[0] * (b[1]-c[1]) - b[0] * (p[1] - c[1]) + c[0] * (p[1] - b[1]);
+        ctype area0 = p[0] * (b[1]-c[1]) - b[0] * (p[1] - c[1]) + c[0] * (p[1] - b[1]);
 
         // McMat3f(a[0], this->x, c[0],  a[1], this->y, c[1],  1, 1, 1).det();
-        float area1 = a[0] * (p[1]-c[1]) - p[0] * (a[1] - c[1]) + c[0] * (a[1] - p[1]);
+        ctype area1 = a[0] * (p[1]-c[1]) - p[0] * (a[1] - c[1]) + c[0] * (a[1] - p[1]);
 
         // McMat3f(a[0], b[0], c[0],  a[1], b[1], c[1],  1, 1, 1).det();
-        float areaTotal = a[0] * (b[1]-c[1]) - b[0] * (a[1] - c[1]) + c[0] * (a[1] - b[1]);
+        ctype areaTotal = a[0] * (b[1]-c[1]) - b[0] * (a[1] - c[1]) + c[0] * (a[1] - b[1]);
 
         localBarycentricCoords[0] = area0/areaTotal;
         localBarycentricCoords[1] = area1/areaTotal;
@@ -520,12 +523,12 @@ protected:
         return (localBarycentricCoords[0]>=-eps && localBarycentricCoords[1]>=-eps && localBarycentricCoords[2]>=-eps);
     }
 
-    static bool lineIntersection2D(const StaticVector<float,2> &p1, const StaticVector<float,2> &p2, const StaticVector<float,2> &p3, const StaticVector<float,2> &p4, float eps=0) {
-        const StaticVector<float,2> A = p2 - p1;
-        const StaticVector<float,2> B = p3 - p4;
-        const StaticVector<float,2> C = p1 - p3;
+    static bool lineIntersection2D(const StaticVector<ctype,2> &p1, const StaticVector<ctype,2> &p2, const StaticVector<ctype,2> &p3, const StaticVector<ctype,2> &p4, ctype eps=0) {
+        const StaticVector<ctype,2> A = p2 - p1;
+        const StaticVector<ctype,2> B = p3 - p4;
+        const StaticVector<ctype,2> C = p1 - p3;
         
-        float det = A[1]*B[0] - A[0]*B[1];
+        ctype det = A[1]*B[0] - A[0]*B[1];
 
         // 1D intersection
         if (det>=-eps && det<=eps)
@@ -534,15 +537,15 @@ protected:
                       ((p2-p3).length() + (p2-p4).length()) / (p3-p4).length() < 1+eps ||
                       ((p1-p3).length() + (p1-p4).length()) / (p3-p4).length() < 1+eps   );
         
-        float mu     = (A[0]*C[1] - A[1]*C[0]) / det;
-        float lambda = (B[1]*C[0] - B[0]*C[1]) / det;
+        ctype mu     = (A[0]*C[1] - A[1]*C[0]) / det;
+        ctype lambda = (B[1]*C[0] - B[0]*C[1]) / det;
 
         return (mu>-eps && mu<1+eps && lambda>-eps && lambda<1+eps);
     }
 
 public:
     /// 
-    bool intersectionTriangleBox(int n, const Box<float, 3>& box) {
+    bool intersectionTriangleBox(int n, const Box<ctype, 3>& box) {
         return box.contains(vertices(triangles(n).vertices[0])) ||
             box.contains(vertices(triangles(n).vertices[1])) ||
             box.contains(vertices(triangles(n).vertices[2]));

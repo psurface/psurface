@@ -19,6 +19,9 @@ class McVertex: public StaticVector<ctype,3>
 {
 public:
 
+    /** \brief Export coordinate type */
+    typedef ctype coordtype;
+
     /** \brief Default constructor */
     McVertex() {}
 
