@@ -9,7 +9,7 @@
 
 /** A triangle containing a plane triangulation */
 class DomainTriangle : public McTriangle,
-                       public PlaneParam
+                       public PlaneParam<float>
 {
 public:
     /// default constructor
@@ -21,10 +21,10 @@ public:
     }
 
     /// creates a domain triangle with an empty parametrization
-    DomainTriangle(int vertexIdx[3]) : McTriangle(vertexIdx), PlaneParam() {}
+    DomainTriangle(int vertexIdx[3]) : McTriangle(vertexIdx), PlaneParam<float>() {}
 
     /// creates a domain triangle with an empty parametrization
-    DomainTriangle(int a, int b, int c) : McTriangle(a, b, c), PlaneParam() {}
+    DomainTriangle(int a, int b, int c) : McTriangle(a, b, c), PlaneParam<float>() {}
 
     ~DomainTriangle() {}
 
@@ -32,7 +32,7 @@ public:
 
     /// creates the identical parametrization
     void makeOneTriangle(int a, int b, int c){
-        PlaneParam::makeOneTriangle(a, b, c);
+        PlaneParam<float>::makeOneTriangle(a, b, c);
 
         edgePoints[0].resize(2);
         edgePoints[0][0] = 0;
@@ -126,7 +126,7 @@ public:
     void adjustTouchingNodes();
 
     void augmentNeighborIdx(int d) {
-        PlaneParam::augmentNeighborIdx(d);
+        PlaneParam<float>::augmentNeighborIdx(d);
 
         for (int i=0; i<3; i++)
             for (size_t j=0; j<edgePoints[i].size(); j++)
@@ -161,7 +161,7 @@ public:
         const StaticVector<float,2> b = nodes[cornerNode(1)].domainPos();
         const StaticVector<float,2> c = nodes[cornerNode(2)].domainPos();
 
-        PlaneParam::installBarycentricCoordinates(a, b, c);
+        PlaneParam<float>::installBarycentricCoordinates(a, b, c);
     }
 
 

@@ -30,7 +30,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
             // size() returns an unsigned type, which underflows if edgePoints[k] is empty
             for (int l=0; l<((int)cT.edgePoints[k].size())-1; l++) {
 
-                PlaneParam::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
+                PlaneParam<float>::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
 
                 if (cE.isValid() && cE.getDPrev().from() != cE.getONext().to())
                     cT.addEdge(cE.getONext().to(), cE.to(), true);
@@ -84,7 +84,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
 #endif
 
         ////////////////////////////////
-        PlaneParam::TriangleIterator cPT;
+        PlaneParam<float>::TriangleIterator cPT;
         for (cPT = cT.firstTriangle(); cPT.isValid(); ++cPT) {
 
             
@@ -119,7 +119,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
             
                 // world coordinates in the domain triangle
                 mergedGrid.back().points[j] = 
-                    PlaneParam::linearInterpol<StaticVector<float,3> >(cT.nodes[cPT.vertices(j)].domainPos(),
+                    PlaneParam<float>::linearInterpol<StaticVector<float,3> >(cT.nodes[cPT.vertices(j)].domainPos(),
                                                                        cPar->vertices(cT.vertices[0]), 
                                                                        cPar->vertices(cT.vertices[1]), 
                                                                        cPar->vertices(cT.vertices[2]));

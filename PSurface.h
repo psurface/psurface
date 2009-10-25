@@ -167,10 +167,10 @@ public:
     void removeExtraEdges();
 
     /// Returns a reference to the node specified by a GlobalNodeIdx
-    Node& nodes(const GlobalNodeIdx& n) {return triangles(n.tri).nodes[n.idx];}
+    Node<float>& nodes(const GlobalNodeIdx& n) {return triangles(n.tri).nodes[n.idx];}
 
     /// Returns a const reference to the node specified by a GlobalNodeIdx
-    const Node& nodes(const GlobalNodeIdx& n) const {return triangles(n.tri).nodes[n.idx];}
+    const Node<float>& nodes(const GlobalNodeIdx& n) const {return triangles(n.tri).nodes[n.idx];}
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
     StaticVector<float,3> imagePos(const GlobalNodeIdx& n) const {
@@ -180,19 +180,19 @@ public:
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
     StaticVector<float,3> imagePos(int tri, NodeIdx node) const {
-        const Node& cN = triangles(tri).nodes[node];
+        const Node<float>& cN = triangles(tri).nodes[node];
 
         switch (cN.type) {
-        case Node::GHOST_NODE: {
+        case Node<float>::GHOST_NODE: {
             const Surface::Triangle& cT = surface->triangles[cN.getNodeNumber()];
 
             StaticVector<float,3> p0(surface->points[cT.points[0]][0],surface->points[cT.points[0]][1],surface->points[cT.points[0]][2]);
             StaticVector<float,3> p1(surface->points[cT.points[1]][0],surface->points[cT.points[1]][1],surface->points[cT.points[1]][2]);
             StaticVector<float,3> p2(surface->points[cT.points[2]][0],surface->points[cT.points[2]][1],surface->points[cT.points[2]][2]);
 
-            return PlaneParam::linearInterpol(cN.dP, p0, p1, p2);
+            return PlaneParam<float>::linearInterpol(cN.dP, p0, p1, p2);
         }
-        case Node::INTERSECTION_NODE:
+        case Node<float>::INTERSECTION_NODE:
             return iPos[cN.getNodeNumber()];
 
         default:

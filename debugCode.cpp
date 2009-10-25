@@ -3,7 +3,8 @@
 #include <psurface/DomainPolygon.h>
 #include <psurface/CircularPatch.h>
 
-void Node::print(bool showNeighbors) const
+template <class ctype>
+void Node<ctype>::print(bool showNeighbors) const
 {
 #ifndef NDEBUG
     printf("dom (%f %f) ", domainPos()[0], domainPos()[1]);
@@ -42,7 +43,8 @@ void Node::print(bool showNeighbors) const
 #endif
 }
  
-void PlaneParam::print(bool showNodes, bool showParamEdges, bool showExtraEdges) const 
+template <class ctype>
+void PlaneParam<ctype>::print(bool showNodes, bool showParamEdges, bool showExtraEdges) const 
 {
 #ifndef NDEBUG
     printf("---------------------------------------------------------\n");
@@ -189,7 +191,8 @@ void PSurface<dim,ctype>::checkConsistency(const char* where) const
 #endif
 }
 
-void PlaneParam::checkConsistency(const char* where) const
+template <class ctype>
+void PlaneParam<ctype>::checkConsistency(const char* where) const
 {
 #ifndef NDEBUG
     int i, j, k;
@@ -197,7 +200,7 @@ void PlaneParam::checkConsistency(const char* where) const
 
     for (k=0; k<nodes.size(); k++) {
 
-        const Node& cN = nodes[k];
+        const Node<ctype>& cN = nodes[k];
         if (cN.isInvalid())
             continue;
 
@@ -280,7 +283,7 @@ void DomainTriangle::checkConsistency(const char* where) const
             assert(false);
         }
         
-    PlaneParam::checkConsistency(where);
+    PlaneParam<float>::checkConsistency(where);
 
     // check whether all corner nodes are of type CORNER_NODE
     for (i=0; i<3; i++){
@@ -316,8 +319,8 @@ void DomainTriangle::checkConsistency(const char* where) const
         }
         // check if two subsequent TOUCHING_NODES are connected by an edge
         for (j=0; j<edgePoints[i].size()-1; j++){
-            const Node& nA = nodes[edgePoints[i][j]];
-            const Node& nB = nodes[edgePoints[i][j+1]];
+            const Node<float>& nA = nodes[edgePoints[i][j]];
+            const Node<float>& nB = nodes[edgePoints[i][j+1]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
@@ -331,8 +334,8 @@ void DomainTriangle::checkConsistency(const char* where) const
 
         // check whether nodes that are not neighbors in the edgePoint array are connected
         for (j=0; j<edgePoints[i].size()-2; j++) {
-            const Node& nA = nodes[edgePoints[i][j]];
-            const Node& nB = nodes[edgePoints[i][j+2]];
+            const Node<float>& nA = nodes[edgePoints[i][j]];
+            const Node<float>& nB = nodes[edgePoints[i][j+2]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 (nA.isConnectedTo(edgePoints[i][j+2]) || nB.isConnectedTo(edgePoints[i][j]))) {
@@ -351,7 +354,7 @@ void DomainTriangle::checkConsistency(const char* where) const
 
     for (int k=0; k<nodes.size(); k++) {
 
-        const Node& cN = nodes[k];
+        const Node<float>& cN = nodes[k];
 
 //         if (cN.domainPos().x < -0.01 || cN.domainPos().x > 1.01 ||
 //             cN.domainPos().y < -0.01 || cN.domainPos().y > 1.01) {
@@ -386,7 +389,7 @@ void DomainPolygon::checkConsistency(const char* where)
 #ifndef NDEBUG
     
     int i, j;
-    PlaneParam::checkConsistency(where);
+    PlaneParam<float>::checkConsistency(where);
 
     // check whether all corner nodes are of type CORNER_NODE
     for (i=0; i<edgePoints.size(); i++){
@@ -408,8 +411,8 @@ void DomainPolygon::checkConsistency(const char* where)
                 continue;
             }
 
-            Node& nA = nodes[edgePoints[i][j]];
-            Node& nB = nodes[edgePoints[i][j+1]];
+            Node<float>& nA = nodes[edgePoints[i][j]];
+            Node<float>& nB = nodes[edgePoints[i][j+1]];
 
             if (!nA.isInvalid() && !nB.isInvalid() && 
                 nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
@@ -425,8 +428,8 @@ void DomainPolygon::checkConsistency(const char* where)
             if (edgePoints[i][j]<0 || edgePoints[i][j+2]<0)
                 continue;
 
-            const Node& nA = nodes[edgePoints[i][j]];
-            const Node& nB = nodes[edgePoints[i][j+2]];
+            const Node<float>& nA = nodes[edgePoints[i][j]];
+            const Node<float>& nB = nodes[edgePoints[i][j+2]];
             
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 (nA.isConnectedTo(edgePoints[i][j+2]) || nB.isConnectedTo(edgePoints[i][j]))) {

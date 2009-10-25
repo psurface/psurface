@@ -10,9 +10,8 @@ inline int isnan(double x) {return _isnan(x);}
 inline int random() {return rand();}
 #endif
 
-PlaneParam::~PlaneParam() {}
-
-PlaneParam::DirectedEdgeIterator PlaneParam::BFLocate(const StaticVector<float,2> &p, int seed) const
+template <class ctype>
+typename PlaneParam<ctype>::DirectedEdgeIterator PlaneParam<ctype>::BFLocate(const StaticVector<ctype,2> &p, int seed) const
 {
 
     //printf("----- BFLocate -----\n");
@@ -31,8 +30,8 @@ PlaneParam::DirectedEdgeIterator PlaneParam::BFLocate(const StaticVector<float,2
 
     while (true){
 
-        StaticVector<float,2> from = nodes[cE.from()].domainPos();
-        StaticVector<float,2> to   = nodes[cE.to()].domainPos();
+        StaticVector<ctype,2> from = nodes[cE.from()].domainPos();
+        StaticVector<ctype,2> to   = nodes[cE.to()].domainPos();
 
         //printf("cE:  %d (%f %f) --> %d (%f %f)\n", cE.from(), from.x, from.y, cE.to(), to.x, to.y);
 
@@ -123,25 +122,26 @@ PlaneParam::DirectedEdgeIterator PlaneParam::BFLocate(const StaticVector<float,2
 // This routine sorts the neighbors of a given vertex in a cyclic order.  It is not as
 // robust as the topological algorithm, however, adjacent neighbors need not be connected
 // by edges.  Therefore, the method can be called without calling insertExtraEdges first.
-void PlaneParam::makeCyclicGeometrically(Node& center)
+template <class ctype>
+void PlaneParam<ctype>::makeCyclicGeometrically(Node<ctype>& center)
 {
     if (center.degree()<=2)
         return;
 
     int i, j;
    
-    std::vector<float> angles(center.degree());
+    std::vector<ctype> angles(center.degree());
 
     // compute angles
-    StaticVector<float,2> edge0Vec = nodes[center.neighbors(0)].domainPos() - center.domainPos();
-    StaticVector<float,2> normal   = StaticVector<float,2>(-edge0Vec[1], edge0Vec[0]);
+    StaticVector<ctype,2> edge0Vec = nodes[center.neighbors(0)].domainPos() - center.domainPos();
+    StaticVector<ctype,2> normal   = StaticVector<ctype,2>(-edge0Vec[1], edge0Vec[0]);
 
     for (i=0; i<center.degree(); i++){
 
-        StaticVector<float,2> cEVec  = nodes[center.neighbors(i)].domainPos() - center.domainPos();
+        StaticVector<ctype,2> cEVec  = nodes[center.neighbors(i)].domainPos() - center.domainPos();
 
-        float x = cEVec.dot(edge0Vec);
-        float y = cEVec.dot(normal);
+        ctype x = cEVec.dot(edge0Vec);
+        ctype y = cEVec.dot(normal);
 
         angles[i] = atan2(y, x);
         if (angles[i]<0)
@@ -171,14 +171,16 @@ void PlaneParam::makeCyclicGeometrically(Node& center)
 // makeCyclic and DFSVisit sort the star of a node, that is the list of all direct neighbors
 // in a cyclic order.  This is done by performing a depth-first search on the graph of these
 // neighbors and looking for a longest path.  See me for details
-bool PlaneParam::DFSVisit(const std::vector<Node::NeighborReference> &star, const Node::NeighborReference& u, 
-                              std::vector<Node::NeighborReference> &outStar)
+template <class ctype>
+bool PlaneParam<ctype>::DFSVisit(const std::vector<typename Node<ctype>::NeighborReference> &star, 
+                                 const typename Node<ctype>::NeighborReference& u, 
+                                 std::vector<typename Node<ctype>::NeighborReference> &outStar)
 {
     int i, j;
     
     for (i=0; i<star.size(); i++){
         if (!nodes[u].isConnectedTo(star[i])) continue;
-        const Node::NeighborReference& v = star[i];
+        const typename Node<ctype>::NeighborReference& v = star[i];
 
         // a cycle?
         bool isNew = true;
@@ -209,14 +211,15 @@ bool PlaneParam::DFSVisit(const std::vector<Node::NeighborReference> &star, cons
 // The parameter u needs to be handed over by value, because this method is used with
 // u = outStar[0].  However the outStar.push_back in this method may lead to a relocation
 // of the outStar content, and the reference to outStar[0] (in u) will dangle.
-bool PlaneParam::DFSBoundaryVisit(const std::vector<Node::NeighborReference> &star, 
-                                  Node::NeighborReference u, int endNode,
-                                  std::vector<Node::NeighborReference> &outStar)
+template <class ctype>
+bool PlaneParam<ctype>::DFSBoundaryVisit(const std::vector<typename Node<ctype>::NeighborReference> &star, 
+                                         typename Node<ctype>::NeighborReference u, int endNode,
+                                         std::vector<typename Node<ctype>::NeighborReference> &outStar)
 {
     for (int i=0; i<star.size(); i++){
 
         if (!nodes[u].isConnectedTo(star[i])) continue;
-        const Node::NeighborReference& v = star[i];
+        const typename Node<ctype>::NeighborReference& v = star[i];
 
         // no cycle yet
         if (std::find(outStar.begin(), outStar.end(), v) == outStar.end()) {
@@ -235,9 +238,10 @@ bool PlaneParam::DFSBoundaryVisit(const std::vector<Node::NeighborReference> &st
 }
 
 
-void PlaneParam::makeCyclicInteriorNode(Node &center)
+template <class ctype>
+void PlaneParam<ctype>::makeCyclicInteriorNode(Node<ctype> &center)
 {
-    std::vector<Node::NeighborReference> outStar(1);
+    std::vector<typename Node<ctype>::NeighborReference> outStar(1);
     outStar[0] = center.neighbors(0);
 
     if (!DFSVisit(center.nbs, center.neighbors(0), outStar)) {  // if not -> programming error
@@ -251,17 +255,17 @@ void PlaneParam::makeCyclicInteriorNode(Node &center)
     // The orientation needs to be consistent for all vertices in order to get
     // correctly oriented normals
 
-    StaticVector<float,2> referenceVector = nodes[center.neighbors(0)].domainPos() - center.domainPos();
-    StaticVector<float,2> normal          = StaticVector<float,2>(-referenceVector[1], referenceVector[0]);
+    StaticVector<ctype,2> referenceVector = nodes[center.neighbors(0)].domainPos() - center.domainPos();
+    StaticVector<ctype,2> normal          = StaticVector<ctype,2>(-referenceVector[1], referenceVector[0]);
     int i;
     int leastPosVector = -1;
     int mostPosVector  = -1;
-    float maxDotProdukt = -std::numeric_limits<float>::max();
-    float minDotProdukt = std::numeric_limits<float>::max();
+    ctype maxDotProdukt = -std::numeric_limits<ctype>::max();
+    ctype minDotProdukt = std::numeric_limits<ctype>::max();
 
     for (i=1; i<center.degree(); i++) {
 
-        StaticVector<float,2> testVector = nodes[center.neighbors(i)].domainPos() - center.domainPos();
+        StaticVector<ctype,2> testVector = nodes[center.neighbors(i)].domainPos() - center.domainPos();
         if (testVector.dot(normal) > maxDotProdukt) {
             maxDotProdukt = testVector.dot(normal);
             mostPosVector = i;
@@ -283,15 +287,16 @@ void PlaneParam::makeCyclicInteriorNode(Node &center)
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<float,2> &p, const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c)
+template <class ctype>
+StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVector<ctype,2> &p, const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c)
 {
-    StaticVector<float,2> result;
+    StaticVector<ctype,2> result;
     
-    StaticMatrix<float,3> area0(p[0], b[0], c[0],  p[1], b[1], c[1], 1, 1, 1);
-    StaticMatrix<float,3> area1(a[0], p[0], c[0],  a[1], p[1], c[1], 1, 1, 1);
+    StaticMatrix<ctype,3> area0(p[0], b[0], c[0],  p[1], b[1], c[1], 1, 1, 1);
+    StaticMatrix<ctype,3> area1(a[0], p[0], c[0],  a[1], p[1], c[1], 1, 1, 1);
     
-    StaticMatrix<float,3> areaTotal(a[0], b[0], c[0], a[1], b[1], c[1], 1, 1, 1);
-    float areaTotalDet = areaTotal.det();
+    StaticMatrix<ctype,3> areaTotal(a[0], b[0], c[0], a[1], b[1], c[1], 1, 1, 1);
+    ctype areaTotalDet = areaTotal.det();
     
     result[0] = area0.det()/areaTotalDet;
     result[1] = area1.det()/areaTotalDet;
@@ -301,15 +306,15 @@ StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<fl
 
 // This routine computes the barycentric coordinates of a point in space with respect to
 // a triangle in space.  It tacitly assumes that the point is coplanar with the triangle.
-
-StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c)
+template <class ctype>
+StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVector<ctype,3> &p, const StaticVector<ctype,3> &a, const StaticVector<ctype,3> &b, const StaticVector<ctype,3> &c)
 {
-    StaticVector<float,2> result;
+    StaticVector<ctype,2> result;
     
-    float area0 = (p-b).cross(p-c).length();
-    float area1 = (p-a).cross(p-c).length();
+    ctype area0 = (p-b).cross(p-c).length();
+    ctype area1 = (p-a).cross(p-c).length();
     
-    float areaTotal = (b-a).cross(c-a).length();
+    ctype areaTotal = (b-a).cross(c-a).length();
     
     result[0] = area0/areaTotal;
     result[1] = area1/areaTotal;
@@ -323,7 +328,8 @@ StaticVector<float,2> PlaneParam::computeBarycentricCoords(const StaticVector<fl
     return result;
 }
 
-int PlaneParam::map(StaticVector<float,2> &domainCoord, std::tr1::array<NodeIdx, 3>& tri, StaticVector<float,2>& localBarycentricCoords,
+template <class ctype>
+int PlaneParam<ctype>::map(StaticVector<ctype,2> &domainCoord, std::tr1::array<NodeIdx, 3>& tri, StaticVector<ctype,2>& localBarycentricCoords,
                     int seed) const
 {
     DirectedEdgeIterator e = BFLocate(domainCoord);
@@ -364,7 +370,8 @@ int PlaneParam::map(StaticVector<float,2> &domainCoord, std::tr1::array<NodeIdx,
 }
 
 
-void PlaneParam::unflipTriangles(const std::vector<StaticVector<float,3> >& nodePositions)
+template <class ctype>
+void PlaneParam<ctype>::unflipTriangles(const std::vector<StaticVector<ctype,3> >& nodePositions)
 {
     applyParametrization(nodePositions);
     return;
@@ -387,12 +394,13 @@ void PlaneParam::unflipTriangles(const std::vector<StaticVector<float,3> >& node
 // this routine installs the shape-preserving parametrization 
 // only INTERIOR_NODEs get moved
 ////////////////////////////////////////////////////////////////
-void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >& nodePositions)
+template <class ctype>
+void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctype,3> >& nodePositions)
 {
     int i;
     
     // compute lambdas
-    SparseMatrix<float> lambda_ij(nodes.size());
+    SparseMatrix<ctype> lambda_ij(nodes.size());
 
     computeFloaterLambdas(lambda_ij, nodePositions);
     
@@ -405,29 +413,29 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
     // Compute the right side. We use complex numbers for solving the systems
     // for both x- and y-components in one pass.  This leads to a considerable
     // speedup.
-    std::vector<std::complex<float> > b(nodes.size());
+    std::vector<std::complex<ctype> > b(nodes.size());
     
     std::fill(b.begin(), b.end(), 0);
     
     for (i=0; i<nodes.size(); i++) 
         if (!nodes[i].isINTERIOR_NODE()) {
             // not elegant
-            b[i] = std::complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
+            b[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
         }
 
     // solve the system
     int maxIter=3000;
-    std::vector<std::complex<float> > residue;
-    std::vector<std::complex<float> > result(nodes.size());
+    std::vector<std::complex<ctype> > residue;
+    std::vector<std::complex<ctype> > result(nodes.size());
     
     for (i=0; i<nodes.size(); i++)
-        result[i] = std::complex<float>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
+        result[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
     
     lambda_ij.BiCGSTABC(b, result, residue, &maxIter, 1e-6);
     
     for (i=0; i<nodes.size(); i++)
         if (nodes[i].isINTERIOR_NODE())
-            nodes[i].setDomainPos(StaticVector<float,2>(real(result[i]), imag(result[i])));
+            nodes[i].setDomainPos(StaticVector<ctype,2>(real(result[i]), imag(result[i])));
 
 }
 
@@ -436,8 +444,10 @@ void PlaneParam::applyParametrization(const std::vector<StaticVector<float,3> >&
             
 ////////////////////////////////////////////////////////
 // computes lambda_ij for the Floater-Parametrization
-void PlaneParam::computeFloaterLambdas(SparseMatrix<float>& lambda_ij, 
-                                       const std::vector<StaticVector<float,3> >& nodePositions)
+////////////////////////////////////////////////////////
+template <class ctype>
+void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij, 
+                                       const std::vector<StaticVector<ctype,3> >& nodePositions)
 {
     int i, k, l;
     int N = nodes.size();
@@ -450,13 +460,13 @@ void PlaneParam::computeFloaterLambdas(SparseMatrix<float>& lambda_ij,
     for (i=0; i<nodes.size(); i++) {
         if (nodes[i].isINTERIOR_NODE()) {
             
-            Node& p = nodes[i];
+            Node<ctype>& p = nodes[i];
             makeCyclicGeometrically(p);
             
             std::vector<int>    p_k(p.degree());
-            std::vector<StaticVector<float,3> >  p_k_3DCoords(p.degree());
-            std::vector<StaticVector<float,2> >  p_k_2DCoords(p.degree());
-            std::vector<float>    angle;
+            std::vector<StaticVector<ctype,3> >  p_k_3DCoords(p.degree());
+            std::vector<StaticVector<ctype,2> >  p_k_2DCoords(p.degree());
+            std::vector<ctype>    angle;
             
             for (k=0; k<p.degree(); k++){
                 p_k[k]          = (int)p.neighbors(k);
@@ -474,16 +484,16 @@ void PlaneParam::computeFloaterLambdas(SparseMatrix<float>& lambda_ij,
             if (!polarMap(nodePositions[p.getNodeNumber()], p_k_3DCoords, p_k_2DCoords, angle )) {
 
                 for (k=0; k<p.degree(); k++)
-                    lambda_ij.setEntry(i, p.neighbors(k), 1/((float)p.degree()));
+                    lambda_ij.setEntry(i, p.neighbors(k), 1/((ctype)p.degree()));
 
                 continue;
             }
             
             if (p.degree()==3){
                 
-                StaticVector<float,2> lambdas = computeBarycentricCoords(StaticVector<float,2>(0,0), p_k_2DCoords[0], p_k_2DCoords[1], p_k_2DCoords[2]);
+                StaticVector<ctype,2> lambdas = computeBarycentricCoords(StaticVector<ctype,2>(0,0), p_k_2DCoords[0], p_k_2DCoords[1], p_k_2DCoords[2]);
                 
-                StaticVector<float,3> l_ij;
+                StaticVector<ctype,3> l_ij;
                 l_ij[0] = lambdas[0];
                 l_ij[1] = lambdas[1];
                 l_ij[2] = 1-lambdas[0]-lambdas[1];
@@ -501,16 +511,16 @@ void PlaneParam::computeFloaterLambdas(SparseMatrix<float>& lambda_ij,
                     
                     int rlPlus1=0;
                     
-                    float oppositeAngle = (angle[l]<M_PI) ? angle[l]+M_PI : angle[l]-M_PI;
+                    ctype oppositeAngle = (angle[l]<M_PI) ? angle[l]+M_PI : angle[l]-M_PI;
                     
                     while (rlPlus1<angle.size() && angle[rlPlus1] < oppositeAngle) rlPlus1++;
                     
                     int rl = (rlPlus1 + p.degree()-1)%p.degree();
                     rlPlus1 = rlPlus1%p.degree();
                     
-                    StaticVector<float,2> bCoords = computeBarycentricCoords(StaticVector<float,2>(0,0), p_k_2DCoords[l], p_k_2DCoords[rl], p_k_2DCoords[rlPlus1]);
+                    StaticVector<ctype,2> bCoords = computeBarycentricCoords(StaticVector<ctype,2>(0,0), p_k_2DCoords[l], p_k_2DCoords[rl], p_k_2DCoords[rlPlus1]);
                     
-                    StaticVector<float,3> delta(bCoords[0], bCoords[1], 1-bCoords[0]-bCoords[1]);
+                    StaticVector<ctype,3> delta(bCoords[0], bCoords[1], 1-bCoords[0]-bCoords[1]);
                     
                     lambda_ij.addToEntry(i, index[l],       delta[0] / p.degree());
                     lambda_ij.addToEntry(i, index[rl],      delta[1] / p.degree());
@@ -524,9 +534,9 @@ void PlaneParam::computeFloaterLambdas(SparseMatrix<float>& lambda_ij,
 }
             
 
-
-bool PlaneParam::polarMap(const StaticVector<float,3>& center, const std::vector<StaticVector<float,3> > &threeDStarVertices, 
-                          std::vector<StaticVector<float,2> >& flattenedCoords, std::vector<float >& theta)
+template <class ctype>
+bool PlaneParam<ctype>::polarMap(const StaticVector<ctype,3>& center, const std::vector<StaticVector<ctype,3> > &threeDStarVertices, 
+                          std::vector<StaticVector<ctype,2> >& flattenedCoords, std::vector<ctype >& theta)
 {
     /////////////////////////////////////
     // computes the flattened coordinates
@@ -542,8 +552,8 @@ bool PlaneParam::polarMap(const StaticVector<float,3>& center, const std::vector
     int k;
 
     for (k=1; k<K+1; k++){
-        StaticVector<float,3> pLeft  = threeDStarVertices[k-1];
-        StaticVector<float,3> pRight = threeDStarVertices[k%K];
+        StaticVector<ctype,3> pLeft  = threeDStarVertices[k-1];
+        StaticVector<ctype,3> pRight = threeDStarVertices[k%K];
 
         if ( (pLeft-center).length()==0 || (pRight-center).length()==0){
             printf("vertex coincides with its neighbor, aborting polar map\n");
@@ -565,16 +575,16 @@ bool PlaneParam::polarMap(const StaticVector<float,3>& center, const std::vector
         
     }
 
-    float a = 2*M_PI/theta[K];
+    ctype a = 2*M_PI/theta[K];
 
     // compute parameter domain coordinates
     for (k=0; k<K; k++){
 
         theta[k] *= a;
-        float r = (threeDStarVertices[k] - center).length();
-        float rPowA = powf(r, a);
+        ctype r = (threeDStarVertices[k] - center).length();
+        ctype rPowA = powf(r, a);
 
-        flattenedCoords[k] = StaticVector<float,2>(rPowA*cos(theta[k]), rPowA*sin(theta[k])); 
+        flattenedCoords[k] = StaticVector<ctype,2>(rPowA*cos(theta[k]), rPowA*sin(theta[k])); 
     }
 
     theta.pop_back();
@@ -582,7 +592,8 @@ bool PlaneParam::polarMap(const StaticVector<float,3>& center, const std::vector
     return true;
 }
 
-void PlaneParam::removeExtraEdges()
+template <class ctype>
+void PlaneParam<ctype>::removeExtraEdges()
 {
     checkConsistency("before removing of extra edges");
     for (int i=0; i<nodes.size(); i++)
@@ -594,7 +605,8 @@ void PlaneParam::removeExtraEdges()
 
 }
 
-void PlaneParam::makeCyclicBoundaryNode(Node& center, int next, int previous)
+template <class ctype>
+void PlaneParam<ctype>::makeCyclicBoundaryNode(Node<ctype>& center, int next, int previous)
 {
 
 //     printf("------------------------------------\n");
@@ -602,7 +614,7 @@ void PlaneParam::makeCyclicBoundaryNode(Node& center, int next, int previous)
 //     printf("next %d    previous %d\n", next, previous);
 
     int i;
-    std::vector<Node::NeighborReference> outStar(1);
+    std::vector<typename Node<ctype>::NeighborReference> outStar(1);
 
     // look for the correct NeighborReference pointing to #next#
 
@@ -629,7 +641,8 @@ void PlaneParam::makeCyclicBoundaryNode(Node& center, int next, int previous)
     center.nbs = outStar;
 }
 
-void PlaneParam::installWorldCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c)
+template <class ctype>
+void PlaneParam<ctype>::installWorldCoordinates(const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c)
 {
     for (int i=0; i<nodes.size(); i++)
         nodes[i].setDomainPos(a*nodes[i].domainPos()[0] + b*nodes[i].domainPos()[1] + 
@@ -637,7 +650,8 @@ void PlaneParam::installWorldCoordinates(const StaticVector<float,2> &a, const S
 }
 
 
-void PlaneParam::installBarycentricCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c)
+template <class ctype>
+void PlaneParam<ctype>::installBarycentricCoordinates(const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c)
 {
     for (int i=0; i<nodes.size(); i++) {
         //printf("node %d,  before (%f %f)  ", i, nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
@@ -645,3 +659,11 @@ void PlaneParam::installBarycentricCoordinates(const StaticVector<float,2> &a, c
         //printf("after (%f %f) \n ", nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
     }
 }
+
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
+
+template class PlaneParam<float>;
+template class PlaneParam<double>;

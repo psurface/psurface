@@ -1,6 +1,7 @@
 #include <psurface/PlaneParam.h>
 
-PlaneParam::DirectedEdgeIterator& PlaneParam::DirectedEdgeIterator::operator++()
+template <class ctype>
+typename PlaneParam<ctype>::DirectedEdgeIterator& PlaneParam<ctype>::DirectedEdgeIterator::operator++()
 {
     if (neighborIdx < (*nodes)[from()].degree()-1)
         neighborIdx++;
@@ -17,7 +18,8 @@ PlaneParam::DirectedEdgeIterator& PlaneParam::DirectedEdgeIterator::operator++()
     return *this;
 }
 
-void PlaneParam::DirectedEdgeIterator::invert() 
+template <class ctype>
+void PlaneParam<ctype>::DirectedEdgeIterator::invert() 
 {
     int other = to();
     for (int i=0; i<(*nodes)[other].degree(); i++)
@@ -28,7 +30,8 @@ void PlaneParam::DirectedEdgeIterator::invert()
 }
 
 
-PlaneParam::UndirectedEdgeIterator& PlaneParam::UndirectedEdgeIterator::operator++()
+template <class ctype>
+typename PlaneParam<ctype>::UndirectedEdgeIterator& PlaneParam<ctype>::UndirectedEdgeIterator::operator++()
 {
     
     do{
@@ -52,7 +55,8 @@ PlaneParam::UndirectedEdgeIterator& PlaneParam::UndirectedEdgeIterator::operator
             return *this;
 }
 
-PlaneParam::TriangleIterator::TriangleIterator(const DirectedEdgeIterator& firstEdge)
+template <class ctype>
+PlaneParam<ctype>::TriangleIterator::TriangleIterator(const DirectedEdgeIterator& firstEdge)
 {
     cE = firstEdge;
 
@@ -61,7 +65,8 @@ PlaneParam::TriangleIterator::TriangleIterator(const DirectedEdgeIterator& first
         ++cE;
 }
 
-PlaneParam::TriangleIterator& PlaneParam::TriangleIterator::operator++()
+template <class ctype>
+typename PlaneParam<ctype>::TriangleIterator& PlaneParam<ctype>::TriangleIterator::operator++()
 {
     do {
         ++cE;
@@ -70,7 +75,8 @@ PlaneParam::TriangleIterator& PlaneParam::TriangleIterator::operator++()
     return *this;
 }
 
-bool PlaneParam::TriangleIterator::isCorrectlyOriented() const
+template <class ctype>
+bool PlaneParam<ctype>::TriangleIterator::isCorrectlyOriented() const
 {
     if (cE.getONext().to()!=cE.getDPrev().from() ||
              vertices(2) >= vertices(0) || vertices(2) >= vertices(1))
@@ -109,7 +115,8 @@ bool PlaneParam::TriangleIterator::isCorrectlyOriented() const
 //     return vertices(0) < vertices(1);
 }
 
-PlaneParam::TriangleIterator PlaneParam::firstTriangle() const
+template <class ctype>
+typename PlaneParam<ctype>::TriangleIterator PlaneParam<ctype>::firstTriangle() const
 {
     DirectedEdgeIterator firstEdge = firstDirectedEdge();
     return TriangleIterator(firstEdge);    

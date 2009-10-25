@@ -85,7 +85,7 @@ void DomainTriangle::flip()
     // turn the parametrization
     /** \todo This is slow and should be reprogrammed! */
     installWorldCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(1,0), StaticVector<float,2>(0,1));
-    PlaneParam::installBarycentricCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(0,1), StaticVector<float,2>(1,0));
+    PlaneParam<float>::installBarycentricCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(0,1), StaticVector<float,2>(1,0));
 }
 
 void DomainTriangle::rotate()
@@ -97,7 +97,7 @@ void DomainTriangle::rotate()
     // turn the parametrization
     /// \todo This is slow and should be replaced!
     installWorldCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(1,0), StaticVector<float,2>(0,1));
-    PlaneParam::installBarycentricCoordinates(StaticVector<float,2>(0,1), StaticVector<float,2>(0,0), StaticVector<float,2>(1,0));
+    PlaneParam<float>::installBarycentricCoordinates(StaticVector<float,2>(0,1), StaticVector<float,2>(0,0), StaticVector<float,2>(1,0));
 }
 
 

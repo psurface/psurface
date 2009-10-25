@@ -85,11 +85,11 @@ void PSurface<dim,ctype>::init(const PSurface* other)
 template <int dim, class ctype>
 StaticVector<float,2> PSurface<dim,ctype>::getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const
 {
-    const Node& cN = triangles(n.tri).nodes[n.idx];
+    const Node<float>& cN = triangles(n.tri).nodes[n.idx];
     
     switch (cN.type) {
-    case Node::GHOST_NODE:
-    case Node::INTERSECTION_NODE: {
+    case Node<float>::GHOST_NODE:
+    case Node<float>::INTERSECTION_NODE: {
 
         StaticVector<float,3> iPos = imagePos(n.tri, n.idx);
         return triangles(n.tri).computeBarycentricCoords(iPos, *(StaticVector<float,3>*)&surface->points[surface->triangles[targetTri].points[0]][0], 
@@ -499,7 +499,7 @@ int PSurface<dim,ctype>::writeAmiraMesh(PSurface<dim,ctype>* par, const char* fi
         /////////////////////////////////////////
         // the parameterEdges for this triangle
 
-        PlaneParam::UndirectedEdgeIterator cE;
+        PlaneParam<float>::UndirectedEdgeIterator cE;
         for (cE = cT.firstUndirectedEdge(); cE.isValid(); ++cE){
             if (cE.isRegularEdge()) {
                 parameterEdgeArray[edgeArrayIdx][0] = newIdx[cE.from()];
@@ -714,17 +714,17 @@ bool PSurface<dim,ctype>::initFromAmiraMesh(AmiraMesh* am, const char* filename,
         // three corner nodes
         StaticVector<float,2> domainPos(1, 0);
         int nodeNumber = numNodesAndEdgesData[11*i+8];
-        triangles(newTriIdx).nodes[0].setValue(domainPos, nodeNumber, Node::CORNER_NODE);
+        triangles(newTriIdx).nodes[0].setValue(domainPos, nodeNumber, Node<float>::CORNER_NODE);
         cornerNodes[0] = 0;
 
         domainPos = StaticVector<float,2>(0, 1);
         nodeNumber = numNodesAndEdgesData[11*i+9];
-        triangles(newTriIdx).nodes[1].setValue(domainPos, nodeNumber, Node::CORNER_NODE);
+        triangles(newTriIdx).nodes[1].setValue(domainPos, nodeNumber, Node<float>::CORNER_NODE);
         cornerNodes[1] = 1;
 
         domainPos = StaticVector<float,2>(0, 0);
         nodeNumber = numNodesAndEdgesData[11*i+10];
-        triangles(newTriIdx).nodes[2].setValue(domainPos, nodeNumber, Node::CORNER_NODE);
+        triangles(newTriIdx).nodes[2].setValue(domainPos, nodeNumber, Node<float>::CORNER_NODE);
         cornerNodes[2] = 2;
 
         int nodeCounter = 3;
@@ -734,7 +734,7 @@ bool PSurface<dim,ctype>::initFromAmiraMesh(AmiraMesh* am, const char* filename,
             StaticVector<float,2> domainPos = nodeData[nodeArrayIdx];
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
 
-            triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node::INTERSECTION_NODE);
+            triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<float>::INTERSECTION_NODE);
         }
 
         // the touching nodes
@@ -742,7 +742,7 @@ bool PSurface<dim,ctype>::initFromAmiraMesh(AmiraMesh* am, const char* filename,
             StaticVector<float,2> domainPos = nodeData[nodeArrayIdx];
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
             
-            triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node::TOUCHING_NODE);
+            triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<float>::TOUCHING_NODE);
         }
 
         // the interior nodes
@@ -750,7 +750,7 @@ bool PSurface<dim,ctype>::initFromAmiraMesh(AmiraMesh* am, const char* filename,
             StaticVector<float,2> domainPos = nodeData[nodeArrayIdx];
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
 
-            triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node::INTERIOR_NODE);
+            triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<float>::INTERIOR_NODE);
         }
 
         ///////////////////////////////
@@ -830,17 +830,17 @@ void PSurface<dim,ctype>::setupOriginalSurface()
 
         for (i=0; i<numNodes; i++) {
 
-            Node& cN = cT.nodes[i];
+            Node<float>& cN = cT.nodes[i];
             std::tr1::array<int,3> v;
 
             v[0] = cN.nodeNumber;
 
             switch (cN.type) {
 
-            case Node::INTERSECTION_NODE:
+            case Node<float>::INTERSECTION_NODE:
                 continue;
 
-            case Node::INTERIOR_NODE:
+            case Node<float>::INTERIOR_NODE:
                 
                 for (j=0; j<cN.degree(); j++) {
                     
@@ -870,8 +870,8 @@ void PSurface<dim,ctype>::setupOriginalSurface()
                 
                 break;
 
-            case Node::TOUCHING_NODE:
-            case Node::CORNER_NODE:
+            case Node<float>::TOUCHING_NODE:
+            case Node<float>::CORNER_NODE:
                 
 
                 int firstRegNeighbor = -1;
@@ -1082,7 +1082,7 @@ int PSurface<dim,ctype>::map(int triIdx, StaticVector<float,2>& p, std::tr1::arr
     if (!status)
         return 0;
 
-    StaticVector<float,3> imagePos = PlaneParam::linearInterpol<StaticVector<float,3> >(coords, nP[tri.nodes[v[0]].getNodeNumber()],
+    StaticVector<float,3> imagePos = PlaneParam<float>::linearInterpol<StaticVector<float,3> >(coords, nP[tri.nodes[v[0]].getNodeNumber()],
                                                            nP[tri.nodes[v[1]].getNodeNumber()],
                                                            nP[tri.nodes[v[2]].getNodeNumber()]);
 
@@ -1254,16 +1254,11 @@ template <int dim, class ctype>
 std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNodeIdx& n) const
 {
     assert(surface->trianglesPerPoint.size());
-    const Node& cN = triangles(n.tri).nodes[n.idx];
+    const Node<float>& cN = triangles(n.tri).nodes[n.idx];
     const float eps = 1e-6;
 
     switch (cN.type) {
-    case Node::GHOST_NODE: {
-//         printf("targetTri: %d (%d %d %d)      targetLocalCoords: (%f %f)\n", cN.getNodeNumber(),
-//                surface->triangles[cN.getNodeNumber()].points[0],
-//                surface->triangles[cN.getNodeNumber()].points[1],
-//                surface->triangles[cN.getNodeNumber()].points[2],
-//                cN.dP[0], cN.dP[1]);
+    case Node<float>::GHOST_NODE: {
         
         std::vector<int> result(1);
         result[0] = cN.getNodeNumber();
@@ -1271,21 +1266,21 @@ std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNode
             // append the triangles bordering on edge 0
             int p = surface->triangles[result[0]].points[0];
             int q = surface->triangles[result[0]].points[1];
-            //printf("1) using:  p -> %d   q-> %d \n", p, q);
+
             getTrianglesPerEdge(p, q, result, result[0]);
 
         } else if (cN.dP[0] < eps) {
             // append the triangles bordering on edge 1
             int p = surface->triangles[result[0]].points[1];
             int q = surface->triangles[result[0]].points[2];
-            //printf("2) using:  p -> %d   q-> %d \n", p, q);
+
             getTrianglesPerEdge(p, q, result, result[0]);
 
         } else if (cN.dP[1] < eps) {
             // append the triangles bordering on edge 2
             int p = surface->triangles[result[0]].points[2];
             int q = surface->triangles[result[0]].points[0];
-            //printf("3) using:  p -> %d   q-> %d \n", p, q);
+
             getTrianglesPerEdge(p, q, result, result[0]);
             
         }
@@ -1294,7 +1289,7 @@ std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNode
         
         
     }
-    case Node::INTERSECTION_NODE:
+    case Node<float>::INTERSECTION_NODE:
         assert(false);
     }
 
@@ -1336,7 +1331,7 @@ void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<float,2
     const DomainTriangle& tri = triangles(triIdx);
     float lambda = (p-a).length() / (a-b).length();
 
-    StaticVector<float,3> targetPos = PlaneParam::linearInterpol<StaticVector<float,3> >(lambda, 
+    StaticVector<float,3> targetPos = PlaneParam<float>::linearInterpol<StaticVector<float,3> >(lambda, 
                                                             imagePos(triIdx, tri.edgePoints[edge][edgePos]),
                                                             imagePos(triIdx, tri.edgePoints[edge][edgePos+1]));
 
@@ -1377,7 +1372,7 @@ void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<float,2
 
     } else {
         
-        PlaneParam::DirectedEdgeIterator edge = tri.getDirectedEdgeIterator(n1, n2);
+        PlaneParam<float>::DirectedEdgeIterator edge = tri.getDirectedEdgeIterator(n1, n2);
         vertices[2] = getOtherEndNode(triIdx, edge.getONext().to());
 
     }
@@ -1408,7 +1403,7 @@ int PSurface<dim,ctype>::positionMap(int triIdx, StaticVector<float,2>& p, Stati
         return false;
     }
 
-    result = PlaneParam::linearInterpol<StaticVector<float,3> >(localCoords, iPos[tri[0]], iPos[tri[1]], iPos[tri[2]]);
+    result = PlaneParam<float>::linearInterpol<StaticVector<float,3> >(localCoords, iPos[tri[0]], iPos[tri[1]], iPos[tri[2]]);
 
     return true;
 }
@@ -1463,14 +1458,14 @@ int PSurface<dim,ctype>::invertTriangles(int patch)
 template <int dim, class ctype>
 NodeIdx PSurface<dim,ctype>::addInteriorNode(int tri, const StaticVector<float,2>& dom, int nodeNumber)
 {
-    triangles(tri).nodes.push_back(Node(dom, nodeNumber, Node::INTERIOR_NODE));
+    triangles(tri).nodes.push_back(Node<float>(dom, nodeNumber, Node<float>::INTERIOR_NODE));
     return triangles(tri).nodes.size()-1;
 }
 
 template <int dim, class ctype>
 NodeIdx PSurface<dim,ctype>::addGhostNode(int tri, int corner, int targetTri, const StaticVector<float,2>& localTargetCoords)
 {
-    triangles(tri).nodes.push_back(Node());
+    triangles(tri).nodes.push_back(Node<float>());
     triangles(tri).nodes.back().makeGhostNode(corner, targetTri, localTargetCoords);
     return triangles(tri).nodes.size()-1;
 }
@@ -1480,7 +1475,7 @@ NodeIdx PSurface<dim,ctype>::addCornerNode(int tri, int corner, int nodeNumber)
 {
     DomainTriangle& cT = triangles(tri);
 
-    cT.nodes.push_back(Node());
+    cT.nodes.push_back(Node<float>());
     cT.nodes.back().makeCornerNode(corner, nodeNumber);
     return cT.nodes.size()-1;
 }
@@ -1497,12 +1492,12 @@ NodeIdx PSurface<dim,ctype>::addIntersectionNodePair(int tri1, int tri2,
     iPos.push_back(range);
     int nodeNumber = iPos.size()-1;
 
-    cT1.nodes.push_back(Node());
+    cT1.nodes.push_back(Node<float>());
     int newNode1 = cT1.nodes.size()-1;
-    cT2.nodes.push_back(Node());
+    cT2.nodes.push_back(Node<float>());
     
-    cT1.nodes.back().setValue(dP1, nodeNumber, Node::INTERSECTION_NODE);
-    cT2.nodes.back().setValue(dP2, nodeNumber, Node::INTERSECTION_NODE);
+    cT1.nodes.back().setValue(dP1, nodeNumber, Node<float>::INTERSECTION_NODE);
+    cT2.nodes.back().setValue(dP2, nodeNumber, Node<float>::INTERSECTION_NODE);
 
     cT1.nodes.back().setDomainEdge(edge1);
     cT2.nodes.back().setDomainEdge(edge2);
@@ -1515,9 +1510,9 @@ NodeIdx PSurface<dim,ctype>::addTouchingNode(int tri, const StaticVector<float,2
 {
     DomainTriangle& cT = triangles(tri);
 
-    cT.nodes.push_back(Node());
+    cT.nodes.push_back(Node<float>());
     
-    cT.nodes.back().setValue(dP, nodeNumber, Node::TOUCHING_NODE);
+    cT.nodes.back().setValue(dP, nodeNumber, Node<float>::TOUCHING_NODE);
     cT.nodes.back().setDomainEdge(edge);
     return cT.nodes.size()-1;
 }
@@ -1531,11 +1526,11 @@ NodeIdx PSurface<dim,ctype>::addTouchingNodePair(int tri1, int tri2,
     DomainTriangle& cT1 = triangles(tri1);
     DomainTriangle& cT2 = triangles(tri2);
 
-    cT1.nodes.push_back(Node());
-    cT2.nodes.push_back(Node());
+    cT1.nodes.push_back(Node<float>());
+    cT2.nodes.push_back(Node<float>());
     
-    cT1.nodes.back().setValue(dP1, nodeNumber, Node::TOUCHING_NODE);
-    cT2.nodes.back().setValue(dP2, nodeNumber, Node::TOUCHING_NODE);
+    cT1.nodes.back().setValue(dP1, nodeNumber, Node<float>::TOUCHING_NODE);
+    cT2.nodes.back().setValue(dP2, nodeNumber, Node<float>::TOUCHING_NODE);
 
     cT1.nodes.back().setDomainEdge(edge1);
     cT2.nodes.back().setDomainEdge(edge2);

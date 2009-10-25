@@ -68,14 +68,14 @@ public:
                                         const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
-                                        Node::NodeType& currType, int& currTri,
+                                        Node<float>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
     bool testInsertEdgeFromIntersectionNode(const PSurface<2,float>* par, 
                                             const std::vector<StaticVector<double,3> >& normals, 
                                             int from, int to, double& lambda,
                                             const std::vector<NodeBundle>& projectedTo,
-                                            Node::NodeType& currType, int& currTri,
+                                            Node<float>::NodeType& currType, int& currTri,
                                             int& enteringEdge);
 
     bool testInsertEdgeFromTouchingNode(const PSurface<2,float>* par, 
@@ -83,7 +83,7 @@ public:
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         const NodeBundle& curr,
-                                        Node::NodeType& currType, int& currTri,
+                                        Node<float>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
     bool testInsertEdgeFromCornerNode(const PSurface<2,float>* par, 
@@ -91,7 +91,7 @@ public:
                                       int from, int to, double& lambda,
                                       const std::vector<NodeBundle>& projectedTo,
                                       const NodeBundle& curr, 
-                                      Node::NodeType& currType, int& currTri,
+                                      Node<float>::NodeType& currType, int& currTri,
                                       int& enteringEdge);
 
     void insertGhostNodeAtVertex(PSurface<2,float>* par, 

@@ -23,7 +23,7 @@ void DomainPolygon::init(const DomainTriangle& tri, const StaticVector<float,2> 
     edgePoints[2] = tri.edgePoints[2];
     
     // turns the coordinates into world coordinates
-    PlaneParam::installWorldCoordinates(coords[0], coords[1], coords[2]);
+    PlaneParam<float>::installWorldCoordinates(coords[0], coords[1], coords[2]);
     
     removeExtraEdges();
     par->hasUpToDatePointLocationStructure = false;
@@ -513,8 +513,8 @@ bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>
         /** \todo what do I do with this? */
         for (j=0; j<cT.edgePoints[2].size()-2; j++) {
 
-            const Node& nA = cT.nodes[cT.edgePoints[2][j]];
-            const Node& nB = cT.nodes[cT.edgePoints[2][j+2]];
+            const Node<float>& nA = cT.nodes[cT.edgePoints[2][j]];
+            const Node<float>& nB = cT.nodes[cT.edgePoints[2][j+2]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 (nA.isConnectedTo(cT.edgePoints[2][j+2]) || 
@@ -635,7 +635,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
 
             // preNextPolyNode
             switch (nodes[currentPolyNode].type) {
-            case Node::INTERIOR_NODE: {
+            case Node<float>::INTERIOR_NODE: {
                 DirectedEdgeIterator cPE = getDirectedEdgeIterator(currentPolyNode, currentTriNode);
                 assert(cPE.isValid());
 
@@ -643,8 +643,8 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                 preNextPolyNode = Onext.to();
                 break;
             }
-            case Node::TOUCHING_NODE:
-            case Node::CORNER_NODE:
+            case Node<float>::TOUCHING_NODE:
+            case Node<float>::CORNER_NODE:
                 if (nodes[currentPolyNode].isLastNeighbor(currentTriNode)) {
                     preNextPolyNode = getPreviousEdgeNode(currentPolyNode);
                 } else {
@@ -657,7 +657,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                 }
                 break;
 
-            case Node::INTERSECTION_NODE:
+            case Node<float>::INTERSECTION_NODE:
                 preNextPolyNode = getPreviousEdgeNode(currentPolyNode);
                 break;
             }
@@ -665,7 +665,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
             
             // preNextTriNode
             switch (nodes[currentTriNode].type) {
-            case Node::INTERIOR_NODE: {
+            case Node<float>::INTERIOR_NODE: {
                 DirectedEdgeIterator cPE = getDirectedEdgeIterator(currentPolyNode, currentTriNode);
                 assert(cPE.isValid());
 
@@ -673,8 +673,8 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                 preNextTriNode = Dprev.from();
                 break;
             }
-            case Node::TOUCHING_NODE:
-            case Node::CORNER_NODE:
+            case Node<float>::TOUCHING_NODE:
+            case Node<float>::CORNER_NODE:
                 if (nodes[currentTriNode].isFirstNeighbor(currentPolyNode)) {
                     
                     preNextTriNode = getNextEdgeNode(currentTriNode);
@@ -687,7 +687,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                 }
                 break;
 
-            case Node::INTERSECTION_NODE:
+            case Node<float>::INTERSECTION_NODE:
                 preNextTriNode = getNextEdgeNode(currentTriNode);
                 break;
             }
@@ -804,8 +804,8 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
             
             int newNodeNumber = createNodePosition(par->iPos, nodeStack, newImagePos);
             
-            nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
-            nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
+            nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
+            nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
             
             nodeLocs[newTriNode]  = IN_TRIANGLE;
             nodeLocs[newPolyNode] = IN_POLYGON;
@@ -830,7 +830,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
             // Find next pair of current###Nodes
             // //////////////////////////////////////
 
-            const Node& cN = nodes[currentPolyNode];
+            const Node<float>& cN = nodes[currentPolyNode];
             assert(nodeLocs[currentPolyNode] == ON_SEGMENT);
 
             nextPolyNode = -1;
@@ -951,10 +951,10 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
           
     if (nodes[cN].isCORNER_NODE()){
         nodes[newNode].setValue(nodes[cN].domainPos(),
-                                nodes[cN].getNodeNumber(), Node::CORNER_NODE);
+                                nodes[cN].getNodeNumber(), Node<float>::CORNER_NODE);
     }else{
         nodes[newNode].setValue(nodes[cN].domainPos(),
-                                nodes[cN].getNodeNumber(), Node::TOUCHING_NODE);
+                                nodes[cN].getNodeNumber(), Node<float>::TOUCHING_NODE);
         nodes[cN].makeTouchingNode();
     }
 
@@ -990,13 +990,13 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
             // add edge from newNode to nodes[cN].neighbors(i)
             // The new edge has to appear topologically 'next to' the old one
             
-            nodes[newNode].appendNeighbor(Node::NeighborReference(nodes[cN].neighbors(i)));
+            nodes[newNode].appendNeighbor(Node<float>::NeighborReference(nodes[cN].neighbors(i)));
 
-            Node& thisNeighbor = nodes[nodes[cN].neighbors(i)];
+            Node<float>& thisNeighbor = nodes[nodes[cN].neighbors(i)];
             for (int j=0; j<thisNeighbor.degree(); j++)
                 if (thisNeighbor.neighbors(j)==cN){
                     thisNeighbor.nbs.insert(thisNeighbor.nbs.begin() + (j+1)%thisNeighbor.degree(), 
-                                            Node::NeighborReference(newNode));
+                                            Node<float>::NeighborReference(newNode));
                     break;
                 }
             
@@ -1121,7 +1121,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
             } else
                 nodeLocs[cN] = ON_SEGMENT;
         else 
-            switch(PlaneParam::orientation(segmentFrom, segmentTo, nodes[cN].domainPos())){
+            switch(PlaneParam<float>::orientation(segmentFrom, segmentTo, nodes[cN].domainPos())){
             case  1:
             case  0:
                 nodeLocs[cN] = IN_POLYGON;
@@ -1146,7 +1146,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
             newNode = nodes.size()-1;
             nodeLocs.resize(nodeLocs.size()+1);
 
-            nodes[newNode].setValue(nodes[cN].domainPos(), nodes[cN].getNodeNumber(), Node::TOUCHING_NODE);
+            nodes[newNode].setValue(nodes[cN].domainPos(), nodes[cN].getNodeNumber(), Node<float>::TOUCHING_NODE);
 
             if (nodes[cN].isCORNER_NODE())
                 nodes[newNode].makeCornerNode();
@@ -1254,8 +1254,8 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
                 par->iPos.push_back(newImagePos);
                 int newNodeNumber = par->iPos.size()-1;
 
-                nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
-                nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node::INTERSECTION_NODE);
+                nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
+                nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
                 
                 nodeLocs[newTriNode]  = ON_SEGMENT;
                 nodeLocs[newPolyNode] = ON_SEGMENT;

@@ -12,7 +12,7 @@ class CircularPatch;
 
 
 /** A polygon carrying a plane triangulation */
-class DomainPolygon : public PlaneParam{
+class DomainPolygon : public PlaneParam<float> {
 public:
     /// standard constructor
     DomainPolygon(PSurface<2,float>* _par) : par(_par) {};
@@ -70,12 +70,12 @@ public:
 
     ///
     void unflipTriangles() {
-        PlaneParam::unflipTriangles(par->iPos);
+        PlaneParam<float>::unflipTriangles(par->iPos);
     }
 
     ///
     void applyParametrization() {
-        PlaneParam::applyParametrization(par->iPos);
+        PlaneParam<float>::applyParametrization(par->iPos);
     }
 
     ///

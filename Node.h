@@ -46,7 +46,10 @@ typedef int NodeIdx;
  * <li> <b> Intersection Nodes: </b> ddd
  * <li> <b> Ghost Nodes: </b> ddd
  * </ul>
+
+ \tparam ctype The type used for coordinates
  */
+template <class ctype>
 class Node {
 
 public:
@@ -115,7 +118,7 @@ public:
     Node() : valid(true) {}
         
     ///
-    Node(const StaticVector<float,2> &domain, int number, NodeType nodeType) : valid(true) {
+    Node(const StaticVector<ctype,2> &domain, int number, NodeType nodeType) : valid(true) {
         setDomainPos(domain);
         nodeNumber = number;
 
@@ -129,7 +132,7 @@ public:
     ~Node() {}
 
     ///
-    void setValue(const StaticVector<float,2> &domain, int nN, NodeType nodeType) {
+    void setValue(const StaticVector<ctype,2> &domain, int nN, NodeType nodeType) {
         setDomainPos(domain);
         nodeNumber = nN;
             
@@ -157,14 +160,14 @@ public:
         nodeNumber = nN;
         edge = corner;
         if (corner==0)
-            dP = StaticVector<float,2>(1,0);
+            dP = StaticVector<ctype,2>(1,0);
         else if (corner==1)
-            dP = StaticVector<float,2>(0,1);
+            dP = StaticVector<ctype,2>(0,1);
         else
-            dP = StaticVector<float,2>(0,0);
+            dP = StaticVector<ctype,2>(0,0);
     }
 
-    void makeGhostNode(int corner, int targetTri, const StaticVector<float,2>& localTargetCoords) {
+    void makeGhostNode(int corner, int targetTri, const StaticVector<ctype,2>& localTargetCoords) {
         assert(corner==0 || corner==1 || corner==2);
         type = GHOST_NODE;
         nodeNumber = targetTri;
@@ -179,7 +182,7 @@ public:
     }
 
     ///
-    bool isOnSegment(const StaticVector<float,2>& a, const StaticVector<float,2>& b, float eps) const {
+    bool isOnSegment(const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b, ctype eps) const {
         return ( (domainPos()-a).length() + (domainPos()-b).length()) / (a-b).length() <1.0 +eps;
     }
 
@@ -291,7 +294,7 @@ public:
      * Is undefined if the node is interior.  Is also undefined if the node
      * lives on a corner!!!     
      */
-    float getDomainEdgeCoord() const {
+    ctype getDomainEdgeCoord() const {
         assert(isINTERSECTION_NODE() || isTOUCHING_NODE());
         switch (getDomainEdge()) {
         case 0: return domainPos()[1];
@@ -302,7 +305,7 @@ public:
         assert(false);
     }
 
-    float getDomainEdgeCoord(int edge) const {
+    ctype getDomainEdgeCoord(int edge) const {
         assert(!isINTERIOR_NODE());
         switch (edge) {
         case 0: return domainPos()[1];
@@ -389,22 +392,22 @@ public:
     void print(bool showNeighbors=true) const;
 
     /// query domain position
-    StaticVector<float,2> domainPos() const {
+    StaticVector<ctype,2> domainPos() const {
         if (isGHOST_NODE())
             switch (edge) {
-            case 0: return StaticVector<float,2>(1, 0);
-            case 1: return StaticVector<float,2>(0, 1);
-            case 2: return StaticVector<float,2>(0, 0);
+            case 0: return StaticVector<ctype,2>(1, 0);
+            case 1: return StaticVector<ctype,2>(0, 1);
+            case 2: return StaticVector<ctype,2>(0, 0);
             }
 
         return dP;
     }
 
     /// set domain position
-    void setDomainPos(const StaticVector<float,2>& p) {dP = p;}
+    void setDomainPos(const StaticVector<ctype,2>& p) {dP = p;}
 
     //private:
-    StaticVector<float,2> dP;
+    StaticVector<ctype,2> dP;
 
 public:    
     ///

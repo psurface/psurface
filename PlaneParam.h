@@ -20,6 +20,7 @@ class PSurface;
 /** The parametrization of a surface in space.  It is actually a planar graph
    having only triangular and unbounded faces.  The nodes of the graph store
    a 3D position, the rest is computed via linear interpolation. */
+template <class ctype>
 class PlaneParam{
 public:
 
@@ -27,7 +28,7 @@ public:
     public:
         DirectedEdgeIterator() : fromNode(-1), neighborIdx(0) , nodes(0){}
 
-        DirectedEdgeIterator(const std::vector<Node>& _nodes) :  fromNode(-1), neighborIdx(0) {
+        DirectedEdgeIterator(const std::vector<Node<ctype> >& _nodes) :  fromNode(-1), neighborIdx(0) {
             nodes = &_nodes;
         }
 
@@ -68,7 +69,7 @@ public:
         int fromNode;
         int neighborIdx;
 
-        const std::vector<Node>* nodes;
+        const std::vector<Node<ctype> >* nodes;
 
     };
 
@@ -76,7 +77,7 @@ public:
     public:
         UndirectedEdgeIterator() : fromNode(-1), neighborIdx(0) , nodes(0){}
 
-        UndirectedEdgeIterator(const std::vector<Node>& _nodes) :  fromNode(-1), neighborIdx(0) {
+        UndirectedEdgeIterator(const std::vector<Node<ctype> >& _nodes) :  fromNode(-1), neighborIdx(0) {
             nodes = &_nodes;
         }
 
@@ -99,7 +100,7 @@ public:
         NodeIdx fromNode;
         int neighborIdx;
 
-        const std::vector<Node>* nodes;
+        const std::vector<Node<ctype> >* nodes;
 
     };
 
@@ -236,7 +237,7 @@ public:
 //         if (edge.neighborIdx == -1)
 //             edge.fromNode = -1;
 
-        std::vector<Node::NeighborReference>::const_iterator findIt = std::find(nodes[from].nbs.begin(), nodes[from].nbs.end(), to);
+        typename std::vector<typename Node<ctype>::NeighborReference>::const_iterator findIt = std::find(nodes[from].nbs.begin(), nodes[from].nbs.end(), to);
 
         if (findIt ==nodes[from].nbs.end()) {
             edge.neighborIdx = -1;
@@ -263,9 +264,9 @@ public:
     {
         nodes.resize(3);
 
-        nodes[0].setValue(StaticVector<float,2>(1, 0), a, Node::CORNER_NODE);
-        nodes[1].setValue(StaticVector<float,2>(0, 1), b, Node::CORNER_NODE);
-        nodes[2].setValue(StaticVector<float,2>(0, 0), c, Node::CORNER_NODE);
+        nodes[0].setValue(StaticVector<ctype,2>(1, 0), a, Node<ctype>::CORNER_NODE);
+        nodes[1].setValue(StaticVector<ctype,2>(0, 1), b, Node<ctype>::CORNER_NODE);
+        nodes[2].setValue(StaticVector<ctype,2>(0, 0), c, Node<ctype>::CORNER_NODE);
 
         addEdge(0, 1);
         addEdge(1, 2);
@@ -284,8 +285,8 @@ public:
                                                  * it has just been inserted to turn the 
                                                  * graph into a triangulation. */
                  ){
-        nodes[from].appendNeighbor(Node::NeighborReference(to, triangularClosure));
-        nodes[to].appendNeighbor(Node::NeighborReference(from, triangularClosure));
+        nodes[from].appendNeighbor(typename Node<ctype>::NeighborReference(to, triangularClosure));
+        nodes[to].appendNeighbor(typename Node<ctype>::NeighborReference(from, triangularClosure));
     }
 
     ///
@@ -322,13 +323,13 @@ public:
 
         for (int i=0; i<nodes.size(); i++){
             switch (nodes[i].getType()) {
-            case Node::INTERSECTION_NODE:
+            case Node<ctype>::INTERSECTION_NODE:
                 intersectionNodes++;
                 break;
-            case Node::TOUCHING_NODE:
+            case Node<ctype>::TOUCHING_NODE:
                 touchingNodes++;
                 break;
-            case Node::INTERIOR_NODE:
+            case Node<ctype>::INTERIOR_NODE:
                 interiorNodes++;
                 break;
             }
@@ -376,7 +377,7 @@ public:
     /**@name access methods */
     //@{
     ///
-    int map(StaticVector<float,2>& domainCoord, std::tr1::array<NodeIdx, 3>& vertices, StaticVector<float,2>& coords,
+    int map(StaticVector<ctype,2>& domainCoord, std::tr1::array<NodeIdx, 3>& vertices, StaticVector<ctype,2>& coords,
             int seed=-1) const;
     //@}
 
@@ -387,10 +388,10 @@ public:
      *   0 : collinear
      *   1 : counterclockwise
      */
-    signed char orientation(const DirectedEdgeIterator& cE, const StaticVector<float,2>& p) const {
+    signed char orientation(const DirectedEdgeIterator& cE, const StaticVector<ctype,2>& p) const {
 
-        const StaticVector<float,2>& f = nodes[cE.from()].domainPos();
-        const StaticVector<float,2>& t = nodes[cE.to()].domainPos();
+        const StaticVector<ctype,2>& f = nodes[cE.from()].domainPos();
+        const StaticVector<ctype,2>& t = nodes[cE.to()].domainPos();
 
         return orientation(f, t, p);
     }
@@ -402,11 +403,11 @@ public:
      *   0 : collinear
      *   1 : counterclockwise
      */
-    static signed char orientation(const StaticVector<float,2>& a, const StaticVector<float,2>& b, const StaticVector<float,2>& c) {
+    static signed char orientation(const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b, const StaticVector<ctype,2>& c) {
 
-        StaticVector<float,2> n = StaticVector<float,2>(a[1] - b[1], b[0] - a[0]);
+        StaticVector<ctype,2> n = StaticVector<ctype,2>(a[1] - b[1], b[0] - a[0]);
 
-        float scalarProd = n.dot(c-a);
+        ctype scalarProd = n.dot(c-a);
         if (scalarProd > 0)
             return 1;
         else if (scalarProd < 0)
@@ -423,17 +424,17 @@ public:
      * is specified by supplying new coordinates for the three points
      * (1,0), (0,1), and (0, 0)
      */
-    void installWorldCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c);
+    void installWorldCoordinates(const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c);
 
     /** assuming the domain coordinates are given as world coordinates
         this routines turns them into barycentric ones, given the vertices of a bounding triangle. */
-    void installBarycentricCoordinates(const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c);
+    void installBarycentricCoordinates(const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c);
 
     ///
-    void applyParametrization(const std::vector<StaticVector<float,3> >& nodePositions);
+    void applyParametrization(const std::vector<StaticVector<ctype,3> >& nodePositions);
 
     ///
-    void unflipTriangles(const std::vector<StaticVector<float,3> >& nodePositions);
+    void unflipTriangles(const std::vector<StaticVector<ctype,3> >& nodePositions);
 
     ///
     void augmentNeighborIdx(int d) {
@@ -450,15 +451,15 @@ public:
 
     
     ///
-    void makeCyclicBoundaryNode(Node& center, int next, int previous);
+    void makeCyclicBoundaryNode(Node<ctype>& center, int next, int previous);
 
     void removeExtraEdges();
     
-    void computeFloaterLambdas(SparseMatrix<float>& lambda_ij,
-                               const std::vector<StaticVector<float,3> >& nodePositions);
+    void computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij,
+                               const std::vector<StaticVector<ctype,3> >& nodePositions);
 
-    bool polarMap(const StaticVector<float,3>& center, const std::vector<StaticVector<float,3> > &threeDStarVertices, 
-                  std::vector<StaticVector<float,2> >& flattenedCoords, std::vector<float>& theta);
+    bool polarMap(const StaticVector<ctype,3>& center, const std::vector<StaticVector<ctype,3> > &threeDStarVertices, 
+                  std::vector<StaticVector<ctype,2> >& flattenedCoords, std::vector<ctype>& theta);
 
 public:
     /**@name debug code */
@@ -471,7 +472,7 @@ public:
     //@}
 
     ///
-    static StaticVector<float,2> computeBarycentricCoords(const StaticVector<float,2> &p, const StaticVector<float,2> &a, const StaticVector<float,2> &b, const StaticVector<float,2> &c);
+    static StaticVector<ctype,2> computeBarycentricCoords(const StaticVector<ctype,2> &p, const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c);
 
     /** \brief Computes the barycentric coordinates of a point.
      *
@@ -479,28 +480,29 @@ public:
      * with respect to a triangle in space.  It tacitly assumes that the point 
      * is coplanar with the triangle.
      */
-    static StaticVector<float,2> computeBarycentricCoords(const StaticVector<float,3> &p, const StaticVector<float,3> &a, const StaticVector<float,3> &b, const StaticVector<float,3> &c);
+    static StaticVector<ctype,2> computeBarycentricCoords(const StaticVector<ctype,3> &p, const StaticVector<ctype,3> &a, const StaticVector<ctype,3> &b, const StaticVector<ctype,3> &c);
 
     ///
-    DirectedEdgeIterator BFLocate(const StaticVector<float,2> &p, int seed=-1) const;
+    DirectedEdgeIterator BFLocate(const StaticVector<ctype,2> &p, int seed=-1) const;
 
     ///
-    void makeCyclicGeometrically(Node& center);
+    void makeCyclicGeometrically(Node<ctype>& center);
 
     ///
-    void makeCyclicInteriorNode(Node& center);
+    void makeCyclicInteriorNode(Node<ctype>& center);
 
     ///
     //virtual void makeCyclicBoundaryNode(Node& center);
     
     ///
-    bool DFSBoundaryVisit(const std::vector<Node::NeighborReference> &star, 
-                          Node::NeighborReference u, int endNode,
-                          std::vector<Node::NeighborReference> &outStar);
+    bool DFSBoundaryVisit(const std::vector<typename Node<ctype>::NeighborReference> &star, 
+                          typename Node<ctype>::NeighborReference u, int endNode,
+                          std::vector<typename Node<ctype>::NeighborReference> &outStar);
 
     ///
-    bool DFSVisit(const std::vector<Node::NeighborReference> &star, const Node::NeighborReference& u, 
-                  std::vector<Node::NeighborReference> &outStar);
+    bool DFSVisit(const std::vector<typename Node<ctype>::NeighborReference> &star, 
+                  const typename Node<ctype>::NeighborReference& u, 
+                  std::vector<typename Node<ctype>::NeighborReference> &outStar);
 
 public:
     ///////////////////////////////////////////////////////////////////////
@@ -508,13 +510,13 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
     template<class T>
-    static T linearInterpol(const StaticVector<float,2>& p, const T& a, const T& b, const T& c){
+    static T linearInterpol(const StaticVector<ctype,2>& p, const T& a, const T& b, const T& c){
         T result = p[0]*a + p[1]*b + (1-p[0]-p[1])*c;
         return result;
     }
         
     template<class T>
-    static T linearInterpol(float lambda, const T& a, const T& b){
+    static T linearInterpol(ctype lambda, const T& a, const T& b){
         T result = a + lambda*(b-a);
         return result;
     }
@@ -522,7 +524,7 @@ public:
     //////////////////////////////////////////////////////////////
 
     ///
-    std::vector<Node> nodes;
+    std::vector<Node<ctype> > nodes;
 
 };
 
