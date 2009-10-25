@@ -564,7 +564,7 @@ int PSurface<dim,ctype>::writeAmiraMesh(PSurface<dim,ctype>* par, const char* fi
 }
 
 template <int dim, class ctype>
-PSurface<dim,ctype>* PSurface<dim,ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
+void* PSurface<dim,ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
 {
     PSurface<dim,ctype>* par = new PSurface<dim,ctype>;
 
@@ -581,7 +581,6 @@ PSurface<dim,ctype>* PSurface<dim,ctype>::readAmiraMesh(AmiraMesh* am, const cha
 
     return par;
 }
-
 
 template <int dim, class ctype>
 bool PSurface<dim,ctype>::initFromAmiraMesh(AmiraMesh* am, const char* filename, Surface* surf)

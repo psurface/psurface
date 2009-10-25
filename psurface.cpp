@@ -27,7 +27,7 @@ int psurface::LoadMesh(const char* label, const char* filename)
         return ERROR;
     }
 
-    Parametrization* newDomain = Parametrization::readAmiraMesh(am, filename);
+    Parametrization* newDomain = (Parametrization*)Parametrization::readAmiraMesh(am, filename);
 
     // The following delete should be here but it sometimes crashes...
     //delete(am);
