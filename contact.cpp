@@ -6,7 +6,7 @@
 #include <vector>
 #include <tr1/array>
 
-static Parametrization* cPar;
+static PSurface<2,float>* cPar;
 static Surface* surf1;
 static Surface* surf2;
 
@@ -96,7 +96,7 @@ void buildContactMapping(const std::vector<std::tr1::array<double,3> >& coords1,
     if (!cPar)
         delete cPar;
 
-    cPar = new Parametrization;
+    cPar = new PSurface<2,float>;
 
     ContactToolBox::buildContactSurface(cPar, surf1, surf2, epsilon, obsDirections);
 

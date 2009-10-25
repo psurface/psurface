@@ -4,7 +4,7 @@
 
 //#define MY_DB
 
-void ContactToolBox::extractMergedGrid(Parametrization* cPar,
+void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
                                        std::vector<IntersectionPrimitive<2,float> >& mergedGrid)
 {
     if (cPar->getNumTriangles()==0)
@@ -13,7 +13,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
 
     // ///////////////////////////////////////////////////
     // Set up point location structure
-    // Can we use the routine in Parametrization ???
+    // Can we use the routine in PSurface<2,float> ???
     // ///////////////////////////////////////////////////
     for (int i=0; i<cPar->getNumTriangles(); i++) {
 
@@ -91,7 +91,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
             int targetTri = -1;
             try {
                 targetTri = cPar->getImageSurfaceTriangle(i, cPT.vertices());
-            } catch (Parametrization::ParamError){
+            } catch (PSurface<2,float>::ParamError){
                 printf("exception caught!\n");
                 targetTri = -1;
             }
@@ -132,7 +132,7 @@ void ContactToolBox::extractMergedGrid(Parametrization* cPar,
 }
 
 #ifdef PSURFACE_EXTRACT_ONLY_COMPLETELY_COVERED_FACES
-bool ContactToolBox::isCompletelyCovered(Parametrization* cPar, int tri, const DomainTriangle* cT)
+bool ContactToolBox::isCompletelyCovered(PSurface<2,float>* cPar, int tri, const DomainTriangle* cT)
 {
     // Count number of CORNER/GHOST-nodes
     int nCorners = 0;

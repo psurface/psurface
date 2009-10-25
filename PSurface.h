@@ -416,9 +416,5 @@ public:
 
 };
 
-/** \brief Typedef for backward compatibility */
-typedef PSurface<2,float> Parametrization;
-
-
 #endif
 

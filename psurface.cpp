@@ -10,9 +10,9 @@
 
 // Using a map instead of a vector here seems nice, but I need
 // the index operator once.
-std::vector<std::pair<std::string, Parametrization*> > domains;
+std::vector<std::pair<std::string, PSurface<2,float>*> > domains;
 
-Parametrization* currentDomain;
+PSurface<2,float>* currentDomain;
 
 int psurface::LoadMesh(const char* label, const char* filename)
 {
@@ -27,7 +27,7 @@ int psurface::LoadMesh(const char* label, const char* filename)
         return ERROR;
     }
 
-    Parametrization* newDomain = (Parametrization*)Parametrization::readAmiraMesh(am, filename);
+    PSurface<2,float>* newDomain = (PSurface<2,float>*)PSurface<2,float>::readAmiraMesh(am, filename);
 
     // The following delete should be here but it sometimes crashes...
     //delete(am);
@@ -37,7 +37,7 @@ int psurface::LoadMesh(const char* label, const char* filename)
         return ERROR;
     }
     
-    domains.push_back(std::pair<std::string, Parametrization*>(label, newDomain));
+    domains.push_back(std::pair<std::string, PSurface<2,float>*>(label, newDomain));
 
     return OK;    
 #endif
@@ -47,7 +47,7 @@ int psurface::RemoveDomain(const char* label)
 {
     std::string domainLabel = label;
 
-    std::vector<std::pair<std::string, Parametrization*> >::iterator i = domains.begin();
+    std::vector<std::pair<std::string, PSurface<2,float>*> >::iterator i = domains.begin();
 
     for (; i!= domains.end(); ++i)
         if (i->first == domainLabel) {
@@ -67,7 +67,7 @@ int psurface::RemoveDomain(const char* label)
 
 void psurface::RemoveAllDomains()
 {
-    std::vector<std::pair<std::string,Parametrization*> >::iterator i = domains.begin();
+    std::vector<std::pair<std::string,PSurface<2,float>*> >::iterator i = domains.begin();
     for (; i!=domains.end(); ++i) 
         delete i->second;
 
@@ -82,7 +82,7 @@ int psurface::StartEditingDomain(const char* label)
 {
     std::string domainLabel = label;
 
-    std::vector<std::pair<std::string, Parametrization*> >::iterator i = domains.begin();
+    std::vector<std::pair<std::string, PSurface<2,float>*> >::iterator i = domains.begin();
 
     for (; i!=domains.end(); ++i)
         if (i->first == domainLabel) {

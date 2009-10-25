@@ -26,14 +26,14 @@ public:
     }
 
     ///
-    CircularPatch(Parametrization* param) {
+    CircularPatch(PSurface<2,float>* param) {
         triangles.resize(0); 
         innerEdges.resize(0);
         par = param;
     }
 
     ///
-    CircularPatch(int size, Parametrization* param) {
+    CircularPatch(int size, PSurface<2,float>* param) {
         triangles.resize(size);
         triangles.assign(size,-1U);
 
@@ -46,7 +46,7 @@ public:
     }
 
     ///
-    CircularPatch(const std::vector<int>& array, Parametrization* param) {
+    CircularPatch(const std::vector<int>& array, PSurface<2,float>* param) {
         triangles.resize(array.size());
         for (size_t i=0; i<array.size(); i++)
             triangles[i] = array[i];
@@ -111,7 +111,7 @@ public:
     }
 
     ///
-    bool hasSmallDihedralAngles(float threshold, const Parametrization* par, 
+    bool hasSmallDihedralAngles(float threshold, const PSurface<2,float>* par, 
                                  const McVertex<float>* centerVertex) const;
 
     /// returns the largest triangle aspect ratio
@@ -146,7 +146,7 @@ private:
 
     std::vector<int> triangles;
 public:
-    Parametrization* par;
+    PSurface<2,float>* par;
 
 };
 

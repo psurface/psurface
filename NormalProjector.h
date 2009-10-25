@@ -15,39 +15,39 @@ class GlobalNodeIdx;
 class NormalProjector {
 public:
 
-    void handleSide(Parametrization* par, 
+    void handleSide(PSurface<2,float>* par, 
                     const ContactBoundary& contactPatch,
                     void (*obsDirections)(const double* pos, double* dir)
                     );
 
-    void setupEdgePointArrays(Parametrization* par);
+    void setupEdgePointArrays(PSurface<2,float>* par);
 
-    void insertEdge(Parametrization* par,  
+    void insertEdge(PSurface<2,float>* par,  
                     const std::vector<StaticVector<double,3> >& normals,
                     int from, 
                     int to,
                     const std::vector<NodeBundle>& projectedTo
                     );
 
-    void insertEdgeFromInteriorNode(Parametrization* par, 
+    void insertEdgeFromInteriorNode(PSurface<2,float>* par, 
                                     const std::vector<StaticVector<double,3> >& normals, 
                                     int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromIntersectionNode(Parametrization* par, 
+    void insertEdgeFromIntersectionNode(PSurface<2,float>* par, 
                                         const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromTouchingNode(Parametrization* par, 
+    void insertEdgeFromTouchingNode(PSurface<2,float>* par, 
                                     const std::vector<StaticVector<double,3> >& normals, 
                                     int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringTri);
 
-    void insertEdgeFromCornerNode(Parametrization* par, 
+    void insertEdgeFromCornerNode(PSurface<2,float>* par, 
                                   const std::vector<StaticVector<double,3> >& normals, 
                                   int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
@@ -57,28 +57,28 @@ public:
     // ///////////////////////////////////////////////////////////////////////
     //   Methods needed to test whether an edge can be projected completely
     // ///////////////////////////////////////////////////////////////////////
-    bool edgeCanBeInserted(const Parametrization* par,  
+    bool edgeCanBeInserted(const PSurface<2,float>* par,  
                            const std::vector<StaticVector<double,3> >& normals,
                            int from, 
                            int to,
                            const std::vector<NodeBundle>& projectedTo
                            );
 
-    bool testInsertEdgeFromInteriorNode(const Parametrization* par, 
+    bool testInsertEdgeFromInteriorNode(const PSurface<2,float>* par, 
                                         const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         Node::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
-    bool testInsertEdgeFromIntersectionNode(const Parametrization* par, 
+    bool testInsertEdgeFromIntersectionNode(const PSurface<2,float>* par, 
                                             const std::vector<StaticVector<double,3> >& normals, 
                                             int from, int to, double& lambda,
                                             const std::vector<NodeBundle>& projectedTo,
                                             Node::NodeType& currType, int& currTri,
                                             int& enteringEdge);
 
-    bool testInsertEdgeFromTouchingNode(const Parametrization* par, 
+    bool testInsertEdgeFromTouchingNode(const PSurface<2,float>* par, 
                                         const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
@@ -86,7 +86,7 @@ public:
                                         Node::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
-    bool testInsertEdgeFromCornerNode(const Parametrization* par, 
+    bool testInsertEdgeFromCornerNode(const PSurface<2,float>* par, 
                                       const std::vector<StaticVector<double,3> >& normals, 
                                       int from, int to, double& lambda,
                                       const std::vector<NodeBundle>& projectedTo,
@@ -94,13 +94,13 @@ public:
                                       Node::NodeType& currType, int& currTri,
                                       int& enteringEdge);
 
-    void insertGhostNodeAtVertex(Parametrization* par, 
+    void insertGhostNodeAtVertex(PSurface<2,float>* par, 
                                  int v, 
                                  int targetTri, 
                                  const StaticVector<double,2>& localTargetCoords
                                  );
 
-    void addCornerNodeBundle(Parametrization* par, 
+    void addCornerNodeBundle(PSurface<2,float>* par, 
                              int v, 
                              int nN
                              );

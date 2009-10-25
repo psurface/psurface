@@ -8,7 +8,7 @@
 #include <psurface/MultiDimOctree.h>
 #include <psurface/PointIntersectionFunctor.h>
 
-void ContactToolBox::buildContactSurface(Parametrization* cPar, 
+void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar, 
                                          const Surface* surf1,  const Surface* surf2,
                                          float epsilon, 
                                          void (*obsDirections)(const double* pos, double* dir))

@@ -15,7 +15,7 @@ class CircularPatch;
 class DomainPolygon : public PlaneParam{
 public:
     /// standard constructor
-    DomainPolygon(Parametrization* _par) : par(_par) {};
+    DomainPolygon(PSurface<2,float>* _par) : par(_par) {};
 
     ///
     ~DomainPolygon() {};
@@ -194,7 +194,7 @@ public:
     /// for each edge of the polygon, a list of the mapping nodes that are right on this edge
     std::vector<std::vector<int> > edgePoints;
 
-    Parametrization* par;
+    PSurface<2,float>* par;
 
 };
 
