@@ -4,7 +4,8 @@
 #include <psurface/PSurface.h>
 
 
-bool CircularPatch::inducesTopologyChange() const
+template <class ctype>
+bool CircularPatch<ctype>::inducesTopologyChange() const
 {
     int i;
 
@@ -20,8 +21,10 @@ bool CircularPatch::inducesTopologyChange() const
     return false;
 }
 
-bool CircularPatch::hasSmallDihedralAngles(float threshold, const PSurface<2,float>* par, 
-                                           const McVertex<float>* centerVertex) const
+
+template <class ctype>
+bool CircularPatch<ctype>::hasSmallDihedralAngles(ctype threshold, const PSurface<2,ctype>* par, 
+                                           const McVertex<ctype>* centerVertex) const
 {
     printf("hasSmallDihedralAngles has been commented out!\n");
 #if 0
@@ -76,7 +79,8 @@ bool CircularPatch::hasSmallDihedralAngles(float threshold, const PSurface<2,flo
 //////////////////////////////////////////////////////////////////
 // this routine returns the bounding box of the patch
 // it is not well programmed.  Each vertex is checked three times
-void CircularPatch::getBoundingBox(Box<float,3> &bbox) const
+template <class ctype>
+void CircularPatch<ctype>::getBoundingBox(Box<ctype,3> &bbox) const
 {
     assert(size());
 
@@ -94,38 +98,39 @@ void CircularPatch::getBoundingBox(Box<float,3> &bbox) const
 
 //////////////////////////////////////////////////////////////////
 // gives the distance of a point to the patch
-float CircularPatch::distanceTo(const StaticVector<float,3> &p) const
+template <class ctype>
+ctype CircularPatch<ctype>::distanceTo(const StaticVector<ctype,3> &p) const
 {
     int i, j;
-    float bestDist = std::numeric_limits<float>::max();
+    ctype bestDist = std::numeric_limits<ctype>::max();
     
     // check point against triangles
     for (j=0; j<size(); j++){
 
         const DomainTriangle& cT = par->triangles(triangles[j]);
         
-        StaticVector<float,3> triPoints[3];
+        StaticVector<ctype,3> triPoints[3];
         triPoints[0] = par->vertices(cT.vertices[0]);
         triPoints[1] = par->vertices(cT.vertices[1]);
         triPoints[2] = par->vertices(cT.vertices[2]);
         
         // local base
-        StaticVector<float,3> a = triPoints[1] - triPoints[0];
-        StaticVector<float,3> b = triPoints[2] - triPoints[0];
-        StaticVector<float,3> c = a.cross(b);
+        StaticVector<ctype,3> a = triPoints[1] - triPoints[0];
+        StaticVector<ctype,3> b = triPoints[2] - triPoints[0];
+        StaticVector<ctype,3> c = a.cross(b);
         c.normalize();
         
-        StaticVector<float,3> x = p - triPoints[0];
+        StaticVector<ctype,3> x = p - triPoints[0];
         
         // write x in the new base  (Cramer's rule)
-        StaticMatrix<float,3> numerator(a, b, c);
-        StaticMatrix<float,3> alphaMat(x, b, c);
-        StaticMatrix<float,3> betaMat(a, x, c);
-        StaticMatrix<float,3> gammaMat(a, b, x);
+        StaticMatrix<ctype,3> numerator(a, b, c);
+        StaticMatrix<ctype,3> alphaMat(x, b, c);
+        StaticMatrix<ctype,3> betaMat(a, x, c);
+        StaticMatrix<ctype,3> gammaMat(a, b, x);
         
-        float alpha = alphaMat.det()/numerator.det();
-        float beta  = betaMat.det()/numerator.det();
-        float gamma = gammaMat.det()/numerator.det();
+        ctype alpha = alphaMat.det()/numerator.det();
+        ctype beta  = betaMat.det()/numerator.det();
+        ctype gamma = gammaMat.det()/numerator.det();
         
         // check whether orthogonal projection onto the ab plane is in triangle
         bool isIn = alpha>=0 && beta>=0 && (1-alpha-beta)>=0;
@@ -147,15 +152,15 @@ float CircularPatch::distanceTo(const StaticVector<float,3> &p) const
 
             const DomainTriangle& cT = par->triangles(triangles[i]);
 
-            StaticVector<float,3> from = par->vertices(cT.vertices[j]);
-            StaticVector<float,3> to   = par->vertices(cT.vertices[(j+1)%3]);
+            StaticVector<ctype,3> from = par->vertices(cT.vertices[j]);
+            StaticVector<ctype,3> to   = par->vertices(cT.vertices[(j+1)%3]);
             
-            StaticVector<float,3> edge = to - from;
+            StaticVector<ctype,3> edge = to - from;
             
-            float projectLength = edge.dot(p - from)/edge.length();
-            StaticVector<float,3> projection = edge/edge.length() * projectLength;
+            ctype projectLength = edge.dot(p - from)/edge.length();
+            StaticVector<ctype,3> projection = edge/edge.length() * projectLength;
             
-            float orthoDist = ((p-from) - projection).length();
+            ctype orthoDist = ((p-from) - projection).length();
             
             if (projectLength>=0 && projectLength<=edge.length() && orthoDist<bestDist)
                 bestDist = orthoDist;       
@@ -165,7 +170,7 @@ float CircularPatch::distanceTo(const StaticVector<float,3> &p) const
     // check point against vertices
     for (i=0; i<size(); i++){
         for (j=0; j<3; j++){
-            float dist = (p - par->vertices(par->triangles(triangles[i]).vertices[j])).length();
+            ctype dist = (p - par->vertices(par->triangles(triangles[i]).vertices[j])).length();
             if (dist < bestDist){
                 bestDist = dist;
             }
@@ -175,34 +180,26 @@ float CircularPatch::distanceTo(const StaticVector<float,3> &p) const
     return bestDist;
 }
 
-bool CircularPatch::intersectsParametrization(const std::vector<int> &closeEdges) const
+
+template <class ctype>
+bool CircularPatch<ctype>::intersectsParametrization(const std::vector<int> &closeEdges) const
 {
     for (size_t i=0; i<closeEdges.size(); i++){
         
-//         printf("closeEdge:  %d    %d --> %d\n", closeEdges[i],
-//                par->edges(closeEdges[i]).from, par->edges(closeEdges[i]).to);
-
         int from = par->edges(closeEdges[i]).from;
         int to   = par->edges(closeEdges[i]).to;
         
         for (int j=0; j<size(); j++){
             
-            // printf("tri: %d  von %d (%d %d %d)\n", j, size(),
-//                    par->triangles(triangles[j]).vertices[0],
-//                    par->triangles(triangles[j]).vertices[1],
-//                    par->triangles(triangles[j]).vertices[2]);
-
             // check whether triangle and edge have one common point
             if (par->triangles(triangles[j]).isConnectedTo(from) || 
                 par->triangles(triangles[j]).isConnectedTo(to) ) 
                 continue;
-            //printf("a\n");
             
             //if (triangles[j]->intersects(closeEdges[i], 0.00001)){
             if (par->intersectionTriangleEdge(triangles[j], &par->edges(closeEdges[i]), 0.00001)){
                 return true;
             }
-            //printf("a\n");
 
         }
     }
@@ -211,7 +208,9 @@ bool CircularPatch::intersectsParametrization(const std::vector<int> &closeEdges
 }
 
 
-bool CircularPatch::hasSelfintersections() const
+
+template <class ctype>
+bool CircularPatch<ctype>::hasSelfintersections() const
 {
     McEdge tmpEdge;
     
@@ -238,7 +237,13 @@ bool CircularPatch::hasSelfintersections() const
 }
 
 
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
 
+template class CircularPatch<float>;
+template class CircularPatch<double>;
 
 
 

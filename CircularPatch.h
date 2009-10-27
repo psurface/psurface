@@ -12,6 +12,7 @@ class PSurface;
 /** This class represents the retriangulation of a small hole in a surface.
     It's basically a bunch of triangles.  The feature of this class are the
     routines that evaluate the quality of the retriangulation. */
+template <class ctype>
 class CircularPatch {
 public:
     
@@ -26,14 +27,14 @@ public:
     }
 
     ///
-    CircularPatch(PSurface<2,float>* param) {
+    CircularPatch(PSurface<2,ctype>* param) {
         triangles.resize(0); 
         innerEdges.resize(0);
         par = param;
     }
 
     ///
-    CircularPatch(int size, PSurface<2,float>* param) {
+    CircularPatch(int size, PSurface<2,ctype>* param) {
         triangles.resize(size);
         triangles.assign(size,-1U);
 
@@ -46,7 +47,7 @@ public:
     }
 
     ///
-    CircularPatch(const std::vector<int>& array, PSurface<2,float>* param) {
+    CircularPatch(const std::vector<int>& array, PSurface<2,ctype>* param) {
         triangles.resize(array.size());
         for (size_t i=0; i<array.size(); i++)
             triangles[i] = array[i];
@@ -86,7 +87,7 @@ public:
     int size() const { return triangles.size(); }
 
     ///
-    void getBoundingBox(Box<float,3> &bbox) const;
+    void getBoundingBox(Box<ctype,3> &bbox) const;
 
     ///
     void killAll(){
@@ -98,11 +99,11 @@ public:
     /**@name Evaluatation methods */
     //@{
     /// gets the smallest internal angle found in any of the triangles
-    float getMinInteriorAngle() const{
+    ctype getMinInteriorAngle() const{
         int i;
-        float minAngle = 2*M_PI;
+        ctype minAngle = 2*M_PI;
         for (i=0; i<size(); i++){
-            float currentMinAngle = par->minInteriorAngle(i);
+            ctype currentMinAngle = par->minInteriorAngle(i);
             if (currentMinAngle<minAngle)
                 minAngle = currentMinAngle;
         }
@@ -111,15 +112,15 @@ public:
     }
 
     ///
-    bool hasSmallDihedralAngles(float threshold, const PSurface<2,float>* par, 
-                                 const McVertex<float>* centerVertex) const;
+    bool hasSmallDihedralAngles(ctype threshold, const PSurface<2,ctype>* par, 
+                                 const McVertex<ctype>* centerVertex) const;
 
     /// returns the largest triangle aspect ratio
-    float maxAspectRatio() const {
+    ctype maxAspectRatio() const {
         int i;
-        float maxRatio = 0;
+        ctype maxRatio = 0;
         for (i=0; i<size(); i++){
-            const float currentAspectRatio = par->aspectRatio(i);
+            const ctype currentAspectRatio = par->aspectRatio(i);
             if (currentAspectRatio>maxRatio)
                 maxRatio = currentAspectRatio;
         }
@@ -138,7 +139,7 @@ public:
 
     //@}
 
-    float distanceTo(const class StaticVector<float,3> &) const ;
+    ctype distanceTo(const class StaticVector<ctype,3> &) const ;
 
     std::vector<std::tr1::array<int, 2> > innerEdges;
 
@@ -146,7 +147,7 @@ private:
 
     std::vector<int> triangles;
 public:
-    PSurface<2,float>* par;
+    PSurface<2,ctype>* par;
 
 };
 
