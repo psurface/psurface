@@ -34,7 +34,7 @@ class AmiraMesh;
 */
 template <int dim, class ctype>
 class PSurface
-    : public McSurfaceBase<McVertex<float>, McEdge, DomainTriangle>{
+    : public McSurfaceBase<McVertex<ctype>, McEdge, DomainTriangle>{
 
 public:
 
@@ -77,7 +77,7 @@ public:
     void clear();
 
     /// Get box containing all vertices.
-    virtual void getBoundingBox(Box<float,3>& bbox) const;
+    virtual void getBoundingBox(Box<ctype,3>& bbox) const;
 
     /** \brief Sets up the internal data structures needed by the map() method.
      * 
@@ -167,10 +167,10 @@ public:
     void removeExtraEdges();
 
     /// Returns a reference to the node specified by a GlobalNodeIdx
-    Node<float>& nodes(const GlobalNodeIdx& n) {return triangles(n.tri).nodes[n.idx];}
+    Node<float>& nodes(const GlobalNodeIdx& n) {return this->triangles(n.tri).nodes[n.idx];}
 
     /// Returns a const reference to the node specified by a GlobalNodeIdx
-    const Node<float>& nodes(const GlobalNodeIdx& n) const {return triangles(n.tri).nodes[n.idx];}
+    const Node<float>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
     StaticVector<float,3> imagePos(const GlobalNodeIdx& n) const {
@@ -180,7 +180,7 @@ public:
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
     StaticVector<float,3> imagePos(int tri, NodeIdx node) const {
-        const Node<float>& cN = triangles(tri).nodes[node];
+        const Node<float>& cN = this->triangles(tri).nodes[node];
 
         switch (cN.type) {
         case Node<float>::GHOST_NODE: {

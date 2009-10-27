@@ -8,7 +8,7 @@
 class DomainTriangle;
 class DomainVertex;
 class DomainEdge;
-class CircularPatch;
+template <class ctype> class CircularPatch;
 
 
 /** A polygon carrying a plane triangulation */
@@ -101,7 +101,7 @@ public:
      * set of DomainTriangles.
      *
      */
-    bool triangulate(CircularPatch &fillIn, 
+    bool triangulate(CircularPatch<float> &fillIn, 
                      std::vector<unsigned int>& nodeStack);
 
     ///

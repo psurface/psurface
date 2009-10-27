@@ -343,7 +343,7 @@ float DomainPolygon::computeIntersection(float &mu, const StaticVector<float,2> 
 
 
 
-bool DomainPolygon::triangulate(CircularPatch& fillIn, std::vector<unsigned int>& nodeStack)
+bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsigned int>& nodeStack)
 {
     int i, j, k;
 

@@ -144,21 +144,21 @@ void PSurface<dim,ctype>::checkConsistency(const char* where) const
     int i, j;
     // first checks whether all triangles are consistent
     // sorts out invalid triangles
-    std::vector<bool> isInvalid(triangleArray.size());
+    std::vector<bool> isInvalid(this->triangleArray.size());
     std::fill(isInvalid.begin(), isInvalid.end(), false);
 
-    for (i=0; i<freeTriangleStack.size(); i++)
-        isInvalid[freeTriangleStack[i]] = true;
+    for (i=0; i<this->freeTriangleStack.size(); i++)
+        isInvalid[this->freeTriangleStack[i]] = true;
 
-    for (i=0; i<getNumTriangles(); i++)
+    for (i=0; i<this->getNumTriangles(); i++)
         if (!isInvalid[i]){
             //printf("i = %d\n", i);
-            triangles(i).checkConsistency("where");
+            this->triangles(i).checkConsistency("where");
 
             for (j=0; j<3; j++) {
-                const McEdge& cE = edges(triangles(i).edges[j]);
-                if (!(cE.from == triangles(i).vertices[j] && cE.to == triangles(i).vertices[(j+1)%3]) &&
-                    !(cE.to == triangles(i).vertices[j] && cE.from == triangles(i).vertices[(j+1)%3])){
+                const McEdge& cE = this->edges(this->triangles(i).edges[j]);
+                if (!(cE.from == this->triangles(i).vertices[j] && cE.to   == this->triangles(i).vertices[(j+1)%3]) &&
+                    !(cE.to   == this->triangles(i).vertices[j] && cE.from == this->triangles(i).vertices[(j+1)%3])){
                     printf(where);
                     printf("inconsistent triangle edges\n");
                     assert(false);
@@ -167,14 +167,14 @@ void PSurface<dim,ctype>::checkConsistency(const char* where) const
         }
 
     // checks whether matching edgepoint arrays have the same size
-    for (i=0; i<getNumEdges(); i++) {
-        const McEdge& cE = edges(i);
+    for (i=0; i<this->getNumEdges(); i++) {
+        const McEdge& cE = this->edges(i);
 
         if (cE.triangles.size()!=2)
             continue;
 
-        const DomainTriangle& tri1 = triangles(cE.triangles[0]);
-        const DomainTriangle& tri2 = triangles(cE.triangles[1]);
+        const DomainTriangle& tri1 = this->triangles(cE.triangles[0]);
+        const DomainTriangle& tri2 = this->triangles(cE.triangles[1]);
 
         if (tri1.edgePoints[tri1.getEdge(i)].size() != tri2.edgePoints[tri2.getEdge(i)].size()) {
             printf(where);
