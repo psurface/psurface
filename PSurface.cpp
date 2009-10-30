@@ -92,9 +92,16 @@ StaticVector<ctype,2> PSurface<dim,ctype>::getLocalTargetCoords(const GlobalNode
     case Node<ctype>::INTERSECTION_NODE: {
 
         StaticVector<ctype,3> iPos = imagePos(n.tri, n.idx);
-        return this->triangles(n.tri).computeBarycentricCoords(iPos, *(StaticVector<float,3>*)&surface->points[surface->triangles[targetTri].points[0]][0], 
-                                                         *(StaticVector<float,3>*)&surface->points[surface->triangles[targetTri].points[1]][0], 
-                                                         *(StaticVector<float,3>*)&surface->points[surface->triangles[targetTri].points[2]][0]);
+
+        // Convert from McVec3f to StaticVector
+        std::tr1::array<StaticVector<ctype,3>, 3> p;
+
+        for (int i=0; i<3; i++)
+            for (int j=0; j<3; j++)
+                p[i][j] = surface->points[surface->triangles[targetTri].points[i]][j];
+
+        return this->triangles(n.tri).computeBarycentricCoords(iPos, p[0], p[1], p[2]);
+
     }
     default:
         if (cN.getNodeNumber()==surface->triangles[targetTri].points[0])

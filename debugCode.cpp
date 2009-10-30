@@ -285,7 +285,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
             assert(false);
         }
         
-    PlaneParam<float>::checkConsistency(where);
+    PlaneParam<ctype>::checkConsistency(where);
 
     // check whether all corner nodes are of type CORNER_NODE
     for (i=0; i<3; i++){
@@ -321,8 +321,8 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
         }
         // check if two subsequent TOUCHING_NODES are connected by an edge
         for (j=0; j<edgePoints[i].size()-1; j++){
-            const Node<float>& nA = this->nodes[edgePoints[i][j]];
-            const Node<float>& nB = this->nodes[edgePoints[i][j+1]];
+            const Node<ctype>& nA = this->nodes[edgePoints[i][j]];
+            const Node<ctype>& nB = this->nodes[edgePoints[i][j+1]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
@@ -336,8 +336,8 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
 
         // check whether nodes that are not neighbors in the edgePoint array are connected
         for (j=0; j<edgePoints[i].size()-2; j++) {
-            const Node<float>& nA = this->nodes[edgePoints[i][j]];
-            const Node<float>& nB = this->nodes[edgePoints[i][j+2]];
+            const Node<ctype>& nA = this->nodes[edgePoints[i][j]];
+            const Node<ctype>& nB = this->nodes[edgePoints[i][j+2]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 (nA.isConnectedTo(edgePoints[i][j+2]) || nB.isConnectedTo(edgePoints[i][j]))) {
@@ -356,14 +356,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
 
     for (int k=0; k<this->nodes.size(); k++) {
 
-        const Node<float>& cN = this->nodes[k];
-
-//         if (cN.domainPos().x < -0.01 || cN.domainPos().x > 1.01 ||
-//             cN.domainPos().y < -0.01 || cN.domainPos().y > 1.01) {
-//             printf(where);
-//             cN.print();
-//             assert(false);
-//         }
+        const Node<ctype>& cN = this->nodes[k];
 
         if (cN.isINTERSECTION_NODE()){
 
