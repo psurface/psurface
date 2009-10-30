@@ -480,7 +480,8 @@ public:
      * with respect to a triangle in space.  It tacitly assumes that the point 
      * is coplanar with the triangle.
      */
-    static StaticVector<ctype,2> computeBarycentricCoords(const StaticVector<ctype,3> &p, const StaticVector<ctype,3> &a, const StaticVector<ctype,3> &b, const StaticVector<ctype,3> &c);
+    template <class ctype2>
+    static StaticVector<ctype,2> computeBarycentricCoords(const StaticVector<ctype,3> &p, const StaticVector<ctype2,3> &a, const StaticVector<ctype2,3> &b, const StaticVector<ctype2,3> &c);
 
     ///
     DirectedEdgeIterator BFLocate(const StaticVector<ctype,2> &p, int seed=-1) const;

@@ -666,7 +666,7 @@ void NormalProjector::insertEdgeFromTouchingNode(PSurface<2,float>* par,
         if (curr[i].tri == enteringTri)
             continue;
 
-        DomainTriangle& cT = par->triangles(curr[i].tri);
+        DomainTriangle<float>& cT = par->triangles(curr[i].tri);
         int currentEdge = cT.nodes[curr[i].idx].getDomainEdge();
         
         for (int j=0; j<3; j++) {
@@ -1103,7 +1103,7 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const PSurface<2,float>* pa
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
 
-        const DomainTriangle& cT = par->triangles(curr[i].tri);
+        const DomainTriangle<float>& cT = par->triangles(curr[i].tri);
         int currentEdge = cT.nodes[curr[i].idx].getDomainEdge();
         
         for (int j=0; j<3; j++) {
@@ -1459,7 +1459,7 @@ void NormalProjector::computeVertexNormals()
 {
 }
 
-NodeIdx NormalProjector::getCornerNode(const DomainTriangle& cT, int corner)
+NodeIdx NormalProjector::getCornerNode(const DomainTriangle<float>& cT, int corner)
 {
     assert(corner>=0 && corner<3);
 
@@ -1500,7 +1500,7 @@ void NormalProjector::setupEdgePointArrays(PSurface<2,float>* par)
 
     for (i=0; i<par->getNumTriangles(); i++) {
 
-        DomainTriangle& cT = par->triangles(i);
+        DomainTriangle<float>& cT = par->triangles(i);
 
         cT.edgePoints[0].clear();
         cT.edgePoints[1].clear();

@@ -34,7 +34,7 @@ class AmiraMesh;
 */
 template <int dim, class ctype>
 class PSurface
-    : public McSurfaceBase<McVertex<ctype>, McEdge, DomainTriangle>{
+    : public McSurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >{
 
 public:
 
@@ -167,40 +167,40 @@ public:
     void removeExtraEdges();
 
     /// Returns a reference to the node specified by a GlobalNodeIdx
-    Node<float>& nodes(const GlobalNodeIdx& n) {return this->triangles(n.tri).nodes[n.idx];}
+    Node<ctype>& nodes(const GlobalNodeIdx& n) {return this->triangles(n.tri).nodes[n.idx];}
 
     /// Returns a const reference to the node specified by a GlobalNodeIdx
-    const Node<float>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
+    const Node<ctype>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    StaticVector<float,3> imagePos(const GlobalNodeIdx& n) const {
+    StaticVector<ctype,3> imagePos(const GlobalNodeIdx& n) const {
         return imagePos(n.tri, n.idx);
     }
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    StaticVector<float,3> imagePos(int tri, NodeIdx node) const {
-        const Node<float>& cN = this->triangles(tri).nodes[node];
+    StaticVector<ctype,3> imagePos(int tri, NodeIdx node) const {
+        const Node<ctype>& cN = this->triangles(tri).nodes[node];
 
         switch (cN.type) {
-        case Node<float>::GHOST_NODE: {
+        case Node<ctype>::GHOST_NODE: {
             const Surface::Triangle& cT = surface->triangles[cN.getNodeNumber()];
 
-            StaticVector<float,3> p0(surface->points[cT.points[0]][0],surface->points[cT.points[0]][1],surface->points[cT.points[0]][2]);
-            StaticVector<float,3> p1(surface->points[cT.points[1]][0],surface->points[cT.points[1]][1],surface->points[cT.points[1]][2]);
-            StaticVector<float,3> p2(surface->points[cT.points[2]][0],surface->points[cT.points[2]][1],surface->points[cT.points[2]][2]);
+            StaticVector<ctype,3> p0(surface->points[cT.points[0]][0],surface->points[cT.points[0]][1],surface->points[cT.points[0]][2]);
+            StaticVector<ctype,3> p1(surface->points[cT.points[1]][0],surface->points[cT.points[1]][1],surface->points[cT.points[1]][2]);
+            StaticVector<ctype,3> p2(surface->points[cT.points[2]][0],surface->points[cT.points[2]][1],surface->points[cT.points[2]][2]);
 
-            return PlaneParam<float>::linearInterpol(cN.dP, p0, p1, p2);
+            return PlaneParam<ctype>::linearInterpol(cN.dP, p0, p1, p2);
         }
-        case Node<float>::INTERSECTION_NODE:
+        case Node<ctype>::INTERSECTION_NODE:
             return iPos[cN.getNodeNumber()];
 
         default:
 #ifdef PSURFACE_STANDALONE
             return surface->points[cN.getNodeNumber()];
 #else 
-            StaticVector<float,3> result;
-            return StaticVector<float,3>(surface->points[cN.getNodeNumber()][0],
+            StaticVector<ctype,3> result;
+            return StaticVector<ctype,3>(surface->points[cN.getNodeNumber()][0],
                                          surface->points[cN.getNodeNumber()][1],
                                          surface->points[cN.getNodeNumber()][2]);
 #endif
@@ -211,7 +211,7 @@ public:
     /** \brief Returns the local coordinates of the image of a node with
      * respect to a given image triangle.
      */
-    StaticVector<float,2> getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
+    StaticVector<ctype,2> getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
 
     /**@name Mapping functions */
     //@{
@@ -235,9 +235,9 @@ public:
      * 
      */
     int map(int tri,                ///< The triangle of the input point \f$x\f$
-            StaticVector<float,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
+            StaticVector<ctype,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
             std::tr1::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
-            StaticVector<float,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
+            StaticVector<ctype,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
             int seed=-1                      
             ) const;
 
@@ -252,7 +252,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int positionMap(int tri, StaticVector<float,2>& p, StaticVector<float,3>& result) const;
+    int positionMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
 
     /** \brief Convenience function for accessing the normals of the target surface.
      *
@@ -265,7 +265,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int directNormalMap(int tri, StaticVector<float,2>& p, StaticVector<float,3>& result) const;
+    int directNormalMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
 
     //@}
 
@@ -339,24 +339,24 @@ public:
      */
     void checkConsistency(const char* where) const;
 
-    NodeIdx addNode(int tri, const StaticVector<float,3>& p);
+    NodeIdx addNode(int tri, const StaticVector<ctype,3>& p);
 
-    NodeIdx addInteriorNode(int tri, const StaticVector<float,2>& dom, int nodeNumber);
+    NodeIdx addInteriorNode(int tri, const StaticVector<ctype,2>& dom, int nodeNumber);
 
-    NodeIdx addGhostNode(int tri, int corner, int targetTri, const StaticVector<float,2>& localTargetCoords);
+    NodeIdx addGhostNode(int tri, int corner, int targetTri, const StaticVector<ctype,2>& localTargetCoords);
 
     NodeIdx addCornerNode(int tri, int corner, int nodeNumber);
 
     /** \todo Sollte vielleicht ein Bundle zurückgeben */
     NodeIdx addIntersectionNodePair(int tri1, int tri2,
-                                    const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
-                                    int edge1, int edge2, const StaticVector<float,3>& range);
+                                    const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
+                                    int edge1, int edge2, const StaticVector<ctype,3>& range);
 
-    NodeIdx addTouchingNode(int tri, const StaticVector<float,2>& dP, int edge, int nodeNumber);
+    NodeIdx addTouchingNode(int tri, const StaticVector<ctype,2>& dP, int edge, int nodeNumber);
 
     /** \todo Sollte vielleicht ein Bundle zurückgeben */
     NodeIdx addTouchingNodePair(int tri1, int tri2,
-                                const StaticVector<float,2>& dP1, const StaticVector<float,2>& dP2, 
+                                const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
                                 int edge1, int edge2, int nodeNumber);
 
     void addParTriangle(int tri, const std::tr1::array<int,3>& p);
@@ -373,8 +373,8 @@ protected:
 
     /** \brief Internal routine used by map() 
      */
-    void handleMapOnEdge(int tri, const StaticVector<float,2>& p, const StaticVector<float,2>& a, const StaticVector<float,2>& b,
-                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<float,2>& coords) const;
+    void handleMapOnEdge(int tri, const StaticVector<ctype,2>& p, const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b,
+                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
     void appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch);
@@ -402,7 +402,7 @@ public:
 #endif
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
-    std::vector<StaticVector<float,3> > iPos;
+    std::vector<StaticVector<ctype,3> > iPos;
 
     /// The corresponding image surface
     Surface* surface;

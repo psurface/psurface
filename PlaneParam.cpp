@@ -307,7 +307,8 @@ StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVe
 // This routine computes the barycentric coordinates of a point in space with respect to
 // a triangle in space.  It tacitly assumes that the point is coplanar with the triangle.
 template <class ctype>
-StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVector<ctype,3> &p, const StaticVector<ctype,3> &a, const StaticVector<ctype,3> &b, const StaticVector<ctype,3> &c)
+template <class ctype2>
+StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVector<ctype,3> &p, const StaticVector<ctype2,3> &a, const StaticVector<ctype2,3> &b, const StaticVector<ctype2,3> &c)
 {
     StaticVector<ctype,2> result;
     

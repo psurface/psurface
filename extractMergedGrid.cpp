@@ -17,7 +17,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
     // ///////////////////////////////////////////////////
     for (int i=0; i<cPar->getNumTriangles(); i++) {
 
-        DomainTriangle& cT = cPar->triangles(i);
+        DomainTriangle<float>& cT = cPar->triangles(i);
 
         cT.insertExtraEdges();
 
@@ -73,7 +73,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
     //
     for (int i=0; i<cPar->getNumTriangles(); i++) {
 
-        const DomainTriangle& cT = cPar->triangles(i);
+        const DomainTriangle<float>& cT = cPar->triangles(i);
 
         if (cT.nodes.size()<3)
             continue;

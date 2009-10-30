@@ -115,7 +115,7 @@ public:
 
     std::vector<int> getCommonTris(const NodeBundle& a, const NodeBundle& b);
 
-    NodeIdx getCornerNode(const DomainTriangle& cT, int corner);
+    NodeIdx getCornerNode(const DomainTriangle<float>& cT, int corner);
 
     /** basically by solving the nonlinear system of equations 
      * \f$ F(x) := x_0 (p_0 - p_1) + x_1 (p_1 - p_2) + x_2 x_0(n_0 - n_2) + x_2 x_1 (n_1 - n_2)

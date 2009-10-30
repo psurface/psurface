@@ -107,7 +107,7 @@ ctype CircularPatch<ctype>::distanceTo(const StaticVector<ctype,3> &p) const
     // check point against triangles
     for (j=0; j<size(); j++){
 
-        const DomainTriangle& cT = par->triangles(triangles[j]);
+        const DomainTriangle<ctype>& cT = par->triangles(triangles[j]);
         
         StaticVector<ctype,3> triPoints[3];
         triPoints[0] = par->vertices(cT.vertices[0]);
@@ -150,7 +150,7 @@ ctype CircularPatch<ctype>::distanceTo(const StaticVector<ctype,3> &p) const
     for (i=0; i<size(); i++){
         for (j=0; j<3; j++){
 
-            const DomainTriangle& cT = par->triangles(triangles[i]);
+            const DomainTriangle<ctype>& cT = par->triangles(triangles[i]);
 
             StaticVector<ctype,3> from = par->vertices(cT.vertices[j]);
             StaticVector<ctype,3> to   = par->vertices(cT.vertices[(j+1)%3]);

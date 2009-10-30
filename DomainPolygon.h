@@ -5,9 +5,7 @@
 #include <psurface/PlaneParam.h>
 #include <psurface/PSurface.h>
 
-class DomainTriangle;
-class DomainVertex;
-class DomainEdge;
+template <class ctype> class DomainTriangle;
 template <class ctype> class CircularPatch;
 
 
@@ -29,7 +27,7 @@ private:
 public:
         
     ///
-    void init(const DomainTriangle& tri, const StaticVector<float,2> coords[3]);
+    void init(const DomainTriangle<float>& tri, const StaticVector<float,2> coords[3]);
 
 
     enum NodeLocation {IN_TRIANGLE, ON_SEGMENT, IN_POLYGON};
@@ -107,7 +105,7 @@ public:
     ///
     void cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
                            std::vector<int>& nodeLocs,
-                           DomainTriangle& cT,
+                           DomainTriangle<float>& cT,
                            const std::tr1::array<StaticVector<float,2>, 3>& newTriangleCoords,
                            std::vector<int>& triNewEdgePoints,
                            std::vector<int>& polyNewEdgePoints,

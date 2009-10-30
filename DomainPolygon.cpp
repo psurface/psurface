@@ -8,7 +8,7 @@ inline int isnan(double x) {return _isnan(x);}
 
 static int counter = 0;
 
-void DomainPolygon::init(const DomainTriangle& tri, const StaticVector<float,2> coords[3]){
+void DomainPolygon::init(const DomainTriangle<float>& tri, const StaticVector<float,2> coords[3]){
 
     nodes = tri.nodes;     
     
@@ -36,7 +36,7 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
 
     // for debugging
 
-    DomainTriangle& cT = par->triangles(tri);
+    DomainTriangle<float>& cT = par->triangles(tri);
 
     cT.removeExtraEdges();
     par->hasUpToDatePointLocationStructure = false;
@@ -370,7 +370,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
 
         }
 
-        DomainTriangle& cT = par->triangles(fillIn[i]);
+        DomainTriangle<float>& cT = par->triangles(fillIn[i]);
 
         //////////////////////////////////////////////////////////////////////////
         // cut off one triangle from the polygon and update the parametrization
@@ -553,7 +553,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
     }
     
     // there's only on triangle left
-    DomainTriangle& cT = par->triangles(fillIn.last());
+    DomainTriangle<float>& cT = par->triangles(fillIn.last());
     
     cT.nodes = nodes;
 
@@ -590,7 +590,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
 
 void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
                                       std::vector<int>& nodeLocs,
-                                      DomainTriangle& cT,
+                                      DomainTriangle<float>& cT,
                                       const std::tr1::array<StaticVector<float,2>, 3>& newTriangleCoords,
                                       std::vector<int>& triNewEdgePoints,
                                       std::vector<int>& polyNewEdgePoints,
@@ -975,7 +975,7 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
         return newNode;
 
     
-    DomainTriangle::rotate(nodes[cN].nbs, -(lastNonePolygonNeighbor+1));
+    DomainTriangle<float>::rotate(nodes[cN].nbs, -(lastNonePolygonNeighbor+1));
 
     
     for (i=nodes[cN].degree()-1; i>=0; i--){

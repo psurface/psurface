@@ -98,7 +98,8 @@ void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNod
 #endif
 }
 
-void DomainTriangle::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const
+template <class ctype>
+void DomainTriangle<ctype>::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const
 {
 #ifndef NDEBUG
     int i, j;
@@ -116,7 +117,7 @@ void DomainTriangle::print(bool showEdgePoints, bool showParamEdges, bool showNo
             printf("edgePoints %d:\n", i);
             for (j=0; j<edgePoints[i].size(); j++){
                 printf("%d:   -- ", edgePoints[i][j]);
-                nodes[edgePoints[i][j]].print();
+                this->nodes[edgePoints[i][j]].print();
             }
         }
         
@@ -124,9 +125,9 @@ void DomainTriangle::print(bool showEdgePoints, bool showParamEdges, bool showNo
     }
 
     if (showNodes){
-        for (int cN=0; cN<nodes.size(); cN++){
+        for (int cN=0; cN<this->nodes.size(); cN++){
             printf("%d  ", cN);
-            nodes[cN].print(showParamEdges);
+            this->nodes[cN].print(showParamEdges);
 //             if (showParamEdges) 
 //                 for (i=0; i<nodes[cN].degree(); i++)
 //                     printf("    %d\n", (int)nodes[cN].neighbors(i));
@@ -173,8 +174,8 @@ void PSurface<dim,ctype>::checkConsistency(const char* where) const
         if (cE.triangles.size()!=2)
             continue;
 
-        const DomainTriangle& tri1 = this->triangles(cE.triangles[0]);
-        const DomainTriangle& tri2 = this->triangles(cE.triangles[1]);
+        const DomainTriangle<ctype>& tri1 = this->triangles(cE.triangles[0]);
+        const DomainTriangle<ctype>& tri2 = this->triangles(cE.triangles[1]);
 
         if (tri1.edgePoints[tri1.getEdge(i)].size() != tri2.edgePoints[tri2.getEdge(i)].size()) {
             printf(where);
@@ -264,20 +265,21 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
 #endif
 }
 
-void DomainTriangle::checkConsistency(const char* where) const
+template <class ctype>
+void DomainTriangle<ctype>::checkConsistency(const char* where) const
 {
 #ifndef NDEBUG
-    if (nodes.size()<3){
+    if (this->nodes.size()<3){
         printf(where);
         //print(true, true, true);
-        assert(nodes.size()>=3);
+        assert(this->nodes.size()>=3);
     }
 
     int i,j;
 
     // triangles should never contain obsolete nodes
-    for (i=0; i<nodes.size(); i++)
-        if (nodes[i].isInvalid()) {
+    for (i=0; i<this->nodes.size(); i++)
+        if (this->nodes[i].isInvalid()) {
             printf(where);
             printf("***** triangle contains invalid node *****\n");
             assert(false);
@@ -291,36 +293,36 @@ void DomainTriangle::checkConsistency(const char* where) const
         assert(edgePoints[i].size()>=2);
 
         for (j=0; j<edgePoints[i].size(); j++)
-            if (edgePoints[i][j]<0 || edgePoints[i][j]>=nodes.size()) {
+            if (edgePoints[i][j]<0 || edgePoints[i][j]>=this->nodes.size()) {
                 printf(where);
                 printf("\n***** illegal node index %d in edgePoints array *****\n", edgePoints[i][j]);
                 print();
                 assert(false);
             }
         
-        if (!nodes[edgePoints[i][0]].isCORNER_NODE()){
+        if (!this->nodes[edgePoints[i][0]].isCORNER_NODE()){
             printf(where);
             printf("***** corner node is not CORNER_NODE *****\n");
             assert(false);
         }
 
         for (j=1; j<edgePoints[i].size()-1; j++){
-            if (nodes[edgePoints[i][j]].isCORNER_NODE()){
+            if (this->nodes[edgePoints[i][j]].isCORNER_NODE()){
                 printf(where);
                 printf("******* corner node found in edgePoint array *** %d *****\n", j);
                 assert(false);
             }
-            if (nodes[edgePoints[i][j]].isINTERIOR_NODE()){
+            if (this->nodes[edgePoints[i][j]].isINTERIOR_NODE()){
                 printf(where);
                 printf("******* interior node found in edgePoint array ********\n");
-                printf("***     The node has the node number %ld      ***\n", nodes[edgePoints[i][j]].getNodeNumber());
+                printf("***     The node has the node number %ld      ***\n", this->nodes[edgePoints[i][j]].getNodeNumber());
                 assert(false);
             }
         }
         // check if two subsequent TOUCHING_NODES are connected by an edge
         for (j=0; j<edgePoints[i].size()-1; j++){
-            const Node<float>& nA = nodes[edgePoints[i][j]];
-            const Node<float>& nB = nodes[edgePoints[i][j+1]];
+            const Node<float>& nA = this->nodes[edgePoints[i][j]];
+            const Node<float>& nB = this->nodes[edgePoints[i][j+1]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
@@ -334,8 +336,8 @@ void DomainTriangle::checkConsistency(const char* where) const
 
         // check whether nodes that are not neighbors in the edgePoint array are connected
         for (j=0; j<edgePoints[i].size()-2; j++) {
-            const Node<float>& nA = nodes[edgePoints[i][j]];
-            const Node<float>& nB = nodes[edgePoints[i][j+2]];
+            const Node<float>& nA = this->nodes[edgePoints[i][j]];
+            const Node<float>& nB = this->nodes[edgePoints[i][j+2]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 (nA.isConnectedTo(edgePoints[i][j+2]) || nB.isConnectedTo(edgePoints[i][j]))) {
@@ -352,9 +354,9 @@ void DomainTriangle::checkConsistency(const char* where) const
 
     // check whether all intersection nodes are pointed to from an edgePoint array    
 
-    for (int k=0; k<nodes.size(); k++) {
+    for (int k=0; k<this->nodes.size(); k++) {
 
-        const Node<float>& cN = nodes[k];
+        const Node<float>& cN = this->nodes[k];
 
 //         if (cN.domainPos().x < -0.01 || cN.domainPos().x > 1.01 ||
 //             cN.domainPos().y < -0.01 || cN.domainPos().y > 1.01) {
