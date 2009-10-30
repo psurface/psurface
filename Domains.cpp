@@ -75,8 +75,8 @@ void DomainTriangle<ctype>::flip()
 
     // turn the parametrization
     /** \todo This is slow and should be reprogrammed! */
-    this->installWorldCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(1,0), StaticVector<float,2>(0,1));
-    PlaneParam<float>::installBarycentricCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(0,1), StaticVector<float,2>(1,0));
+    this->installWorldCoordinates(StaticVector<ctype,2>(0,0), StaticVector<ctype,2>(1,0), StaticVector<ctype,2>(0,1));
+    PlaneParam<ctype>::installBarycentricCoordinates(StaticVector<ctype,2>(0,0), StaticVector<ctype,2>(0,1), StaticVector<ctype,2>(1,0));
 }
 
 template <class ctype>
@@ -88,8 +88,8 @@ void DomainTriangle<ctype>::rotate()
     
     // turn the parametrization
     /// \todo This is slow and should be replaced!
-    this->installWorldCoordinates(StaticVector<float,2>(0,0), StaticVector<float,2>(1,0), StaticVector<float,2>(0,1));
-    PlaneParam<float>::installBarycentricCoordinates(StaticVector<float,2>(0,1), StaticVector<float,2>(0,0), StaticVector<float,2>(1,0));
+    this->installWorldCoordinates(StaticVector<ctype,2>(0,0), StaticVector<ctype,2>(1,0), StaticVector<ctype,2>(0,1));
+    PlaneParam<ctype>::installBarycentricCoordinates(StaticVector<ctype,2>(0,1), StaticVector<ctype,2>(0,0), StaticVector<ctype,2>(1,0));
 }
 
 
@@ -118,8 +118,8 @@ void DomainTriangle<ctype>::adjustTouchingNodes()
     for (i=1; i<edgePoints[0].size()-1; i++)
         if (this->nodes[edgePoints[0][i]].isTOUCHING_NODE() 
             || this->nodes[edgePoints[0][i]].isINTERSECTION_NODE()){
-            StaticVector<float,2> tmp = this->nodes[edgePoints[0][i]].domainPos();
-            float diff = (1.0f - tmp[0] - tmp[1]);
+            StaticVector<ctype,2> tmp = this->nodes[edgePoints[0][i]].domainPos();
+            ctype diff = (1.0f - tmp[0] - tmp[1]);
             tmp[0] += 0.5*diff;
             tmp[1] += 0.5*diff;
             this->nodes[edgePoints[0][i]].setDomainPos(tmp);
@@ -127,11 +127,11 @@ void DomainTriangle<ctype>::adjustTouchingNodes()
 
     for (i=1; i<edgePoints[1].size()-1; i++)
         if (this->nodes[edgePoints[1][i]].isTOUCHING_NODE() || this->nodes[edgePoints[1][i]].isINTERSECTION_NODE())
-            this->nodes[edgePoints[1][i]].setDomainPos(StaticVector<float,2>(0, this->nodes[edgePoints[1][i]].domainPos()[1]));
+            this->nodes[edgePoints[1][i]].setDomainPos(StaticVector<ctype,2>(0, this->nodes[edgePoints[1][i]].domainPos()[1]));
     
     for (i=1; i<edgePoints[2].size()-1; i++)
         if (this->nodes[edgePoints[2][i]].isTOUCHING_NODE() || this->nodes[edgePoints[2][i]].isINTERSECTION_NODE())
-            this->nodes[edgePoints[2][i]].setDomainPos(StaticVector<float,2>(this->nodes[edgePoints[2][i]].domainPos()[0], 0));
+            this->nodes[edgePoints[2][i]].setDomainPos(StaticVector<ctype,2>(this->nodes[edgePoints[2][i]].domainPos()[0], 0));
 }
         
 
@@ -170,3 +170,9 @@ void DomainTriangle<ctype>::createPointLocationStructure()
 
 }
 
+// ///////////////////////////////////////////////////////
+//   explicit template instantiations
+// ///////////////////////////////////////////////////////
+
+template class DomainTriangle<float>;
+template class DomainTriangle<double>;

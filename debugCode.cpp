@@ -446,3 +446,11 @@ void DomainPolygon::checkConsistency(const char* where)
     }
 #endif
 }
+
+
+// ///////////////////////////////////////////////////////
+//   explicit template instantiations
+// ///////////////////////////////////////////////////////
+
+template class DomainTriangle<float>;
+template class DomainTriangle<double>;

@@ -257,9 +257,6 @@ public:
     PlaneParam() {}
 
     ///
-    ~PlaneParam();
-
-    ///
     void makeOneTriangle(int a, int b, int c)
     {
         nodes.resize(3);
