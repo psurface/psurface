@@ -115,12 +115,6 @@ bool PlaneParam<ctype>::TriangleIterator::isCorrectlyOriented() const
 //     return vertices(0) < vertices(1);
 }
 
-template <class ctype>
-typename PlaneParam<ctype>::TriangleIterator PlaneParam<ctype>::firstTriangle() const
-{
-    DirectedEdgeIterator firstEdge = firstDirectedEdge();
-    return TriangleIterator(firstEdge);    
-}
 
 // ////////////////////////////////////////////////////////
 //   Explicit template instantiations.

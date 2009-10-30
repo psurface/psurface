@@ -156,4 +156,12 @@ bool ContactToolBox::isCompletelyCovered(PSurface<2,ctype>* cPar, int tri, const
     // compare with expected number of triangles (by Euler's formula)
     return nCorners==3 && (nTris == 1 - cT->nodes.size() + cT->getNumEdges());
 }
+
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
+
+template bool ContactToolBox::isCompletelyCovered<float>(PSurface<2,float>* cPar, int tri, const DomainTriangle<float>* cT);
+template bool ContactToolBox::isCompletelyCovered<double>(PSurface<2,double>* cPar, int tri, const DomainTriangle<double>* cT);
 #endif

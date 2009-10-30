@@ -151,7 +151,10 @@ public:
     /**@name Access to different iterators */
     //@{
 
-    TriangleIterator firstTriangle() const;
+    TriangleIterator firstTriangle() const 
+    {
+        return TriangleIterator(firstDirectedEdge());    
+    }
 
     UndirectedEdgeIterator firstUndirectedEdge() const {
 
