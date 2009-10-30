@@ -447,3 +447,9 @@ void DomainPolygon::checkConsistency(const char* where)
 
 template class DomainTriangle<float>;
 template class DomainTriangle<double>;
+
+template class PlaneParam<float>;
+template class PlaneParam<double>;
+
+template class Node<float>;
+template class Node<double>;

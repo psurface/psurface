@@ -121,3 +121,17 @@ typename PlaneParam<ctype>::TriangleIterator PlaneParam<ctype>::firstTriangle() 
     DirectedEdgeIterator firstEdge = firstDirectedEdge();
     return TriangleIterator(firstEdge);    
 }
+
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
+
+template class PlaneParam<float>::DirectedEdgeIterator;
+template class PlaneParam<double>::DirectedEdgeIterator;
+
+template class PlaneParam<float>::UndirectedEdgeIterator;
+template class PlaneParam<double>::UndirectedEdgeIterator;
+
+template class PlaneParam<float>::TriangleIterator;
+template class PlaneParam<double>::TriangleIterator;
