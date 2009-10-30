@@ -196,14 +196,11 @@ public:
             return iPos[cN.getNodeNumber()];
 
         default:
-#ifdef PSURFACE_STANDALONE
-            return surface->points[cN.getNodeNumber()];
-#else 
+            // Do a componentwise copy to get from McVec3f to StaticVector<ctype>
             StaticVector<ctype,3> result;
             return StaticVector<ctype,3>(surface->points[cN.getNodeNumber()][0],
                                          surface->points[cN.getNodeNumber()][1],
                                          surface->points[cN.getNodeNumber()][2]);
-#endif
         }
 
     }
