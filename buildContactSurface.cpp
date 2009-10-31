@@ -176,8 +176,8 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     upper = bbox1.upper();
 
     Box<float, 3> mdBBox1(lower, upper);
-    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor, float, 3, true> mdOctree1(mdBBox1);
-    PointIntersectionFunctor intersectionFunctor;
+    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor<float>, float, 3, true> mdOctree1(mdBBox1);
+    PointIntersectionFunctor<float> intersectionFunctor;
 
     std::vector<StaticVector<float,3> > points1(surf1->points.size());        
 
@@ -194,7 +194,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     upper = intersectBox.upper();
 
     Box<float, 3> mdIntersectBox(lower, upper);
-    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor, float, 3, true> mdOctree2(mdIntersectBox);
+    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor<float>, float, 3, true> mdOctree2(mdIntersectBox);
 
     std::vector<StaticVector<float,3> > points2(surf2->points.size());        
 
