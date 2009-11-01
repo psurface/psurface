@@ -30,8 +30,6 @@ public:
         : StaticVector<ctype,3>(a) 
     {}
 
-    ~McVertex() {}
-
     std::vector<int> edges;
 
     /// the number of edges connected to this vertex
@@ -170,8 +168,6 @@ public:
 
         edges[0] = edges[1] = edges[2] = -1;
     }
-
-    ~McTriangle() {}
 
     ///
     bool isConnectedTo(int vertex) const {
