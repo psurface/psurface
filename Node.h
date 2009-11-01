@@ -267,11 +267,8 @@ public:
     void swapNeighbors(int i, int j) {
         assert(0<=i && i<degree());
         assert(0<=j && j<degree());
-        assert(i!=j);
 
-        NeighborReference temp = neighbors(i);
-        neighbors(i) = neighbors(j);
-        neighbors(j) = temp;
+        std::swap(nbs[i], nbs[j]);
     }
 
     void reverseNeighbors() {
