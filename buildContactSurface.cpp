@@ -391,9 +391,7 @@ void ContactToolBox::computeContactPatch(const Surface* surf, ContactBoundary& c
     /** \todo Maybe cbound.vertices can be a std::set?
         Then we wouldn't have to copy
     */
-    std::set<int> vertexSet;
-    for (int i=0; i<cBound.vertices.size(); i++)
-        vertexSet.insert(cBound.vertices[i]);
+    std::set<int> vertexSet(cBound.vertices.begin(), cBound.vertices.end());
 
     for (int i=0; i<surf->triangles.size(); i++) {
         
