@@ -82,7 +82,7 @@ public:
                                         const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
-                                        const NodeBundle& curr,
+                                        NodeBundle& curr,
                                         Node<float>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
@@ -90,7 +90,7 @@ public:
                                       const std::vector<StaticVector<double,3> >& normals, 
                                       int from, int to, double& lambda,
                                       const std::vector<NodeBundle>& projectedTo,
-                                      const NodeBundle& curr, 
+                                      NodeBundle& curr, 
                                       Node<float>::NodeType& currType, int& currTri,
                                       int& enteringEdge);
 

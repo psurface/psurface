@@ -929,7 +929,8 @@ bool NormalProjector::edgeCanBeInserted(const PSurface<2,float>* par,
             break;
             
         default:
-            assert(0);
+            std::cout << "ERROR: unknown node type found!" << std::endl;
+            abort();
         }
             
     }
@@ -1094,7 +1095,7 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const PSurface<2,float>* pa
                                                      const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
-                                                     const NodeBundle& curr,
+                                                     NodeBundle& curr,
                                                      Node<float>::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
@@ -1156,10 +1157,40 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const PSurface<2,float>* pa
                     return true;
                 
                 } else {
-                    // Shouldn't happen: we have to leave the triangle through an
-                    // edge.  If the parameter edge should go through a domain vertex, there would
-                    // be a node on that vertex.
-                    abort();
+                    // parameter polyedge is leaving base grid triangle through a ghost node
+
+                    // get all ghost nodes for the base grid vertex
+                    int vertex = par->triangles(currTri).vertices[corner];
+                    std::vector<int> neighbors = par->getTrianglesPerVertex(vertex);
+
+                    curr.resize(0);
+                    for (int k=0; k<neighbors.size(); k++) {
+                        
+                        int cornerOnNeighbor = par->triangles(neighbors[k]).getCorner(vertex);
+
+                        /** \todo Linear search: pretty slow */
+                        for (int l=0; l<par->triangles(neighbors[k]).nodes.size(); l++) {
+
+                            if (par->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
+                                && par->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
+
+                                curr.push_back(GlobalNodeIdx(neighbors[k], l));
+                                break;
+
+                            }
+                        
+                        }
+                        
+                    }
+
+                    currType = Node<float>::GHOST_NODE;
+                    //currTri = ???;
+                    //enteringEdge = -1;
+
+                    lambda = newLambda;
+
+                    return true;
+
                 }
                 
             }
@@ -1178,24 +1209,16 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const PSurface<2,float>* par,
                                                    const std::vector<StaticVector<double,3> >& normals, 
                                                    int from, int to, double &lambda,
                                                    const std::vector<NodeBundle>& projectedTo,
-                                                   const NodeBundle& curr, 
+                                                   NodeBundle& curr, 
                                                    Node<float>::NodeType& currType, int& currTri,
-                                                   int& enteringEdge)
+                                                   int& leavingEdge)
 {
-    int i;
-
     const Surface* surf = par->surface;
 
     // The other end of the edge is *not* on this triangle
-    for (i=0; i<curr.size(); i++) {
+    for (int i=0; i<curr.size(); i++) {
         
         int cT = curr[i].tri;
-
-#if 0   // Pointless: there is no entering anything!
-        // it is called enteringEdge, but the incoming value is the entering*Tri*!
-        if (cT == enteringEdge)
-            continue;
-#endif
 
         int thisCorner = par->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
@@ -1241,16 +1264,45 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const PSurface<2,float>* par,
                 currType = Node<float>::INTERSECTION_NODE;
                 currTri  = neighboringTri;
                 lambda   = newLambda;
-                enteringEdge = e;
+                leavingEdge = e;
 
                 return true;
 
             } else {
 
-                // Shouldn't happen: we have to leave the triangle through an
-                // edge.  If the parameter edge should go through a domain vertex, there would
-                // be a node on that vertex.
-                abort();
+                // parameter polyedge is leaving base grid triangle through a ghost node
+
+                // get all ghost nodes for the base grid vertex
+                int vertex = par->triangles(currTri).vertices[corner];
+                std::vector<int> neighbors = par->getTrianglesPerVertex(vertex);
+                
+                curr.resize(0);
+                for (int k=0; k<neighbors.size(); k++) {
+                    
+                    int cornerOnNeighbor = par->triangles(neighbors[k]).getCorner(vertex);
+                    
+                    /** \todo Linear search: pretty slow */
+                    for (int l=0; l<par->triangles(neighbors[k]).nodes.size(); l++) {
+                        
+                        if (par->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
+                            && par->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
+                            
+                            curr.push_back(GlobalNodeIdx(neighbors[k], l));
+                            break;
+                            
+                        }
+                        
+                    }
+                    
+                }
+                
+                currType = Node<float>::GHOST_NODE;
+                //currTri = ???;
+                //enteringEdge = -1;
+                
+                lambda = newLambda;
+                
+                return true;
                 
             }
             
