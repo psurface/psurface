@@ -128,11 +128,9 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
     }
     
     // compute projection
-    NormalProjector<float>* projector = new NormalProjector<float>;
+    NormalProjector<float> projector;
     
-    projector->handleSide(cPar, contactBoundary[1], obsDirections);
-    
-    delete projector;
+    projector.handleSide(cPar, contactBoundary[1], obsDirections);
 
 }
 
