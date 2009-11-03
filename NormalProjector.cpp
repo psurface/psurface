@@ -10,7 +10,8 @@
 #include <vector>
 
 
-void NormalProjector::handleSide(PSurface<2,float>* par, const ContactBoundary& contactPatch,
+template <class ctype>
+void NormalProjector<ctype>::handleSide(PSurface<2,float>* par, const ContactBoundary& contactPatch,
                                  void (*obsDirections)(const double* pos, double* dir))
 {
     int i, j;
@@ -381,7 +382,8 @@ void NormalProjector::handleSide(PSurface<2,float>* par, const ContactBoundary& 
 }
 
 
-void NormalProjector::insertEdge(PSurface<2,float>* par, 
+template <class ctype>
+void NormalProjector<ctype>::insertEdge(PSurface<2,float>* par, 
                                  const std::vector<StaticVector<double,3> >& normals,
                                  int from, int to, 
                                  const std::vector<NodeBundle>& projectedTo)
@@ -439,7 +441,9 @@ void NormalProjector::insertEdge(PSurface<2,float>* par,
     
 }
 
-void NormalProjector::insertEdgeFromInteriorNode(PSurface<2,float>* par, 
+
+template <class ctype>
+void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,float>* par, 
                                                  const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
@@ -545,7 +549,9 @@ void NormalProjector::insertEdgeFromInteriorNode(PSurface<2,float>* par,
         
 }
 
-void NormalProjector::insertEdgeFromIntersectionNode(PSurface<2,float>* par, 
+
+template <class ctype>
+void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,float>* par, 
                                                  const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
@@ -650,7 +656,9 @@ void NormalProjector::insertEdgeFromIntersectionNode(PSurface<2,float>* par,
         
 }
 
-void NormalProjector::insertEdgeFromTouchingNode(PSurface<2,float>* par,
+
+template <class ctype>
+void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,float>* par,
                                                  const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
@@ -766,7 +774,8 @@ void NormalProjector::insertEdgeFromTouchingNode(PSurface<2,float>* par,
 }
 
 
-void NormalProjector::insertEdgeFromCornerNode(PSurface<2,float>* par,
+template <class ctype>
+void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,float>* par,
                                                const std::vector<StaticVector<double,3> >& normals, int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
@@ -870,7 +879,9 @@ void NormalProjector::insertEdgeFromCornerNode(PSurface<2,float>* par,
 }
 
 
-bool NormalProjector::edgeCanBeInserted(const PSurface<2,float>* par, 
+
+template <class ctype>
+bool NormalProjector<ctype>::edgeCanBeInserted(const PSurface<2,float>* par, 
                                         const std::vector<StaticVector<double,3> >& normals,
                                         int from, int to, 
                                         const std::vector<NodeBundle>& projectedTo)
@@ -939,7 +950,10 @@ bool NormalProjector::edgeCanBeInserted(const PSurface<2,float>* par,
     return true;
 }
 
-bool NormalProjector::testInsertEdgeFromInteriorNode(const PSurface<2,float>* par, 
+
+
+template <class ctype>
+bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const PSurface<2,float>* par, 
                                                      const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
@@ -1016,7 +1030,10 @@ bool NormalProjector::testInsertEdgeFromInteriorNode(const PSurface<2,float>* pa
     return true;
 }
 
-bool NormalProjector::testInsertEdgeFromIntersectionNode(const PSurface<2,float>* par, 
+
+
+template <class ctype>
+bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const PSurface<2,float>* par, 
                                                          const std::vector<StaticVector<double,3> >& normals,
                                                          int from, int to, double &lambda,
                                                          const std::vector<NodeBundle>& projectedTo,
@@ -1091,7 +1108,9 @@ bool NormalProjector::testInsertEdgeFromIntersectionNode(const PSurface<2,float>
 }
 
 
-bool NormalProjector::testInsertEdgeFromTouchingNode(const PSurface<2,float>* par,
+
+template <class ctype>
+bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const PSurface<2,float>* par,
                                                      const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
@@ -1205,7 +1224,9 @@ bool NormalProjector::testInsertEdgeFromTouchingNode(const PSurface<2,float>* pa
 }
 
 
-bool NormalProjector::testInsertEdgeFromCornerNode(const PSurface<2,float>* par,
+
+template <class ctype>
+bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const PSurface<2,float>* par,
                                                    const std::vector<StaticVector<double,3> >& normals, 
                                                    int from, int to, double &lambda,
                                                    const std::vector<NodeBundle>& projectedTo,
@@ -1315,7 +1336,9 @@ bool NormalProjector::testInsertEdgeFromCornerNode(const PSurface<2,float>* par,
 }
 
 
-bool NormalProjector::onSameTriangle(const NodeBundle& a, const NodeBundle& b) const
+
+template <class ctype>
+bool NormalProjector<ctype>::onSameTriangle(const NodeBundle& a, const NodeBundle& b) const
 {
     for (int i=0; i<a.size(); i++)
         for (int j=0; j<b.size(); j++)
@@ -1325,7 +1348,9 @@ bool NormalProjector::onSameTriangle(const NodeBundle& a, const NodeBundle& b) c
     return false;
 }
 
-bool NormalProjector::onSameTriangle(const int& tri, const NodeBundle& b) const
+
+template <class ctype>
+bool NormalProjector<ctype>::onSameTriangle(const int& tri, const NodeBundle& b) const
 {
     for (int j=0; j<b.size(); j++)
         if (tri==b[j].tri)
@@ -1334,7 +1359,9 @@ bool NormalProjector::onSameTriangle(const int& tri, const NodeBundle& b) const
     return false;
 }
 
-void NormalProjector::insertGhostNodeAtVertex(PSurface<2,float>* par, int v, 
+
+template <class ctype>
+void NormalProjector<ctype>::insertGhostNodeAtVertex(PSurface<2,float>* par, int v, 
                                               int targetTri, const StaticVector<double,2>& localTargetCoords)
 {
     std::vector<int> neighbors = par->getTrianglesPerVertex(v);
@@ -1349,7 +1376,9 @@ void NormalProjector::insertGhostNodeAtVertex(PSurface<2,float>* par, int v,
  
 }
 
-void NormalProjector::addCornerNodeBundle(PSurface<2,float>* cS, int v, int nN)
+
+template <class ctype>
+void NormalProjector<ctype>::addCornerNodeBundle(PSurface<2,float>* cS, int v, int nN)
 {
     std::vector<int> neighbors = cS->getTrianglesPerVertex(v);
 
@@ -1362,7 +1391,9 @@ void NormalProjector::addCornerNodeBundle(PSurface<2,float>* cS, int v, int nN)
         
 }
 
-bool NormalProjector::computeInverseNormalProjection(const StaticVector<float,3>& p0_f, const StaticVector<float,3>& p1_f, const StaticVector<float,3>& p2_f,
+
+template <class ctype>
+bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<float,3>& p0_f, const StaticVector<float,3>& p1_f, const StaticVector<float,3>& p2_f,
                                                      const StaticVector<double,3>& n0, const StaticVector<double,3>& n1, const StaticVector<double,3>& n2,
                                                      const StaticVector<float,3>& target, StaticVector<double,3>& x)
 {
@@ -1405,7 +1436,9 @@ bool NormalProjector::computeInverseNormalProjection(const StaticVector<float,3>
     return false;
 }
 
-bool NormalProjector::edgeIntersectsNormalFan(const StaticVector<float,3>& q0_f, const StaticVector<float,3>& q1_f,
+
+template <class ctype>
+bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<float,3>& q0_f, const StaticVector<float,3>& q1_f,
                                               const StaticVector<float,3>& p0_f, const StaticVector<float,3>& p1_f,
                                               const StaticVector<double,3>& n0, const StaticVector<double,3>& n1,
                                               StaticVector<double,3>& x)
@@ -1448,7 +1481,9 @@ bool NormalProjector::edgeIntersectsNormalFan(const StaticVector<float,3>& q0_f,
     return false;
 }
 
-bool NormalProjector::rayIntersectsTriangle(const StaticVector<double,3>& basePoint, const StaticVector<double,3>& direction,
+
+template <class ctype>
+bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>& basePoint, const StaticVector<double,3>& direction,
                                             const StaticVector<float,3>& a_, const StaticVector<float,3>& b_, const StaticVector<float,3>& c_,
                                             StaticVector<double,2>& localCoords, double& normalDist, double eps)
 {
@@ -1507,11 +1542,14 @@ bool NormalProjector::rayIntersectsTriangle(const StaticVector<double,3>& basePo
 }
 
 
-void NormalProjector::computeVertexNormals()
+template <class ctype>
+void NormalProjector<ctype>::computeVertexNormals()
 {
 }
 
-NodeIdx NormalProjector::getCornerNode(const DomainTriangle<float>& cT, int corner)
+
+template <class ctype>
+NodeIdx NormalProjector<ctype>::getCornerNode(const DomainTriangle<float>& cT, int corner)
 {
     assert(corner>=0 && corner<3);
 
@@ -1523,7 +1561,9 @@ NodeIdx NormalProjector::getCornerNode(const DomainTriangle<float>& cT, int corn
     return -1;
 }
 
-int NormalProjector::getCommonTri(const NodeBundle& a, const NodeBundle& b)
+
+template <class ctype>
+int NormalProjector<ctype>::getCommonTri(const NodeBundle& a, const NodeBundle& b)
 {
     for (int i=0; i<a.size(); i++)
         for (int j=0; j<b.size(); j++)
@@ -1533,7 +1573,9 @@ int NormalProjector::getCommonTri(const NodeBundle& a, const NodeBundle& b)
     return -1;
 }
 
-std::vector<int> NormalProjector::getCommonTris(const NodeBundle& a, const NodeBundle& b)
+
+template <class ctype>
+std::vector<int> NormalProjector<ctype>::getCommonTris(const NodeBundle& a, const NodeBundle& b)
 {
     std::vector<int> result;
 
@@ -1546,7 +1588,9 @@ std::vector<int> NormalProjector::getCommonTris(const NodeBundle& a, const NodeB
 }
 
 
-void NormalProjector::setupEdgePointArrays(PSurface<2,float>* par)
+
+template <class ctype>
+void NormalProjector<ctype>::setupEdgePointArrays(PSurface<2,float>* par)
 {
     int i, j;
 

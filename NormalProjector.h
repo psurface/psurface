@@ -12,6 +12,11 @@ class ContactBoundary;
 class GlobalNodeIdx;
 
 
+/** \brief Construct a PSurface object by projecting one surface in normal direction onto another
+
+\tparam ctype The type used for coordinates
+*/
+template <class ctype>
 class NormalProjector {
 public:
 
