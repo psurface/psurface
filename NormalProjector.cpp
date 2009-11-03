@@ -1263,7 +1263,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 // parameter polyedge is leaving base grid triangle through a ghost node
 
                 // get all ghost nodes for the base grid vertex
-                int vertex = psurface_->triangles(currTri).vertices[corner];
+                int vertex = psurface_->triangles(curr[i].tri).vertices[corner];
                 std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
                 
                 curr.resize(0);
