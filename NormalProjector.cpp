@@ -369,7 +369,7 @@ void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<double,3>
     int enteringEdge=-1;
     NodeBundle curr = projectedTo[from];
 
-    // psurface_ameter value for the edge to be inserted
+    // parameter value for the edge to be inserted
     double lambda = 0;
 
     while (curr!=projectedTo[to]) {
@@ -430,7 +430,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
     int cT = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the psurface_amPolyEdge leaves the triangle via this edge
+    // check whether the paramPolyEdge leaves the triangle via this edge
     for (i=0; i<3; i++) {
             
         if (i==enteringEdge)
@@ -497,7 +497,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
                                                                   dom1Ctype, dom2Ctype, i, e, image);
                 NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
-                // insert new psurface_ameter edge
+                // insert new parameter edge
                 psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
 
                 //
@@ -537,7 +537,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
     int cTIdx = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the psurface_amPolyEdge leaves the triangle via this edge
+    // check whether the paramPolyEdge leaves the triangle via this edge
     //int currentEdge = cT.nodes[curr[0].idx].getDomainEdge();
     //printf("currentEdge: %d\n", currentEdge);
 
@@ -602,7 +602,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
                                                                   dom1, dom2, i, e, image);
                 NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
-                // insert new psurface_ameter edge
+                // insert new parameter edge
                 psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
 
                 //
@@ -680,7 +680,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
                     corner = (j+1)%3;
 
                 if (corner==-1) {
-                    // psurface_ameter polyedge is leaving basegrid triangle through an edge
+                    // parameter polyedge is leaving basegrid triangle through an edge
                     
                     // get neighboring triangle
                     int neighboringTri = psurface_->getNeighboringTriangle(curr[i].tri, j);
@@ -710,7 +710,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
                                                                         dom1, dom2, j, e, image);
                     NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
-                    // insert new psurface_ameter edge
+                    // insert new parameter edge
                     psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, newNodeIn);
 
                     curr.resize(1);
@@ -719,13 +719,13 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
                     
                 } else if (corner== ((currentEdge+2)%3)) {
 
-                    // psurface_ameter polyedge leaves BG triangle through the opposite vertex
+                    // parameter polyedge leaves BG triangle through the opposite vertex
                     psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, getCornerNode(cT, corner));
                     enteringTri = curr[i].tri;
                     curr = psurface_->getNodeBundleAtVertex(cT.vertices[corner]);
 
                 } else {
-                    // psurface_ameter polyedge leaves BG triangle through an adjacent vertex
+                    // parameter polyedge leaves BG triangle through an adjacent vertex
                     NodeBundle target = psurface_->getNodeBundleAtVertex(cT.vertices[corner]);
                     for (int k=0; k<curr.size(); k++)
                         psurface_->triangles(curr[k].tri).addEdge(curr[k].idx, target.triToIdx(curr[k].tri));
@@ -790,7 +790,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
                 corner = (thisCorner+2)%3;
             
             if (corner==-1) {
-                // psurface_ameter polyedge is leaving basegrid triangle 
+                // parameter polyedge is leaving basegrid triangle 
                 // through the opposite edge
                 
                 // get neighboring triangle
@@ -819,7 +819,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
                                                                   dom1, dom2, oppEdge, e, image);
                 NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                 
-                // insert new psurface_ameter edge
+                // insert new parameter edge
                 psurface_->triangles(cT).addEdge(curr[i].idx, newNodeIn);
 
                 curr.resize(1);
@@ -872,7 +872,7 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<do
     typename Node<ctype>::NodeType currType = psurface_->nodes(curr[0]).type;
     int currTri     = curr[0].tri;
 
-    // psurface_ameter value for the edge to be inserted
+    // parameter value for the edge to be inserted
     double lambda = 0;
 
     while (true) {
@@ -933,7 +933,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
                                                      int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the psurface_amPolyEdge leaves the triangle via this edge
+    // check whether the paramPolyEdge leaves the triangle via this edge
     int i;
     for (i=0; i<3; i++) {
             
@@ -1012,7 +1012,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                                                          int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the psurface_amPolyEdge leaves the triangle via this edge
+    // check whether the paramPolyEdge leaves the triangle via this edge
     int i;
     for (i=0; i<3; i++) {
             
@@ -1124,7 +1124,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                     corner = (j+1)%3;
                 
                 if (corner==-1) {
-                    // psurface_ameter polyedge is leaving basegrid triangle through an edge
+                    // parameter polyedge is leaving basegrid triangle through an edge
                     
                     // get neighboring triangle
                     int neighboringTri = psurface_->getNeighboringTriangle(curr[i].tri, j);
@@ -1146,7 +1146,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                     return true;
                 
                 } else {
-                    // psurface_ameter polyedge is leaving base grid triangle through a ghost node
+                    // parameter polyedge is leaving base grid triangle through a ghost node
 
                     // get all ghost nodes for the base grid vertex
                     int vertex = psurface_->triangles(currTri).vertices[corner];
@@ -1236,7 +1236,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 corner = (thisCorner+2)%3;
             
             if (corner==-1) {
-                // psurface_ameter polyedge is leaving basegrid triangle 
+                // parameter polyedge is leaving basegrid triangle 
                 // through the opposite edge
                 
                 // get neighboring triangle
@@ -1260,7 +1260,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
 
             } else {
 
-                // psurface_ameter polyedge is leaving base grid triangle through a ghost node
+                // parameter polyedge is leaving base grid triangle through a ghost node
 
                 // get all ghost nodes for the base grid vertex
                 int vertex = psurface_->triangles(currTri).vertices[corner];
