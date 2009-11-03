@@ -285,26 +285,6 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
         
     }
 
-#if 0
-    // ////////////////////////////////////////////////////////////
-    // Compute the reduced contact boundary, i.e., the image of the
-    // intermediate surface under the normal projection
-
-    ContactBoundary reducedContactPatch(surf);
-    reducedContactPatch.vertices = contactPatch.vertices;
-
-    for (i=0; i<contactPatch.triIdx.size(); i++) {
-
-        if (projectedTo[contactPatch.triangles(i).points[0]].size() &&
-            projectedTo[contactPatch.triangles(i).points[1]].size() &&
-            projectedTo[contactPatch.triangles(i).points[2]].size()) {
-
-            reducedContactPatch.triIdx.append(contactPatch.triIdx[i]);
-
-        }
-
-    }
-#endif
     // ///////////////////////////////////////////////////////////////////
     //   Place ghost nodes at the vertices of the intermediate manifold
     // ///////////////////////////////////////////////////////////////////
