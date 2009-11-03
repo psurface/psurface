@@ -8,7 +8,6 @@
 
 class NodeBundle;
 class Surface;
-class ContactBoundary;
 class GlobalNodeIdx;
 
 
@@ -148,8 +147,8 @@ public:
 
     // /////////////////////////////////////
     // Data members
+    // /////////////////////////////////////
 
-    const ContactBoundary* contactBoundary[2];
     std::vector<StaticVector<double, 3> > targetNormals;
 
 };
