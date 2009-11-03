@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include <psurface/PlaneParam.h>
 #include <psurface/Domains.h>
 #include <psurface/DomainPolygon.h>
@@ -200,7 +202,7 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
         if (cN.isInvalid())
             continue;
 
-        if (isnan(cN.domainPos()[0]) || isnan(cN.domainPos()[1])) {
+        if (std::isnan(cN.domainPos()[0]) || std::isnan(cN.domainPos()[1])) {
             printf(where);
             printf("\n****** A node mit NaN domainPos found! ******\n");
             cN.print();

@@ -8,6 +8,7 @@
 
 #include <tr1/array>
 #include <vector>
+#include <cmath>
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
@@ -1451,7 +1452,7 @@ int PSurface<dim,ctype>::directNormalMap(int triIdx, StaticVector<ctype,2>& p, S
     result = a.cross(b);
     result.normalize();
 
-    assert(!isnan(result[0]) && !isnan(result[1]) && !isnan(result[2]));
+    assert(!std::isnan(result[0]) && !std::isnan(result[1]) && !std::isnan(result[2]));
 
     return true;
 }

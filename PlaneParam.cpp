@@ -1,12 +1,11 @@
+#include <cmath>
+#include <limits>
+
 #include <psurface/PlaneParam.h>
 #include <psurface/StaticMatrix.h>
 #include <psurface/SparseMatrix.h>
 
-#include <limits>
-
 #ifdef _WIN32
-//#include <float.h>
-inline int isnan(double x) {return _isnan(x);}
 inline int random() {return rand();}
 #endif
 
@@ -319,7 +318,7 @@ StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVe
     result[0] = area0/areaTotal;
     result[1] = area1/areaTotal;
     
-    if (isnan(result[1])) {
+    if (std::isnan(result[1])) {
         printf("area0 %f   area1 %f    areaTotal %f   res  (%f %f)\n", area0, area1, areaTotal, 
                result[0], result[1]);
         assert(false);
@@ -472,13 +471,13 @@ void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij,
                 p_k[k]          = (int)p.neighbors(k);
                 //p_k_3DCoords[k] = nodes[p_k[k]].getImagePos(nodePositions);
                 p_k_3DCoords[k] = nodePositions[nodes[p_k[k]].getNodeNumber()];
-                if (isnan(p_k_3DCoords[k][0])) {
+                if (std::isnan(p_k_3DCoords[k][0])) {
                     printf("iPos.size: %d,  nN: %d\n", nodePositions.size(), nodes[p_k[k]].getNodeNumber());
                     nodes[p_k[k]].print();
                 }
-                assert(!isnan(p_k_3DCoords[k][0]));
-                assert(!isnan(p_k_3DCoords[k][1]));
-                assert(!isnan(p_k_3DCoords[k][2]));
+                assert(!std::isnan(p_k_3DCoords[k][0]));
+                assert(!std::isnan(p_k_3DCoords[k][1]));
+                assert(!std::isnan(p_k_3DCoords[k][2]));
             }
             
             if (!polarMap(nodePositions[p.getNodeNumber()], p_k_3DCoords, p_k_2DCoords, angle )) {
@@ -561,7 +560,7 @@ bool PlaneParam<ctype>::polarMap(const StaticVector<ctype,3>& center, const std:
         }
 
         theta[k] = theta[k-1] + (pLeft - center).angle(pRight - center);
-        if (isnan(theta[k])){
+        if (std::isnan(theta[k])){
             printf("center (%f %f %f)\n", center[0], center[1], center[2]);
             printf("pLeft - center (%f %f %f) pRight - center (%f %f %f)\n", 
                    pLeft[0] - center[0], pLeft[1] - center[1], pLeft[2] - center[2], 

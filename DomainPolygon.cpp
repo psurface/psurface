@@ -1,10 +1,8 @@
+#include <cmath>
+
 #include <psurface/DomainPolygon.h>
 #include <psurface/CircularPatch.h>
 
-#ifdef _WIN32
-#include <float.h>
-inline int isnan(double x) {return _isnan(x);}
-#endif
 
 static int counter = 0;
 
@@ -356,7 +354,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
     }
 
     for (i=0; i<nodes.size(); i++)
-        assert(!isnan(nodes[i].domainPos()[0]) && !isnan(nodes[i].domainPos()[1]));
+        assert(!std::isnan(nodes[i].domainPos()[0]) && !std::isnan(nodes[i].domainPos()[1]));
 
     for (i=0; i<fillIn.size()-1; i++){
 
@@ -530,7 +528,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
 
         // ward off more degeneracies in the input
         for (j=0; j<cT.nodes.size(); j++)
-            if (isnan(cT.nodes[j].domainPos()[0]) || isnan(cT.nodes[j].domainPos()[1])) {
+            if (std::isnan(cT.nodes[j].domainPos()[0]) || std::isnan(cT.nodes[j].domainPos()[1])) {
                 printf("[DomainPolygon::triangulate]  Rejecting this vertex because\n");
                 printf("  the domain position of one of its nodes contains NaNs.\n");
                 printf("  This can be due to a degeneracy in the input data or to a\n");
@@ -571,7 +569,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
 
     // ward off more degeneracies in the input
     for (j=0; j<cT.nodes.size(); j++)
-        if (isnan(cT.nodes[j].domainPos()[0]) || isnan(cT.nodes[j].domainPos()[1])) {
+        if (std::isnan(cT.nodes[j].domainPos()[0]) || std::isnan(cT.nodes[j].domainPos()[1])) {
             printf("[DomainPolygon::triangulate]  Rejecting this vertex because\n");
             printf("  the domain position of one of its nodes contains NaNs.\n");
             printf("  This can be due to a degeneracy in the input data or to a\n");
