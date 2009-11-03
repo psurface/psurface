@@ -11,18 +11,18 @@
 
 
 template <class ctype>
-void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBoundary& contactPatch,
+void NormalProjector<ctype>::handleSide(const ContactBoundary& contactPatch,
                                  void (*obsDirections)(const double* pos, double* dir))
 {
     int i, j;
     const double eps = 0.0001;
-    const Surface* surf = par->surface;
+    const Surface* surf = psurface_->surface;
 
     // //////////////////////////
     // compute normals
     // //////////////////////////
-    int nPoints = par->getNumVertices();
-    int nTriangles = par->getNumTriangles();
+    int nPoints = psurface_->getNumVertices();
+    int nTriangles = psurface_->getNumTriangles();
         
     std::vector<StaticVector<double,3> > normals(nPoints);
     normals.assign(nPoints, StaticVector<double,3>(0.0));
@@ -38,7 +38,7 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
             double dir[3];
 
             for (int j=0; j<3; j++)
-                pos[j] = par->vertices(i)[j];
+                pos[j] = psurface_->vertices(i)[j];
             (*obsDirections)(pos, dir);
             for (int j=0; j<3; j++)
                 normals[i][j] = dir[j];
@@ -49,12 +49,12 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
 
         for (i=0; i<nTriangles; i++) {
             
-            int p0 = par->triangles(i).vertices[0];
-            int p1 = par->triangles(i).vertices[1];
-            int p2 = par->triangles(i).vertices[2];
+            int p0 = psurface_->triangles(i).vertices[0];
+            int p1 = psurface_->triangles(i).vertices[1];
+            int p2 = psurface_->triangles(i).vertices[2];
             
-            StaticVector<ctype,3> a_ = par->vertices(p1) - par->vertices(p0);
-            StaticVector<ctype,3> b_ = par->vertices(p2) - par->vertices(p0);
+            StaticVector<ctype,3> a_ = psurface_->vertices(p1) - psurface_->vertices(p0);
+            StaticVector<ctype,3> b_ = psurface_->vertices(p2) - psurface_->vertices(p0);
             
             StaticVector<double,3> a(a_[0], a_[1], a_[2]);
             StaticVector<double,3> b(b_[0], b_[1], b_[2]);
@@ -127,7 +127,7 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
 
     // This bitfield marks whether base grid vertices already have a
     // corresponding image
-    std::vector<bool> vertexHasBeenHandled(par->getNumVertices(), false);
+    std::vector<bool> vertexHasBeenHandled(psurface_->getNumVertices(), false);
     
     // Loop over the vertices of the target surface
     for (i=0; i<contactPatch.vertices.size(); i++) {
@@ -136,15 +136,15 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
         int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
-        for (j=0; j<par->getNumTriangles(); j++) {
+        for (j=0; j<psurface_->getNumTriangles(); j++) {
 
-            const StaticVector<ctype,3>& p0 = par->vertices(par->triangles(j).vertices[0]);
-            const StaticVector<ctype,3>& p1 = par->vertices(par->triangles(j).vertices[1]);
-            const StaticVector<ctype,3>& p2 = par->vertices(par->triangles(j).vertices[2]);
+            const StaticVector<ctype,3>& p0 = psurface_->vertices(psurface_->triangles(j).vertices[0]);
+            const StaticVector<ctype,3>& p1 = psurface_->vertices(psurface_->triangles(j).vertices[1]);
+            const StaticVector<ctype,3>& p2 = psurface_->vertices(psurface_->triangles(j).vertices[2]);
 
-            const StaticVector<double,3>& n0 = normals[par->triangles(j).vertices[0]];
-            const StaticVector<double,3>& n1 = normals[par->triangles(j).vertices[1]];
-            const StaticVector<double,3>& n2 = normals[par->triangles(j).vertices[2]];
+            const StaticVector<double,3>& n0 = normals[psurface_->triangles(j).vertices[0]];
+            const StaticVector<double,3>& n1 = normals[psurface_->triangles(j).vertices[1]];
+            const StaticVector<double,3>& n2 = normals[psurface_->triangles(j).vertices[2]];
 
             StaticVector<double,3> x; // the unknown...
 
@@ -156,7 +156,7 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
                 // We want that the line from the domain surface to its projection
                 // approaches the target surface from the front side, i.e., it should
                 // not pass through the body represented by the target surface.
-                // We do a simplified test by comparing the connecting segment
+                // We do a simplified test by compsurface_ing the connecting segment
                 // with the normal at the target surface and the normal at the
                 // domain surface
                 StaticVector<ctype,3> base       = p0*x[0] + p1*x[1] + (1-x[0]-x[1])*p2;
@@ -203,10 +203,10 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
                 mu = 1-bestDPos[1];
                 if (bestDPos[1] < eps) {
                     newType = Node<ctype>::CORNER_NODE;
-                    v       = par->triangles(bestTri).vertices[2];
+                    v       = psurface_->triangles(bestTri).vertices[2];
                 } else if (bestDPos[1] > 1-eps) {
                     newType = Node<ctype>::CORNER_NODE;
-                    v       = par->triangles(bestTri).vertices[1];
+                    v       = psurface_->triangles(bestTri).vertices[1];
                 } else {
                     newType = Node<ctype>::TOUCHING_NODE;
                 }
@@ -215,10 +215,10 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
                 mu = bestDPos[0];
                 if (bestDPos[0] < eps) {
                     newType = Node<ctype>::CORNER_NODE;
-                    v       = par->triangles(bestTri).vertices[2];
+                    v       = psurface_->triangles(bestTri).vertices[2];
                 } else if (bestDPos[0] > 1-eps) {
                     newType = Node<ctype>::CORNER_NODE;
-                    v       = par->triangles(bestTri).vertices[0];
+                    v       = psurface_->triangles(bestTri).vertices[0];
                 } else {
                     newType = Node<ctype>::TOUCHING_NODE;
                 }
@@ -227,10 +227,10 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
                 mu = 1-bestDPos[0];
                 if (bestDPos[1] < eps) {
                     newType = Node<ctype>::CORNER_NODE;
-                    v       = par->triangles(bestTri).vertices[0];
+                    v       = psurface_->triangles(bestTri).vertices[0];
                 } else if (bestDPos[1] > 1-eps) {
                     newType = Node<ctype>::CORNER_NODE;
-                    v       = par->triangles(bestTri).vertices[1];
+                    v       = psurface_->triangles(bestTri).vertices[1];
                 } else {
                     newType = Node<ctype>::TOUCHING_NODE;
                 }
@@ -241,40 +241,40 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
             if (newType==Node<ctype>::TOUCHING_NODE) {
 
                 // find the other triangle, if there is one
-                int neighboringTri = par->getNeighboringTriangle(bestTri, dir);
+                int neighboringTri = psurface_->getNeighboringTriangle(bestTri, dir);
 
                 if (neighboringTri == -1) {
-                    NodeIdx newNodeNumber = par->addTouchingNode(bestTri, bestDPosCtype, dir, contactPatch.vertices[i]);
+                    NodeIdx newNodeNumber = psurface_->addTouchingNode(bestTri, bestDPosCtype, dir, contactPatch.vertices[i]);
                     projectedTo[contactPatch.vertices[i]].resize(1);
                     projectedTo[contactPatch.vertices[i]][0].setValue(bestTri, newNodeNumber);
                 } else {
                     // find domain pos on other triangle
-                    int commonEdge = par->triangles(bestTri).getCommonEdgeWith(par->triangles(neighboringTri));
-                    int dir2 = par->triangles(neighboringTri).getEdge(commonEdge);
+                    int commonEdge = psurface_->triangles(bestTri).getCommonEdgeWith(psurface_->triangles(neighboringTri));
+                    int dir2 = psurface_->triangles(neighboringTri).getEdge(commonEdge);
                     StaticVector<ctype,2> dP2((dir2==0)*(mu) + (dir2==2)*(1-mu), (dir2==0)*(1-mu) + (dir2==1)*(mu));
 
                     // insert touching node pair
-                    NodeIdx newNodeNumber = par->addTouchingNodePair(bestTri, neighboringTri, bestDPosCtype, dP2, 
+                    NodeIdx newNodeNumber = psurface_->addTouchingNodePair(bestTri, neighboringTri, bestDPosCtype, dP2, 
                                                                      dir, dir2, contactPatch.vertices[i]);
                     projectedTo[contactPatch.vertices[i]].resize(2);
                     projectedTo[contactPatch.vertices[i]][0].setValue(bestTri, newNodeNumber);
-                    projectedTo[contactPatch.vertices[i]][1].setValue(neighboringTri, par->triangles(neighboringTri).nodes.size()-1);
+                    projectedTo[contactPatch.vertices[i]][1].setValue(neighboringTri, psurface_->triangles(neighboringTri).nodes.size()-1);
                 }
                 
             } else if (newType==Node<ctype>::CORNER_NODE) {
 
-                addCornerNodeBundle(par, v, contactPatch.vertices[i]);
+                addCornerNodeBundle(v, contactPatch.vertices[i]);
                 vertexHasBeenHandled[v] = true;
-                std::vector<int> neighboringTris = par->getTrianglesPerVertex(v);
+                std::vector<int> neighboringTris = psurface_->getTrianglesPerVertex(v);
                 projectedTo[contactPatch.vertices[i]].resize(neighboringTris.size());
                 for (j=0; j<neighboringTris.size(); j++) {
                     projectedTo[contactPatch.vertices[i]][j].setValue(neighboringTris[j],
-                                                                      par->triangles(neighboringTris[j]).nodes.size()-1);
+                                                                      psurface_->triangles(neighboringTris[j]).nodes.size()-1);
                 }
 
             } else {
 
-                NodeIdx newNodeNumber = par->addInteriorNode(bestTri, bestDPosCtype, contactPatch.vertices[i]);
+                NodeIdx newNodeNumber = psurface_->addInteriorNode(bestTri, bestDPosCtype, contactPatch.vertices[i]);
             
                 projectedTo[contactPatch.vertices[i]].resize(1);
                 projectedTo[contactPatch.vertices[i]][0].setValue(bestTri, newNodeNumber);
@@ -288,7 +288,7 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
     // ///////////////////////////////////////////////////////////////////
     //   Place ghost nodes at the vertices of the intermediate manifold
     // ///////////////////////////////////////////////////////////////////
-    for (i=0; i<par->getNumVertices(); i++) {
+    for (i=0; i<psurface_->getNumVertices(); i++) {
 
         // Has the vertex been hit by the projection of a target vertex already?
         if (vertexHasBeenHandled[i])
@@ -298,7 +298,7 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
         int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
-        const StaticVector<ctype,3>& basePointCtype = par->vertices(i);
+        const StaticVector<ctype,3>& basePointCtype = psurface_->vertices(i);
         const StaticVector<double,3> basePoint(basePointCtype[0], basePointCtype[1], basePointCtype[2]);
         const StaticVector<double,3>& normal    = normals[i];
 
@@ -327,7 +327,7 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
 
         // Set ghost node mapping to the closest triangle intersected by the normal ray
         if (bestTri != -1)
-            insertGhostNodeAtVertex(par, i, contactPatch.triIdx[bestTri], bestDPos);
+            insertGhostNodeAtVertex(i, contactPatch.triIdx[bestTri], bestDPos);
 
     }
 
@@ -347,8 +347,8 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
             // tests for boundary edges
             if (from < to || contactPatch.containsEdge(from, to)==1) {
                 
-                if (edgeCanBeInserted(par, normals, from, to, projectedTo))
-                    insertEdge(par, normals, from, to, projectedTo);
+                if (edgeCanBeInserted(normals, from, to, projectedTo))
+                    insertEdge(normals, from, to, projectedTo);
                 else {
                     //std::cout << "Skipping edge (" << from << ", " << to << ") ..." << std::endl;
                 }
@@ -358,20 +358,19 @@ void NormalProjector<ctype>::handleSide(PSurface<2,ctype>* par, const ContactBou
         
     }
 
-    setupEdgePointArrays(par);
+    setupEdgePointArrays();
 }
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdge(PSurface<2,ctype>* par, 
-                                 const std::vector<StaticVector<double,3> >& normals,
+void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<double,3> >& normals,
                                  int from, int to, 
                                  const std::vector<NodeBundle>& projectedTo)
 {
     int enteringEdge=-1;
     NodeBundle curr = projectedTo[from];
 
-    // parameter value for the edge to be inserted
+    // psurface_ameter value for the edge to be inserted
     double lambda = 0;
 
     while (curr!=projectedTo[to]) {
@@ -382,7 +381,7 @@ void NormalProjector<ctype>::insertEdge(PSurface<2,ctype>* par,
             // Get the common triangle
             std::vector<int> commonTris = getCommonTris(curr, projectedTo[to]);
             for (int i=0; i<commonTris.size(); i++) {
-                par->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
+                psurface_->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
                                                       projectedTo[to].triToIdx(commonTris[i]));
             }
             
@@ -391,24 +390,24 @@ void NormalProjector<ctype>::insertEdge(PSurface<2,ctype>* par,
 
         try {
             
-            typename Node<ctype>::NodeType currType = par->nodes(curr[0]).type;
+            typename Node<ctype>::NodeType currType = psurface_->nodes(curr[0]).type;
             switch (currType) {
             case Node<ctype>::TOUCHING_NODE:
                 
-                insertEdgeFromTouchingNode(par, normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromTouchingNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             case Node<ctype>::GHOST_NODE:
             case Node<ctype>::CORNER_NODE:
-                insertEdgeFromCornerNode(par, normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromCornerNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             case Node<ctype>::INTERSECTION_NODE:
-                insertEdgeFromIntersectionNode(par, normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromIntersectionNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             case Node<ctype>::INTERIOR_NODE:
-                insertEdgeFromInteriorNode(par, normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromInteriorNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             }
@@ -423,8 +422,7 @@ void NormalProjector<ctype>::insertEdge(PSurface<2,ctype>* par,
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,ctype>* par, 
-                                                 const std::vector<StaticVector<double,3> >& normals,
+void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
@@ -433,22 +431,22 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,ctype>* par,
     int cT = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the paramPolyEdge leaves the triangle via this edge
+    // check whether the psurface_amPolyEdge leaves the triangle via this edge
     for (i=0; i<3; i++) {
             
         if (i==enteringEdge)
             continue;
             
         StaticVector<double,3> x;
-        int p = par->triangles(curr[0].tri).vertices[i];
-        int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
+        int p = psurface_->triangles(curr[0].tri).vertices[i];
+        int q = psurface_->triangles(curr[0].tri).vertices[(i+1)%3];
 
-        const Surface* surf = par->surface;
+        const Surface* surf = psurface_->surface;
 
 
         if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0], 
                                     *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                    par->vertices(p), par->vertices(q),
+                                    psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
             const double& newLambda = x[1];
@@ -467,7 +465,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,ctype>* par,
             if (corner==-1) {
 
                 // get neighboring triangle
-                int neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
+                int neighboringTri = psurface_->getNeighboringTriangle(curr[0].tri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -482,7 +480,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,ctype>* par,
                     
                 // the domain position of the new intersection node on the next triangle
                 // better: using getEdge()
-                int e = par->triangles(neighboringTri).getCorner(q);
+                int e = psurface_->triangles(neighboringTri).getCorner(q);
                     
                 // the domain position of the new intersection node on this triangle
                 StaticVector<double,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
@@ -496,12 +494,12 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,ctype>* par,
 
                 StaticVector<ctype,2> dom1Ctype(dom1[0], dom1[1]);
                 StaticVector<ctype,2> dom2Ctype(dom2[0], dom2[1]);
-                NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[0].tri, neighboringTri,
+                NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1Ctype, dom2Ctype, i, e, image);
-                NodeIdx newNodeOut = par->triangles(neighboringTri).nodes.size()-1;
+                NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
-                // insert new parameter edge
-                par->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
+                // insert new psurface_ameter edge
+                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
 
                 //
                 curr.resize(1);
@@ -511,8 +509,8 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,ctype>* par,
                 
             } else {
                 enteringEdge = curr[0].tri;
-                par->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(par->triangles(cT), corner));
-                curr = par->getNodeBundleAtVertex(par->triangles(cT).vertices[corner]);
+                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(psurface_->triangles(cT), corner));
+                curr = psurface_->getNodeBundleAtVertex(psurface_->triangles(cT).vertices[corner]);
             }
             break;
         }
@@ -531,8 +529,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurface<2,ctype>* par,
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* par, 
-                                                 const std::vector<StaticVector<double,3> >& normals,
+void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
@@ -541,7 +538,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
     int cTIdx = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the paramPolyEdge leaves the triangle via this edge
+    // check whether the psurface_amPolyEdge leaves the triangle via this edge
     //int currentEdge = cT.nodes[curr[0].idx].getDomainEdge();
     //printf("currentEdge: %d\n", currentEdge);
 
@@ -551,13 +548,13 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
             continue;
             
         StaticVector<double,3> x;
-        int p = par->triangles(curr[0].tri).vertices[i];
-        int q = par->triangles(curr[0].tri).vertices[(i+1)%3];
+        int p = psurface_->triangles(curr[0].tri).vertices[i];
+        int q = psurface_->triangles(curr[0].tri).vertices[(i+1)%3];
 
-        const Surface* surf = par->surface;
+        const Surface* surf = psurface_->surface;
         if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0], 
                                     *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                    par->vertices(p), par->vertices(q),
+                                    psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
             const double& newLambda = x[1];
@@ -574,7 +571,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
 
             if (corner==-1) {
                 // get neighboring triangle
-                int neighboringTri = par->getNeighboringTriangle(curr[0].tri, i);
+                int neighboringTri = psurface_->getNeighboringTriangle(curr[0].tri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -590,7 +587,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
                     
                 // the domain position of the new intersection node on the next triangle
                 // better: using getEdge()
-                int e = par->triangles(neighboringTri).getCorner(q);
+                int e = psurface_->triangles(neighboringTri).getCorner(q);
                     
                 // the domain position of the new intersection node on this triangle
                 StaticVector<ctype,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
@@ -602,12 +599,12 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
                 for (int j=0; j<3; j++)
                     image[j] = surf->points[from][j] + newLambda*(surf->points[to][j]-surf->points[from][j]);
                     
-                NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[0].tri, neighboringTri,
+                NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1, dom2, i, e, image);
-                NodeIdx newNodeOut = par->triangles(neighboringTri).nodes.size()-1;
+                NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
-                // insert new parameter edge
-                par->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
+                // insert new psurface_ameter edge
+                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
 
                 //
                 curr.resize(1);
@@ -617,8 +614,8 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
                 
             } else {
                 enteringEdge = curr[0].tri;
-                par->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(par->triangles(cTIdx), corner));
-                curr = par->getNodeBundleAtVertex(par->triangles(cTIdx).vertices[corner]);
+                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(psurface_->triangles(cTIdx), corner));
+                curr = psurface_->getNodeBundleAtVertex(psurface_->triangles(cTIdx).vertices[corner]);
             }
             break;
         }
@@ -628,7 +625,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
 #ifndef NDEBUG
         printf("No intersection found!\n");
 #endif
-        par->triangles(curr[0].tri).nodes.erase(par->triangles(curr[0].tri).nodes.begin() + curr[0].idx);
+        psurface_->triangles(curr[0].tri).nodes.erase(psurface_->triangles(curr[0].tri).nodes.begin() + curr[0].idx);
         curr = projectedTo[to];
         return;
         assert(false);
@@ -638,13 +635,12 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurface<2,ctype>* p
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
-                                                 const std::vector<StaticVector<double,3> >& normals,
+void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals,
                                                  int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringTri)
 {
-    const Surface* surf = par->surface;
+    const Surface* surf = psurface_->surface;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
@@ -654,7 +650,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
         if (curr[i].tri == enteringTri)
             continue;
 
-        DomainTriangle<ctype>& cT = par->triangles(curr[i].tri);
+        DomainTriangle<ctype>& cT = psurface_->triangles(curr[i].tri);
         int currentEdge = cT.nodes[curr[i].idx].getDomainEdge();
         
         for (int j=0; j<3; j++) {
@@ -668,7 +664,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
 
             if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
                                         *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                        par->vertices(p), par->vertices(q),
+                                        psurface_->vertices(p), psurface_->vertices(q),
                                         normals[p], normals[q], x)) {
                 
                 if (x[1] < lambda) {
@@ -685,10 +681,10 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
                     corner = (j+1)%3;
 
                 if (corner==-1) {
-                    // parameter polyedge is leaving basegrid triangle through an edge
+                    // psurface_ameter polyedge is leaving basegrid triangle through an edge
                     
                     // get neighboring triangle
-                    int neighboringTri = par->getNeighboringTriangle(curr[i].tri, j);
+                    int neighboringTri = psurface_->getNeighboringTriangle(curr[i].tri, j);
 
                     // if no neighboring triangle --> error
                     if (neighboringTri==-1) {
@@ -700,7 +696,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
                     // add intersection nodes on both sides
                     
                     // better: using getEdge()
-                    int e = par->triangles(neighboringTri).getCorner(q);
+                    int e = psurface_->triangles(neighboringTri).getCorner(q);
 
                     // the domain position of the new intersection node on this triangle
                     StaticVector<ctype,2> dom1((j==0)*(1-mu) + (j==2)*mu, (j==0)*mu + (j==1)*(1-mu));
@@ -711,12 +707,12 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
                     for (int k=0; k<3; k++)
                         image[k] = surf->points[from][k] + lambda*(surf->points[to][k]-surf->points[from][k]);
                     
-                    NodeIdx newNodeIn  = par->addIntersectionNodePair(curr[i].tri, neighboringTri,
+                    NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(curr[i].tri, neighboringTri,
                                                                         dom1, dom2, j, e, image);
-                    NodeIdx newNodeOut = par->triangles(neighboringTri).nodes.size()-1;
+                    NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
-                    // insert new parameter edge
-                    par->triangles(curr[i].tri).addEdge(curr[i].idx, newNodeIn);
+                    // insert new psurface_ameter edge
+                    psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, newNodeIn);
 
                     curr.resize(1);
                     curr[0].setValue(neighboringTri, newNodeOut);
@@ -724,16 +720,16 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
                     
                 } else if (corner== ((currentEdge+2)%3)) {
 
-                    // parameter polyedge leaves BG triangle through the opposite vertex
-                    par->triangles(curr[i].tri).addEdge(curr[i].idx, getCornerNode(cT, corner));
+                    // psurface_ameter polyedge leaves BG triangle through the opposite vertex
+                    psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, getCornerNode(cT, corner));
                     enteringTri = curr[i].tri;
-                    curr = par->getNodeBundleAtVertex(cT.vertices[corner]);
+                    curr = psurface_->getNodeBundleAtVertex(cT.vertices[corner]);
 
                 } else {
-                    // parameter polyedge leaves BG triangle through an adjacent vertex
-                    NodeBundle target = par->getNodeBundleAtVertex(cT.vertices[corner]);
+                    // psurface_ameter polyedge leaves BG triangle through an adjacent vertex
+                    NodeBundle target = psurface_->getNodeBundleAtVertex(cT.vertices[corner]);
                     for (int k=0; k<curr.size(); k++)
-                        par->triangles(curr[k].tri).addEdge(curr[k].idx, target.triToIdx(curr[k].tri));
+                        psurface_->triangles(curr[k].tri).addEdge(curr[k].idx, target.triToIdx(curr[k].tri));
 
                     curr = target;
                     
@@ -755,12 +751,11 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurface<2,ctype>* par,
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,ctype>* par,
-                                               const std::vector<StaticVector<double,3> >& normals, int from, int to, double &lambda,
+void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, int from, int to, double &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
 {
-    const Surface* surf = par->surface;
+    const Surface* surf = psurface_->surface;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
@@ -771,16 +766,16 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,ctype>* par,
         if (cT == enteringEdge)
             continue;
 
-        int thisCorner = par->triangles(cT).nodes[curr[i].idx].getCorner();
+        int thisCorner = psurface_->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
 
         StaticVector<double,3> x;
-        int p = par->triangles(cT).vertices[(thisCorner+1)%3];
-        int q = par->triangles(cT).vertices[(thisCorner+2)%3];
+        int p = psurface_->triangles(cT).vertices[(thisCorner+1)%3];
+        int q = psurface_->triangles(cT).vertices[(thisCorner+2)%3];
 
         if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
                                     *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                    par->vertices(p), par->vertices(q),
+                                    psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
             
             if (x[1] < lambda) {
@@ -796,11 +791,11 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,ctype>* par,
                 corner = (thisCorner+2)%3;
             
             if (corner==-1) {
-                // parameter polyedge is leaving basegrid triangle 
+                // psurface_ameter polyedge is leaving basegrid triangle 
                 // through the opposite edge
                 
                 // get neighboring triangle
-                int neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
+                int neighboringTri = psurface_->getNeighboringTriangle(cT, oppEdge);
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
                     
@@ -810,7 +805,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,ctype>* par,
                 // add intersection nodes on both sides
                 
                 // better: using getEdge()
-                int e = par->triangles(neighboringTri).getCorner(q);
+                int e = psurface_->triangles(neighboringTri).getCorner(q);
 
                 // the domain position of the new intersection node on this triangle
                 StaticVector<ctype,2> dom1((oppEdge==0)*(1-mu) + (oppEdge==2)*mu, (oppEdge==0)*mu + (oppEdge==1)*(1-mu));
@@ -821,12 +816,12 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,ctype>* par,
                 for (int j=0; j<3; j++)
                     image[j] = surf->points[from][j] + lambda*(surf->points[to][j]-surf->points[from][j]);
                 
-                NodeIdx newNodeIn  = par->addIntersectionNodePair(cT, neighboringTri,
+                NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(cT, neighboringTri,
                                                                   dom1, dom2, oppEdge, e, image);
-                NodeIdx newNodeOut = par->triangles(neighboringTri).nodes.size()-1;
+                NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                 
-                // insert new parameter edge
-                par->triangles(cT).addEdge(curr[i].idx, newNodeIn);
+                // insert new psurface_ameter edge
+                psurface_->triangles(cT).addEdge(curr[i].idx, newNodeIn);
 
                 curr.resize(1);
                 curr[0].setValue(neighboringTri, newNodeOut);
@@ -835,10 +830,10 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,ctype>* par,
             } else {
 
                 // edge leaves through a corner
-                NodeBundle target = par->getNodeBundleAtVertex(par->triangles(cT).vertices[corner]);
+                NodeBundle target = psurface_->getNodeBundleAtVertex(psurface_->triangles(cT).vertices[corner]);
                 std::vector<int> commonTris = getCommonTris(curr, target);
                 for (i=0; i<commonTris.size(); i++) {
-                    par->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
+                    psurface_->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
                                                           target.triToIdx(commonTris[i]));
                 }
                 
@@ -861,8 +856,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurface<2,ctype>* par,
 
 
 template <class ctype>
-bool NormalProjector<ctype>::edgeCanBeInserted(const PSurface<2,ctype>* par, 
-                                        const std::vector<StaticVector<double,3> >& normals,
+bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<double,3> >& normals,
                                         int from, int to, 
                                         const std::vector<NodeBundle>& projectedTo)
 {
@@ -876,10 +870,10 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const PSurface<2,ctype>* par,
     if (onSameTriangle(curr, projectedTo[to]))
         return true;
 
-    typename Node<ctype>::NodeType currType = par->nodes(curr[0]).type;
+    typename Node<ctype>::NodeType currType = psurface_->nodes(curr[0]).type;
     int currTri     = curr[0].tri;
 
-    // parameter value for the edge to be inserted
+    // psurface_ameter value for the edge to be inserted
     double lambda = 0;
 
     while (true) {
@@ -891,7 +885,7 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const PSurface<2,ctype>* par,
         switch (currType) {
         case Node<ctype>::TOUCHING_NODE:
 
-            if (!testInsertEdgeFromTouchingNode(par, normals, 
+            if (!testInsertEdgeFromTouchingNode(normals, 
                                                 from, to, 
                                                 lambda, projectedTo, 
                                                 curr, currType, currTri, enteringEdge))
@@ -902,7 +896,7 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const PSurface<2,ctype>* par,
         case Node<ctype>::GHOST_NODE:
         case Node<ctype>::CORNER_NODE:
 
-            if (!testInsertEdgeFromCornerNode(par, normals, 
+            if (!testInsertEdgeFromCornerNode(normals, 
                                               from, to, 
                                               lambda, projectedTo, 
                                               curr, currType, currTri, enteringEdge))
@@ -910,12 +904,12 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const PSurface<2,ctype>* par,
             break;
 
         case Node<ctype>::INTERSECTION_NODE:
-            if (!testInsertEdgeFromIntersectionNode(par, normals, from, to, lambda, projectedTo, currType, currTri, enteringEdge))
+            if (!testInsertEdgeFromIntersectionNode(normals, from, to, lambda, projectedTo, currType, currTri, enteringEdge))
                 return false;
             break;
             
         case Node<ctype>::INTERIOR_NODE:
-            if (!testInsertEdgeFromInteriorNode(par, normals, from, to, lambda, projectedTo, currType, currTri, enteringEdge))
+            if (!testInsertEdgeFromInteriorNode(normals, from, to, lambda, projectedTo, currType, currTri, enteringEdge))
                 return false;
             break;
             
@@ -933,15 +927,14 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const PSurface<2,ctype>* par,
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const PSurface<2,ctype>* par, 
-                                                     const std::vector<StaticVector<double,3> >& normals,
+bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
                                                             typename Node<ctype>::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the paramPolyEdge leaves the triangle via this edge
+    // check whether the psurface_amPolyEdge leaves the triangle via this edge
     int i;
     for (i=0; i<3; i++) {
             
@@ -949,15 +942,15 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const PSurface<2,cty
             continue;
             
         StaticVector<double,3> x;
-        int p = par->triangles(currTri).vertices[i];
-        int q = par->triangles(currTri).vertices[(i+1)%3];
+        int p = psurface_->triangles(currTri).vertices[i];
+        int q = psurface_->triangles(currTri).vertices[(i+1)%3];
 
-        const Surface* surf = par->surface;
+        const Surface* surf = psurface_->surface;
 
 
         if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
                                     *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                    par->vertices(p), par->vertices(q),
+                                    psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
             const double& newLambda = x[1];
@@ -976,7 +969,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const PSurface<2,cty
 
             if (corner==-1) {
                 // get neighboring triangle
-                int neighboringTri = par->getNeighboringTriangle(currTri, i);
+                int neighboringTri = psurface_->getNeighboringTriangle(currTri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -988,7 +981,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const PSurface<2,cty
                     
                 // the domain position of the new intersection node on the next triangle
                 // better: using getEdge()
-                int e = par->triangles(neighboringTri).getCorner(q);
+                int e = psurface_->triangles(neighboringTri).getCorner(q);
                     
                 currType = Node<ctype>::INTERSECTION_NODE;
                 currTri  = neighboringTri;
@@ -1013,15 +1006,14 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const PSurface<2,cty
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const PSurface<2,ctype>* par, 
-                                                         const std::vector<StaticVector<double,3> >& normals,
+bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals,
                                                          int from, int to, double &lambda,
                                                          const std::vector<NodeBundle>& projectedTo,
                                                          typename Node<ctype>::NodeType& currType, int& currTri,
                                                          int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the paramPolyEdge leaves the triangle via this edge
+    // check whether the psurface_amPolyEdge leaves the triangle via this edge
     int i;
     for (i=0; i<3; i++) {
             
@@ -1029,13 +1021,13 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const PSurface<2
             continue;
             
         StaticVector<double,3> x;
-        int p = par->triangles(currTri).vertices[i];
-        int q = par->triangles(currTri).vertices[(i+1)%3];
+        int p = psurface_->triangles(currTri).vertices[i];
+        int q = psurface_->triangles(currTri).vertices[(i+1)%3];
         
-        const Surface* surf = par->surface;
+        const Surface* surf = psurface_->surface;
         if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
                                     *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                    par->vertices(p), par->vertices(q),
+                                    psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
             const double& newLambda = x[1];
@@ -1054,7 +1046,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const PSurface<2
 
             if (corner==-1) {
                 // get neighboring triangle
-                int neighboringTri = par->getNeighboringTriangle(currTri, i);
+                int neighboringTri = psurface_->getNeighboringTriangle(currTri, i);
                     
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1) {
@@ -1066,7 +1058,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const PSurface<2
                     
                 // the domain position of the new intersection node on the next triangle
                 // better: using getEdge()
-                int e = par->triangles(neighboringTri).getCorner(q);
+                int e = psurface_->triangles(neighboringTri).getCorner(q);
 
                 currType = Node<ctype>::INTERSECTION_NODE;
                 currTri  = neighboringTri;
@@ -1090,20 +1082,19 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const PSurface<2
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const PSurface<2,ctype>* par,
-                                                     const std::vector<StaticVector<double,3> >& normals,
+bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
                                                      const std::vector<NodeBundle>& projectedTo,
                                                      NodeBundle& curr,
                                                      typename Node<ctype>::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
-    const Surface* surf = par->surface;
+    const Surface* surf = psurface_->surface;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
 
-        const DomainTriangle<ctype>& cT = par->triangles(curr[i].tri);
+        const DomainTriangle<ctype>& cT = psurface_->triangles(curr[i].tri);
         int currentEdge = cT.nodes[curr[i].idx].getDomainEdge();
         
         for (int j=0; j<3; j++) {
@@ -1117,7 +1108,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const PSurface<2,cty
 
             if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
                                         *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                        par->vertices(p), par->vertices(q),
+                                        psurface_->vertices(p), psurface_->vertices(q),
                                         normals[p], normals[q], x)) {
                 
                 const double& newLambda = x[1];
@@ -1134,10 +1125,10 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const PSurface<2,cty
                     corner = (j+1)%3;
                 
                 if (corner==-1) {
-                    // parameter polyedge is leaving basegrid triangle through an edge
+                    // psurface_ameter polyedge is leaving basegrid triangle through an edge
                     
                     // get neighboring triangle
-                    int neighboringTri = par->getNeighboringTriangle(curr[i].tri, j);
+                    int neighboringTri = psurface_->getNeighboringTriangle(curr[i].tri, j);
 
                     // if no neighboring triangle --> error
                     if (neighboringTri==-1)
@@ -1146,7 +1137,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const PSurface<2,cty
                     // add intersection nodes on both sides
                 
                     // better: using getEdge()
-                    int e = par->triangles(neighboringTri).getCorner(q);
+                    int e = psurface_->triangles(neighboringTri).getCorner(q);
                 
                     currType = Node<ctype>::INTERSECTION_NODE;
                     currTri  = neighboringTri;
@@ -1156,22 +1147,22 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const PSurface<2,cty
                     return true;
                 
                 } else {
-                    // parameter polyedge is leaving base grid triangle through a ghost node
+                    // psurface_ameter polyedge is leaving base grid triangle through a ghost node
 
                     // get all ghost nodes for the base grid vertex
-                    int vertex = par->triangles(currTri).vertices[corner];
-                    std::vector<int> neighbors = par->getTrianglesPerVertex(vertex);
+                    int vertex = psurface_->triangles(currTri).vertices[corner];
+                    std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
 
                     curr.resize(0);
                     for (int k=0; k<neighbors.size(); k++) {
                         
-                        int cornerOnNeighbor = par->triangles(neighbors[k]).getCorner(vertex);
+                        int cornerOnNeighbor = psurface_->triangles(neighbors[k]).getCorner(vertex);
 
                         /** \todo Linear search: pretty slow */
-                        for (int l=0; l<par->triangles(neighbors[k]).nodes.size(); l++) {
+                        for (int l=0; l<psurface_->triangles(neighbors[k]).nodes.size(); l++) {
 
-                            if (par->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
-                                && par->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
+                            if (psurface_->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
+                                && psurface_->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
 
                                 curr.push_back(GlobalNodeIdx(neighbors[k], l));
                                 break;
@@ -1206,31 +1197,30 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const PSurface<2,cty
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const PSurface<2,ctype>* par,
-                                                   const std::vector<StaticVector<double,3> >& normals, 
+bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
                                                    int from, int to, double &lambda,
                                                    const std::vector<NodeBundle>& projectedTo,
                                                    NodeBundle& curr, 
                                                    typename Node<ctype>::NodeType& currType, int& currTri,
                                                    int& leavingEdge)
 {
-    const Surface* surf = par->surface;
+    const Surface* surf = psurface_->surface;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
         
         int cT = curr[i].tri;
 
-        int thisCorner = par->triangles(cT).nodes[curr[i].idx].getCorner();
+        int thisCorner = psurface_->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
 
         StaticVector<double,3> x;
-        int p = par->triangles(cT).vertices[(thisCorner+1)%3];
-        int q = par->triangles(cT).vertices[(thisCorner+2)%3];
+        int p = psurface_->triangles(cT).vertices[(thisCorner+1)%3];
+        int q = psurface_->triangles(cT).vertices[(thisCorner+2)%3];
 
         if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
                                     *(StaticVector<ctype,3>*)&surf->points[to][0],
-                                    par->vertices(p), par->vertices(q),
+                                    psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
             
             const double& newLambda = x[1];
@@ -1247,11 +1237,11 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const PSurface<2,ctype
                 corner = (thisCorner+2)%3;
             
             if (corner==-1) {
-                // parameter polyedge is leaving basegrid triangle 
+                // psurface_ameter polyedge is leaving basegrid triangle 
                 // through the opposite edge
                 
                 // get neighboring triangle
-                int neighboringTri = par->getNeighboringTriangle(cT, oppEdge);
+                int neighboringTri = psurface_->getNeighboringTriangle(cT, oppEdge);
 
                 // if no neighboring triangle --> error
                 if (neighboringTri==-1)
@@ -1260,7 +1250,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const PSurface<2,ctype
                 // add intersection nodes on both sides
                 
                 // better: using getEdge()
-                int e = par->triangles(neighboringTri).getCorner(q);
+                int e = psurface_->triangles(neighboringTri).getCorner(q);
 
                 currType = Node<ctype>::INTERSECTION_NODE;
                 currTri  = neighboringTri;
@@ -1271,22 +1261,22 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const PSurface<2,ctype
 
             } else {
 
-                // parameter polyedge is leaving base grid triangle through a ghost node
+                // psurface_ameter polyedge is leaving base grid triangle through a ghost node
 
                 // get all ghost nodes for the base grid vertex
-                int vertex = par->triangles(currTri).vertices[corner];
-                std::vector<int> neighbors = par->getTrianglesPerVertex(vertex);
+                int vertex = psurface_->triangles(currTri).vertices[corner];
+                std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
                 
                 curr.resize(0);
                 for (int k=0; k<neighbors.size(); k++) {
                     
-                    int cornerOnNeighbor = par->triangles(neighbors[k]).getCorner(vertex);
+                    int cornerOnNeighbor = psurface_->triangles(neighbors[k]).getCorner(vertex);
                     
                     /** \todo Linear search: pretty slow */
-                    for (int l=0; l<par->triangles(neighbors[k]).nodes.size(); l++) {
+                    for (int l=0; l<psurface_->triangles(neighbors[k]).nodes.size(); l++) {
                         
-                        if (par->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
-                            && par->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
+                        if (psurface_->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
+                            && psurface_->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
                             
                             curr.push_back(GlobalNodeIdx(neighbors[k], l));
                             break;
@@ -1341,16 +1331,15 @@ bool NormalProjector<ctype>::onSameTriangle(const int& tri, const NodeBundle& b)
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertGhostNodeAtVertex(PSurface<2,ctype>* par, int v, 
-                                              int targetTri, const StaticVector<double,2>& localTargetCoords)
+void NormalProjector<ctype>::insertGhostNodeAtVertex(int v, int targetTri, const StaticVector<double,2>& localTargetCoords)
 {
-    std::vector<int> neighbors = par->getTrianglesPerVertex(v);
+    std::vector<int> neighbors = psurface_->getTrianglesPerVertex(v);
 
     for (int i=0; i<neighbors.size(); i++) {
 
-        int corner = par->triangles(neighbors[i]).getCorner(v);
+        int corner = psurface_->triangles(neighbors[i]).getCorner(v);
         StaticVector<ctype,2> lTC_Ctype(localTargetCoords[0], localTargetCoords[1]);
-        par->addGhostNode(neighbors[i], corner, targetTri, lTC_Ctype);
+        psurface_->addGhostNode(neighbors[i], corner, targetTri, lTC_Ctype);
 
     }
  
@@ -1358,14 +1347,14 @@ void NormalProjector<ctype>::insertGhostNodeAtVertex(PSurface<2,ctype>* par, int
 
 
 template <class ctype>
-void NormalProjector<ctype>::addCornerNodeBundle(PSurface<2,ctype>* cS, int v, int nN)
+void NormalProjector<ctype>::addCornerNodeBundle(int v, int nN)
 {
-    std::vector<int> neighbors = cS->getTrianglesPerVertex(v);
+    std::vector<int> neighbors = psurface_->getTrianglesPerVertex(v);
 
     for (int i=0; i<neighbors.size(); i++) {
 
-        int corner = cS->triangles(neighbors[i]).getCorner(v);
-        cS->addCornerNode(neighbors[i], corner, nN);
+        int corner = psurface_->triangles(neighbors[i]).getCorner(v);
+        psurface_->addCornerNode(neighbors[i], corner, nN);
 
     }
         
@@ -1477,15 +1466,15 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>&
     StaticVector<double,3> e2 = c-a;
     e1.normalize();
     e2.normalize();
-    bool parallel = fabs(StaticMatrix<double,3>(e1, e2, direction).det()) <eps;
+    bool psurface_allel = fabs(StaticMatrix<double,3>(e1, e2, direction).det()) <eps;
         
         // Cramer's rule
         
-        if (!parallel){
+        if (!psurface_allel){
 
             double det = StaticMatrix<double,3>(b-a, c-a, direction).det();
             
-            // triangle and edge are not parallel
+            // triangle and edge are not psurface_allel
             double nu = StaticMatrix<double,3>(b-a, c-a, p-a).det() / det;
 
             double lambda = StaticMatrix<double,3>(p-a, c-a, direction).det() / det;
@@ -1506,12 +1495,12 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>&
 
         } else {
 
-            // triangle and edge are parallel
+            // triangle and edge are psurface_allel
             double alpha = StaticMatrix<double,3>(b-a, c-a, p-a).det();
             if (alpha<-eps || alpha>eps)
                 return false;
             else {
-                printf("ray and triangle are parallel!\n");
+                printf("ray and triangle are psurface_allel!\n");
                 return false;
 
             }
@@ -1564,13 +1553,13 @@ std::vector<int> NormalProjector<ctype>::getCommonTris(const NodeBundle& a, cons
 
 
 template <class ctype>
-void NormalProjector<ctype>::setupEdgePointArrays(PSurface<2,ctype>* par)
+void NormalProjector<ctype>::setupEdgePointArrays()
 {
     int i, j;
 
-    for (i=0; i<par->getNumTriangles(); i++) {
+    for (i=0; i<psurface_->getNumTriangles(); i++) {
 
-        DomainTriangle<ctype>& cT = par->triangles(i);
+        DomainTriangle<ctype>& cT = psurface_->triangles(i);
 
         cT.edgePoints[0].clear();
         cT.edgePoints[1].clear();

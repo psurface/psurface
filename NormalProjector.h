@@ -19,40 +19,40 @@ template <class ctype>
 class NormalProjector {
 public:
 
-    void handleSide(PSurface<2,ctype>* par, 
-                    const ContactBoundary& contactPatch,
+    NormalProjector(PSurface<2,ctype>* psurface)
+        : psurface_(psurface)
+    {}
+
+    void handleSide(const ContactBoundary& contactPatch,
                     void (*obsDirections)(const double* pos, double* dir)
                     );
 
-    void setupEdgePointArrays(PSurface<2,ctype>* par);
+protected:
 
-    void insertEdge(PSurface<2,ctype>* par,  
-                    const std::vector<StaticVector<double,3> >& normals,
+    void setupEdgePointArrays();
+
+    void insertEdge(const std::vector<StaticVector<double,3> >& normals,
                     int from, 
                     int to,
                     const std::vector<NodeBundle>& projectedTo
                     );
 
-    void insertEdgeFromInteriorNode(PSurface<2,ctype>* par, 
-                                    const std::vector<StaticVector<double,3> >& normals, 
+    void insertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals, 
                                     int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromIntersectionNode(PSurface<2,ctype>* par, 
-                                        const std::vector<StaticVector<double,3> >& normals, 
+    void insertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromTouchingNode(PSurface<2,ctype>* par, 
-                                    const std::vector<StaticVector<double,3> >& normals, 
+    void insertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals, 
                                     int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringTri);
 
-    void insertEdgeFromCornerNode(PSurface<2,ctype>* par, 
-                                  const std::vector<StaticVector<double,3> >& normals, 
+    void insertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
                                   int from, int to, double& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
@@ -61,51 +61,45 @@ public:
     // ///////////////////////////////////////////////////////////////////////
     //   Methods needed to test whether an edge can be projected completely
     // ///////////////////////////////////////////////////////////////////////
-    bool edgeCanBeInserted(const PSurface<2,ctype>* par,  
-                           const std::vector<StaticVector<double,3> >& normals,
+
+    bool edgeCanBeInserted(const std::vector<StaticVector<double,3> >& normals,
                            int from, 
                            int to,
                            const std::vector<NodeBundle>& projectedTo
                            );
 
-    bool testInsertEdgeFromInteriorNode(const PSurface<2,ctype>* par, 
-                                        const std::vector<StaticVector<double,3> >& normals, 
+    bool testInsertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
-    bool testInsertEdgeFromIntersectionNode(const PSurface<2,ctype>* par, 
-                                            const std::vector<StaticVector<double,3> >& normals, 
+    bool testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals, 
                                             int from, int to, double& lambda,
                                             const std::vector<NodeBundle>& projectedTo,
                                             typename Node<ctype>::NodeType& currType, int& currTri,
                                             int& enteringEdge);
 
-    bool testInsertEdgeFromTouchingNode(const PSurface<2,ctype>* par, 
-                                        const std::vector<StaticVector<double,3> >& normals, 
+    bool testInsertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         NodeBundle& curr,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
-    bool testInsertEdgeFromCornerNode(const PSurface<2,ctype>* par, 
-                                      const std::vector<StaticVector<double,3> >& normals, 
+    bool testInsertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
                                       int from, int to, double& lambda,
                                       const std::vector<NodeBundle>& projectedTo,
                                       NodeBundle& curr, 
                                       typename Node<ctype>::NodeType& currType, int& currTri,
                                       int& enteringEdge);
 
-    void insertGhostNodeAtVertex(PSurface<2,ctype>* par, 
-                                 int v, 
+    void insertGhostNodeAtVertex(int v, 
                                  int targetTri, 
                                  const StaticVector<double,2>& localTargetCoords
                                  );
 
-    void addCornerNodeBundle(PSurface<2,ctype>* par, 
-                             int v, 
+    void addCornerNodeBundle(int v, 
                              int nN
                              );
 
@@ -148,6 +142,8 @@ public:
     // /////////////////////////////////////
     // Data members
     // /////////////////////////////////////
+
+    PSurface<2,ctype>* psurface_;
 
     std::vector<StaticVector<double, 3> > targetNormals;
 
