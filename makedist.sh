@@ -23,7 +23,7 @@ cp DomainPolygon.h              $BASENAME/include/psurface
 cp Domains.h                    $BASENAME/include/psurface
 cp GlobalNodeIdx.h              $BASENAME/include/psurface
 cp McPointerSurfaceParts.h      $BASENAME/include/psurface
-cp McSurfaceBase.h              $BASENAME/include/psurface
+cp SurfaceBase.h                $BASENAME/include/psurface
 cp Node.h                       $BASENAME/include/psurface
 cp NodeBundle.h                 $BASENAME/include/psurface
 cp PSurface.h                   $BASENAME/include/psurface
