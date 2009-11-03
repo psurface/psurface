@@ -14,7 +14,6 @@ template <class ctype>
 void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
                                  void (*directions)(const double* pos, double* dir))
 {
-    int i, j;
     const double eps = 0.0001;
     const Surface* surf = psurface_->surface;
 
@@ -33,7 +32,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
     if (directions) {
 
-        for (i=0; i<nPoints; i++) {
+        for (int i=0; i<nPoints; i++) {
             double pos[3];
             double dir[3];
 
@@ -47,7 +46,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
     } else {
 
-        for (i=0; i<nTriangles; i++) {
+        for (int i=0; i<nTriangles; i++) {
             
             int p0 = psurface_->triangles(i).vertices[0];
             int p1 = psurface_->triangles(i).vertices[1];
@@ -70,7 +69,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             nTriPerVertex[p2]++;
         }
 
-        for (i=0; i<nPoints; i++)
+        for (int i=0; i<nPoints; i++)
             if (nTriPerVertex[i])
                 normals[i].normalize();
 
@@ -86,7 +85,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     std::vector<bool> hasTargetNormal;
     hasTargetNormal.assign(nTargetPoints, false);
 
-    for (i=0; i<nTargetTriangles; i++) {
+    for (int i=0; i<nTargetTriangles; i++) {
         
         int p0 = contactPatch.triangles(i).points[0];
         int p1 = contactPatch.triangles(i).points[1];
@@ -114,7 +113,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
     }
     
-    for (i=0; i<contactPatch.vertices.size(); i++)
+    for (int i=0; i<contactPatch.vertices.size(); i++)
         if (hasTargetNormal[contactPatch.vertices[i]])
             targetNormals[contactPatch.vertices[i]].normalize();
 
@@ -130,13 +129,13 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     std::vector<bool> vertexHasBeenHandled(psurface_->getNumVertices(), false);
     
     // Loop over the vertices of the target surface
-    for (i=0; i<contactPatch.vertices.size(); i++) {
+    for (int i=0; i<contactPatch.vertices.size(); i++) {
 
         StaticVector<double,2> bestDPos;
         int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
-        for (j=0; j<psurface_->getNumTriangles(); j++) {
+        for (int j=0; j<psurface_->getNumTriangles(); j++) {
 
             const StaticVector<ctype,3>& p0 = psurface_->vertices(psurface_->triangles(j).vertices[0]);
             const StaticVector<ctype,3>& p1 = psurface_->vertices(psurface_->triangles(j).vertices[1]);
@@ -267,7 +266,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
                 vertexHasBeenHandled[v] = true;
                 std::vector<int> neighboringTris = psurface_->getTrianglesPerVertex(v);
                 projectedTo[contactPatch.vertices[i]].resize(neighboringTris.size());
-                for (j=0; j<neighboringTris.size(); j++) {
+                for (int j=0; j<neighboringTris.size(); j++) {
                     projectedTo[contactPatch.vertices[i]][j].setValue(neighboringTris[j],
                                                                       psurface_->triangles(neighboringTris[j]).nodes.size()-1);
                 }
@@ -288,7 +287,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     // ///////////////////////////////////////////////////////////////////
     //   Place ghost nodes at the vertices of the intermediate manifold
     // ///////////////////////////////////////////////////////////////////
-    for (i=0; i<psurface_->getNumVertices(); i++) {
+    for (int i=0; i<psurface_->getNumVertices(); i++) {
 
         // Has the vertex been hit by the projection of a target vertex already?
         if (vertexHasBeenHandled[i])
@@ -303,7 +302,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
         const StaticVector<double,3>& normal    = normals[i];
 
         //for (j=0; j<reducedContactPatch.triIdx.size(); j++) {
-        for (j=0; j<contactPatch.triIdx.size(); j++) {
+        for (int j=0; j<contactPatch.triIdx.size(); j++) {
 
             StaticVector<double,2> domainPos;
             double dist;
@@ -335,9 +334,9 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     // Insert the edges
     // ////////////////////////////////////////////////////////////
 
-    for (i=0; i<contactPatch.triIdx.size(); i++) {
+    for (int i=0; i<contactPatch.triIdx.size(); i++) {
 
-        for (j=0; j<3; j++) {
+        for (int j=0; j<3; j++) {
             
             int from = contactPatch.triangles(i).points[j];
             int to   = contactPatch.triangles(i).points[(j+1)%3];
