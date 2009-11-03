@@ -146,9 +146,6 @@ public:
                                double& normalDist,
                                double eps);
 
-    /** \todo Können wir nicht die entsprechende Routine in Surface verwenden? */
-    void computeVertexNormals();
-
     // /////////////////////////////////////
     // Data members
 

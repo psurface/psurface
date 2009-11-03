@@ -1543,12 +1543,6 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>&
 
 
 template <class ctype>
-void NormalProjector<ctype>::computeVertexNormals()
-{
-}
-
-
-template <class ctype>
 NodeIdx NormalProjector<ctype>::getCornerNode(const DomainTriangle<float>& cT, int corner)
 {
     assert(corner>=0 && corner<3);
