@@ -1626,3 +1626,12 @@ void NormalProjector<ctype>::setupEdgePointArrays(PSurface<2,float>* par)
     }   
     
 }
+
+
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
+
+template class NormalProjector<float>;
+template class NormalProjector<double>;
