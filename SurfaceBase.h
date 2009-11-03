@@ -1,5 +1,5 @@
-#ifndef MC__SURFACE_BASE
-#define MC__SURFACE_BASE
+#ifndef SURFACE_BASE_H
+#define SURFACE_BASE_H
 
 #include <vector>
 #include <set>
@@ -23,7 +23,7 @@
     @see McVertex, McEdge, McTriangle
 */
 template <class VertexType, class EdgeType, class TriangleType>
-class McSurfaceBase {
+class SurfaceBase {
 
 public:
 
@@ -31,7 +31,7 @@ public:
     typedef typename VertexType::coordtype ctype;
 
     ///
-    McSurfaceBase(){}
+    SurfaceBase(){}
 
     ///
     void clear() {

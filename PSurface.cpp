@@ -56,7 +56,7 @@ void PSurface<dim,ctype>::clear()
 
     iPos.clear();
     paths.clear();
-    McSurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >::clear();
+    SurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >::clear();
 }
 
 template <int dim, class ctype>
@@ -306,7 +306,7 @@ void PSurface<dim,ctype>::garbageCollection()
 
     }
 
-    McSurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >::garbageCollection();
+    SurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >::garbageCollection();
     
 #ifndef NDEBUG
         printf("   ...Garbage collection finished!\n");

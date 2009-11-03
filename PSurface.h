@@ -18,7 +18,7 @@
 
 #include <psurface/StaticVector.h>
 
-#include "McSurfaceBase.h"
+#include "SurfaceBase.h"
 #include "Domains.h"
 #include "SurfacePathSet.h"
 #include "GlobalNodeIdx.h"
@@ -34,7 +34,7 @@ class AmiraMesh;
 */
 template <int dim, class ctype>
 class PSurface
-    : public McSurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >{
+    : public SurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >{
 
 public:
 
