@@ -30,7 +30,7 @@ void Node<ctype>::print(bool showNeighbors) const
     printf(" number %d", nodeNumber);
 
     if (isOnEdge())
-        printf("  edge: %ld  edgePos %ud\n", getDomainEdge(), getDomainEdgePosition());
+        std::cout << "  edge: " << getDomainEdge() << "  edgePos " << getDomainEdgePosition() << std::endl;
     else if (isOnCorner())
         printf("  corner: %d\n", getCorner());
     else
@@ -47,23 +47,21 @@ template <class ctype>
 void PlaneParam<ctype>::print(bool showNodes, bool showParamEdges, bool showExtraEdges) const 
 {
 #ifndef NDEBUG
-    printf("---------------------------------------------------------\n");
-    printf("parametrization contains %ld nodes\n", nodes.size());
+    std::cout << "---------------------------------------------------------" << std::endl;
+    std::cout << "parametrization contains " << nodes.size() << " nodes" << std::endl;
     
     if (showNodes){
-        for (int i=0; i<nodes.size(); i++)
+        for (size_t i=0; i<nodes.size(); i++)
             nodes[i].print();
     }
 
-    printf("---------------------------------------------------------\n\n");
+    std::cout << "---------------------------------------------------------" << std::endl;
 #endif
 }   
 
 void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const 
 {
 #ifndef NDEBUG
-    int i, j;
-
     printf("--------------------------------------------------------\n");
     printf("--  Print Polygon  -------------------------------------\n");
 
@@ -76,9 +74,9 @@ void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNod
 
     if (showEdgePoints){
         
-        for (i=0; i<edgePoints.size(); i++){
+        for (size_t i=0; i<edgePoints.size(); i++){
             printf("edgePoints %d:\n", i);
-            for (j=0; j<edgePoints[i].size(); j++){
+            for (size_t j=0; j<edgePoints[i].size(); j++){
                 printf("  %d) -- ", edgePoints[i][j]);
                 nodes[edgePoints[i][j]].print();
             }
@@ -196,12 +194,9 @@ template <class ctype>
 void PlaneParam<ctype>::checkConsistency(const char* where) const
 {
 #ifndef NDEBUG
-    int i, j, k;
+    for (size_t i=0; i<nodes.size(); i++) {
 
-
-    for (k=0; k<nodes.size(); k++) {
-
-        const Node<ctype>& cN = nodes[k];
+        const Node<ctype>& cN = nodes[i];
         if (cN.isInvalid())
             continue;
 
@@ -212,21 +207,18 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
             assert(false);
         }
 
-//      for (j=0; j<cN.degree(); j++)
-//          assert(cN.neighbor(j)>=0);
-
         // make sure references are mutual
-        for (j=0; j<cN.degree(); j++)
-            if (!nodes[cN.neighbors(j)].isConnectedTo(k)) {
+        for (size_t j=0; j<cN.degree(); j++)
+            if (!nodes[cN.neighbors(j)].isConnectedTo(i)) {
                 printf(where);
-                printf("\n***** Neighbor relation is not mutual j=%d   k=%d *****\n", j, k);
+                printf("\n***** Neighbor relation is not mutual j=%d   k=%d *****\n", j, i);
                 cN.print();
                 nodes[cN.neighbors(j)].print();
                 assert(false);
             }
         
         // make sure that no neighbor is invalid
-        for (j=0; j<cN.degree(); j++)
+        for (size_t j=0; j<cN.degree(); j++)
             if (nodes[cN.neighbors(j)].isInvalid()) {
                 printf(where);
                 printf("***** Node has an invalid neighbor *****\n");
@@ -234,12 +226,12 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
             }
 
         // check for double edges
-        for (i=0; i<cN.degree(); i++)
-            for (j=0; j<i; j++)
-                if (cN.neighbors(i)==cN.neighbors(j)) {
+        for (size_t l=0; l<cN.degree(); l++)
+            for (size_t j=0; j<i; j++)
+                if (cN.neighbors(l)==cN.neighbors(j)) {
                     printf(where);
                     printf("***** PlaneParam contains double edge! *****\n");
-                    for (k=0; k<cN.degree(); k++){
+                    for (size_t k=0; k<cN.degree(); k++){
                         printf("   %d\n  ", (int)cN.neighbors(k));
                         nodes[cN.neighbors(k)].print();
                     }
@@ -251,15 +243,14 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
         if (!cN.degree() && !cN.isCORNER_NODE()){
             printf(where);
             cN.print();
-            printf("NodeNumber = %d\n", k);
+            printf("NodeNumber = %d\n", i);
             printf("****** solitary Node found!\n");
             assert(false);
         }
 
-        for (int i=0; i<cN.degree(); i++){
+        for (int i=0; i<cN.degree(); i++)
             assert(cN.neighbors(i)>=0 && cN.neighbors(i)<nodes.size());
 
-        }
     }
 
 #endif
