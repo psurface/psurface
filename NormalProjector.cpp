@@ -11,8 +11,8 @@
 
 
 template <class ctype>
-void NormalProjector<ctype>::handleSide(const ContactBoundary& contactPatch,
-                                 void (*obsDirections)(const double* pos, double* dir))
+void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
+                                 void (*directions)(const double* pos, double* dir))
 {
     int i, j;
     const double eps = 0.0001;
@@ -31,7 +31,7 @@ void NormalProjector<ctype>::handleSide(const ContactBoundary& contactPatch,
 
     nTriPerVertex.assign(nTriPerVertex.size(), 0);
 
-    if (obsDirections) {
+    if (directions) {
 
         for (i=0; i<nPoints; i++) {
             double pos[3];
@@ -39,7 +39,7 @@ void NormalProjector<ctype>::handleSide(const ContactBoundary& contactPatch,
 
             for (int j=0; j<3; j++)
                 pos[j] = psurface_->vertices(i)[j];
-            (*obsDirections)(pos, dir);
+            (*directions)(pos, dir);
             for (int j=0; j<3; j++)
                 normals[i][j] = dir[j];
 

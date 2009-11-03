@@ -23,8 +23,8 @@ public:
         : psurface_(psurface)
     {}
 
-    void handleSide(const ContactBoundary& contactPatch,
-                    void (*obsDirections)(const double* pos, double* dir)
+    void project(const ContactBoundary& contactPatch,
+                    void (*directions)(const double* pos, double* dir)
                     );
 
 protected:
