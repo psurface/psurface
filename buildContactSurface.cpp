@@ -56,14 +56,7 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
     for (i=0; i<contactBoundary[0].vertices.size(); i++)
         cPar->newVertex(*(StaticVector<float,3>*)&surf1->points[contactBoundary[0].vertices[i]][0]);
     
-#if 0
-    // Can't use HxParameter anymore, because it is part of Amira(Mesh)
-    cPar->params->insert(new HxParameter("targetTris",
-                                         contactBoundary[0].triIdx.size(),
-                                         &contactBoundary[0].triIdx[0]));
-#else
     cPar->domainSurfaceTriangleNumbers = contactBoundary[0].triIdx;
-#endif
 
     std::vector<int> vertexOffsets = contactBoundary[0].getVertexOffsets();
     for (i=0; i<contactBoundary[0].triIdx.size(); i++) {
