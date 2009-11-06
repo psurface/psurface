@@ -1031,8 +1031,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
             
     }
 
-    printf("No intersection found!\n");
-    assert(false);
+    printf("No intersection found (in testInsertEdgeFromInteriorNode)!\n");
+    return false;
 }
 
 
@@ -1139,8 +1139,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
             
     }
 
-    printf("No intersection found!\n");
-    assert(false);
+    printf("No intersection found (in testInsertEdgeFromIntersectionNode)!\n");
+    return false;
 }
 
 
