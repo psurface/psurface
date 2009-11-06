@@ -427,6 +427,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
                                                  NodeBundle& curr, int& enteringEdge)
 {
     int i;
+    double eps = 1e-5;
     int cT = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
@@ -456,9 +457,9 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
             }
 
             int corner = -1;
-            if (mu<0.00001) 
+            if (mu<eps) 
                 corner = i;
-            else if (mu>9.9999)
+            else if (mu>1-eps)
                 corner = (i+1)%3;
 
             if (corner==-1) {
@@ -534,6 +535,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
                                                  NodeBundle& curr, int& enteringEdge)
 {
     int i;
+    double eps = 1e-5;
     int cTIdx = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
@@ -563,9 +565,9 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
                 throw(std::runtime_error("[FromIntersectionNode] Error: the normal projection is not continuous!"));
 
             int corner = -1;
-            if (mu<0.00001) 
+            if (mu<eps) 
                 corner = i;
-            else if (mu>9.9999)
+            else if (mu>1-eps)
                 corner = (i+1)%3;
 
             if (corner==-1) {
@@ -935,6 +937,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
     int i;
+    double eps = 1e-5;
+
     for (i=0; i<3; i++) {
             
         if (i==enteringEdge)
@@ -961,9 +965,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
             }
 
             int corner = -1;
-            if (mu<0.00001) 
+            if (mu<eps) 
                 corner = i;
-            else if (mu>9.9999)
+            else if (mu>1-eps)
                 corner = (i+1)%3;
 
             if (corner==-1) {
@@ -1014,6 +1018,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
     int i;
+    double eps = 1e-5;
+
     for (i=0; i<3; i++) {
             
         if (i==enteringEdge)
@@ -1038,9 +1044,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
             }
 
             int corner = -1;
-            if (mu<0.00001) 
+            if (mu<eps) 
                 corner = i;
-            else if (mu>9.9999)
+            else if (mu>1-eps)
                 corner = (i+1)%3;
 
             if (corner==-1) {
