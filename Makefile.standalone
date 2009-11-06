@@ -8,7 +8,7 @@
 
 CXX = g++
 CFLAGS = -O
-CXXFLAGS = $(CFLAGS) -DNDEBUG
+CXXFLAGS = $(CFLAGS)
 LDFLAGS = -O
 AR = ar
 
