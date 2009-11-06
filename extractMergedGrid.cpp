@@ -2,7 +2,6 @@
 #include <psurface/ContactToolBox.h>
 #include <vector>
 
-//#define MY_DB
 
 void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
                                        std::vector<IntersectionPrimitive<2,float> >& mergedGrid)
@@ -60,15 +59,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
     cPar->surface->computeTrianglesPerPoint();
 
     // get the array that relates the base grid triangles with the whole nonmortar surface
-#if 0
-    HxParameter* nonMortarTargetTriParam = cPar->params->find("targetTris");
-    assert(nonMortarTargetTriParam);
-    assert(nonMortarTargetTriParam->dim() == cPar->getNumTriangles());
-    std::vector<int> nonMortarTargetTris(nonMortarTargetTriParam->dim());
-    nonMortarTargetTriParam->getNum(&nonMortarTargetTris[0]);
-#else
     std::vector<int> nonMortarTargetTris = cPar->domainSurfaceTriangleNumbers;
-#endif
 
     //
     for (int i=0; i<cPar->getNumTriangles(); i++) {
