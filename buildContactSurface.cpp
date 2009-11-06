@@ -44,57 +44,6 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
            contactBoundary[1].vertices.size());
 
 
-    // //////////////////
-    // BEGIN DEBUG
-    // //////////////////
-#if 0
-    char nodesName[50];
-    // display nodes
-    sprintf(nodesName, "Poly.0.nodes");
-    HxCluster* theNodes = new HxCluster();
-    theNodes->setLabel(nodesName);
-
-    theNodes->points.resize(contactBoundary[0].vertices.size());
-    theNodes->ids.resize(contactBoundary[0].vertices.size());
-
-    theNodes->dataColumns.resize(0);
-
-    for (i=0; i<contactBoundary[0].vertices.size(); i++) {
-        theNodes->points[i] = StaticVector<float,3>(contactBoundary[0].surf->points[contactBoundary[0].vertices[i]].x,
-                                      contactBoundary[0].surf->points[contactBoundary[0].vertices[i]].y,
-                                      contactBoundary[0].surf->points[contactBoundary[0].vertices[i]].z);
-
-        theNodes->ids[i] = 0;
-    }
-
-    theNodes->writePSI(nodesName);
-    theObjectPool->addObject(theNodes);
-
-    // display nodes
-    sprintf(nodesName, "Poly.1.nodes");
-    theNodes = new HxCluster();
-    theNodes->setLabel(nodesName);
-
-    theNodes->points.resize(contactBoundary[1].vertices.size());
-    theNodes->ids.resize(contactBoundary[1].vertices.size());
-
-    theNodes->dataColumns.resize(0);
-
-    for (i=0; i<contactBoundary[1].vertices.size(); i++) {
-        theNodes->points[i] = StaticVector<float,3>(contactBoundary[1].surf->points[contactBoundary[1].vertices[i]].x,
-                                      contactBoundary[1].surf->points[contactBoundary[1].vertices[i]].y,
-                                      contactBoundary[1].surf->points[contactBoundary[1].vertices[i]].z);
-
-        theNodes->ids[i] = 0;
-    }
-
-    theNodes->writePSI(nodesName);
-    theObjectPool->addObject(theNodes);
-#endif
-    // ///////////////////////////////////
-    // END DEBUG
-    // //////////////////////////////////
-
     // create the two contact patches
     
     computeContactPatch(surf1, contactBoundary[0]);
