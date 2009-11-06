@@ -70,26 +70,24 @@ protected:
 
     bool testInsertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
-                                        const std::vector<NodeBundle>& projectedTo,
+                                        NodeBundle& curr,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
     bool testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals, 
                                             int from, int to, double& lambda,
-                                            const std::vector<NodeBundle>& projectedTo,
+                                            NodeBundle& curr,
                                             typename Node<ctype>::NodeType& currType, int& currTri,
                                             int& enteringEdge);
 
     bool testInsertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals, 
                                         int from, int to, double& lambda,
-                                        const std::vector<NodeBundle>& projectedTo,
                                         NodeBundle& curr,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
     bool testInsertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
                                       int from, int to, double& lambda,
-                                      const std::vector<NodeBundle>& projectedTo,
                                       NodeBundle& curr, 
                                       typename Node<ctype>::NodeType& currType, int& currTri,
                                       int& enteringEdge);

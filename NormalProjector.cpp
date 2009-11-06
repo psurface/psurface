@@ -888,7 +888,7 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<do
 
             if (!testInsertEdgeFromTouchingNode(normals, 
                                                 from, to, 
-                                                lambda, projectedTo, 
+                                                lambda,
                                                 curr, currType, currTri, enteringEdge))
                 return false;
 
@@ -899,18 +899,18 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<do
 
             if (!testInsertEdgeFromCornerNode(normals, 
                                               from, to, 
-                                              lambda, projectedTo, 
+                                              lambda,
                                               curr, currType, currTri, enteringEdge))
                 return false;
             break;
 
         case Node<ctype>::INTERSECTION_NODE:
-            if (!testInsertEdgeFromIntersectionNode(normals, from, to, lambda, projectedTo, currType, currTri, enteringEdge))
+            if (!testInsertEdgeFromIntersectionNode(normals, from, to, lambda, curr, currType, currTri, enteringEdge))
                 return false;
             break;
             
         case Node<ctype>::INTERIOR_NODE:
-            if (!testInsertEdgeFromInteriorNode(normals, from, to, lambda, projectedTo, currType, currTri, enteringEdge))
+            if (!testInsertEdgeFromInteriorNode(normals, from, to, lambda, curr, currType, currTri, enteringEdge))
                 return false;
             break;
             
@@ -930,16 +930,15 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<do
 template <class ctype>
 bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
-                                                     const std::vector<NodeBundle>& projectedTo,
+                                                     NodeBundle& curr,
                                                             typename Node<ctype>::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
-    int i;
     double eps = 1e-5;
 
-    for (i=0; i<3; i++) {
+    for (int i=0; i<3; i++) {
             
         if (i==enteringEdge)
             continue;
@@ -990,20 +989,50 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
                 currTri  = neighboringTri;
                 lambda   = newLambda;
                 enteringEdge = e;
+
+                return true;
                 
             } else {
-                assert(false);
+             
+                // parameter polyedge is leaving base grid triangle through a ghost node
+                
+                // get all ghost nodes for the base grid vertex
+                int vertex = psurface_->triangles(currTri).vertices[corner];
+                std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
+                
+                curr.resize(0);
+                for (int k=0; k<neighbors.size(); k++) {
+                    
+                    int cornerOnNeighbor = psurface_->triangles(neighbors[k]).getCorner(vertex);
+                    
+                    /** \todo Linear search: pretty slow */
+                    for (int l=0; l<psurface_->triangles(neighbors[k]).nodes.size(); l++) {
+                        
+                        if (psurface_->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
+                            && psurface_->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
+                            
+                            curr.push_back(GlobalNodeIdx(neighbors[k], l));
+                            break;
+                            
+                        }
+                        
+                    }
+                    
+                }
+                
+                currType = Node<ctype>::GHOST_NODE;
+                lambda = newLambda;
+
+                return true;
+   
             }
-            break;
+
         }
             
     }
-    if (i==3) {
-        printf("No intersection found!\n");
-        return false;
-    }
-        
-    return true;
+
+    printf("No intersection found!\n");
+    assert(false);
 }
 
 
@@ -1011,16 +1040,15 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
 template <class ctype>
 bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals,
                                                          int from, int to, double &lambda,
-                                                         const std::vector<NodeBundle>& projectedTo,
+                                                                NodeBundle& curr,
                                                          typename Node<ctype>::NodeType& currType, int& currTri,
                                                          int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
-    int i;
     double eps = 1e-5;
 
-    for (i=0; i<3; i++) {
+    for (int i=0; i<3; i++) {
             
         if (i==enteringEdge)
             continue;
@@ -1070,18 +1098,49 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                 lambda   = newLambda;
                 enteringEdge = e;
                 
+                return true;
+
             } else {
-                assert(false);
+
+                // parameter polyedge is leaving base grid triangle through a ghost node
+                
+                // get all ghost nodes for the base grid vertex
+                int vertex = psurface_->triangles(currTri).vertices[corner];
+                std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
+                
+                curr.resize(0);
+                for (int k=0; k<neighbors.size(); k++) {
+                    
+                    int cornerOnNeighbor = psurface_->triangles(neighbors[k]).getCorner(vertex);
+                    
+                    /** \todo Linear search: pretty slow */
+                    for (int l=0; l<psurface_->triangles(neighbors[k]).nodes.size(); l++) {
+                        
+                        if (psurface_->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
+                            && psurface_->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
+                            
+                            curr.push_back(GlobalNodeIdx(neighbors[k], l));
+                            break;
+                            
+                        }
+                        
+                    }
+                    
+                }
+                
+                currType = Node<ctype>::GHOST_NODE;
+                lambda = newLambda;
+                
+                return true;
+
             }
-            break;
+
         }
             
     }
-    if (i==3) {
-        printf("No intersection found!\n");
-        return false;
-    }
-    return true;
+
+    printf("No intersection found!\n");
+    assert(false);
 }
 
 
@@ -1089,7 +1148,6 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
 template <class ctype>
 bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals,
                                                      int from, int to, double &lambda,
-                                                     const std::vector<NodeBundle>& projectedTo,
                                                      NodeBundle& curr,
                                                      typename Node<ctype>::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
@@ -1179,9 +1237,6 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                     }
 
                     currType = Node<ctype>::GHOST_NODE;
-                    //currTri = ???;
-                    //enteringEdge = -1;
-
                     lambda = newLambda;
 
                     return true;
@@ -1204,7 +1259,6 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
 template <class ctype>
 bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
                                                    int from, int to, double &lambda,
-                                                   const std::vector<NodeBundle>& projectedTo,
                                                    NodeBundle& curr, 
                                                    typename Node<ctype>::NodeType& currType, int& currTri,
                                                    int& leavingEdge)
@@ -1293,9 +1347,6 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 }
                 
                 currType = Node<ctype>::GHOST_NODE;
-                //currTri = ???;
-                //enteringEdge = -1;
-                
                 lambda = newLambda;
                 
                 return true;
