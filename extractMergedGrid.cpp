@@ -78,11 +78,6 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
         if (cT.nodes.size()<3)
             continue;
 
-#ifdef PSURFACE_EXTRACT_ONLY_COMPLETELY_COVERED_FACES
-        if (!isCompletelyCovered(cPar, i, &cT))
-            continue;
-#endif
-
         ////////////////////////////////
         PlaneParam<float>::TriangleIterator cPT;
         for (cPT = cT.firstTriangle(); cPT.isValid(); ++cPT) {
@@ -130,38 +125,3 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
         
     }
 }
-
-#ifdef PSURFACE_EXTRACT_ONLY_COMPLETELY_COVERED_FACES
-template <class ctype>
-bool ContactToolBox::isCompletelyCovered(PSurface<2,ctype>* cPar, int tri, const DomainTriangle<ctype>* cT)
-{
-    // Count number of CORNER/GHOST-nodes
-    int nCorners = 0;
-    for (int i=0; i<cT->nodes.size(); i++)
-        if (cT->nodes[i].isCORNER_NODE() ||
-            cT->nodes[i].isGHOST_NODE())
-            nCorners++;
-
-    // Count number of parametrization triangles
-    typename PlaneParam<ctype>::TriangleIterator cPT;
-    int nTris = 0;
-
-    for (cPT = cT->firstTriangle(); cPT.isValid(); ++cPT) {
-        int targetTri = cPar->getImageSurfaceTriangle(tri, cPT.vertices());
-
-        if (targetTri!=-1)
-            nTris++;
-    }
-
-    // compare with expected number of triangles (by Euler's formula)
-    return nCorners==3 && (nTris == 1 - cT->nodes.size() + cT->getNumEdges());
-}
-
-// ////////////////////////////////////////////////////////
-//   Explicit template instantiations.
-//   If you need more, you can add them here.
-// ////////////////////////////////////////////////////////
-
-template bool ContactToolBox::isCompletelyCovered<float>(PSurface<2,float>* cPar, int tri, const DomainTriangle<float>* cT);
-template bool ContactToolBox::isCompletelyCovered<double>(PSurface<2,double>* cPar, int tri, const DomainTriangle<double>* cT);
-#endif

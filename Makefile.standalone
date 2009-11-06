@@ -14,12 +14,6 @@ AR = ar
 
 CXXFLAGS += -DPSURFACE_STANDALONE
 
-# If this is set the MergedGrid contains only domain triangles that are
-# entirely covered.  This may be needed for dual basis mortar methods.
-# You would really want the selection in the mortar assembler though.
-# Therefore this flag is here only for backward-compatibility.
-#CXXFLAGS += -DPSURFACE_EXTRACT_ONLY_COMPLETELY_COVERED_FACES
-
 # Uncomment the following two lines if you have libamiramesh installed
 # You can then read and write parametrized surfaces from/to disk.
 # AMIRAMESH_DIR = /home/haile/sander/libamiramesh
