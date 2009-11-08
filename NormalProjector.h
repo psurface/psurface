@@ -113,6 +113,9 @@ protected:
 
     NodeIdx getCornerNode(const DomainTriangle<ctype>& cT, int corner);
 
+    /** \brief Get the type of the nodes in a bundle (it must be the same for all) */
+    typename Node<ctype>::NodeType type(const NodeBundle& b) const;
+
     /** basically by solving the nonlinear system of equations 
      * \f$ F(x) := x_0 (p_0 - p_1) + x_1 (p_1 - p_2) + x_2 x_0(n_0 - n_2) + x_2 x_1 (n_1 - n_2)
      * + x_2 n_2 + p_2 - p = 0\f$ using standard Newton iteration.

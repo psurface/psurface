@@ -1021,6 +1021,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
                 }
                 
                 currType = Node<ctype>::GHOST_NODE;
+                assert(currType==type(curr));
                 lambda = newLambda;
 
                 return true;
@@ -1129,6 +1130,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                 }
                 
                 currType = Node<ctype>::GHOST_NODE;
+                assert(currType==type(curr));
                 lambda = newLambda;
                 
                 return true;
@@ -1237,6 +1239,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                     }
 
                     currType = Node<ctype>::GHOST_NODE;
+                    assert(currType==type(curr));
                     lambda = newLambda;
 
                     return true;
@@ -1347,6 +1350,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 }
                 
                 currType = Node<ctype>::GHOST_NODE;
+                assert(currType == type(curr));
                 lambda = newLambda;
                 
                 return true;
@@ -1578,6 +1582,15 @@ NodeIdx NormalProjector<ctype>::getCornerNode(const DomainTriangle<ctype>& cT, i
             return i;
 
     return -1;
+}
+
+template <class ctype>
+typename Node<ctype>::NodeType NormalProjector<ctype>::type(const NodeBundle& b) const
+{
+    assert(b.size()>0);
+    for (size_t i=0; i<b.size(); i++)
+        assert(psurface_->nodes(b[i]).type == psurface_->nodes(b[0]).type);
+    return psurface_->nodes(b[0]).type;
 }
 
 
