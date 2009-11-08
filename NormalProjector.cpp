@@ -517,12 +517,10 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
             
     }
     if (i==3) {
-#ifndef NDEBUG
-        printf("No intersection found!\n");
-#endif
+        printf("No intersection found (in insertEdgeFromInteriorNode)!\n");
         curr = projectedTo[to];
-        return;
         assert(false);
+        return;
     }
         
 }
@@ -623,13 +621,11 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
             
     }
     if (i==3) {
-#ifndef NDEBUG
-        printf("No intersection found!\n");
-#endif
+        printf("No intersection found (in insertEdgeFromIntersectionNode)!\n");
         psurface_->triangles(curr[0].tri).nodes.erase(psurface_->triangles(curr[0].tri).nodes.begin() + curr[0].idx);
         curr = projectedTo[to];
-        return;
         assert(false);
+        return;
     }
         
 }
@@ -744,10 +740,10 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
         
     }
 
-#ifndef NDEBUG
-    printf("No Intersection found!\n");
-#endif
+    printf("No Intersection found (in insertEdgeFromTouchingNode)!\n");
     curr = projectedTo[to];
+    assert(false);
+    return;
 }
 
 
@@ -762,10 +758,6 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
     for (int i=0; i<curr.size(); i++) {
         
         int cT = curr[i].tri;
-
-        // it is called enteringEdge, but the incoming value is the entering*Tri*!
-        if (cT == enteringEdge)
-            continue;
 
         int thisCorner = psurface_->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
@@ -848,10 +840,9 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
         
     }
 
-#ifndef NDEBUG
-    printf("no intersection found!\n");
-#endif
+    printf("no intersection found (in insertEdgeFromCornerNode)!\n");
     curr = projectedTo[to];
+    assert(false);
 }
 
 
@@ -880,7 +871,9 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<do
     while (true) {
 
         // If the two nodes are on the same triangle it is surely possible to enter the edge
-        if (onSameTriangle(currTri, projectedTo[to]))
+        if (onSameTriangle(currTri, projectedTo[to])
+            || ((currType==Node<ctype>::GHOST_NODE || currType==Node<ctype>::CORNER_NODE)
+                && onSameTriangle(curr, projectedTo[to])))
             return true;
 
         switch (currType) {
@@ -1252,7 +1245,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
 
     }
     
-    printf("No intersection found!\n");
+    printf("No intersection found (in testInsertEdgeFromTouchingNode)!\n");
+    assert(false);
     return false;
 
 }
@@ -1270,7 +1264,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
-        
+
         int cT = curr[i].tri;
 
         int thisCorner = psurface_->triangles(cT).nodes[curr[i].idx].getCorner();
@@ -1361,8 +1355,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
         
     }
 
-    printf("no intersection found!\n");
-    return false;
+    printf("no intersection found (in testInsertEdgeFromCornerNode)!\n");
+    assert(false);
 }
 
 
