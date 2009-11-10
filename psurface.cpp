@@ -3,6 +3,7 @@
 
 #include <psurface/PSurface.h>
 #include <psurface/psurface.h>
+#include <psurface/AmiraMeshIO.h>
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
@@ -27,7 +28,7 @@ int psurface::LoadMesh(const char* label, const char* filename)
         return ERROR;
     }
 
-    PSurface<2,float>* newDomain = (PSurface<2,float>*)PSurface<2,float>::readAmiraMesh(am, filename);
+    PSurface<2,float>* newDomain = (PSurface<2,float>*)AmiraMeshIO<float>::readAmiraMesh(am, filename);
 
     // The following delete should be here but it sometimes crashes...
     //delete(am);

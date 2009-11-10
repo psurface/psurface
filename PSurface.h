@@ -115,19 +115,6 @@ public:
     void garbageCollection();
 
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    /// Writes the parametrization in AmiraMesh format
-    static int writeAmiraMesh(PSurface<dim,ctype>* par, const char* filename);
-
-    /** \brief Reads the parametrization from an AmiraMesh object
-        \todo The return value should be PSurface<dim,ctype>*
-    */
-    static void* readAmiraMesh(AmiraMesh* am, const char* filename);
-
-    /// AmiraMesh Reader using an existing AmiraMesh object (is used by derived classes)
-    bool initFromAmiraMesh(AmiraMesh* am, const char* filename, Surface* surf);
-#endif
-
     /** \brief Creates an explicit Surface object from the information implicitly
      * given by the parametrization.
      */
