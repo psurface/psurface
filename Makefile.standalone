@@ -36,7 +36,8 @@ all: ../lib/libpsurface.a
 
 ../lib/libpsurface.a: $(OBJS)
 	${AR} cr ../lib/libpsurface.a $(OBJS)
-
+        ranlib ../lib/libpsurface.a
+        
 dynamic: $(OBJS)
 	$(CXX) $(LDFLAGS) -shared -Wl --export-dynamic $(OBJS) -o ../lib/libpsurface.so
 
