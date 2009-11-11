@@ -36,7 +36,7 @@ cp PointIntersectionFunctor.h   $BASENAME/include/psurface
 cp StaticVector.h               $BASENAME/include/psurface
 cp StaticMatrix.h               $BASENAME/include/psurface
 cp SparseMatrix.h               $BASENAME/include/psurface
-
+cp AmiraMeshIO.h                $BASENAME/include/psurface
 
 cp psurface.cpp                 $BASENAME/src
 cp CircularPatch.cpp            $BASENAME/src
@@ -47,6 +47,7 @@ cp PSurface.cpp                 $BASENAME/src
 cp PlaneParam.cpp               $BASENAME/src
 cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
 cp debugCode.cpp                $BASENAME/src
+cp AmiraMeshIO.cpp              $BASENAME/src
 
 cp contact.h                    $BASENAME/include/psurface
 cp ContactToolBox.h             $BASENAME/include/psurface
