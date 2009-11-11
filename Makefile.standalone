@@ -44,8 +44,5 @@ dynamic: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $(@F)
 
 clean:
-	rm -rf *.a *.o ii_files
-
-distclean: clean
-	rm -rf ../lib/libpsurface.a
+	rm -rf ../lib/libpsurface.a *.o ii_files
 
