@@ -7,7 +7,6 @@ rm -rf $BASENAME
 mkdir $BASENAME
 mkdir $BASENAME/include
 mkdir $BASENAME/include/psurface
-mkdir $BASENAME/include/contact
 mkdir $BASENAME/src
 mkdir $BASENAME/lib
 
