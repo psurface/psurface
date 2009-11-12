@@ -28,7 +28,7 @@ INCLUDES = -I../include -I$(AMIRAMESH_DIR)/include -I$(AMIRAMESH_DIR)/include/am
 .SUFFIXES: .cpp .c .d
 
 OBJS = psurface.o CircularPatch.o DomainPolygon.o Domains.o Iterators.o \
-       PSurface.o PlaneParam.o TargetSurface.o debugCode.o AmiraMeshIO.o \
+       PSurface.o PlaneParam.o TargetSurface.o AmiraMeshIO.o \
        contact.o NormalProjector.o buildContactSurface.o extractMergedGrid.o \
        ContactMapping.o
 

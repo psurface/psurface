@@ -170,6 +170,161 @@ void DomainTriangle<ctype>::createPointLocationStructure()
 
 }
 
+template <class ctype>
+void DomainTriangle<ctype>::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const
+{
+#ifndef NDEBUG
+    int i, j;
+
+    printf("--------------------------------------------------------\n");
+    printf("--  Print Triangle  ------------------------------------\n");
+
+    printf("vertices:  (%d %d %d)\n", vertices[0], vertices[1], vertices[2]);
+    printf("edges:     (%d %d %d)\n", edges[0], edges[1], edges[2]);
+
+
+    if (showEdgePoints){
+        
+        for (i=0; i<3; i++){
+            printf("edgePoints %d:\n", i);
+            for (j=0; j<edgePoints[i].size(); j++){
+                printf("%d:   -- ", edgePoints[i][j]);
+                this->nodes[edgePoints[i][j]].print();
+            }
+        }
+        
+        printf("\n");
+    }
+
+    if (showNodes){
+        for (int cN=0; cN<this->nodes.size(); cN++){
+            printf("%d  ", cN);
+            this->nodes[cN].print(showParamEdges);
+//             if (showParamEdges) 
+//                 for (i=0; i<nodes[cN].degree(); i++)
+//                     printf("    %d\n", (int)nodes[cN].neighbors(i));
+        }
+    }
+
+    printf("---------------------------------------------------------\n\n");
+#endif
+}
+
+
+template <class ctype>
+void DomainTriangle<ctype>::checkConsistency(const char* where) const
+{
+#ifndef NDEBUG
+    if (this->nodes.size()<3){
+        printf(where);
+        //print(true, true, true);
+        assert(this->nodes.size()>=3);
+    }
+
+    int i,j;
+
+    // triangles should never contain obsolete nodes
+    for (i=0; i<this->nodes.size(); i++)
+        if (this->nodes[i].isInvalid()) {
+            printf(where);
+            printf("***** triangle contains invalid node *****\n");
+            assert(false);
+        }
+        
+    PlaneParam<ctype>::checkConsistency(where);
+
+    // check whether all corner nodes are of type CORNER_NODE
+    for (i=0; i<3; i++){
+
+        assert(edgePoints[i].size()>=2);
+
+        for (j=0; j<edgePoints[i].size(); j++)
+            if (edgePoints[i][j]<0 || edgePoints[i][j]>=this->nodes.size()) {
+                printf(where);
+                printf("\n***** illegal node index %d in edgePoints array *****\n", edgePoints[i][j]);
+                print();
+                assert(false);
+            }
+        
+        if (!this->nodes[edgePoints[i][0]].isCORNER_NODE()){
+            printf(where);
+            printf("***** corner node is not CORNER_NODE *****\n");
+            assert(false);
+        }
+
+        for (j=1; j<edgePoints[i].size()-1; j++){
+            if (this->nodes[edgePoints[i][j]].isCORNER_NODE()){
+                printf(where);
+                printf("******* corner node found in edgePoint array *** %d *****\n", j);
+                assert(false);
+            }
+            if (this->nodes[edgePoints[i][j]].isINTERIOR_NODE()){
+                printf(where);
+                printf("******* interior node found in edgePoint array ********\n");
+                printf("***     The node has the node number %ld      ***\n", this->nodes[edgePoints[i][j]].getNodeNumber());
+                assert(false);
+            }
+        }
+        // check if two subsequent TOUCHING_NODES are connected by an edge
+        for (j=0; j<edgePoints[i].size()-1; j++){
+            const Node<ctype>& nA = this->nodes[edgePoints[i][j]];
+            const Node<ctype>& nB = this->nodes[edgePoints[i][j+1]];
+
+            if (!nA.isInvalid() && !nB.isInvalid() &&
+                nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
+                !nA.isConnectedTo(edgePoints[i][j+1])){
+                
+                printf(where);
+                printf("***** two adjacent TOUCHING NODES are not connected! *****\n");
+                assert(false);
+            }
+        }
+
+        // check whether nodes that are not neighbors in the edgePoint array are connected
+        for (j=0; j<edgePoints[i].size()-2; j++) {
+            const Node<ctype>& nA = this->nodes[edgePoints[i][j]];
+            const Node<ctype>& nB = this->nodes[edgePoints[i][j+2]];
+
+            if (!nA.isInvalid() && !nB.isInvalid() &&
+                (nA.isConnectedTo(edgePoints[i][j+2]) || nB.isConnectedTo(edgePoints[i][j]))) {
+
+                printf(where);
+                printf("Edge %d,  index %d\n", i, j);
+                nA.print();
+                nB.print();
+                printf("****** two nonadjacent nodes are connected!! *******\n");
+                assert(false);
+            }
+        }
+    }
+
+    // check whether all intersection nodes are pointed to from an edgePoint array    
+
+    for (int k=0; k<this->nodes.size(); k++) {
+
+        const Node<ctype>& cN = this->nodes[k];
+
+        if (cN.isINTERSECTION_NODE()){
+
+            bool isIn = false;
+            
+            for (i=0; i<3; i++)
+                for (j=0; j<edgePoints[i].size(); j++)
+                    if (edgePoints[i][j]==k)
+                        isIn = true;
+            
+            if (!isIn){
+                printf(where);
+                printf("***** INTERSECTION NODE not in edgePoints array *****\n");
+                cN.print();
+                assert(false);
+            }
+        }
+    }
+
+#endif
+}    
+
 // ///////////////////////////////////////////////////////
 //   explicit template instantiations
 // ///////////////////////////////////////////////////////

@@ -25,6 +25,7 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <iostream>
 #include <psurface/StaticVector.h>
 #include <vector>
 
@@ -386,7 +387,44 @@ public:
     bool isOnCorner() const {return isCORNER_NODE() || isGHOST_NODE();}
 
     ///
-    void print(bool showNeighbors=true) const;
+    void print(bool showNeighbors=true) const {
+
+#ifndef NDEBUG
+        printf("dom (%f %f) ", domainPos()[0], domainPos()[1]);
+        
+        switch(type){
+        case INTERIOR_NODE:
+            printf("INTERIOR_NODE");
+            break;
+        case TOUCHING_NODE:
+            printf("TOUCHING_NODE");
+            break;
+        case INTERSECTION_NODE:
+            printf("INTERSECTION_NODE");
+            break;
+        case CORNER_NODE:
+            printf("CORNER_NODE");
+            break;
+        case GHOST_NODE:
+            printf("GHOST_NODE");
+            break;
+        }
+        
+        printf(" number %d", nodeNumber);
+        
+        if (isOnEdge())
+            std::cout << "  edge: " << getDomainEdge() << "  edgePos " << getDomainEdgePosition() << std::endl;
+        else if (isOnCorner())
+            printf("  corner: %d\n", getCorner());
+        else
+        printf("\n");
+        
+        if (showNeighbors)
+            for (int i=0; i<degree(); i++)
+                printf("   %d %s\n", (int)nbs[i], nbs[i].isRegular() ? " " : "c");
+        
+#endif
+    }
 
     /// query domain position
     StaticVector<ctype,2> domainPos() const {

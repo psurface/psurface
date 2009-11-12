@@ -1112,6 +1112,62 @@ NodeBundle PSurface<dim,ctype>::getNodeBundleAtVertex(int v) const
 }
 
 
+template <int dim, class ctype>
+void PSurface<dim,ctype>::checkConsistency(const char* where) const
+{
+#ifndef NDEBUG
+    int i, j;
+    // first checks whether all triangles are consistent
+    // sorts out invalid triangles
+    std::vector<bool> isInvalid(this->triangleArray.size());
+    std::fill(isInvalid.begin(), isInvalid.end(), false);
+
+    for (i=0; i<this->freeTriangleStack.size(); i++)
+        isInvalid[this->freeTriangleStack[i]] = true;
+
+    for (i=0; i<this->getNumTriangles(); i++)
+        if (!isInvalid[i]){
+            //printf("i = %d\n", i);
+            this->triangles(i).checkConsistency("where");
+
+            for (j=0; j<3; j++) {
+                const McEdge& cE = this->edges(this->triangles(i).edges[j]);
+                if (!(cE.from == this->triangles(i).vertices[j] && cE.to   == this->triangles(i).vertices[(j+1)%3]) &&
+                    !(cE.to   == this->triangles(i).vertices[j] && cE.from == this->triangles(i).vertices[(j+1)%3])){
+                    printf(where);
+                    printf("inconsistent triangle edges\n");
+                    assert(false);
+                }
+            }
+        }
+
+    // checks whether matching edgepoint arrays have the same size
+    for (i=0; i<this->getNumEdges(); i++) {
+        const McEdge& cE = this->edges(i);
+
+        if (cE.triangles.size()!=2)
+            continue;
+
+        const DomainTriangle<ctype>& tri1 = this->triangles(cE.triangles[0]);
+        const DomainTriangle<ctype>& tri2 = this->triangles(cE.triangles[1]);
+
+        if (tri1.edgePoints[tri1.getEdge(i)].size() != tri2.edgePoints[tri2.getEdge(i)].size()) {
+            printf(where);
+            printf("Nonmatching edgePoint arrays at edge %d  (%d vs. %d)!\n", i,
+                   tri1.edgePoints[tri1.getEdge(i)].size(),
+                   tri2.edgePoints[tri2.getEdge(i)].size());
+            tri1.print(true);
+            tri2.print(true);
+            assert(false);
+        }
+    }
+
+
+#endif
+}
+
+
+
 // ////////////////////////////////////////////////////////
 //   Explicit template instantiations.
 //   If you need more, you can add them here.

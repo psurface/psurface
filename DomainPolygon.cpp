@@ -1393,3 +1393,104 @@ void DomainPolygon::insertExtraEdges()
     }
 }
 
+
+void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const 
+{
+#ifndef NDEBUG
+    printf("--------------------------------------------------------\n");
+    printf("--  Print Polygon  -------------------------------------\n");
+
+//     printf("points:  ");
+//     for (i=0; i<boundaryPoints.size(); i++)
+//      printf("%d  ", (int)boundaryPoints[i]);
+
+    printf("\n");
+
+
+    if (showEdgePoints){
+        
+        for (size_t i=0; i<edgePoints.size(); i++){
+            printf("edgePoints %d:\n", i);
+            for (size_t j=0; j<edgePoints[i].size(); j++){
+                printf("  %d) -- ", edgePoints[i][j]);
+                nodes[edgePoints[i][j]].print();
+            }
+        }
+        
+        printf("\n");
+    }
+
+    if (showNodes){
+        for (int cN=0; cN<nodes.size(); cN++){
+            printf("%d  ", cN);
+            nodes[cN].print(showParamEdges);
+        }
+    }
+
+    printf("---------------------------------------------------------\n\n");
+#endif
+}
+
+
+
+
+void DomainPolygon::checkConsistency(const char* where)
+{
+#ifndef NDEBUG
+    
+    int i, j;
+    PlaneParam<float>::checkConsistency(where);
+
+    // check whether all corner nodes are of type CORNER_NODE
+    for (i=0; i<edgePoints.size(); i++){
+//      if (edgePoints[i][0]->type != Node::CORNER_NODE || 
+//          edgePoints[i].last()->type != Node::CORNER_NODE){
+//          printf(where);
+//          printf("***** corner node is not CORNER_NODE *****\n");
+//          display(counter++);
+//          assert(FALSE);
+//      }
+        // check if two subsequent TOUCHING_NODES are connected by an edge
+        for (j=0; j<edgePoints[i].size()-1; j++){
+
+            //assert(edgePoints[i][j]>=0 && edgePoints[i][j+1]>=0);
+            if (edgePoints[i][j]<0 || edgePoints[i][j+1]<0) {
+//              printf(where);
+//              printf("***** negative edgePoints ********\n");
+//              assert(false);
+                continue;
+            }
+
+            Node<float>& nA = nodes[edgePoints[i][j]];
+            Node<float>& nB = nodes[edgePoints[i][j+1]];
+
+            if (!nA.isInvalid() && !nB.isInvalid() && 
+                nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
+                !nA.isConnectedTo(edgePoints[i][j+1])){
+                printf(where);
+                printf("***** two adjacent TOUCHING NODES are not connected! *****\n");
+                assert(false);
+            }
+        }
+
+        // check whether nodes that are not neighbors in the edgePoint array are connected
+        for (j=0; j<edgePoints[i].size()-2; j++) {
+            if (edgePoints[i][j]<0 || edgePoints[i][j+2]<0)
+                continue;
+
+            const Node<float>& nA = nodes[edgePoints[i][j]];
+            const Node<float>& nB = nodes[edgePoints[i][j+2]];
+            
+            if (!nA.isInvalid() && !nB.isInvalid() &&
+                (nA.isConnectedTo(edgePoints[i][j+2]) || nB.isConnectedTo(edgePoints[i][j]))) {
+
+                printf(where);
+                printf("%d  and  %d\n", edgePoints[i][j], edgePoints[i][j+2]);
+                printf("****** two nonadjacent nodes are connected!! *******\n");
+                assert(false);
+            }
+            
+        }
+    }
+#endif
+}

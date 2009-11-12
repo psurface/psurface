@@ -659,6 +659,90 @@ void PlaneParam<ctype>::installBarycentricCoordinates(const StaticVector<ctype,2
     }
 }
 
+template <class ctype>
+void PlaneParam<ctype>::print(bool showNodes, bool showParamEdges, bool showExtraEdges) const 
+{
+#ifndef NDEBUG
+    std::cout << "---------------------------------------------------------" << std::endl;
+    std::cout << "parametrization contains " << nodes.size() << " nodes" << std::endl;
+    
+    if (showNodes){
+        for (size_t i=0; i<nodes.size(); i++)
+            nodes[i].print();
+    }
+
+    std::cout << "---------------------------------------------------------" << std::endl;
+#endif
+}   
+
+
+template <class ctype>
+void PlaneParam<ctype>::checkConsistency(const char* where) const
+{
+#ifndef NDEBUG
+    for (size_t i=0; i<nodes.size(); i++) {
+
+        const Node<ctype>& cN = nodes[i];
+        if (cN.isInvalid())
+            continue;
+
+        if (std::isnan(cN.domainPos()[0]) || std::isnan(cN.domainPos()[1])) {
+            printf(where);
+            printf("\n****** A node mit NaN domainPos found! ******\n");
+            cN.print();
+            assert(false);
+        }
+
+        // make sure references are mutual
+        for (size_t j=0; j<cN.degree(); j++)
+            if (!nodes[cN.neighbors(j)].isConnectedTo(i)) {
+                printf(where);
+                printf("\n***** Neighbor relation is not mutual j=%d   k=%d *****\n", j, i);
+                cN.print();
+                nodes[cN.neighbors(j)].print();
+                assert(false);
+            }
+        
+        // make sure that no neighbor is invalid
+        for (size_t j=0; j<cN.degree(); j++)
+            if (nodes[cN.neighbors(j)].isInvalid()) {
+                printf(where);
+                printf("***** Node has an invalid neighbor *****\n");
+                assert(false);
+            }
+
+        // check for double edges
+        for (size_t l=0; l<cN.degree(); l++)
+            for (size_t j=0; j<i; j++)
+                if (cN.neighbors(l)==cN.neighbors(j)) {
+                    printf(where);
+                    printf("***** PlaneParam contains double edge! *****\n");
+                    for (size_t k=0; k<cN.degree(); k++){
+                        printf("   %d\n  ", (int)cN.neighbors(k));
+                        nodes[cN.neighbors(k)].print();
+                    }
+
+                    cN.print();
+                    assert(false);
+                }
+
+        if (!cN.degree() && !cN.isCORNER_NODE()){
+            printf(where);
+            cN.print();
+            printf("NodeNumber = %d\n", i);
+            printf("****** solitary Node found!\n");
+            assert(false);
+        }
+
+        for (int i=0; i<cN.degree(); i++)
+            assert(cN.neighbors(i)>=0 && cN.neighbors(i)<nodes.size());
+
+    }
+
+#endif
+}
+
+
 // ////////////////////////////////////////////////////////
 //   Explicit template instantiations.
 //   If you need more, you can add them here.

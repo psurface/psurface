@@ -45,7 +45,6 @@ cp Iterators.cpp                $BASENAME/src
 cp PSurface.cpp                 $BASENAME/src
 cp PlaneParam.cpp               $BASENAME/src
 cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
-cp debugCode.cpp                $BASENAME/src
 cp AmiraMeshIO.cpp              $BASENAME/src
 
 cp contact.h                    $BASENAME/include/psurface
