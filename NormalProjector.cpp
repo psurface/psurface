@@ -1148,6 +1148,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                                                      int& enteringEdge)
 {
     const Surface* surf = psurface_->surface;
+    double eps = 1e-5;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
@@ -1177,9 +1178,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                 }
                 
                 int corner = -1;
-                if (x[0]<0.00001) 
+                if (x[0]<eps) 
                     corner = j;
-                else if (x[0]>0.99999)
+                else if (x[0]>1-eps)
                     corner = (j+1)%3;
                 
                 if (corner==-1) {
@@ -1208,7 +1209,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                     // parameter polyedge is leaving base grid triangle through a ghost node
 
                     // get all ghost nodes for the base grid vertex
-                    int vertex = psurface_->triangles(currTri).vertices[corner];
+                    int vertex = psurface_->triangles(curr[i].tri).vertices[corner];
                     std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
 
                     curr.resize(0);
@@ -1261,6 +1262,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                                                    int& leavingEdge)
 {
     const Surface* surf = psurface_->surface;
+    double eps = 1e-5;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
@@ -1287,9 +1289,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
             }
             
             int corner = -1;
-            if (x[0]<0.00001) 
+            if (x[0]<eps) 
                 corner = (thisCorner+1)%3;
-            else if (x[0]>0.99999)
+            else if (x[0]>1-eps)
                 corner = (thisCorner+2)%3;
             
             if (corner==-1) {
