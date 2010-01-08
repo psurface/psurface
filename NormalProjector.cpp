@@ -1357,8 +1357,11 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
         
     }
 
-    printf("no intersection found (in testInsertEdgeFromCornerNode)!\n");
-    assert(false);
+    // If we get to here this means that the intersection of the edge from 'from' to 'to' with
+    // the star around the vertex corresponding to the corner node we are testing consists
+    // only of a single point.  This can happen if the star is not a full circle.  In this
+    // case the edge cannot be inserted and consequently we return 'false'.
+    return false;
 }
 
 
