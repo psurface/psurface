@@ -9,6 +9,33 @@
 #include <amiramesh/AmiraMesh.h>
 #endif
 
+
+/** \brief Tiny array class with controlled length
+
+The AmiraMesh library cannot handle vectors of vectors.  Therefore the list
+of triangle indices is returned as int* rather than array<int,3>*.  For easier
+access I would like to cast to array<int,3>, but that is dangerous.  In various
+gcc implementations of array, its size is more than sizeof(type)*N.
+What I need is a replacement for array with guaranteed size, so the cast works.
+*/
+
+template <class T, int N>
+struct MiniArray
+{
+
+    T& operator[](int index) {
+        return data_[index];
+    }
+
+    const T& operator[](int index) const {
+        return data_[index];
+    }
+
+    T data_[N];
+};
+
+
+
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 template <class ctype>
 int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filename)
@@ -54,10 +81,11 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
     AmiraMesh::Location* triangles = new AmiraMesh::Location("BaseGridTriangles", numTriangles);
     am.insert(triangles);
 
-    std::vector<std::tr1::array<int, 3> > baseGridTriArray(numTriangles);
+    std::vector<MiniArray<int, 3> > baseGridTriArray(numTriangles);
 
     for (int i(0); i<par->getNumTriangles(); i++)
-        baseGridTriArray[i] = par->triangles(i).vertices;
+        for (int j=0; j<3; j++)
+            baseGridTriArray[i][j] = par->triangles(i).vertices[j];
     
 
     AmiraMesh::Data* triangleCoords = new AmiraMesh::Data("BaseGridTriangles", triangles,
@@ -134,7 +162,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
 
     std::vector<StaticVector<ctype,2> > domainPositions(numNodes);
     std::vector<int>     nodeNumbers(numNodes);
-    std::vector<std::tr1::array<int,2> > parameterEdgeArray(numParamEdges);
+    std::vector<MiniArray<int,2> > parameterEdgeArray(numParamEdges);
     std::vector<int>     edgePointsArray(numEdgePoints);
 
     int cN;    
@@ -352,7 +380,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         return false;
     }
     
-    const std::tr1::array<int,3>* triIdx = (std::tr1::array<int,3>*)AMtriangles->dataPtr();
+    const MiniArray<int,3>* triIdx = (MiniArray<int,3>*)AMtriangles->dataPtr();
     const int numTriangles = AMtriangles->location()->dims()[0];
 
     AmiraMesh::Data* numNodesAndEdges = am->findData("NumNodesAndParameterEdgesPerTriangle", HxINT32, 11, 
@@ -387,7 +415,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     const int* numNodesAndEdgesData = (int*)numNodesAndEdges->dataPtr();
     const StaticVector<float,2>*   nodeData       = (StaticVector<float,2>*)nodes->dataPtr();
     const int* nodeNumbers          = (int*)AMnodeNumbers->dataPtr();
-    const std::tr1::array<int,2>* edgeData  = (std::tr1::array<int,2>*)AMedges->dataPtr();
+    const MiniArray<int,2>* edgeData  = (MiniArray<int,2>*)AMedges->dataPtr();
     const int*     edgePointData    = (int*)AMedgePoints->dataPtr();
 
 
