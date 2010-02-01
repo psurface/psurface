@@ -446,25 +446,20 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         ////////////////////////////////////
         // first the nodes
 
-        int cornerNodes[3];
-
         psurface->triangles(newTriIdx).nodes.resize(numIntersectionNodes + numTouchingNodes + numInteriorNodes + 3);
 
         // three corner nodes
         StaticVector<ctype,2> domainPos(1, 0);
         int nodeNumber = numNodesAndEdgesData[11*i+8];
         psurface->triangles(newTriIdx).nodes[0].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
-        cornerNodes[0] = 0;
 
         domainPos = StaticVector<ctype,2>(0, 1);
         nodeNumber = numNodesAndEdgesData[11*i+9];
         psurface->triangles(newTriIdx).nodes[1].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
-        cornerNodes[1] = 1;
 
         domainPos = StaticVector<ctype,2>(0, 0);
         nodeNumber = numNodesAndEdgesData[11*i+10];
         psurface->triangles(newTriIdx).nodes[2].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
-        cornerNodes[2] = 2;
 
         int nodeCounter = 3;
 
