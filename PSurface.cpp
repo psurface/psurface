@@ -236,11 +236,8 @@ template <int dim, class ctype>
 void PSurface<dim,ctype>::createPointLocationStructure()
 {
     for (int i(0); i<this->getNumTriangles(); i++){
-        //        printf("######## Triangle: %d\n", i);
         this->triangles(i).checkConsistency("Before Insert");
         this->triangles(i).insertExtraEdges();
-//         if (i==95)
-//             triangles(i).print(false, true, true);
         this->triangles(i).createPointLocationStructure();
     }
 
