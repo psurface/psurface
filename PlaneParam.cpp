@@ -713,7 +713,7 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
 
         // check for double edges
         for (size_t l=0; l<cN.degree(); l++)
-            for (size_t j=0; j<i; j++)
+            for (size_t j=0; j<l; j++)
                 if (cN.neighbors(l)==cN.neighbors(j)) {
                     printf(where);
                     printf("***** PlaneParam contains double edge! *****\n");
