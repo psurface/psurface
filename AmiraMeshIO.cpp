@@ -357,21 +357,27 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     int numPoints = AMvertices->location()->dims()[0];
 
 #warning Illegal cast in AmiraMeshIO
-    const StaticVector<ctype,3>* vertexCoords = (StaticVector<ctype,3>*)AMvertices->dataPtr();
+    const MiniArray<ctype,3>* vertexCoords = (MiniArray<ctype,3>*)AMvertices->dataPtr();
 
     // copy points
-    for (i=0; i<numPoints; i++)
-        psurface->newVertex(vertexCoords[i]);
+    StaticVector<ctype,3> newVertex;
+    for (i=0; i<numPoints; i++) {
+        for (int j=0; j<3; j++)
+            newVertex[j] = vertexCoords[i][j];
+        psurface->newVertex(newVertex);
+    }
 
     // /////////////////////////////////////////////////////
     //  copy node positions
     // /////////////////////////////////////////////////////
     psurface->iPos.resize(AMnodePos->location()->dims()[0]);
     
-    for (i=0; i<psurface->iPos.size(); i++)
+    for (i=0; i<psurface->iPos.size(); i++) {
 #warning Illegal cast in AmiraMeshIO
-        psurface->iPos[i] = ((StaticVector<ctype,3>*)AMnodePos->dataPtr())[i];
-    
+        for (int j=0; j<3; j++)
+            psurface->iPos[i][j] = ((ctype(*)[3])AMnodePos->dataPtr())[i][j];
+    }
+
     ////////////////////////////////////////////////////
     // copy triangles.  This takes care of the edges, too
     AmiraMesh::Data* AMtriangles = am->findData("BaseGridTriangles", HxINT32, 3, "BaseGridTriangles");
@@ -413,7 +419,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     }
 
     const int* numNodesAndEdgesData = (int*)numNodesAndEdges->dataPtr();
-    const StaticVector<float,2>*   nodeData       = (StaticVector<float,2>*)nodes->dataPtr();
+    const MiniArray<float,2>*   nodeData       = (MiniArray<float,2>*)nodes->dataPtr();
     const int* nodeNumbers          = (int*)AMnodeNumbers->dataPtr();
     const MiniArray<int,2>* edgeData  = (MiniArray<int,2>*)AMedges->dataPtr();
     const int*     edgePointData    = (int*)AMedgePoints->dataPtr();
@@ -525,7 +531,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
         psurface->integrateTriangle(newTriIdx);
     }
-    
+
     // sad but true ...
     psurface->hasUpToDatePointLocationStructure = false;
 
