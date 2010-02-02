@@ -143,6 +143,7 @@ void DomainTriangle<ctype>::createPointLocationStructure()
 
     for (int i=0; i<this->nodes.size(); i++)
         if (this->nodes[i].isINTERIOR_NODE())
+            makeCyclicInteriorNode(this->nodes[i]);
 
     checkConsistency("AfterInterior");
 
