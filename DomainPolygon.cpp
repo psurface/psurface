@@ -1396,7 +1396,6 @@ void DomainPolygon::insertExtraEdges()
 
 void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const 
 {
-#ifndef NDEBUG
     printf("--------------------------------------------------------\n");
     printf("--  Print Polygon  -------------------------------------\n");
 
@@ -1428,7 +1427,6 @@ void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNod
     }
 
     printf("---------------------------------------------------------\n\n");
-#endif
 }
 
 

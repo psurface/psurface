@@ -662,7 +662,6 @@ void PlaneParam<ctype>::installBarycentricCoordinates(const StaticVector<ctype,2
 template <class ctype>
 void PlaneParam<ctype>::print(bool showNodes, bool showParamEdges, bool showExtraEdges) const 
 {
-#ifndef NDEBUG
     std::cout << "---------------------------------------------------------" << std::endl;
     std::cout << "parametrization contains " << nodes.size() << " nodes" << std::endl;
     
@@ -672,7 +671,6 @@ void PlaneParam<ctype>::print(bool showNodes, bool showParamEdges, bool showExtr
     }
 
     std::cout << "---------------------------------------------------------" << std::endl;
-#endif
 }   
 
 

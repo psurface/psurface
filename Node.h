@@ -389,7 +389,6 @@ public:
     ///
     void print(bool showNeighbors=true) const {
 
-#ifndef NDEBUG
         printf("dom (%f %f) ", domainPos()[0], domainPos()[1]);
         
         switch(type){
@@ -423,7 +422,6 @@ public:
             for (int i=0; i<degree(); i++)
                 printf("   %d %s\n", (int)nbs[i], nbs[i].isRegular() ? " " : "c");
         
-#endif
     }
 
     /// query domain position

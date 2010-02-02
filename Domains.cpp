@@ -174,7 +174,6 @@ void DomainTriangle<ctype>::createPointLocationStructure()
 template <class ctype>
 void DomainTriangle<ctype>::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const
 {
-#ifndef NDEBUG
     int i, j;
 
     printf("--------------------------------------------------------\n");
@@ -208,7 +207,6 @@ void DomainTriangle<ctype>::print(bool showEdgePoints, bool showParamEdges, bool
     }
 
     printf("---------------------------------------------------------\n\n");
-#endif
 }
 
 
