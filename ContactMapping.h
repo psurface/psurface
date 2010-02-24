@@ -27,8 +27,6 @@ public:
 
 private:
 
-    bool isCompletelyCovered(int i) const;
-
     static bool computeInverseNormalProjection(const StaticVector<double,2>& p0,
                                                const StaticVector<double,2>& p1,
                                                const StaticVector<double,2>& n0,

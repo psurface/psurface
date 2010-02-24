@@ -35,9 +35,6 @@ namespace ContactToolBox {
 
     void computeContactPatch(const Surface* surf, ContactBoundary& cBound);
 
-    template <class ctype>
-    bool isCompletelyCovered(PSurface<2,ctype>* cPar, int tri, const DomainTriangle<ctype>* cT);
-
     /** \brief Extraction of the merged grid */
     void extractMergedGrid(PSurface<2,float>* cPar,
                            std::vector<IntersectionPrimitive<2,float> >& mergedGrid);

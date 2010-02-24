@@ -454,9 +454,6 @@ void ContactMapping<2,ctype>::getOverlaps(std::vector<IntersectionPrimitive<1,fl
         const DomainSegment&    cS = domainSegments[i];
         const std::vector<Node>& nodes = domainSegments[i].nodes;
 
-        if (!isCompletelyCovered(i))
-            continue;
-
         ////////////////////////////////
         for (int j=0; j<int(nodes.size())-1; j++) {
             
@@ -507,32 +504,6 @@ void ContactMapping<2,ctype>::getOverlaps(std::vector<IntersectionPrimitive<1,fl
                overlaps[i].localCoords[1][0][0], overlaps[i].localCoords[1][1][0]);
 #endif
 //     exit(0);
-}
-
-template <class ctype>
-bool ContactMapping<2,ctype>::isCompletelyCovered(int i) const
-{
-    // A domain segment is completely covered by the mapping if the first
-    // and last node coincide with the ends of the domain boundary segment and if
-    // every pair of adjacent nodes on the boundary segment is connected by an
-    // edge.
-
-    const DomainSegment& cS = domainSegments[i];
-
-    if (cS.nodes.size()<2)
-        return false;
-
-    if (!cS.nodes[0].isNodeOnVertex || !cS.nodes[cS.nodes.size()-1].isNodeOnVertex)
-        return false;
-
-#if 0
-    /** \todo Should be in here for true edge handling */
-    for (int i=0; i<cS.nodes.size()-1; i++)
-        if (cS.nodes[i].rightRangeSegment == -1)
-            return false;
-#endif    
-
-    return true;
 }
 
 template <class ctype>
