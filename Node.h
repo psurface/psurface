@@ -26,6 +26,7 @@
 #define NODE_H
 
 #include <iostream>
+#include <stdio.h>
 #include <psurface/StaticVector.h>
 #include <vector>
 
