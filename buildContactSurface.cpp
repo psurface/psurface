@@ -218,19 +218,14 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
 
     //  All vertices of surface1 belong to the result contact surface
-
-    int c = 0;
-
     contactNodes1.resize(surf1->points.size());
     for (int i=0; i<surf1->points.size(); i++)
-        contactNodes1[c++] = i;
+        contactNodes1[i] = i;
 
-    c = 0;
-    int nSetBits2 = 0;
-    for (size_t i=0; i<contactField2.size(); i++)
-        if (contactField2[i])
-            nSetBits2++;
+    // count the number of set bits in contactField2
+    int nSetBits2 = std::count(contactField2.begin(), contactField2.end(), true);
 
+    int c = 0;
     contactNodes2.resize(nSetBits2);
     for (size_t i=0; i<contactField2.size(); i++)
         if (contactField2[i])
