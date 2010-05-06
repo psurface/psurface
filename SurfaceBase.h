@@ -165,6 +165,7 @@ public:
         if (freeTriangleStack.size()) {
             newTri = freeTriangleStack.back();
             freeTriangleStack.pop_back();
+            triangleArray[newTri] = TriangleType(a,b,c);
         } else {
             triangleArray.push_back(TriangleType(a,b,c));
             newTri = triangleArray.size()-1;
@@ -265,25 +266,12 @@ public:
         for (int i=0; i<cV.edges.size(); i++) {
 
             const EdgeType& cE = edges(cV.edges[i]);
-
-            for (int j=0; j<cE.triangles.size(); j++) {
-
-//                 if (result.findSorted(cE.triangles[j], &mcStandardCompare)==-1)
-//                     result.insertSorted(cE.triangles[j], &mcStandardCompare);
-                resultSet.insert(cE.triangles[j]);
-                
-            }
+            resultSet.insert(cE.triangles.begin(),cE.triangles.end());
 
         }
 
         // copy set to std::vector;
-        std::vector<int> result(resultSet.size());
-
-        std::set<int>::const_iterator setIt = resultSet.begin();
-        std::set<int>::const_iterator endIt = resultSet.end();
-        int idx = 0;
-        for (; setIt!=endIt; ++setIt, ++idx)
-            result[idx] = *setIt;
+        std::vector<int> result(resultSet.begin(), resultSet.end());
 
         return result;
     }
