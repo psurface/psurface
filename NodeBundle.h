@@ -13,7 +13,7 @@ public:
         \return -1 if none of the nodes is on triangle 'tri'
     */
     NodeIdx triToIdx(int tri) const {
-        for (int i=0; i<size(); i++)
+        for (size_t i=0; i<size(); i++)
             if ((*this)[i].tri == tri)
                 return (*this)[i].idx;
 
@@ -22,7 +22,7 @@ public:
 
     /** \brief Print the content for debugging */
     void print() const {
-        for (int i=0; i<size(); i++)
+        for (size_t i=0; i<size(); i++)
             printf("triangle: %d,   index: %d\n", (*this)[i].tri, (*this)[i].idx);
     }
 
@@ -31,7 +31,7 @@ public:
         if (size()!=other.size())
             return false;
 
-        for (int i=0; i<size(); i++)
+        for (size_t i=0; i<size(); i++)
             if ((*this)[i].tri!=other[i].tri || (*this)[i].idx!=other[i].idx )
                 return false;
 
