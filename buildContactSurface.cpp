@@ -13,8 +13,6 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
                                          float epsilon, 
                                          void (*obsDirections)(const double* pos, double* dir))
 {
-    int i;
-    
     // set up parametrization
     cPar->surface = const_cast<Surface*>(surf2);
     cPar->patches.resize(1);
@@ -40,9 +38,8 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
         
     }
     
-    printf("%ld resp. %ld contact nodes found!\n", contactBoundary[0].vertices.size(),
-           contactBoundary[1].vertices.size());
-
+    std::cout << contactBoundary[0].vertices.size() << " resp. "
+              << contactBoundary[1].vertices.size() << " contact nodes found!" << std::endl;
 
     // create the two contact patches
     
@@ -53,13 +50,13 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
               << " (resp. " << contactBoundary[1].triIdx.size() << ") triangles." << std::endl;
     
     // the nonmortar side becomes the base grid of the parametrization
-    for (i=0; i<contactBoundary[0].vertices.size(); i++)
+    for (size_t i=0; i<contactBoundary[0].vertices.size(); i++)
         cPar->newVertex(*(StaticVector<float,3>*)&surf1->points[contactBoundary[0].vertices[i]][0]);
     
     cPar->domainSurfaceTriangleNumbers = contactBoundary[0].triIdx;
 
     std::vector<int> vertexOffsets = contactBoundary[0].getVertexOffsets();
-    for (i=0; i<contactBoundary[0].triIdx.size(); i++) {
+    for (size_t i=0; i<contactBoundary[0].triIdx.size(); i++) {
         
         int newTri = cPar->createSpaceForTriangle(vertexOffsets[contactBoundary[0].triangles(i).points[0]],
                                                   vertexOffsets[contactBoundary[0].triangles(i).points[1]],
@@ -81,7 +78,6 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
                                    std::vector<int>& contactNodes1, std::vector<int>& contactNodes2,
                                    float epsilon)
 {
-    int i, j;
     const float epsSquared = epsilon*epsilon;
     
     Box<float,3> bbox1, bbox2;
@@ -93,7 +89,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
     std::tr1::array<float,3> lower1, upper1, lower2, upper2;
 
-    for (i=0; i<3; i++) {
+    for (int i=0; i<3; i++) {
         lower1[i] = bbox1_raw[2*i];
         upper1[i] = bbox1_raw[2*i+1];
 
@@ -179,7 +175,7 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
         mdQueryBox.extendByEps(epsilon);
         mdOctree2.lookupIndex(mdQueryBox, result);
 
-        for (j=0; j<result.size(); j++) {
+        for (size_t j=0; j<result.size(); j++) {
 
             // Don't recompute everything if the vertex is already marked
             if (contactField2[result[j]])
@@ -226,17 +222,17 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     int c = 0;
 
     contactNodes1.resize(surf1->points.size());
-    for (i=0; i<surf1->points.size(); i++)
+    for (int i=0; i<surf1->points.size(); i++)
         contactNodes1[c++] = i;
 
     c = 0;
     int nSetBits2 = 0;
-    for (i=0; i<contactField2.size(); i++)
+    for (size_t i=0; i<contactField2.size(); i++)
         if (contactField2[i])
             nSetBits2++;
 
     contactNodes2.resize(nSetBits2);
-    for (i=0; i<contactField2.size(); i++)
+    for (size_t i=0; i<contactField2.size(); i++)
         if (contactField2[i])
             contactNodes2[c++] = i;
 
