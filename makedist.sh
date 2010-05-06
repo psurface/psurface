@@ -36,6 +36,7 @@ cp StaticVector.h               $BASENAME/include/psurface
 cp StaticMatrix.h               $BASENAME/include/psurface
 cp SparseMatrix.h               $BASENAME/include/psurface
 cp AmiraMeshIO.h                $BASENAME/include/psurface
+cp PSurfaceFactory.h            $BASENAME/include/psurface
 
 cp psurface.cpp                 $BASENAME/src
 cp CircularPatch.cpp            $BASENAME/src
