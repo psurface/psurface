@@ -331,8 +331,6 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         return false;
     }
 
-    int i, j;
-
     //////////////////////////////////////////////
     // the innerRegions and outerRegions arrays
     AmiraMesh::Data* AMpatches = am->findData("Patches", HxINT32, 3, "Patches");
@@ -343,7 +341,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     
     psurface->patches.resize(AMpatches->location()->dims()[0]);
 
-    for (i=0; i<psurface->patches.size(); i++)
+    for (int i=0; i<psurface->patches.size(); i++)
         psurface->patches[i] = ((typename PSurface<2,ctype>::Patch*)AMpatches->dataPtr())[i];
     
     ///////////////////////////////
@@ -361,7 +359,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
     // copy points
     StaticVector<ctype,3> newVertex;
-    for (i=0; i<numPoints; i++) {
+    for (int i=0; i<numPoints; i++) {
         for (int j=0; j<3; j++)
             newVertex[j] = vertexCoords[i][j];
         psurface->newVertex(newVertex);
@@ -372,7 +370,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     // /////////////////////////////////////////////////////
     psurface->iPos.resize(AMnodePos->location()->dims()[0]);
     
-    for (i=0; i<psurface->iPos.size(); i++) {
+    for (int i=0; i<psurface->iPos.size(); i++) {
 #warning Illegal cast in AmiraMeshIO
         for (int j=0; j<3; j++)
             psurface->iPos[i][j] = ((ctype(*)[3])AMnodePos->dataPtr())[i][j];
@@ -428,7 +426,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     int edgeCounter=0, edgePointCounter=0;
     int nodeArrayIdx = 0;
     
-    for (i=0; i<numTriangles; i++){
+    for (int i=0; i<numTriangles; i++){
         
         int newTriIdx = psurface->createSpaceForTriangle(triIdx[i][0], triIdx[i][1], triIdx[i][2]);
 
@@ -436,6 +434,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
         ///////////////////////////////////////////////
         // get the parametrization on this triangle
+        ///////////////////////////////////////////////
 
         int numIntersectionNodes = numNodesAndEdgesData[11*i+0];
         int numTouchingNodes     = numNodesAndEdgesData[11*i+1];
@@ -445,6 +444,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
         ////////////////////////////////////
         // first the nodes
+        ////////////////////////////////////
 
         psurface->triangles(newTriIdx).nodes.resize(numIntersectionNodes + numTouchingNodes + numInteriorNodes + 3);
 
@@ -467,7 +467,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         int nodeCounter = 3;
 
         // the intersection nodes
-        for (j=0; j<numIntersectionNodes; j++, nodeCounter++, nodeArrayIdx++){
+        for (int j=0; j<numIntersectionNodes; j++, nodeCounter++, nodeArrayIdx++){
             
             // float --> double
             StaticVector<ctype,2> domainPos;
@@ -480,7 +480,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         }
 
         // the touching nodes
-        for (j=0; j<numTouchingNodes; j++, nodeCounter++, nodeArrayIdx++){
+        for (int j=0; j<numTouchingNodes; j++, nodeCounter++, nodeArrayIdx++){
 
             // float --> double
             StaticVector<ctype,2> domainPos;
@@ -493,7 +493,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         }
 
         // the interior nodes
-        for (j=0; j<numInteriorNodes; j++, nodeCounter++, nodeArrayIdx++){
+        for (int j=0; j<numInteriorNodes; j++, nodeCounter++, nodeArrayIdx++){
 
             // float --> double
             StaticVector<ctype,2> domainPos;
@@ -507,13 +507,14 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
         ///////////////////////////////
         // the parameterEdges
-        for (j=0; j<numParamEdges; j++, edgeCounter++){
+        ///////////////////////////////
+        for (int j=0; j<numParamEdges; j++, edgeCounter++)
             psurface->triangles(newTriIdx).addEdge(edgeData[edgeCounter][0], edgeData[edgeCounter][1]);
-        }
 
         //////////////////////////////////
         // the edgePoints arrays
-        for (j=0; j<3; j++){
+        //////////////////////////////////
+        for (int j=0; j<3; j++){
 
             psurface->triangles(newTriIdx).edgePoints[j].resize(numNodesAndEdgesData[11*i+5+j] + 2);
 
