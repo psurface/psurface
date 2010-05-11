@@ -1525,15 +1525,15 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>&
     StaticVector<double,3> e2 = c-a;
     e1.normalize();
     e2.normalize();
-    bool psurface_allel = fabs(StaticMatrix<double,3>(e1, e2, direction).det()) <eps;
+    bool parallel = fabs(StaticMatrix<double,3>(e1, e2, direction).det()) <eps;
         
         // Cramer's rule
         
-        if (!psurface_allel){
+        if (!parallel){
 
             double det = StaticMatrix<double,3>(b-a, c-a, direction).det();
             
-            // triangle and edge are not psurface_allel
+            // triangle and edge are not parallel
             double nu = StaticMatrix<double,3>(b-a, c-a, p-a).det() / det;
 
             double lambda = StaticMatrix<double,3>(p-a, c-a, direction).det() / det;
@@ -1554,12 +1554,12 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>&
 
         } else {
 
-            // triangle and edge are psurface_allel
+            // triangle and edge are parallel
             double alpha = StaticMatrix<double,3>(b-a, c-a, p-a).det();
             if (alpha<-eps || alpha>eps)
                 return false;
             else {
-                printf("ray and triangle are psurface_allel!\n");
+                printf("ray and triangle are parallel!\n");
                 return false;
 
             }
