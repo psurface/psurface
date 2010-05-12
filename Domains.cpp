@@ -259,8 +259,9 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
             }
             if (this->nodes[edgePoints[i][j]].isINTERIOR_NODE()){
                 printf(where);
-                printf("******* interior node found in edgePoint array ********\n");
-                printf("***     The node has the node number %ld      ***\n", this->nodes[edgePoints[i][j]].getNodeNumber());
+                std::cout << "******* interior node found in edgePoint array ********" << std::endl;
+                std::cout << "***     The node has the node number " 
+                          << this->nodes[edgePoints[i][j]].getNodeNumber() << "      ***" << std::endl;
                 assert(false);
             }
         }
