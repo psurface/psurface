@@ -8,7 +8,6 @@
 #include <psurface/StaticVector.h>
 #include <psurface/PSurface.h>
 #include <psurface/ContactToolBox.h>
-#include <psurface/contact.h>
 
 template <int dim, class ctype>
 class ContactMapping {};

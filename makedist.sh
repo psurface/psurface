@@ -48,14 +48,12 @@ cp PlaneParam.cpp               $BASENAME/src
 cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
 cp AmiraMeshIO.cpp              $BASENAME/src
 
-cp contact.h                    $BASENAME/include/psurface
 cp ContactToolBox.h             $BASENAME/include/psurface
 cp IntersectionPrimitive.h      $BASENAME/include/psurface
 cp ContactBoundary.h            $BASENAME/include/psurface
 cp NormalProjector.h            $BASENAME/include/psurface
 cp ContactMapping.h             $BASENAME/include/psurface
 
-cp contact.cpp                  $BASENAME/src
 cp NormalProjector.cpp          $BASENAME/src
 cp buildContactSurface.cpp      $BASENAME/src
 cp extractMergedGrid.cpp        $BASENAME/src
