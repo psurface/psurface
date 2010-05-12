@@ -3,10 +3,10 @@
 #include <vector>
 
 
-void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
+void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
                                        std::vector<IntersectionPrimitive<2,float> >& mergedGrid)
 {
-    if (cPar->getNumTriangles()==0)
+    if (psurface->getNumTriangles()==0)
         return;
 
 
@@ -14,9 +14,9 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
     // Set up point location structure
     // Can we use the routine in PSurface<2,float> ???
     // ///////////////////////////////////////////////////
-    for (int i=0; i<cPar->getNumTriangles(); i++) {
+    for (int i=0; i<psurface->getNumTriangles(); i++) {
 
-        DomainTriangle<float>& cT = cPar->triangles(i);
+        DomainTriangle<float>& cT = psurface->triangles(i);
 
         cT.insertExtraEdges();
 
@@ -56,15 +56,15 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
         
     }
 
-    cPar->surface->computeTrianglesPerPoint();
+    psurface->surface->computeTrianglesPerPoint();
 
     // get the array that relates the base grid triangles with the whole nonmortar surface
-    std::vector<int> nonMortarTargetTris = cPar->domainSurfaceTriangleNumbers;
+    std::vector<int> nonMortarTargetTris = psurface->domainSurfaceTriangleNumbers;
 
     //
-    for (int i=0; i<cPar->getNumTriangles(); i++) {
+    for (int i=0; i<psurface->getNumTriangles(); i++) {
 
-        const DomainTriangle<float>& cT = cPar->triangles(i);
+        const DomainTriangle<float>& cT = psurface->triangles(i);
 
         if (cT.nodes.size()<3)
             continue;
@@ -76,7 +76,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
             
             int targetTri = -1;
             try {
-                targetTri = cPar->getImageSurfaceTriangle(i, cPT.vertices());
+                targetTri = psurface->getImageSurfaceTriangle(i, cPT.vertices());
             } catch (PSurface<2,float>::ParamError){
                 printf("exception caught!\n");
                 targetTri = -1;
@@ -85,7 +85,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
             if (targetTri==-1)
                 continue;
             
-            assert(targetTri>=0 && targetTri<cPar->surface->triangles.size());
+            assert(targetTri>=0 && targetTri<psurface->surface->triangles.size());
 
 
             // //////////////////////////////////////////////
@@ -101,14 +101,14 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* cPar,
                 mergedGrid.back().localCoords[0][j] = cT.nodes[cPT.vertices(j)].domainPos();
             
                 // Local coordinates in the target triangle
-                mergedGrid.back().localCoords[1][j] = cPar->getLocalTargetCoords(GlobalNodeIdx(i, cPT.vertices(j)), targetTri);
+                mergedGrid.back().localCoords[1][j] = psurface->getLocalTargetCoords(GlobalNodeIdx(i, cPT.vertices(j)), targetTri);
             
                 // world coordinates in the domain triangle
                 mergedGrid.back().points[j] = 
                     PlaneParam<float>::linearInterpol<StaticVector<float,3> >(cT.nodes[cPT.vertices(j)].domainPos(),
-                                                                       cPar->vertices(cT.vertices[0]), 
-                                                                       cPar->vertices(cT.vertices[1]), 
-                                                                       cPar->vertices(cT.vertices[2]));
+                                                                              psurface->vertices(cT.vertices[0]), 
+                                                                              psurface->vertices(cT.vertices[1]), 
+                                                                              psurface->vertices(cT.vertices[2]));
 
             }            
             
