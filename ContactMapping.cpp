@@ -416,6 +416,93 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<double,2> 
 
 }
 
+template <class ctype>
+void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<double,3> >& coords1,  ///< The vertices of the first surface
+                         const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
+                         const std::vector<std::tr1::array<double,3> >& coords2,  ///< The vertices of the second surface
+                         const std::vector<std::tr1::array<int,3> >& tri2,
+                         float epsilon, void (*obsDirections)(const double* pos, double* dir))
+{
+    int nVert1 = coords1.size();
+    int nVert2 = coords2.size();
+    int nTri1  = tri1.size();
+    int nTri2  = tri2.size();
+
+    // Create a first Surface object
+    surface1_ = new Surface;
+
+#ifndef PSURFACE_STANDALONE
+    // Amira Surface class needs a 'patch' structure
+    surface1_->patches.resize(1);
+    surface1_->patches[0] = new Surface::Patch;
+    surface1_->patches[0]->innerRegion = 0;
+    surface1_->patches[0]->outerRegion = 1;
+    surface1_->patches[0]->boundaryId  = 0;
+#endif
+
+    surface1_->points.resize(nVert1);
+    for (int i=0; i<nVert1; i++) 
+        for (int j=0; j<3; j++)
+            surface1_->points[i][j] = coords1[i][j];
+
+    surface1_->triangles.resize(nTri1);
+#ifndef PSURFACE_STANDALONE
+    surface1_->patches[0]->triangles.resize(nTri1);
+#endif
+    for (int i=0; i<nTri1; i++) {
+
+        surface1_->triangles[i].points[0] = tri1[i][0];
+        surface1_->triangles[i].points[1] = tri1[i][1];
+        surface1_->triangles[i].points[2] = tri1[i][2];
+
+#ifndef PSURFACE_STANDALONE
+        surface1_->triangles[i].patch = 0;
+        surface1_->patches[0]->triangles[i] = i;
+#endif
+    }
+
+    // Create a second Surface object
+    surface2_ = new Surface;
+    
+#ifndef PSURFACE_STANDALONE
+    surface2_->patches.resize(1);
+    surface2_->patches[0] = new Surface::Patch;
+    surface2_->patches[0]->innerRegion = 0;
+    surface2_->patches[0]->outerRegion = 1;
+    surface2_->patches[0]->boundaryId  = 0;
+#endif
+
+    surface2_->points.resize(nVert2);
+    for (int i=0; i<nVert2; i++)
+        for (int j=0; j<3; j++)
+            surface2_->points[i][j] = coords2[i][j];
+
+    surface2_->triangles.resize(nTri2);
+#ifndef PSURFACE_STANDALONE
+    surface2_->patches[0]->triangles.resize(nTri2);
+#endif
+    for (int i=0; i<nTri2; i++) {
+
+        surface2_->triangles[i].points[0] = tri2[i][0];
+        surface2_->triangles[i].points[1] = tri2[i][1];
+        surface2_->triangles[i].points[2] = tri2[i][2];
+
+#ifndef PSURFACE_STANDALONE
+        surface2_->triangles[i].patch = 0;
+        surface2_->patches[0]->triangles[i] = i;
+#endif
+    }
+
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
+    // For debugging
+    surface1_->write("testSurf1.surf", 1);
+    surface2_->write("testSurf2.surf", 1);
+#endif
+
+    ContactToolBox::buildContactSurface(&psurface_, surface1_, surface2_, epsilon, obsDirections);
+
+}
+
 
 // ///////////////////////////////////////////////////////////////////////
 //   Explicitly instantiate 'float' and 'double' versions of this code
@@ -423,3 +510,5 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<double,2> 
 
 template class ContactMapping<2,float>;
 template class ContactMapping<2,double>;
+
+template class ContactMapping<3,float>;

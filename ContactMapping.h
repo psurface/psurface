@@ -48,9 +48,15 @@ class ContactMapping<3,ctype>
 {
 public:	
 
+    ContactMapping()
+        : surface1_(NULL), surface2_(NULL)
+    {}
+    
     ~ContactMapping() {
-        // delete the contact surface after use
-        deleteContactSurface();
+        if (surface1_)
+            delete surface1_;
+        if (surface2_)
+            delete surface2_;
     }
 
     void build(const std::vector<std::tr1::array<double,3> >& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
@@ -59,15 +65,18 @@ public:
                const std::vector<std::tr1::array<int,3> >& tri2,       ///< The triangles of the second surface
                float epsilon,   ///< The estimate maximum deformation for the contact oracle
                void (*obsDirections)(const double* pos, double* dir)
-               ) {
-        buildContactMapping(coords1, tri1, coords2, tri2,
-                            epsilon,
-                            obsDirections);
-    }
+               );
 
     void getOverlaps(std::vector<IntersectionPrimitive<2,float> >& overlaps) {
-        getMergedGrid(overlaps);
+        ContactToolBox::extractMergedGrid(&psurface_, overlaps);
     }
+
+private:
+
+    PSurface<2,ctype> psurface_;
+
+    Surface* surface1_;
+    Surface* surface2_;
 
 };
 
