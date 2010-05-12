@@ -4,6 +4,7 @@
 #include <psurface/AmiraMeshIO.h>
 #include <psurface/Domains.h>
 #include <psurface/PSurface.h>
+#include <psurface/PSurfaceFactory.h>
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
@@ -43,7 +44,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
     AmiraMesh am;
     am.parameters = *(par->params);
 
-    int i, j, k;
+    int i, j;
     int numVertices  = par->getNumVertices();
     int numTriangles = par->getNumTriangles();
 
@@ -68,7 +69,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
     am.insert(vertices);
 
     std::vector<StaticVector<ctype,3> > baseGridVertexCoordsArray(numVertices);
-    for (i=0; i<par->getNumVertices(); i++)
+    for (size_t i=0; i<par->getNumVertices(); i++)
         baseGridVertexCoordsArray[i] = par->vertices(i);
 
     AmiraMesh::Data* vertexCoords = new AmiraMesh::Data("BaseGridVertexCoords", vertices, 
@@ -83,7 +84,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
 
     std::vector<MiniArray<int, 3> > baseGridTriArray(numTriangles);
 
-    for (int i(0); i<par->getNumTriangles(); i++)
+    for (size_t i=0; i<par->getNumTriangles(); i++)
         for (int j=0; j<3; j++)
             baseGridTriArray[i][j] = par->triangles(i).vertices[j];
     
@@ -165,8 +166,6 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
     std::vector<MiniArray<int,2> > parameterEdgeArray(numParamEdges);
     std::vector<int>     edgePointsArray(numEdgePoints);
 
-    int cN;    
-
     int arrayIdx           = 0;
     int edgeArrayIdx       = 0;
     int edgePointsArrayIdx = 0;
@@ -185,7 +184,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
 
         // the three remaining types are saved separately, in order to avoid
         // explicitly saving the type for each node.
-        for (cN=0; cN<cT.nodes.size(); cN++) {
+        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
             if (cT.nodes[cN].isINTERSECTION_NODE()){
 
                 domainPositions[arrayIdx] = cT.nodes[cN].domainPos();
@@ -198,7 +197,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
             }
         }
 
-        for (cN=0; cN<cT.nodes.size(); cN++) {
+        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isTOUCHING_NODE()){
 
@@ -212,7 +211,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
             }
         }
 
-        for (cN=0; cN<cT.nodes.size(); cN++) {
+        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isINTERIOR_NODE()){
 
@@ -242,9 +241,10 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
 
         ///////////////////////////////////////
         // the edgePoints for this triangle
+        ///////////////////////////////////////
         for (j=0; j<3; j++){
 
-            for (k=1; k<cT.edgePoints[j].size()-1; k++)
+            for (size_t k=1; k<cT.edgePoints[j].size()-1; k++)
                 edgePointsArray[edgePointsArrayIdx++] = newIdx[cT.edgePoints[j][k]];
 
         }
@@ -285,6 +285,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
 
     //////////////////////////////
     // actually write the file
+    //////////////////////////////
     if (!am.write(filename) ) {
         printf("An error has occured writing file %s.\n", filename);
         return 0;
@@ -316,13 +317,19 @@ void* AmiraMeshIO<ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
 template <class ctype>
 bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMesh* am, const char* filename, Surface* surf)
 {
+    // //////////////////////////////////
+    //   Create PSurface factory
+    // //////////////////////////////////
 
+    PSurfaceFactory<2,ctype> factory(psurface);
+    
     psurface->surface = surf;
     
     psurface->getPaths(am->parameters);
 
     ///////////////////////////////////////////////
     // test for file format
+    ///////////////////////////////////////////////
     AmiraMesh::Data* AMnodePos = am->findData("NodePositions", HxFLOAT, 3, "NodePositions");
 
     if (!AMnodePos){
@@ -333,6 +340,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
     //////////////////////////////////////////////
     // the innerRegions and outerRegions arrays
+    //////////////////////////////////////////////
     AmiraMesh::Data* AMpatches = am->findData("Patches", HxINT32, 3, "Patches");
     if (!AMpatches){
         printf("AmiraMesh: Field 'Patches' not found!\n");
@@ -341,11 +349,12 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     
     psurface->patches.resize(AMpatches->location()->dims()[0]);
 
-    for (int i=0; i<psurface->patches.size(); i++)
+    for (size_t i=0; i<psurface->patches.size(); i++)
         psurface->patches[i] = ((typename PSurface<2,ctype>::Patch*)AMpatches->dataPtr())[i];
     
-    ///////////////////////////////
+    //////////////////////////////////
     // load the base grid vertices
+    //////////////////////////////////
     AmiraMesh::Data* AMvertices = am->findData("BaseGridVertexCoords", HxFLOAT, 3, "BaseGridVertexCoords");
     if (!AMvertices){
         printf("AmiraMesh: Field 'BaseGridVertexCoords' not found!\n");
@@ -354,15 +363,12 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     
     int numPoints = AMvertices->location()->dims()[0];
 
-#warning Illegal cast in AmiraMeshIO
-    const MiniArray<ctype,3>* vertexCoords = (MiniArray<ctype,3>*)AMvertices->dataPtr();
-
     // copy points
     StaticVector<ctype,3> newVertex;
     for (int i=0; i<numPoints; i++) {
         for (int j=0; j<3; j++)
-            newVertex[j] = vertexCoords[i][j];
-        psurface->newVertex(newVertex);
+            newVertex[j] = ((float*)AMvertices->dataPtr())[i*3+j];
+        factory.insertVertex(newVertex);
     }
 
     // /////////////////////////////////////////////////////
@@ -370,21 +376,21 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     // /////////////////////////////////////////////////////
     psurface->iPos.resize(AMnodePos->location()->dims()[0]);
     
-    for (int i=0; i<psurface->iPos.size(); i++) {
+    for (size_t i=0; i<psurface->iPos.size(); i++) {
 #warning Illegal cast in AmiraMeshIO
         for (int j=0; j<3; j++)
             psurface->iPos[i][j] = ((ctype(*)[3])AMnodePos->dataPtr())[i][j];
     }
 
-    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     // copy triangles.  This takes care of the edges, too
+    ////////////////////////////////////////////////////////
     AmiraMesh::Data* AMtriangles = am->findData("BaseGridTriangles", HxINT32, 3, "BaseGridTriangles");
     if (!AMtriangles){
         printf("AmiraMesh: Field 'BaseGridTriangles' not found!\n");
         return false;
     }
     
-    const MiniArray<int,3>* triIdx = (MiniArray<int,3>*)AMtriangles->dataPtr();
     const int numTriangles = AMtriangles->location()->dims()[0];
 
     AmiraMesh::Data* numNodesAndEdges = am->findData("NumNodesAndParameterEdgesPerTriangle", HxINT32, 11, 
@@ -428,7 +434,11 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     
     for (int i=0; i<numTriangles; i++){
         
-        int newTriIdx = psurface->createSpaceForTriangle(triIdx[i][0], triIdx[i][1], triIdx[i][2]);
+        //int newTriIdx = psurface->createSpaceForTriangle(triIdx[i][0], triIdx[i][1], triIdx[i][2]);
+        std::tr1::array<unsigned int, 3> triangleVertices = {((int*)AMtriangles->dataPtr())[3*i+0], 
+                                                             ((int*)AMtriangles->dataPtr())[3*i+1], 
+                                                             ((int*)AMtriangles->dataPtr())[3*i+2]};
+        int newTriIdx = factory.insertSimplex(triangleVertices);
 
         psurface->triangles(newTriIdx).patch = numNodesAndEdgesData[11*i+4];
 
@@ -528,7 +538,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
         }
 
-        psurface->integrateTriangle(newTriIdx);
+        //psurface->integrateTriangle(newTriIdx);
     }
 
     // sad but true ...
