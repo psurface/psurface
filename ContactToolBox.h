@@ -1,7 +1,6 @@
 #ifndef CONTACT_TOOLBOX_H
 #define CONTACT_TOOLBOX_H
 
-#include <psurface/Box.h>
 #include <psurface/StaticVector.h>
 
 #include "Node.h"
@@ -11,7 +10,6 @@
 
 template <int dim, class ctype>
 class PSurface;
-template <class ctype> class DomainTriangle;
 class ContactBoundary;
 class Surface;
 
