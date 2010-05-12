@@ -321,7 +321,7 @@ public:
     void countNodes(int& intersectionNodes, int& touchingNodes, int& interiorNodes) const {
         intersectionNodes = touchingNodes = interiorNodes = 0;
 
-        for (int i=0; i<nodes.size(); i++){
+        for (size_t i=0; i<nodes.size(); i++){
             switch (nodes[i].getType()) {
             case Node<ctype>::INTERSECTION_NODE:
                 intersectionNodes++;
