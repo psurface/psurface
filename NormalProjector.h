@@ -9,6 +9,7 @@
 class NodeBundle;
 class Surface;
 class GlobalNodeIdx;
+class ContactBoundary;
 
 
 /** \brief Construct a PSurface object by projecting one surface in normal direction onto another
@@ -140,6 +141,31 @@ protected:
                                double& normalDist,
                                double eps);
 
+    // ///////////////////////////////////////////////////////////////
+    //   A few static methods for the 1d-in-2d case.
+    // ///////////////////////////////////////////////////////////////
+public:
+    static bool computeInverseNormalProjection(const StaticVector<double,2>& p0,
+                                               const StaticVector<double,2>& p1,
+                                               const StaticVector<double,2>& n0,
+                                               const StaticVector<double,2>& n1,
+                                               const StaticVector<double,2>& q,
+                                               double& local);
+    
+    static bool normalProjection(const StaticVector<double,2>& base,
+                                 const StaticVector<double,2>& direction,
+                                 int& bestSegment,
+                                 double& rangeLocalPosition,
+                                 const std::vector<std::tr1::array<int,2> >& targetSegments,
+                                 const std::vector<std::tr1::array<double, 2> >& coords);
+    
+    static bool rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
+                                  const StaticVector<double, 2>& direction,
+                                  const StaticVector<double, 2>& a, 
+                                  const StaticVector<double, 2>& b, 
+                                  double& distance, double& targetLocal);
+
+protected:
     // /////////////////////////////////////
     // Data members
     // /////////////////////////////////////

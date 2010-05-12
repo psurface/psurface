@@ -1664,6 +1664,126 @@ void NormalProjector<ctype>::setupEdgePointArrays()
     
 }
 
+// ///////////////////////////////////////////////////////////////
+//   A few static methods for the 1d-in-2d case.
+// ///////////////////////////////////////////////////////////////
+
+template <class ctype>
+bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<double,2>& p0,
+                                                            const StaticVector<double,2>& p1,
+                                                            const StaticVector<double,2>& n0,
+                                                            const StaticVector<double,2>& n1,
+                                                            const StaticVector<double,2>& q,
+                                                            double& local)
+{
+    double a = (p1[1]-p0[1])*(n1[0]-n0[0]) - (p1[0]-p0[0])*(n1[1]-n0[1]);
+    double b = -(q[1]-p0[1])*(n1[0]-n0[0]) + (p1[1]-p0[1])*n0[0] + (q[0]-p0[0])*(n1[1]-n0[1]) - (p1[0]-p0[0])*n0[1];
+    double c = -(q[1]-p0[1])*n0[0] + (q[0]-p0[0])*n0[1];
+
+    // Is the quadratic formula degenerated to a linear one?
+    if (std::abs(a) < 1e-10) {
+        local = -c/b;
+        //printf("mu:  %g,  old local %g\n", mu, ((q[0]-p0[0]) / (p1[0]-p0[0])));
+        
+        return local >= 0 && local <= 1;
+    }
+
+    // The abc-formula
+    double mu_0 = (-b + std::sqrt(b*b - 4*a*c))/(2*a);
+    double mu_1 = (-b - std::sqrt(b*b - 4*a*c))/(2*a);
+
+    if (mu_0 >= 0 && mu_0 <= 1) {
+        local = mu_0;
+        return true;
+    } else if (mu_1 >= 0 && mu_1 <= 1) {
+        local = mu_1;
+        return true;
+    }
+    return false;
+}
+
+template <class ctype>
+bool NormalProjector<ctype>::normalProjection(const StaticVector<double,2>& base,
+                                              const StaticVector<double,2>& direction,
+                                              int& bestSegment,
+                                              double& rangeLocalPosition,
+                                              const std::vector<std::tr1::array<int,2> >& targetSegments,
+                                              const std::vector<std::tr1::array<double, 2> >& coords)
+{
+    bestSegment = -1;
+    int nTargetSegments = targetSegments.size();
+    double bestDistance = std::numeric_limits<double>::max();
+
+    for (int i=0; i<nTargetSegments; i++) {
+
+        StaticVector<double,2> p0, p1;
+        p0[0] = coords[targetSegments[i][0]][0];
+        p0[1] = coords[targetSegments[i][0]][1];
+
+        p1[0] = coords[targetSegments[i][1]][0];
+        p1[1] = coords[targetSegments[i][1]][1];
+
+        double distance, targetLocal;
+        if (!rayIntersectsLine(base, direction, p0, p1, distance, targetLocal))
+            continue;
+
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            bestSegment  = i;
+            rangeLocalPosition = targetLocal;
+        }
+
+    }
+
+    return bestSegment != -1;
+}
+
+template <class ctype>
+bool NormalProjector<ctype>::
+rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
+                  const StaticVector<double, 2>& direction,
+                  const StaticVector<double, 2>& a, 
+                  const StaticVector<double, 2>& b, 
+                  double& distance, double& targetLocal)
+{
+    // we solve the equation basePoint + x_0 * normal = a + x_1 * (b-a)
+
+    StaticMatrix<double,2> mat;
+    mat[0][0] = direction[0];
+    mat[1][0] = direction[1];
+    mat[0][1] = a[0]-b[0];
+    mat[1][1] = a[1]-b[1];
+
+    /** \todo Easier with expression templates */
+    StaticVector<double,2> rhs;
+    rhs[0] = a[0]-basePoint[0];
+    rhs[1] = a[1]-basePoint[1];
+
+    StaticVector<double,2> x;
+
+    // Solve the system.  If it is singular the normal and the segment
+    // are parallel and there is no intersection
+
+    double detinv = mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0];
+    if (std::abs(detinv)<1e-80)
+        return false;
+    detinv = 1/detinv;
+    
+    x[0] = detinv*(mat[1][1]*rhs[0]-mat[0][1]*rhs[1]);
+    x[1] = detinv*(mat[0][0]*rhs[1]-mat[1][0]*rhs[0]);
+    
+    // x[0] is the distance, x[1] is the intersection point 
+    // in local coordinates on the segment
+    if (x[1]<0 || x[1] > 1)
+        return false;
+
+    distance    = x[0];
+    targetLocal = x[1];
+
+    return true;
+
+}
+
 
 // ////////////////////////////////////////////////////////
 //   Explicit template instantiations.

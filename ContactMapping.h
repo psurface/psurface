@@ -26,29 +26,9 @@ public:
 
     void getOverlaps(std::vector<IntersectionPrimitive<1,float> >& overlaps);
 
-private:
-
-    static bool computeInverseNormalProjection(const StaticVector<double,2>& p0,
-                                               const StaticVector<double,2>& p1,
-                                               const StaticVector<double,2>& n0,
-                                               const StaticVector<double,2>& n1,
-                                               const StaticVector<double,2>& q,
-                                               double& local);
-
-    bool normalProjection(const StaticVector<double,2>& base,
-                          const StaticVector<double,2>& direction,
-                          int& bestSegment,
-                          double& rangeLocalPosition,
-                          const std::vector<std::tr1::array<int,2> >& targetSegments,
-                          const std::vector<std::tr1::array<double, 2> >& coords) const;
-
-    bool rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
-                           const StaticVector<double, 2>& direction,
-                           const StaticVector<double, 2>& a, 
-                           const StaticVector<double, 2>& b, 
-                           double& distance, double& targetLocal) const;
-
     // /////////////////////////////////////////////
+
+private:
 
     PSurface<1,double> psurface_;
 
