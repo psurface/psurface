@@ -7,6 +7,7 @@
 
 #include <psurface/StaticVector.h>
 #include <psurface/PSurface.h>
+#include <psurface/ContactToolBox.h>
 #include <psurface/contact.h>
 
 template <int dim, class ctype>
@@ -24,7 +25,10 @@ public:
                void (*obsDirections)(const double* pos, double* dir)
                );
 
-    void getOverlaps(std::vector<IntersectionPrimitive<1,float> >& overlaps);
+    void getOverlaps(std::vector<IntersectionPrimitive<1,float> >& overlaps)
+    {
+        ContactToolBox::extractMergedGrid(&psurface_, overlaps);
+    }
 
     // /////////////////////////////////////////////
 

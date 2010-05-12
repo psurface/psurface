@@ -115,4 +115,65 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
         }
         
     }
+
+}
+
+
+void ContactToolBox::extractMergedGrid(PSurface<1,double>* psurface,
+                                       std::vector<IntersectionPrimitive<1,float> >& mergedGrid)
+{
+    for (size_t i=0; i<psurface->domainSegments.size(); i++) {
+
+        const PSurface<1,double>::DomainSegment&    cS = psurface->domainSegments[i];
+        const std::vector<PSurface<1,double>::Node>& nodes = psurface->domainSegments[i].nodes;
+
+        ////////////////////////////////
+        for (int j=0; j<int(nodes.size())-1; j++) {
+            
+            /** \todo Should be in here for true edge handling */
+            // Don't do anything if the current pair of points is not connected by an edge
+            if (nodes[j].rightRangeSegment == -1)
+                continue;
+
+            // //////////////////////////////////////////////
+            // Assemble new overlap
+            // //////////////////////////////////////////////
+            IntersectionPrimitive<1,float> newOverlap;
+            newOverlap.tris[0] = i;
+            newOverlap.tris[1] = nodes[j].rightRangeSegment;
+            
+            newOverlap.localCoords[0][0][0] = nodes[j].domainLocalPosition;
+            newOverlap.localCoords[0][1][0] = nodes[j+1].domainLocalPosition;
+            
+            // if the target of a node is a vertex on the target surface, its
+            // rangeLocalPosition is always 0.  But its equivalent coordinate
+            // in the two overlaps that contain it has to be once 1 and once zero.
+            // That explains the following conditional clause
+            newOverlap.localCoords[1][0][0] = (nodes[j].isNodeOnTargetVertex) ? 1 : nodes[j].rangeLocalPosition;
+
+            newOverlap.localCoords[1][1][0] = nodes[j+1].rangeLocalPosition;
+            
+            // Compute the world position of the overlap on the domain side */
+            newOverlap.points[0][0] = psurface->vertices[cS.points[0]][0] * (1-nodes[j].domainLocalPosition)
+                + psurface->vertices[cS.points[1]][0] * nodes[j].domainLocalPosition;
+            newOverlap.points[0][1] = psurface->vertices[cS.points[0]][1] * (1-nodes[j].domainLocalPosition)
+                + psurface->vertices[cS.points[1]][1] * nodes[j].domainLocalPosition;
+
+            newOverlap.points[1][0] = psurface->vertices[cS.points[0]][0] * (1-cS.nodes[j+1].domainLocalPosition)
+                + psurface->vertices[cS.points[1]][0] * cS.nodes[j+1].domainLocalPosition;
+            newOverlap.points[1][1] = psurface->vertices[cS.points[0]][1] * (1-cS.nodes[j+1].domainLocalPosition)
+                + psurface->vertices[cS.points[1]][1] * cS.nodes[j+1].domainLocalPosition;
+            
+            mergedGrid.push_back(newOverlap);
+        }
+        
+    }
+
+#if 0
+    for (int i=0; i<mergedGrid.size(); i++)
+        printf("overlap %d,   nonmortar (%g  -->  %g),    mortar (%g  -->  %g)\n", i,
+               mergedGrid[i].localCoords[0][0][0], mergedGrid[i].localCoords[0][1][0],
+               mergedGrid[i].localCoords[1][0][0], mergedGrid[i].localCoords[1][1][0]);
+#endif
+//     exit(0);
 }

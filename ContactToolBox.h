@@ -36,8 +36,12 @@ namespace ContactToolBox {
     void computeContactPatch(const Surface* surf, ContactBoundary& cBound);
 
     /** \brief Extraction of the merged grid */
-    void extractMergedGrid(PSurface<2,float>* cPar,
+    void extractMergedGrid(PSurface<2,float>* psurface,
                            std::vector<IntersectionPrimitive<2,float> >& mergedGrid);
+
+    /** \brief Extraction of the merged grid */
+    void extractMergedGrid(PSurface<1,double>* psurface,
+                           std::vector<IntersectionPrimitive<1,float> >& mergedGrid);
 
     //@}
 };
