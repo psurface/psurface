@@ -119,7 +119,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
 }
 
 
-void ContactToolBox::extractMergedGrid(PSurface<1,double>* psurface,
+void ContactToolBox::extractMergedGrid(const PSurface<1,double>* psurface,
                                        std::vector<IntersectionPrimitive<1,float> >& mergedGrid)
 {
     for (size_t i=0; i<psurface->domainSegments.size(); i++) {
