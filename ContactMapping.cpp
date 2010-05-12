@@ -404,10 +404,10 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<double,2> 
             else if (nodes[j].rangeSegments[1] == nodes[j+1].rangeSegments[1])
                 nodes[j].rightRangeSegment = nodes[j].rangeSegments[1];
             else
-                throw(std::runtime_error("Segmentx of the Contact Mapping Data structure is inconsistent!"));
+                throw(std::runtime_error("Segment of the PSurface<1> data structure is inconsistent!"));
             
             if (nodes[j].rightRangeSegment == -1)
-                throw(std::runtime_error("Segmentx of the Contact Mapping Data structure is inconsistent!"));
+                throw(std::runtime_error("Segment of the PSurface<1> data structure is inconsistent!"));
 
         }
 
