@@ -6,6 +6,7 @@
 #include <tr1/array>
 
 #include <psurface/StaticVector.h>
+#include <psurface/PSurface.h>
 #include <psurface/contact.h>
 
 template <int dim, class ctype>
@@ -49,60 +50,9 @@ private:
 
     // /////////////////////////////////////////////
 
-    class Node {
-    public:
-
-        Node() {}
-
-        Node(double dLP, double rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
-            : domainLocalPosition(dLP), rangeLocalPosition(rLP),
-              isNodeOnVertex(nOV), isNodeOnTargetVertex(nOTV),
-              rightRangeSegment(-1)
-        {
-            rangeSegments[0] = rangeSegment0;
-            rangeSegments[1] = rangeSegment1;
-        }
-
-        friend
-        std::ostream& operator<< (std::ostream& s, const Node& node)
-        {
-            s << node.domainLocalPosition << ",   " << node.rangeLocalPosition << ",   "
-              << ((node.isNodeOnVertex) ? "true" : "false") << "  "
-              << ((node.isNodeOnTargetVertex) ? "true" : "false") << "  --  "
-              << "rangeSegments: " << node.rangeSegments[0] << "  " << node.rangeSegments[1] 
-              << " -- " << node.rightRangeSegment << std::endl;
-            return s;
-        }
-
-        double domainLocalPosition;
-
-        double rangeLocalPosition;
-
-        bool isNodeOnVertex;
-        
-        bool isNodeOnTargetVertex;
-
-        int rangeSegments[2];
-
-        int rightRangeSegment;
-    };
-
-    class DomainSegment {
-    public:
-        std::vector<Node> nodes;
-
-        int points[2];
-
-        int neighbor[2];
-    };
-
-    std::vector<StaticVector<double, 2> > vertices;
-
-    std::vector<DomainSegment> domainSegments;
+    PSurface<1,double> psurface_;
 
     std::vector<StaticVector<double, 2> > domainNormals;
-
-    std::vector<StaticVector<double, 2> > targetVertices;
 
     std::vector<StaticVector<double, 2> > targetNormals;
 

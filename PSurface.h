@@ -400,5 +400,69 @@ public:
 
 };
 
+
+/** \brief Mapping from one simplicial surface to another -- 1d-in-2d specialization
+    \tparam ctype The type used for coordinates
+*/
+template <class ctype>
+class PSurface<1,ctype>
+{
+public:
+
+    class Node {
+    public:
+
+        Node() {}
+
+        Node(double dLP, double rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
+            : domainLocalPosition(dLP), rangeLocalPosition(rLP),
+              isNodeOnVertex(nOV), isNodeOnTargetVertex(nOTV),
+              rightRangeSegment(-1)
+        {
+            rangeSegments[0] = rangeSegment0;
+            rangeSegments[1] = rangeSegment1;
+        }
+
+        friend
+        std::ostream& operator<< (std::ostream& s, const Node& node)
+        {
+            s << node.domainLocalPosition << ",   " << node.rangeLocalPosition << ",   "
+              << ((node.isNodeOnVertex) ? "true" : "false") << "  "
+              << ((node.isNodeOnTargetVertex) ? "true" : "false") << "  --  "
+              << "rangeSegments: " << node.rangeSegments[0] << "  " << node.rangeSegments[1] 
+              << " -- " << node.rightRangeSegment << std::endl;
+            return s;
+        }
+
+        double domainLocalPosition;
+
+        double rangeLocalPosition;
+
+        bool isNodeOnVertex;
+        
+        bool isNodeOnTargetVertex;
+
+        int rangeSegments[2];
+
+        int rightRangeSegment;
+    };
+
+    class DomainSegment {
+    public:
+        std::vector<Node> nodes;
+
+        int points[2];
+
+        int neighbor[2];
+    };
+
+    std::vector<StaticVector<double, 2> > vertices;
+
+    std::vector<DomainSegment> domainSegments;
+
+    std::vector<StaticVector<double, 2> > targetVertices;
+
+};
+
 #endif
 
