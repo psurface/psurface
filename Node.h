@@ -1,27 +1,3 @@
-/////////////////////////////////////////////////////////////////
-/*
- * $Id: Node.h,v 1.2 2007/10/18 16:05:58 sander Exp $
- *
- * $Log: Node.h,v $
- * Revision 1.2  2007/10/18 16:05:58  sander
- * stuff from 'contact' merged, renamed to psurface
- *
- * Revision 1.1  2007/10/17 13:16:55  sander
- * moved here from the ZIB server
- *
- * Revision 1.3  2005/08/23 12:10:59  bzfsande
- * minor cleanup
- * mailtoauthor: sander@zib.de
- *
- * Revision 1.2  2004/10/01 13:08:37  bzfsande
- * using mclong instead of unsigned int in order to resolve overloading ambiguity
- * mailtoauthor: sander@zib.de
- *
- * Revision 1.1  2004/01/20 15:01:55  bzfsande
- * the Node class now gets its own file
- *
- */
-/////////////////////////////////////////////////////////////////
 #ifndef NODE_H
 #define NODE_H
 
