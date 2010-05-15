@@ -158,6 +158,7 @@ public:
 
     /// Returns a const reference to the node specified by a GlobalNodeIdx
     const Node<ctype>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
+
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
     StaticVector<ctype,3> imagePos(const GlobalNodeIdx& n) const {
@@ -166,31 +167,7 @@ public:
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    StaticVector<ctype,3> imagePos(int tri, NodeIdx node) const {
-        const Node<ctype>& cN = this->triangles(tri).nodes[node];
-
-        switch (cN.type) {
-        case Node<ctype>::GHOST_NODE: {
-            const Surface::Triangle& cT = surface->triangles[cN.getNodeNumber()];
-
-            StaticVector<ctype,3> p0(surface->points[cT.points[0]][0],surface->points[cT.points[0]][1],surface->points[cT.points[0]][2]);
-            StaticVector<ctype,3> p1(surface->points[cT.points[1]][0],surface->points[cT.points[1]][1],surface->points[cT.points[1]][2]);
-            StaticVector<ctype,3> p2(surface->points[cT.points[2]][0],surface->points[cT.points[2]][1],surface->points[cT.points[2]][2]);
-
-            return PlaneParam<ctype>::linearInterpol(cN.dP, p0, p1, p2);
-        }
-        case Node<ctype>::INTERSECTION_NODE:
-            return iPos[cN.getNodeNumber()];
-
-        default:
-            // Do a componentwise copy to get from McVec3f to StaticVector<ctype>
-            StaticVector<ctype,3> result;
-            return StaticVector<ctype,3>(surface->points[cN.getNodeNumber()][0],
-                                         surface->points[cN.getNodeNumber()][1],
-                                         surface->points[cN.getNodeNumber()][2]);
-        }
-
-    }
+    StaticVector<ctype,3> imagePos(int tri, NodeIdx node) const;
 
     /** \brief Returns the local coordinates of the image of a node with
      * respect to a given image triangle.
