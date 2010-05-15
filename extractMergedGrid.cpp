@@ -1,6 +1,13 @@
+#include <vector>
+
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
+#include "hxsurface/Surface.h"
+#endif
+
 #include <psurface/PSurface.h>
 #include <psurface/ContactToolBox.h>
-#include <vector>
 
 
 void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,

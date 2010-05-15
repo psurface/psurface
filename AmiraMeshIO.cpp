@@ -1,5 +1,11 @@
 #include <vector>
 
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
+#include "hxsurface/Surface.h"
+#endif
+
 #include <psurface/StaticVector.h>
 #include <psurface/AmiraMeshIO.h>
 #include <psurface/Domains.h>

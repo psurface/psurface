@@ -10,6 +10,12 @@
 #include <vector>
 #include <cmath>
 
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
+#include "hxsurface/Surface.h"
+#endif
+
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
 #endif

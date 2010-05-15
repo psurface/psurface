@@ -6,16 +6,6 @@
 #ifndef PARAMETRIZATION_H
 #define PARAMETRIZATION_H
 
-#ifdef PSURFACE_STANDALONE
-#include "TargetSurface.h"
-#else
-#include "hxsurface/Surface.h"
-#endif
-
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-#include <amiramesh/HxParamBundle.h>
-#endif
-
 #include <psurface/StaticVector.h>
 
 #include "SurfaceBase.h"
@@ -24,9 +14,10 @@
 #include "GlobalNodeIdx.h"
 #include "NodeBundle.h"
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
+class Surface;
+
 class AmiraMesh;
-#endif
+class HxParamBundle;
 
 /** The parametrization of an arbitrary surface over a simple base grid 
     \tparam dim Dimension of the surface
@@ -59,11 +50,7 @@ public:
     };
 
     /// Default constructor
-    PSurface(
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-                    HxParamBundle* bundle=NULL
-#endif
-                    );
+    PSurface(HxParamBundle* bundle=NULL);
 
     /// Destructor
     virtual ~PSurface();
@@ -120,7 +107,6 @@ public:
      */
     void setupOriginalSurface();
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
     /** \brief Copies the path information from the SurfacePathSet to the
      * parameters.
      *
@@ -134,7 +120,6 @@ public:
      * PSurface's own SurfacePathSet.
      */
     void getPaths(const HxParamBundle& parameters);
-#endif
 
     /** \brief Adds the triangular closure on each triangle.
      *
@@ -355,12 +340,15 @@ public:
     /// All base grid patches
     std::vector<Patch> patches;
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    /// A set of arbitrary parameters
+    /** \brief A set of arbitrary parameters
+        
+    Only used when libamiramesh is present */
     HxParamBundle* params;
 
+    /** \brief True if this class is the owner of the ParamBundle
+        
+    Only used when libamiramesh is present */
     bool hasOwnParamBundle;
-#endif
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
     std::vector<StaticVector<ctype,3> > iPos;

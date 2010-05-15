@@ -1,6 +1,12 @@
 #include <limits>
 #include <stdexcept>
 
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
+#include "hxsurface/Surface.h"
+#endif
+
 #include <psurface/ContactMapping.h>
 #include <psurface/NormalProjector.h>
 #include <psurface/StaticMatrix.h>
@@ -10,6 +16,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<double,2> 
                const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface
                const std::vector<std::tr1::array<double,2> >& coords2,  ///< The vertices of the second surface
                const std::vector<std::tr1::array<int,2> >& tri2,
+
                float epsilon,
                void (*obsDirections)(const double* pos, double* dir)
                )
