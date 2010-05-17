@@ -64,10 +64,8 @@ public:
 
     ///
     McEdge(int a, int b)
-        {
-            to = a;
-            from = b;
-        }
+        : to(a), from(b)
+    {}
 
     ///
     int numTriangles() const {return triangles.size();}
@@ -84,11 +82,7 @@ public:
 
     ///
     bool isConnectedToTriangle(int tri) const {
-        for (size_t i=0; i<triangles.size(); i++)
-            if (triangles[i]==tri)
-                return true;
-
-        return false;
+        return std::find(triangles.begin(), triangles.end(), tri) != triangles.end();
     }
 
     ///
@@ -104,11 +98,11 @@ public:
 
     ///
     bool replaceReferenceTo(int a, int b){
-        for(size_t i=0; i<triangles.size(); i++)
-            if (triangles[i] == a){
-                triangles[i] = b;
-                return true;
-            }
+        std::vector<int>::iterator it = std::find(triangles.begin(), triangles.end(), tri);
+        if (it != triangles.end()) {
+            *it = b;
+            return true;
+        }
 
         return false;
     }
