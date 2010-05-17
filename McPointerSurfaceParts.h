@@ -2,6 +2,7 @@
 #define MC_POINTER_SURFACE_PARTS
 
 #include <vector>
+#include <algorithm>
 
 #include <psurface/StaticVector.h>
 #include <psurface/StaticMatrix.h>
