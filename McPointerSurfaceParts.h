@@ -98,7 +98,7 @@ public:
 
     ///
     bool replaceReferenceTo(int a, int b){
-        std::vector<int>::iterator it = std::find(triangles.begin(), triangles.end(), tri);
+        std::vector<int>::iterator it = std::find(triangles.begin(), triangles.end(), a);
         if (it != triangles.end()) {
             *it = b;
             return true;
