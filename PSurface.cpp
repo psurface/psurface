@@ -22,6 +22,7 @@
 
 #include <psurface/PSurface.h>
 #include <psurface/GlobalNodeIdx.h>
+#include <psurface/Box.h>
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 template <int dim, class ctype>

@@ -15,6 +15,7 @@
 #include "NodeBundle.h"
 
 class Surface;
+template <class type, int dim> class Box;
 
 class AmiraMesh;
 class HxParamBundle;
