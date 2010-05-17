@@ -424,6 +424,15 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<double,2> 
 }
 
 template <class ctype>
+ContactMapping<3,ctype>::~ContactMapping()
+{
+    if (surface1_)
+        delete surface1_;
+    if (surface2_)
+        delete surface2_;
+}
+
+template <class ctype>
 void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<double,3> >& coords1,  ///< The vertices of the first surface
                          const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
                          const std::vector<std::tr1::array<double,3> >& coords2,  ///< The vertices of the second surface
