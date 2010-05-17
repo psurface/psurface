@@ -10,7 +10,6 @@
 
 #include <psurface/StaticVector.h>
 #include <psurface/StaticMatrix.h>
-#include <psurface/Box.h>
 #include "McPointerSurfaceParts.h"
 
 
@@ -530,14 +529,6 @@ protected:
         ctype lambda = (B[1]*C[0] - B[0]*C[1]) / det;
 
         return (mu>-eps && mu<1+eps && lambda>-eps && lambda<1+eps);
-    }
-
-public:
-    /// 
-    bool intersectionTriangleBox(int n, const Box<ctype, 3>& box) {
-        return box.contains(vertices(triangles(n).vertices[0])) ||
-            box.contains(vertices(triangles(n).vertices[1])) ||
-            box.contains(vertices(triangles(n).vertices[2]));
     }
 
     //@}
