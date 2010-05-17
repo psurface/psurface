@@ -5,7 +5,6 @@
 
 #include <psurface/StaticVector.h>
 #include <psurface/StaticMatrix.h>
-#include <psurface/Box.h>
 
 
 /** This is the base class for vertices in a McSurfaceBase.  

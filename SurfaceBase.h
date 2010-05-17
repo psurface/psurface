@@ -10,6 +10,7 @@
 
 #include <psurface/StaticVector.h>
 #include <psurface/StaticMatrix.h>
+#include <psurface/Box.h>
 #include "McPointerSurfaceParts.h"
 
 
