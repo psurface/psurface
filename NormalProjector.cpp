@@ -1,5 +1,6 @@
 #include <psurface/ContactBoundary.h>
 #include <psurface/NormalProjector.h>
+#include <psurface/PSurfaceFactory.h>
 
 #include <psurface/StaticVector.h>
 #include <psurface/StaticMatrix.h>
@@ -15,6 +16,9 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
                                  void (*directions)(const double* pos, double* dir))
 {
     const double eps = 0.0001;
+
+    PSurfaceFactory<2,ctype> factory(psurface_);
+
     const Surface* surf = psurface_->surface;
 
     // //////////////////////////
@@ -155,7 +159,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
                 // We want that the line from the domain surface to its projection
                 // approaches the target surface from the front side, i.e., it should
                 // not pass through the body represented by the target surface.
-                // We do a simplified test by compsurface_ing the connecting segment
+                // We do a simplified test by comparing the connecting segment
                 // with the normal at the target surface and the normal at the
                 // domain surface
                 StaticVector<ctype,3> base       = p0*x[0] + p1*x[1] + (1-x[0]-x[1])*p2;
@@ -285,7 +289,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     }
 
     // ///////////////////////////////////////////////////////////////////
-    //   Place ghost nodes at the vertices of the intermediate manifold
+    //   Place ghost nodes at the vertices of the domain surface
     // ///////////////////////////////////////////////////////////////////
     for (int i=0; i<psurface_->getNumVertices(); i++) {
 
@@ -293,24 +297,26 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
         if (vertexHasBeenHandled[i])
             continue;
 
-        StaticVector<double,2> bestDPos;
+        StaticVector<ctype,2> bestDPos;
         int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
-        const StaticVector<ctype,3>& basePointCtype = psurface_->vertices(i);
-        const StaticVector<double,3> basePoint(basePointCtype[0], basePointCtype[1], basePointCtype[2]);
-        const StaticVector<double,3>& normal    = normals[i];
+        const StaticVector<ctype,3>& basePoint = psurface_->vertices(i);
+        StaticVector<ctype,3> normal;
+        normal[0] = normals[i][0];
+        normal[1] = normals[i][1];
+        normal[2] = normals[i][2];
 
-        //for (j=0; j<reducedContactPatch.triIdx.size(); j++) {
         for (int j=0; j<contactPatch.triIdx.size(); j++) {
 
-            StaticVector<double,2> domainPos;
-            double dist;
+            StaticVector<ctype,2> domainPos;
+            ctype dist;
 
             // magic to be able to take a reference of a McVec3f when compiled within Amira
             const StaticVector<ctype,3>& p0 = *(StaticVector<ctype,3>*)&surf->points[contactPatch.triangles(j).points[0]][0];
             const StaticVector<ctype,3>& p1 = *(StaticVector<ctype,3>*)&surf->points[contactPatch.triangles(j).points[1]][0];
             const StaticVector<ctype,3>& p2 = *(StaticVector<ctype,3>*)&surf->points[contactPatch.triangles(j).points[2]][0];
+
 
             if (rayIntersectsTriangle(basePoint, normal, p0, p1, p2, domainPos, dist, eps)) {
 
@@ -326,7 +332,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
         // Set ghost node mapping to the closest triangle intersected by the normal ray
         if (bestTri != -1)
-            insertGhostNodeAtVertex(i, contactPatch.triIdx[bestTri], bestDPos);
+            factory.insertGhostNode(i, contactPatch.triIdx[bestTri], bestDPos);
 
     }
 
@@ -1390,22 +1396,6 @@ bool NormalProjector<ctype>::onSameTriangle(const int& tri, const NodeBundle& b)
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertGhostNodeAtVertex(int v, int targetTri, const StaticVector<double,2>& localTargetCoords)
-{
-    std::vector<int> neighbors = psurface_->getTrianglesPerVertex(v);
-
-    for (int i=0; i<neighbors.size(); i++) {
-
-        int corner = psurface_->triangles(neighbors[i]).getCorner(v);
-        StaticVector<ctype,2> lTC_Ctype(localTargetCoords[0], localTargetCoords[1]);
-        psurface_->addGhostNode(neighbors[i], corner, targetTri, lTC_Ctype);
-
-    }
- 
-}
-
-
-template <class ctype>
 void NormalProjector<ctype>::addCornerNodeBundle(int v, int nN)
 {
     std::vector<int> neighbors = psurface_->getTrianglesPerVertex(v);
@@ -1511,35 +1501,35 @@ bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>
 
 
 template <class ctype>
-bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>& basePoint, const StaticVector<double,3>& direction,
+bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<ctype,3>& basePoint, const StaticVector<ctype,3>& direction,
                                             const StaticVector<ctype,3>& a_, const StaticVector<ctype,3>& b_, const StaticVector<ctype,3>& c_,
-                                            StaticVector<double,2>& localCoords, double& normalDist, double eps)
+                                            StaticVector<ctype,2>& localCoords, ctype& normalDist, double eps)
 {
-    const StaticVector<double,3> &p = basePoint;
+    const StaticVector<ctype,3> &p = basePoint;
 
-    StaticVector<double,3> a(a_[0], a_[1], a_[2]);
-    StaticVector<double,3> b(b_[0], b_[1], b_[2]);
-    StaticVector<double,3> c(c_[0], c_[1], c_[2]);
+    StaticVector<ctype,3> a(a_[0], a_[1], a_[2]);
+    StaticVector<ctype,3> b(b_[0], b_[1], b_[2]);
+    StaticVector<ctype,3> c(c_[0], c_[1], c_[2]);
 
-    StaticVector<double,3> e1 = b-a;
-    StaticVector<double,3> e2 = c-a;
+    StaticVector<ctype,3> e1 = b-a;
+    StaticVector<ctype,3> e2 = c-a;
     e1.normalize();
     e2.normalize();
-    bool parallel = fabs(StaticMatrix<double,3>(e1, e2, direction).det()) <eps;
+    bool parallel = fabs(StaticMatrix<ctype,3>(e1, e2, direction).det()) <eps;
         
         // Cramer's rule
         
         if (!parallel){
 
-            double det = StaticMatrix<double,3>(b-a, c-a, direction).det();
+            ctype det = StaticMatrix<ctype,3>(b-a, c-a, direction).det();
             
             // triangle and edge are not parallel
-            double nu = StaticMatrix<double,3>(b-a, c-a, p-a).det() / det;
+            ctype nu = StaticMatrix<ctype,3>(b-a, c-a, p-a).det() / det;
 
-            double lambda = StaticMatrix<double,3>(p-a, c-a, direction).det() / det;
+            ctype lambda = StaticMatrix<ctype,3>(p-a, c-a, direction).det() / det;
             if (lambda<-eps) return false;
 
-            double mu = StaticMatrix<double,3>(b-a, p-a, direction).det() / det;
+            ctype mu = StaticMatrix<ctype,3>(b-a, p-a, direction).det() / det;
             if (mu<-eps) return false;
 
             if (lambda + mu > 1+eps) 
@@ -1555,7 +1545,7 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<double,3>&
         } else {
 
             // triangle and edge are parallel
-            double alpha = StaticMatrix<double,3>(b-a, c-a, p-a).det();
+            ctype alpha = StaticMatrix<ctype,3>(b-a, c-a, p-a).det();
             if (alpha<-eps || alpha>eps)
                 return false;
             else {

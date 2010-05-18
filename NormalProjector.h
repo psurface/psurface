@@ -93,11 +93,6 @@ protected:
                                       typename Node<ctype>::NodeType& currType, int& currTri,
                                       int& enteringEdge);
 
-    void insertGhostNodeAtVertex(int v, 
-                                 int targetTri, 
-                                 const StaticVector<double,2>& localTargetCoords
-                                 );
-
     void addCornerNodeBundle(int v, 
                              int nN
                              );
@@ -134,11 +129,11 @@ protected:
     /** The case of parallel ray and triangle is not considered an intersection
      * no matter whether it is or not.
      */
-    bool rayIntersectsTriangle(const StaticVector<double,3>& basePoint, 
-                               const StaticVector<double,3>& direction,
+    bool rayIntersectsTriangle(const StaticVector<ctype,3>& basePoint, 
+                               const StaticVector<ctype,3>& direction,
                                const StaticVector<ctype,3>& a, const StaticVector<ctype,3>& b, const StaticVector<ctype,3>& c,
-                               StaticVector<double,2>& localCoords,
-                               double& normalDist,
+                               StaticVector<ctype,2>& localCoords,
+                               ctype& normalDist,
                                double eps);
 
     // ///////////////////////////////////////////////////////////////
