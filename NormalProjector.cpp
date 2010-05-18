@@ -117,7 +117,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
     }
     
-    for (int i=0; i<contactPatch.vertices.size(); i++)
+    for (size_t i=0; i<contactPatch.vertices.size(); i++)
         if (hasTargetNormal[contactPatch.vertices[i]])
             targetNormals[contactPatch.vertices[i]].normalize();
 
@@ -133,13 +133,13 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     std::vector<bool> vertexHasBeenHandled(psurface_->getNumVertices(), false);
     
     // Loop over the vertices of the target surface
-    for (int i=0; i<contactPatch.vertices.size(); i++) {
+    for (size_t i=0; i<contactPatch.vertices.size(); i++) {
 
-        StaticVector<double,2> bestDPos;
+        StaticVector<ctype,2> bestDPos;
         int bestTri = -1;
         double bestDist = std::numeric_limits<double>::max();
 
-        for (int j=0; j<psurface_->getNumTriangles(); j++) {
+        for (size_t j=0; j<psurface_->getNumTriangles(); j++) {
 
             const StaticVector<ctype,3>& p0 = psurface_->vertices(psurface_->triangles(j).vertices[0]);
             const StaticVector<ctype,3>& p1 = psurface_->vertices(psurface_->triangles(j).vertices[1]);
@@ -182,7 +182,8 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
                 if (distance < bestDist) {
 
                     bestDist = distance;
-                    bestDPos = StaticVector<double,2>(x[0], x[1]);
+                    bestDPos[0] = x[0];
+                    bestDPos[1] = x[1];
                     bestTri  = j;
 
                 }
@@ -193,96 +194,11 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
         
         if (bestTri != -1) {
 
-            // determine which type of node to add
-            typename Node<ctype>::NodeType newType = Node<ctype>::INTERIOR_NODE;
-            int dir = -1;
-            double mu;
-
-            // if the normal projection hits a base grid vertex, this is the vertex
-            int v = -1;
-
-            if (bestDPos[0] < eps) {
-                dir = 1;
-                mu = 1-bestDPos[1];
-                if (bestDPos[1] < eps) {
-                    newType = Node<ctype>::CORNER_NODE;
-                    v       = psurface_->triangles(bestTri).vertices[2];
-                } else if (bestDPos[1] > 1-eps) {
-                    newType = Node<ctype>::CORNER_NODE;
-                    v       = psurface_->triangles(bestTri).vertices[1];
-                } else {
-                    newType = Node<ctype>::TOUCHING_NODE;
-                }
-            } else if (bestDPos[1] < eps) {
-                dir = 2;
-                mu = bestDPos[0];
-                if (bestDPos[0] < eps) {
-                    newType = Node<ctype>::CORNER_NODE;
-                    v       = psurface_->triangles(bestTri).vertices[2];
-                } else if (bestDPos[0] > 1-eps) {
-                    newType = Node<ctype>::CORNER_NODE;
-                    v       = psurface_->triangles(bestTri).vertices[0];
-                } else {
-                    newType = Node<ctype>::TOUCHING_NODE;
-                }
-            } else if (1-bestDPos[0]-bestDPos[1] < eps) {
-                dir = 0;
-                mu = 1-bestDPos[0];
-                if (bestDPos[1] < eps) {
-                    newType = Node<ctype>::CORNER_NODE;
-                    v       = psurface_->triangles(bestTri).vertices[0];
-                } else if (bestDPos[1] > 1-eps) {
-                    newType = Node<ctype>::CORNER_NODE;
-                    v       = psurface_->triangles(bestTri).vertices[1];
-                } else {
-                    newType = Node<ctype>::TOUCHING_NODE;
-                }
-            }
-                    
-            StaticVector<ctype,2> bestDPosCtype(bestDPos[0], bestDPos[1]);
-
-            if (newType==Node<ctype>::TOUCHING_NODE) {
-
-                // find the other triangle, if there is one
-                int neighboringTri = psurface_->getNeighboringTriangle(bestTri, dir);
-
-                if (neighboringTri == -1) {
-                    NodeIdx newNodeNumber = psurface_->addTouchingNode(bestTri, bestDPosCtype, dir, contactPatch.vertices[i]);
-                    projectedTo[contactPatch.vertices[i]].resize(1);
-                    projectedTo[contactPatch.vertices[i]][0].setValue(bestTri, newNodeNumber);
-                } else {
-                    // find domain pos on other triangle
-                    int commonEdge = psurface_->triangles(bestTri).getCommonEdgeWith(psurface_->triangles(neighboringTri));
-                    int dir2 = psurface_->triangles(neighboringTri).getEdge(commonEdge);
-                    StaticVector<ctype,2> dP2((dir2==0)*(mu) + (dir2==2)*(1-mu), (dir2==0)*(1-mu) + (dir2==1)*(mu));
-
-                    // insert touching node pair
-                    NodeIdx newNodeNumber = psurface_->addTouchingNodePair(bestTri, neighboringTri, bestDPosCtype, dP2, 
-                                                                     dir, dir2, contactPatch.vertices[i]);
-                    projectedTo[contactPatch.vertices[i]].resize(2);
-                    projectedTo[contactPatch.vertices[i]][0].setValue(bestTri, newNodeNumber);
-                    projectedTo[contactPatch.vertices[i]][1].setValue(neighboringTri, psurface_->triangles(neighboringTri).nodes.size()-1);
-                }
-                
-            } else if (newType==Node<ctype>::CORNER_NODE) {
-
-                addCornerNodeBundle(v, contactPatch.vertices[i]);
-                vertexHasBeenHandled[v] = true;
-                std::vector<int> neighboringTris = psurface_->getTrianglesPerVertex(v);
-                projectedTo[contactPatch.vertices[i]].resize(neighboringTris.size());
-                for (int j=0; j<neighboringTris.size(); j++) {
-                    projectedTo[contactPatch.vertices[i]][j].setValue(neighboringTris[j],
-                                                                      psurface_->triangles(neighboringTris[j]).nodes.size()-1);
-                }
-
-            } else {
-
-                NodeIdx newNodeNumber = psurface_->addInteriorNode(bestTri, bestDPosCtype, contactPatch.vertices[i]);
-            
-                projectedTo[contactPatch.vertices[i]].resize(1);
-                projectedTo[contactPatch.vertices[i]][0].setValue(bestTri, newNodeNumber);
-            
-            }
+            int domainVertex;
+            factory.insertTargetVertexMapping(contactPatch.vertices[i], bestTri, bestDPos, 
+                                              projectedTo[contactPatch.vertices[i]], domainVertex);
+            if (domainVertex >= 0)
+                vertexHasBeenHandled[domainVertex] = true;
             
         }
         
@@ -1392,21 +1308,6 @@ bool NormalProjector<ctype>::onSameTriangle(const int& tri, const NodeBundle& b)
             return true;
 
     return false;
-}
-
-
-template <class ctype>
-void NormalProjector<ctype>::addCornerNodeBundle(int v, int nN)
-{
-    std::vector<int> neighbors = psurface_->getTrianglesPerVertex(v);
-
-    for (int i=0; i<neighbors.size(); i++) {
-
-        int corner = psurface_->triangles(neighbors[i]).getCorner(v);
-        psurface_->addCornerNode(neighbors[i], corner, nN);
-
-    }
-        
 }
 
 
