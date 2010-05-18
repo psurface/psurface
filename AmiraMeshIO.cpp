@@ -329,7 +329,8 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
     PSurfaceFactory<2,ctype> factory(psurface);
     
-    psurface->surface = surf;
+    // Target surface already exists
+    factory.setTargetSurface(surf);
     
     psurface->getPaths(am->parameters);
 

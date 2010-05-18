@@ -1,7 +1,8 @@
 #ifndef PSURFACE_FACTORY_H
 #define PSURFACE_FACTORY_H
 
-#include <psurface/PSurface.h>
+template <int dim, class ctype> class PSurface;
+class Surface;
 
 template <int dim, class ctype>
 class PSurfaceFactory
@@ -12,10 +13,9 @@ public:
         : psurface_(psurface)
     {}
 
-    void insertVertex(const StaticVector<ctype,dim+1>& position)
-    {
-        psurface_->newVertex(position);
-    }
+    void setTargetSurface(const Surface* surface);
+
+    void insertVertex(const StaticVector<ctype,dim+1>& position);
 
     /** \brief Insert a new domain triangle
 

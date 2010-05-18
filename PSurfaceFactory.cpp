@@ -1,6 +1,18 @@
 #include <psurface/PSurfaceFactory.h>
 
 template <int dim, class ctype>
+void PSurfaceFactory<dim,ctype>::setTargetSurface(const Surface* surface)
+{
+    psurface_->surface = surface;
+}
+
+template <int dim, class ctype>
+void PSurfaceFactory<dim,ctype>::insertVertex(const StaticVector<ctype,dim+1>& position)
+{
+    psurface_->newVertex(position);
+}
+
+template <int dim, class ctype>
 unsigned int  PSurfaceFactory<dim,ctype>::insertSimplex(const std::tr1::array<unsigned int, dim+1>& v)
 {
     assert(dim==2);
