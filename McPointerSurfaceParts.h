@@ -64,7 +64,7 @@ public:
 
     ///
     McEdge(int a, int b)
-        : to(a), from(b)
+        : from(b), to(a)
     {}
 
     ///

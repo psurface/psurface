@@ -91,9 +91,8 @@ public:
 
     ///
     void killAll(){
-        for (int i=0; i<triangles.size(); i++){
+        for (size_t i=0; i<triangles.size(); i++)
             par->removeTriangle(triangles[i]);
-        }
     }
 
     /**@name Evaluatation methods */
