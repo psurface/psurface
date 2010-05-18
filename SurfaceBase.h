@@ -263,7 +263,7 @@ public:
         // A temporary set for fast searching and insertion
         std::set<int> resultSet;
 
-        for (int i=0; i<cV.edges.size(); i++) {
+        for (size_t i=0; i<cV.edges.size(); i++) {
 
             const EdgeType& cE = edges(cV.edges[i]);
             resultSet.insert(cE.triangles.begin(),cE.triangles.end());
