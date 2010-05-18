@@ -1,6 +1,8 @@
 #ifndef PSURFACE_FACTORY_H
 #define PSURFACE_FACTORY_H
 
+#include <psurface/PSurface.h>
+
 template <int dim, class ctype>
 class PSurfaceFactory
 {
@@ -19,13 +21,7 @@ public:
 
     \return The index of the newly inserted triangle
     */
-    unsigned int insertSimplex(const std::tr1::array<unsigned int, dim+1>& v)
-    {
-        assert(dim==2);
-        unsigned int idx = psurface_->createSpaceForTriangle(v[0], v[1], v[2]);
-        psurface_->integrateTriangle(idx);
-        return idx;
-    }
+    unsigned int insertSimplex(const std::tr1::array<unsigned int, dim+1>& v);
 
 private:
 
