@@ -45,6 +45,7 @@ cp Domains.cpp                  $BASENAME/src
 cp Iterators.cpp                $BASENAME/src
 cp PSurface.cpp                 $BASENAME/src
 cp PlaneParam.cpp               $BASENAME/src
+cp PSurfaceFactory.cpp          $BASENAME/src
 cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
 cp AmiraMeshIO.cpp              $BASENAME/src
 
