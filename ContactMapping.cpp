@@ -528,3 +528,5 @@ template class ContactMapping<2,float>;
 template class ContactMapping<2,double>;
 
 template class ContactMapping<3,float>;
+template class ContactMapping<3,double>;
+
