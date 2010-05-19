@@ -1312,21 +1312,15 @@ bool NormalProjector<ctype>::onSameTriangle(const int& tri, const NodeBundle& b)
 
 
 template <class ctype>
-bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<ctype,3>& p0_f, const StaticVector<ctype,3>& p1_f, const StaticVector<ctype,3>& p2_f,
+bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<ctype,3>& p0, const StaticVector<ctype,3>& p1, const StaticVector<ctype,3>& p2,
                                                      const StaticVector<ctype,3>& n0, const StaticVector<ctype,3>& n1, const StaticVector<ctype,3>& n2,
                                                      const StaticVector<ctype,3>& target, StaticVector<ctype,3>& x)
 {
-    int i;
     const ctype eps = 1e-6;
     // Fix some initial value
     x.assign(1.0);
 
-    // transform to ctype
-    StaticVector<ctype,3> p0(p0_f[0], p0_f[1], p0_f[2]);
-    StaticVector<ctype,3> p1(p1_f[0], p1_f[1], p1_f[2]);
-    StaticVector<ctype,3> p2(p2_f[0], p2_f[1], p2_f[2]);
-
-    for (i=0; i<10; i++) {
+    for (int i=0; i<10; i++) {
 
         // compute Newton correction
         StaticVector<ctype,3> Fxk = x[0]*(p0-p2) + x[1]*(p1-p2) + x[2]*x[0]*(n0-n2) + x[2]*x[1]*(n1-n2) + x[2]*n2 + p2;// - target;
