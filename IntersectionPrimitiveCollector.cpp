@@ -22,19 +22,19 @@ void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,
     // Set up point location structure
     // Can we use the routine in PSurface<2,ctype> ???
     // ///////////////////////////////////////////////////
-    for (int i=0; i<psurface->getNumTriangles(); i++) {
+    for (size_t i=0; i<psurface->getNumTriangles(); i++) {
 
         DomainTriangle<ctype>& cT = psurface->triangles(i);
 
         cT.insertExtraEdges();
 
-        for (int k=0; k<cT.nodes.size(); k++)
+        for (size_t k=0; k<cT.nodes.size(); k++)
             cT.makeCyclicGeometrically(cT.nodes[k]);
 
         // the standard insertExtraEdges can miss edges if ghost nodes are present.  
         // We insert them now
         for (int k=0; k<3; k++){
-            // size() returns an unsigned type, which underflows if edgePoints[k] is empty
+            // reason for the cast: size() returns an unsigned type, which underflows if edgePoints[k] is empty
             for (int l=0; l<((int)cT.edgePoints[k].size())-1; l++) {
 
                 typename PlaneParam<ctype>::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
@@ -47,12 +47,12 @@ void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,
         }
 
         // and since we have added more edges, we have to redo the cyclic ordering
-        for (int k=0; k<cT.nodes.size(); k++)
+        for (size_t k=0; k<cT.nodes.size(); k++)
             cT.makeCyclicGeometrically(cT.nodes[k]);
         
         //
         for (int k=0; k<3; k++){
-            for (int l=0; l<cT.edgePoints[k].size(); l++) {
+            for (size_t l=0; l<cT.edgePoints[k].size(); l++) {
                 
                 if (!cT.nodes[cT.edgePoints[k][l]].isOnCorner()) {
                     cT.nodes[cT.edgePoints[k][l]].setDomainEdge(k);
@@ -70,7 +70,7 @@ void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,
     std::vector<int> nonMortarTargetTris = psurface->domainSurfaceTriangleNumbers;
 
     //
-    for (int i=0; i<psurface->getNumTriangles(); i++) {
+    for (size_t i=0; i<psurface->getNumTriangles(); i++) {
 
         const DomainTriangle<ctype>& cT = psurface->triangles(i);
 
