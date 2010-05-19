@@ -138,9 +138,10 @@ void ContactToolBox<ctype>::contactOracle(const Surface* surf1, const Surface* s
     std::vector<StaticVector<ctype,3> > points2(surf2->points.size());        
 
     for (int i=0; i<surf2->points.size(); i++){
-        
-        points2[i] = *(StaticVector<ctype,3>*)&surf2->points[i];
-        if (intersectBox.contains(surf2->points[i]))
+
+        for (int j=0; j<3; j++)
+            points2[i][j] = surf2->points[i][j];
+        if (intersectBox.contains(points2[i]))
             mdOctree2.insert(&points2[i], &intersectionFunctor);
         
     }
