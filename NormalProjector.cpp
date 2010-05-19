@@ -1347,7 +1347,7 @@ bool NormalProjector<ctype>::onSameTriangle(const NodeBundle& a, const NodeBundl
 template <class ctype>
 bool NormalProjector<ctype>::onSameTriangle(const int& tri, const NodeBundle& b) const
 {
-    for (int j=0; j<b.size(); j++)
+    for (size_t j=0; j<b.size(); j++)
         if (tri==b[j].tri)
             return true;
 
@@ -1395,17 +1395,12 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<c
 
 
 template <class ctype>
-bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>& q0_f, const StaticVector<ctype,3>& q1_f,
-                                              const StaticVector<ctype,3>& p0_f, const StaticVector<ctype,3>& p1_f,
+bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>& q0, const StaticVector<ctype,3>& q1,
+                                              const StaticVector<ctype,3>& p0, const StaticVector<ctype,3>& p1,
                                               const StaticVector<ctype,3>& n0, const StaticVector<ctype,3>& n1,
                                               StaticVector<ctype,3>& x)
 {
     int i;
-    // transform to ctype values
-    StaticVector<ctype,3> q0(q0_f[0], q0_f[1], q0_f[2]);
-    StaticVector<ctype,3> q1(q1_f[0], q1_f[1], q1_f[2]);
-    StaticVector<ctype,3> p0(p0_f[0], p0_f[1], p0_f[2]);
-    StaticVector<ctype,3> p1(p1_f[0], p1_f[1], p1_f[2]);
 
     // Fix some initial value
     // sometimes it only works when the initial value is an intersection...
@@ -1441,14 +1436,10 @@ bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>
 
 template <class ctype>
 bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<ctype,3>& basePoint, const StaticVector<ctype,3>& direction,
-                                            const StaticVector<ctype,3>& a_, const StaticVector<ctype,3>& b_, const StaticVector<ctype,3>& c_,
+                                            const StaticVector<ctype,3>& a, const StaticVector<ctype,3>& b, const StaticVector<ctype,3>& c,
                                             StaticVector<ctype,2>& localCoords, ctype& normalDist, ctype eps)
 {
     const StaticVector<ctype,3> &p = basePoint;
-
-    StaticVector<ctype,3> a(a_[0], a_[1], a_[2]);
-    StaticVector<ctype,3> b(b_[0], b_[1], b_[2]);
-    StaticVector<ctype,3> c(c_[0], c_[1], c_[2]);
 
     StaticVector<ctype,3> e1 = b-a;
     StaticVector<ctype,3> e2 = c-a;
@@ -1504,7 +1495,7 @@ NodeIdx NormalProjector<ctype>::getCornerNode(const DomainTriangle<ctype>& cT, i
 {
     assert(corner>=0 && corner<3);
 
-    for (int i=0; i<cT.nodes.size(); i++)
+    for (size_t i=0; i<cT.nodes.size(); i++)
         if ((cT.nodes[i].isCORNER_NODE() || cT.nodes[i].isGHOST_NODE()) &&
             cT.nodes[i].getCorner()==corner)
             return i;
@@ -1525,8 +1516,8 @@ typename Node<ctype>::NodeType NormalProjector<ctype>::type(const NodeBundle& b)
 template <class ctype>
 int NormalProjector<ctype>::getCommonTri(const NodeBundle& a, const NodeBundle& b)
 {
-    for (int i=0; i<a.size(); i++)
-        for (int j=0; j<b.size(); j++)
+    for (size_t i=0; i<a.size(); i++)
+        for (size_t j=0; j<b.size(); j++)
             if (a[i].tri==b[j].tri)
                 return a[i].tri;
 
@@ -1539,8 +1530,8 @@ std::vector<int> NormalProjector<ctype>::getCommonTris(const NodeBundle& a, cons
 {
     std::vector<int> result;
 
-    for (int i=0; i<a.size(); i++)
-        for (int j=0; j<b.size(); j++)
+    for (size_t i=0; i<a.size(); i++)
+        for (size_t j=0; j<b.size(); j++)
             if (a[i].tri==b[j].tri)
                 result.push_back(a[i].tri);
 
