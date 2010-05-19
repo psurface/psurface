@@ -151,10 +151,12 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
             StaticVector<ctype,3> x; // the unknown...
 
-            if (computeInverseNormalProjection(p0, p1, p2, n0, n1, n2, 
-                                               // magic to use a McVec3f as the argument
-                                               *(StaticVector<ctype,3>*)&surf->points[contactPatch.vertices[i]][0], 
-                                               x)) {
+            // magic to use a McVec3f as the argument
+            StaticVector<ctype,3> targetVertex;
+            for (int k=0; k<3; k++)
+                targetVertex[k] = surf->points[contactPatch.vertices[i]][k];
+
+            if (computeInverseNormalProjection(p0, p1, p2, n0, n1, n2, targetVertex, x)) {
 
                 // We want that the line from the domain surface to its projection
                 // approaches the target surface from the front side, i.e., it should
