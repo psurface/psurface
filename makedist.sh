@@ -57,7 +57,7 @@ cp ContactMapping.h             $BASENAME/include/psurface
 
 cp NormalProjector.cpp          $BASENAME/src
 cp buildContactSurface.cpp      $BASENAME/src
-cp extractMergedGrid.cpp        $BASENAME/src
+cp IntersectionPrimitiveCollector.cpp $BASENAME/src
 cp ContactMapping.cpp           $BASENAME/src
 
 cp Makefile.standalone          $BASENAME/src/Makefile
