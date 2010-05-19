@@ -230,11 +230,13 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             StaticVector<ctype,2> domainPos;
             ctype dist;
 
-            // magic to be able to take a reference of a McVec3f when compiled within Amira
-            const StaticVector<ctype,3>& p0 = *(StaticVector<ctype,3>*)&surf->points[contactPatch.triangles(j).points[0]][0];
-            const StaticVector<ctype,3>& p1 = *(StaticVector<ctype,3>*)&surf->points[contactPatch.triangles(j).points[1]][0];
-            const StaticVector<ctype,3>& p2 = *(StaticVector<ctype,3>*)&surf->points[contactPatch.triangles(j).points[2]][0];
-
+            // copy the coordinates, because they are stored in a McVec3f when compiled as part of Amira
+            StaticVector<ctype,3> p0, p1, p2;
+            for (int k=0; k<3; k++) {
+                p0[k] = surf->points[contactPatch.triangles(j).points[0]][k];
+                p1[k] = surf->points[contactPatch.triangles(j).points[1]][k];
+                p2[k] = surf->points[contactPatch.triangles(j).points[2]][k];
+            }
 
             if (rayIntersectsTriangle(basePoint, normal, p0, p1, p2, domainPos, dist, eps)) {
 
@@ -367,9 +369,13 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
 
         const Surface* surf = psurface_->surface;
 
+        StaticVector<ctype,3> targetFrom, targetTo;
+        for (int j=0; j<3; j++) {
+            targetFrom[j] = surf->points[from][j];
+            targetTo[j]   = surf->points[to][j];
+        }
 
-        if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0], 
-                                    *(StaticVector<ctype,3>*)&surf->points[to][0],
+        if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
@@ -475,8 +481,14 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
         int q = psurface_->triangles(curr[0].tri).vertices[(i+1)%3];
 
         const Surface* surf = psurface_->surface;
-        if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0], 
-                                    *(StaticVector<ctype,3>*)&surf->points[to][0],
+
+        StaticVector<ctype,3> targetFrom, targetTo;
+        for (int j=0; j<3; j++) {
+            targetFrom[j] = surf->points[from][j];
+            targetTo[j]   = surf->points[to][j];
+        }
+
+        if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
@@ -583,8 +595,13 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
-            if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
-                                        *(StaticVector<ctype,3>*)&surf->points[to][0],
+            StaticVector<ctype,3> targetFrom, targetTo;
+            for (int k=0; k<3; k++) {
+                targetFrom[k] = surf->points[from][k];
+                targetTo[k]   = surf->points[to][k];
+            }
+
+            if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                         psurface_->vertices(p), psurface_->vertices(q),
                                         normals[p], normals[q], x)) {
                 
@@ -690,8 +707,13 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
         int p = psurface_->triangles(cT).vertices[(thisCorner+1)%3];
         int q = psurface_->triangles(cT).vertices[(thisCorner+2)%3];
 
-        if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
-                                    *(StaticVector<ctype,3>*)&surf->points[to][0],
+        StaticVector<ctype,3> targetFrom, targetTo;
+        for (int j=0; j<3; j++) {
+            targetFrom[j] = surf->points[from][j];
+            targetTo[j]   = surf->points[to][j];
+        }
+
+        if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
             
@@ -866,9 +888,13 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
 
         const Surface* surf = psurface_->surface;
 
+        StaticVector<ctype,3> targetFrom, targetTo;
+        for (int j=0; j<3; j++) {
+            targetFrom[j] = surf->points[from][j];
+            targetTo[j]   = surf->points[to][j];
+        }
 
-        if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
-                                    *(StaticVector<ctype,3>*)&surf->points[to][0],
+        if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
@@ -976,8 +1002,14 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
         int q = psurface_->triangles(currTri).vertices[(i+1)%3];
         
         const Surface* surf = psurface_->surface;
-        if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
-                                    *(StaticVector<ctype,3>*)&surf->points[to][0],
+
+        StaticVector<ctype,3> targetFrom, targetTo;
+        for (int j=0; j<3; j++) {
+            targetFrom[j] = surf->points[from][j];
+            targetTo[j]   = surf->points[to][j];
+        }
+
+        if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
@@ -1089,8 +1121,13 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
-            if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
-                                        *(StaticVector<ctype,3>*)&surf->points[to][0],
+            StaticVector<ctype,3> targetFrom, targetTo;
+            for (int k=0; k<3; k++) {
+                targetFrom[k] = surf->points[from][k];
+                targetTo[k]   = surf->points[to][k];
+            }
+
+            if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                         psurface_->vertices(p), psurface_->vertices(q),
                                         normals[p], normals[q], x)) {
                 
@@ -1200,8 +1237,13 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
         int p = psurface_->triangles(cT).vertices[(thisCorner+1)%3];
         int q = psurface_->triangles(cT).vertices[(thisCorner+2)%3];
 
-        if (edgeIntersectsNormalFan(*(StaticVector<ctype,3>*)&surf->points[from][0],
-                                    *(StaticVector<ctype,3>*)&surf->points[to][0],
+        StaticVector<ctype,3> targetFrom, targetTo;
+        for (int j=0; j<3; j++) {
+            targetFrom[j] = surf->points[from][j];
+            targetTo[j]   = surf->points[to][j];
+        }
+
+        if (edgeIntersectsNormalFan(targetFrom, targetTo,
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
             
