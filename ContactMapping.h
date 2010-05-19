@@ -8,6 +8,8 @@
 #include <psurface/StaticVector.h>
 #include <psurface/PSurface.h>
 #include <psurface/ContactToolBox.h>
+#include <psurface/IntersectionPrimitive.h>
+#include <psurface/IntersectionPrimitiveCollector.h>
 
 template <int dim, class ctype>
 class ContactMapping {};
@@ -26,7 +28,7 @@ public:
 
     void getOverlaps(std::vector<IntersectionPrimitive<1,ctype> >& overlaps)
     {
-        ContactToolBox<ctype>::extractMergedGrid(&psurface_, overlaps);
+        IntersectionPrimitiveCollector<ctype>::collect(&psurface_, overlaps);
     }
 
     // /////////////////////////////////////////////
@@ -62,7 +64,7 @@ public:
                );
 
     void getOverlaps(std::vector<IntersectionPrimitive<2,ctype> >& overlaps) {
-        ContactToolBox<ctype>::extractMergedGrid(&psurface_, overlaps);
+        IntersectionPrimitiveCollector<ctype>::collect(&psurface_, overlaps);
     }
 
 private:

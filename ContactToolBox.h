@@ -1,12 +1,9 @@
 #ifndef CONTACT_TOOLBOX_H
 #define CONTACT_TOOLBOX_H
 
-#include <psurface/StaticVector.h>
-
-#include "Node.h"
-#include "IntersectionPrimitive.h"
-
 #include <vector>
+
+#include <psurface/StaticVector.h>
 
 template <int dim, class ctype>
 class PSurface;
@@ -34,14 +31,5 @@ struct ContactToolBox {
 
     static void computeContactPatch(const Surface* surf, ContactBoundary& cBound);
 
-    /** \brief Extraction of the merged grid */
-    static void extractMergedGrid(PSurface<2,ctype>* psurface,
-                           std::vector<IntersectionPrimitive<2,ctype> >& mergedGrid);
-
-    /** \brief Extraction of the merged grid */
-    static void extractMergedGrid(const PSurface<1,ctype>* psurface,
-                                  std::vector<IntersectionPrimitive<1,ctype> >& mergedGrid);
-
-    //@}
 };
 #endif

@@ -7,11 +7,11 @@
 #endif
 
 #include <psurface/PSurface.h>
-#include <psurface/ContactToolBox.h>
+#include <psurface/IntersectionPrimitiveCollector.h>
 
 
 template <class ctype>
-void ContactToolBox<ctype>::extractMergedGrid(PSurface<2,ctype>* psurface,
+void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,
                                        std::vector<IntersectionPrimitive<2,ctype> >& mergedGrid)
 {
     if (psurface->getNumTriangles()==0)
@@ -127,7 +127,7 @@ void ContactToolBox<ctype>::extractMergedGrid(PSurface<2,ctype>* psurface,
 }
 
 template <class ctype>
-void ContactToolBox<ctype>::extractMergedGrid(const PSurface<1,ctype>* psurface,
+void IntersectionPrimitiveCollector<ctype>::collect(const PSurface<1,ctype>* psurface,
                                        std::vector<IntersectionPrimitive<1,ctype> >& mergedGrid)
 {
     for (size_t i=0; i<psurface->domainSegments.size(); i++) {
@@ -185,3 +185,11 @@ void ContactToolBox<ctype>::extractMergedGrid(const PSurface<1,ctype>* psurface,
 #endif
 //     exit(0);
 }
+
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
+
+template class IntersectionPrimitiveCollector<float>;
+template class IntersectionPrimitiveCollector<double>;
