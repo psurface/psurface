@@ -51,11 +51,11 @@
  *  removal. If many items are removed from the leaf cells branches are not collapsed
  *  even though maybe being sufficiently sparse.
  *
- *  @param T the data type of the stored data
- *  @param F the data type of the above mentioned functor; this class has to support operator() (see class description)
- *  @param C the type of the coordinates used; (const) access via operator[] is required
- *  @param dim the dimension of the tree (has to be the same as for the coordinates)
- *  @param uniform_access If TRUE, the user claims that access to the items geometry is uniform, and so only one
+ *  \tparam T the data type of the stored data
+ *  \tparam F the data type of the above mentioned functor; this class has to support operator() (see class description)
+ *  \tparam C the type of the coordinates used; (const) access via operator[] is required
+ *  \tparam dim the dimension of the tree (has to be the same as for the coordinates)
+ *  \tparam uniform_access If TRUE, the user claims that access to the items geometry is uniform, and so only one
  *  functor is stored, which is, of course, much more efficient! For more information see insert
  */
 template <class T, typename F, typename C, int dim, bool uniform_access = false>
