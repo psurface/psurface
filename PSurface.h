@@ -380,7 +380,7 @@ public:
 
         Node() {}
 
-        Node(double dLP, double rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
+        Node(ctype dLP, ctype rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
             : domainLocalPosition(dLP), rangeLocalPosition(rLP),
               isNodeOnVertex(nOV), isNodeOnTargetVertex(nOTV),
               rightRangeSegment(-1)
@@ -400,9 +400,9 @@ public:
             return s;
         }
 
-        double domainLocalPosition;
+        ctype domainLocalPosition;
 
-        double rangeLocalPosition;
+        ctype rangeLocalPosition;
 
         bool isNodeOnVertex;
         
@@ -422,11 +422,11 @@ public:
         int neighbor[2];
     };
 
-    std::vector<StaticVector<double, 2> > vertices;
+    std::vector<StaticVector<ctype, 2> > vertices;
 
     std::vector<DomainSegment> domainSegments;
 
-    std::vector<StaticVector<double, 2> > targetVertices;
+    std::vector<StaticVector<ctype, 2> > targetVertices;
 
 };
 

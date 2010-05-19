@@ -32,29 +32,29 @@ protected:
 
     void setupEdgePointArrays();
 
-    void insertEdge(const std::vector<StaticVector<double,3> >& normals,
+    void insertEdge(const std::vector<StaticVector<ctype,3> >& normals,
                     int from, 
                     int to,
                     const std::vector<NodeBundle>& projectedTo
                     );
 
-    void insertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals, 
-                                    int from, int to, double& lambda,
+    void insertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                    int from, int to, ctype& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals, 
-                                        int from, int to, double& lambda,
+    void insertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                        int from, int to, ctype& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals, 
-                                    int from, int to, double& lambda,
+    void insertEdgeFromTouchingNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                    int from, int to, ctype& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringTri);
 
-    void insertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
-                                  int from, int to, double& lambda,
+    void insertEdgeFromCornerNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                  int from, int to, ctype& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
 
@@ -63,32 +63,32 @@ protected:
     //   Methods needed to test whether an edge can be projected completely
     // ///////////////////////////////////////////////////////////////////////
 
-    bool edgeCanBeInserted(const std::vector<StaticVector<double,3> >& normals,
+    bool edgeCanBeInserted(const std::vector<StaticVector<ctype,3> >& normals,
                            int from, 
                            int to,
                            const std::vector<NodeBundle>& projectedTo
                            );
 
-    bool testInsertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals, 
-                                        int from, int to, double& lambda,
+    bool testInsertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                        int from, int to, ctype& lambda,
                                         NodeBundle& curr,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
-    bool testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals, 
-                                            int from, int to, double& lambda,
+    bool testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                            int from, int to, ctype& lambda,
                                             NodeBundle& curr,
                                             typename Node<ctype>::NodeType& currType, int& currTri,
                                             int& enteringEdge);
 
-    bool testInsertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals, 
-                                        int from, int to, double& lambda,
+    bool testInsertEdgeFromTouchingNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                        int from, int to, ctype& lambda,
                                         NodeBundle& curr,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
                                         int& enteringEdge);
 
-    bool testInsertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
-                                      int from, int to, double& lambda,
+    bool testInsertEdgeFromCornerNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                      int from, int to, ctype& lambda,
                                       NodeBundle& curr, 
                                       typename Node<ctype>::NodeType& currType, int& currTri,
                                       int& enteringEdge);
@@ -117,14 +117,14 @@ protected:
      * + x_2 n_2 + p_2 - p = 0\f$ using standard Newton iteration.
      */
     bool computeInverseNormalProjection(const StaticVector<ctype,3>& p0, const StaticVector<ctype,3>& p1, const StaticVector<ctype,3>& p2,
-                                        const StaticVector<double,3>& n0, const StaticVector<double,3>& n1, const StaticVector<double,3>& n2,
-                                        const StaticVector<ctype,3>& target, StaticVector<double,3>& x);
+                                        const StaticVector<ctype,3>& n0, const StaticVector<ctype,3>& n1, const StaticVector<ctype,3>& n2,
+                                        const StaticVector<ctype,3>& target, StaticVector<ctype,3>& x);
 
       
     bool edgeIntersectsNormalFan(const StaticVector<ctype,3>& p0, const StaticVector<ctype,3>& p1,
                                  const StaticVector<ctype,3>& q0, const StaticVector<ctype,3>& q1,
-                                 const StaticVector<double,3>& n0, const StaticVector<double,3>& n1,
-                                 StaticVector<double,3>& x);
+                                 const StaticVector<ctype,3>& n0, const StaticVector<ctype,3>& n1,
+                                 StaticVector<ctype,3>& x);
     
     /** The case of parallel ray and triangle is not considered an intersection
      * no matter whether it is or not.
@@ -134,31 +134,31 @@ protected:
                                const StaticVector<ctype,3>& a, const StaticVector<ctype,3>& b, const StaticVector<ctype,3>& c,
                                StaticVector<ctype,2>& localCoords,
                                ctype& normalDist,
-                               double eps);
+                               ctype eps);
 
     // ///////////////////////////////////////////////////////////////
     //   A few static methods for the 1d-in-2d case.
     // ///////////////////////////////////////////////////////////////
 public:
-    static bool computeInverseNormalProjection(const StaticVector<double,2>& p0,
-                                               const StaticVector<double,2>& p1,
-                                               const StaticVector<double,2>& n0,
-                                               const StaticVector<double,2>& n1,
-                                               const StaticVector<double,2>& q,
-                                               double& local);
+    static bool computeInverseNormalProjection(const StaticVector<ctype,2>& p0,
+                                               const StaticVector<ctype,2>& p1,
+                                               const StaticVector<ctype,2>& n0,
+                                               const StaticVector<ctype,2>& n1,
+                                               const StaticVector<ctype,2>& q,
+                                               ctype& local);
     
-    static bool normalProjection(const StaticVector<double,2>& base,
-                                 const StaticVector<double,2>& direction,
+    static bool normalProjection(const StaticVector<ctype,2>& base,
+                                 const StaticVector<ctype,2>& direction,
                                  int& bestSegment,
-                                 double& rangeLocalPosition,
+                                 ctype& rangeLocalPosition,
                                  const std::vector<std::tr1::array<int,2> >& targetSegments,
-                                 const std::vector<std::tr1::array<double, 2> >& coords);
+                                 const std::vector<std::tr1::array<ctype, 2> >& coords);
     
-    static bool rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
-                                  const StaticVector<double, 2>& direction,
-                                  const StaticVector<double, 2>& a, 
-                                  const StaticVector<double, 2>& b, 
-                                  double& distance, double& targetLocal);
+    static bool rayIntersectsLine(const StaticVector<ctype, 2>& basePoint, 
+                                  const StaticVector<ctype, 2>& direction,
+                                  const StaticVector<ctype, 2>& a, 
+                                  const StaticVector<ctype, 2>& b, 
+                                  ctype& distance, ctype& targetLocal);
 
 protected:
     // /////////////////////////////////////
@@ -167,7 +167,7 @@ protected:
 
     PSurface<2,ctype>* psurface_;
 
-    std::vector<StaticVector<double, 3> > targetNormals;
+    std::vector<StaticVector<ctype, 3> > targetNormals;
 
 };
 

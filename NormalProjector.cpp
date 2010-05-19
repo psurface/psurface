@@ -27,8 +27,8 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     int nPoints = psurface_->getNumVertices();
     int nTriangles = psurface_->getNumTriangles();
         
-    std::vector<StaticVector<double,3> > normals(nPoints);
-    normals.assign(nPoints, StaticVector<double,3>(0.0));
+    std::vector<StaticVector<ctype,3> > normals(nPoints);
+    normals.assign(nPoints, StaticVector<ctype,3>(0.0));
     
     std::vector<unsigned char> nTriPerVertex(nPoints);
 
@@ -59,9 +59,9 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             StaticVector<ctype,3> a_ = psurface_->vertices(p1) - psurface_->vertices(p0);
             StaticVector<ctype,3> b_ = psurface_->vertices(p2) - psurface_->vertices(p0);
             
-            StaticVector<double,3> a(a_[0], a_[1], a_[2]);
-            StaticVector<double,3> b(b_[0], b_[1], b_[2]);
-            StaticVector<double,3> triNormal = a.cross(b);
+            StaticVector<ctype,3> a(a_[0], a_[1], a_[2]);
+            StaticVector<ctype,3> b(b_[0], b_[1], b_[2]);
+            StaticVector<ctype,3> triNormal = a.cross(b);
             triNormal.normalize();
             
             normals[p0] += triNormal;
@@ -85,7 +85,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     int nTargetPoints = contactPatch.surf->points.size();
     int nTargetTriangles = contactPatch.triIdx.size();
         
-    targetNormals.assign(nTargetPoints, StaticVector<double,3>(0.0,0.0,0.0));
+    targetNormals.assign(nTargetPoints, StaticVector<ctype,3>(0.0,0.0,0.0));
     std::vector<bool> hasTargetNormal;
     hasTargetNormal.assign(nTargetPoints, false);
 
@@ -102,9 +102,9 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             b_[j] = contactPatch.surf->points[p2][j] - contactPatch.surf->points[p0][j];
         }        
 
-        StaticVector<double,3> a(a_[0], a_[1], a_[2]);
-        StaticVector<double,3> b(b_[0], b_[1], b_[2]);
-        StaticVector<double,3> triNormal = a.cross(b);
+        StaticVector<ctype,3> a(a_[0], a_[1], a_[2]);
+        StaticVector<ctype,3> b(b_[0], b_[1], b_[2]);
+        StaticVector<ctype,3> triNormal = a.cross(b);
         triNormal.normalize();
         
         targetNormals[p0] += triNormal;
@@ -137,7 +137,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
         StaticVector<ctype,2> bestDPos;
         int bestTri = -1;
-        double bestDist = std::numeric_limits<double>::max();
+        ctype bestDist = std::numeric_limits<ctype>::max();
 
         for (size_t j=0; j<psurface_->getNumTriangles(); j++) {
 
@@ -145,11 +145,11 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             const StaticVector<ctype,3>& p1 = psurface_->vertices(psurface_->triangles(j).vertices[1]);
             const StaticVector<ctype,3>& p2 = psurface_->vertices(psurface_->triangles(j).vertices[2]);
 
-            const StaticVector<double,3>& n0 = normals[psurface_->triangles(j).vertices[0]];
-            const StaticVector<double,3>& n1 = normals[psurface_->triangles(j).vertices[1]];
-            const StaticVector<double,3>& n2 = normals[psurface_->triangles(j).vertices[2]];
+            const StaticVector<ctype,3>& n0 = normals[psurface_->triangles(j).vertices[0]];
+            const StaticVector<ctype,3>& n1 = normals[psurface_->triangles(j).vertices[1]];
+            const StaticVector<ctype,3>& n2 = normals[psurface_->triangles(j).vertices[2]];
 
-            StaticVector<double,3> x; // the unknown...
+            StaticVector<ctype,3> x; // the unknown...
 
             if (computeInverseNormalProjection(p0, p1, p2, n0, n1, n2, 
                                                // magic to use a McVec3f as the argument
@@ -163,12 +163,12 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
                 // with the normal at the target surface and the normal at the
                 // domain surface
                 StaticVector<ctype,3> base       = p0*x[0] + p1*x[1] + (1-x[0]-x[1])*p2;
-                StaticVector<double,3> baseNormal = n0*x[0] + n1*x[1] + (1-x[0]-x[1])*n2;
-                StaticVector<double,3> segment(surf->points[contactPatch.vertices[i]][0] - base[0],
+                StaticVector<ctype,3> baseNormal = n0*x[0] + n1*x[1] + (1-x[0]-x[1])*n2;
+                StaticVector<ctype,3> segment(surf->points[contactPatch.vertices[i]][0] - base[0],
                                 surf->points[contactPatch.vertices[i]][1] - base[1],
                                 surf->points[contactPatch.vertices[i]][2] - base[2]);
                 
-                double distance = segment.length() * segment.length();
+                ctype distance = segment.length() * segment.length();
 
                 if (segment.dot(targetNormals[contactPatch.vertices[i]]) > -eps
                     && segment.dot(baseNormal) > 0
@@ -215,7 +215,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
         StaticVector<ctype,2> bestDPos;
         int bestTri = -1;
-        double bestDist = std::numeric_limits<double>::max();
+        ctype bestDist = std::numeric_limits<ctype>::max();
 
         const StaticVector<ctype,3>& basePoint = psurface_->vertices(i);
         StaticVector<ctype,3> normal;
@@ -284,7 +284,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<double,3> >& normals,
+void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<ctype,3> >& normals,
                                  int from, int to, 
                                  const std::vector<NodeBundle>& projectedTo)
 {
@@ -292,7 +292,7 @@ void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<double,3>
     NodeBundle curr = projectedTo[from];
 
     // parameter value for the edge to be inserted
-    double lambda = 0;
+    ctype lambda = 0;
 
     while (curr!=projectedTo[to]) {
 
@@ -343,13 +343,13 @@ void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<double,3>
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals,
-                                                 int from, int to, double &lambda,
+void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals,
+                                                 int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
 {
     int i;
-    double eps = 1e-5;
+    ctype eps = 1e-5;
     int cT = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
@@ -359,7 +359,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
         if (i==enteringEdge)
             continue;
             
-        StaticVector<double,3> x;
+        StaticVector<ctype,3> x;
         int p = psurface_->triangles(curr[0].tri).vertices[i];
         int q = psurface_->triangles(curr[0].tri).vertices[(i+1)%3];
 
@@ -371,8 +371,8 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
-            const double& newLambda = x[1];
-            const double& mu        = x[0];
+            const ctype& newLambda = x[1];
+            const ctype& mu        = x[0];
                 
             if (newLambda < lambda) {
                 throw(std::runtime_error("[FromInteriorNode] Error: the normal projection is not continuous!"));
@@ -405,8 +405,8 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
                 int e = psurface_->triangles(neighboringTri).getCorner(q);
                     
                 // the domain position of the new intersection node on this triangle
-                StaticVector<double,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
-                StaticVector<double,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
+                StaticVector<ctype,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
+                StaticVector<ctype,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
                     
                 StaticVector<ctype,3> image;
 
@@ -449,13 +449,13 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals,
-                                                 int from, int to, double &lambda,
+void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals,
+                                                 int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
 {
     int i;
-    double eps = 1e-5;
+    ctype eps = 1e-5;
     int cTIdx = curr[0].tri;
 
     // loop over the three edges of the current triangle (except for the entering edge) and
@@ -468,7 +468,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
         if (i==enteringEdge)
             continue;
             
-        StaticVector<double,3> x;
+        StaticVector<ctype,3> x;
         int p = psurface_->triangles(curr[0].tri).vertices[i];
         int q = psurface_->triangles(curr[0].tri).vertices[(i+1)%3];
 
@@ -478,8 +478,8 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
-            const double& newLambda = x[1];
-            const double& mu        = x[0];
+            const ctype& newLambda = x[1];
+            const ctype& mu        = x[0];
                 
             if (newLambda < lambda)
                 throw(std::runtime_error("[FromIntersectionNode] Error: the normal projection is not continuous!"));
@@ -554,8 +554,8 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals,
-                                                 int from, int to, double &lambda,
+void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<StaticVector<ctype,3> >& normals,
+                                                 int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringTri)
 {
@@ -577,7 +577,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
             if (j==currentEdge)
                 continue;
             
-            StaticVector<double,3> x;
+            StaticVector<ctype,3> x;
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
@@ -591,7 +591,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
                 }
                 
                 lambda = x[1];
-                const double& mu = x[0];
+                const ctype& mu = x[0];
 
                 int corner = -1;
                 if (x[0]<0.00001) 
@@ -670,7 +670,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, int from, int to, double &lambda,
+void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVector<ctype,3> >& normals, int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
 {
@@ -684,7 +684,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
         int thisCorner = psurface_->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
 
-        StaticVector<double,3> x;
+        StaticVector<ctype,3> x;
         int p = psurface_->triangles(cT).vertices[(thisCorner+1)%3];
         int q = psurface_->triangles(cT).vertices[(thisCorner+2)%3];
 
@@ -698,7 +698,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
             }
             
             lambda = x[1];
-            const double& mu = x[0];
+            const ctype& mu = x[0];
             int corner = -1;
             if (x[0]<0.00001) 
                 corner = (thisCorner+1)%3;
@@ -770,7 +770,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
 
 
 template <class ctype>
-bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<double,3> >& normals,
+bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ctype,3> >& normals,
                                         int from, int to, 
                                         const std::vector<NodeBundle>& projectedTo)
 {
@@ -788,7 +788,7 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<do
     int currTri     = curr[0].tri;
 
     // parameter value for the edge to be inserted
-    double lambda = 0;
+    ctype lambda = 0;
 
     while (true) {
 
@@ -843,22 +843,22 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<do
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<StaticVector<double,3> >& normals,
-                                                     int from, int to, double &lambda,
+bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals,
+                                                     int from, int to, ctype &lambda,
                                                      NodeBundle& curr,
                                                             typename Node<ctype>::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
-    double eps = 1e-5;
+    ctype eps = 1e-5;
 
     for (int i=0; i<3; i++) {
             
         if (i==enteringEdge)
             continue;
             
-        StaticVector<double,3> x;
+        StaticVector<ctype,3> x;
         int p = psurface_->triangles(currTri).vertices[i];
         int q = psurface_->triangles(currTri).vertices[(i+1)%3];
 
@@ -870,8 +870,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
-            const double& newLambda = x[1];
-            const double& mu        = x[0];
+            const ctype& newLambda = x[1];
+            const ctype& mu        = x[0];
                 
             if (newLambda < lambda) {
                 // Error: the normal projection is not continuous!
@@ -954,22 +954,22 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<double,3> >& normals,
-                                                         int from, int to, double &lambda,
+bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals,
+                                                         int from, int to, ctype &lambda,
                                                                 NodeBundle& curr,
                                                          typename Node<ctype>::NodeType& currType, int& currTri,
                                                          int& enteringEdge)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
-    double eps = 1e-5;
+    ctype eps = 1e-5;
 
     for (int i=0; i<3; i++) {
             
         if (i==enteringEdge)
             continue;
             
-        StaticVector<double,3> x;
+        StaticVector<ctype,3> x;
         int p = psurface_->triangles(currTri).vertices[i];
         int q = psurface_->triangles(currTri).vertices[(i+1)%3];
         
@@ -979,8 +979,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
 
-            const double& newLambda = x[1];
-            const double& mu        = x[0];
+            const ctype& newLambda = x[1];
+            const ctype& mu        = x[0];
                 
             if (newLambda < lambda) {
                 // Error: the normal projection is not continuous!
@@ -1063,14 +1063,14 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<StaticVector<double,3> >& normals,
-                                                     int from, int to, double &lambda,
+bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<StaticVector<ctype,3> >& normals,
+                                                     int from, int to, ctype &lambda,
                                                      NodeBundle& curr,
                                                      typename Node<ctype>::NodeType& currType, int& currTri,
                                                      int& enteringEdge)
 {
     const Surface* surf = psurface_->surface;
-    double eps = 1e-5;
+    ctype eps = 1e-5;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
@@ -1083,7 +1083,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
             if (j==currentEdge)
                 continue;
         
-            StaticVector<double,3> x;
+            StaticVector<ctype,3> x;
             int p = cT.vertices[j];
             int q = cT.vertices[(j+1)%3];
 
@@ -1092,7 +1092,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                                         psurface_->vertices(p), psurface_->vertices(q),
                                         normals[p], normals[q], x)) {
                 
-                const double& newLambda = x[1];
+                const ctype& newLambda = x[1];
                 
                 if (newLambda < lambda) {
                     // Edge insertion not possible: the normal projection is not continuous!
@@ -1177,14 +1177,14 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
 
 
 template <class ctype>
-bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<StaticVector<double,3> >& normals, 
-                                                   int from, int to, double &lambda,
+bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<StaticVector<ctype,3> >& normals, 
+                                                   int from, int to, ctype &lambda,
                                                    NodeBundle& curr, 
                                                    typename Node<ctype>::NodeType& currType, int& currTri,
                                                    int& leavingEdge)
 {
     const Surface* surf = psurface_->surface;
-    double eps = 1e-5;
+    ctype eps = 1e-5;
 
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
@@ -1194,7 +1194,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
         int thisCorner = psurface_->triangles(cT).nodes[curr[i].idx].getCorner();
         int oppEdge = (thisCorner+1)%3;
 
-        StaticVector<double,3> x;
+        StaticVector<ctype,3> x;
         int p = psurface_->triangles(cT).vertices[(thisCorner+1)%3];
         int q = psurface_->triangles(cT).vertices[(thisCorner+2)%3];
 
@@ -1203,7 +1203,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                                     psurface_->vertices(p), psurface_->vertices(q),
                                     normals[p], normals[q], x)) {
             
-            const double& newLambda = x[1];
+            const ctype& newLambda = x[1];
             
             if (newLambda < lambda) {
                 // Shouldn't this rather be a 'return false' here?
@@ -1313,34 +1313,34 @@ bool NormalProjector<ctype>::onSameTriangle(const int& tri, const NodeBundle& b)
 
 template <class ctype>
 bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<ctype,3>& p0_f, const StaticVector<ctype,3>& p1_f, const StaticVector<ctype,3>& p2_f,
-                                                     const StaticVector<double,3>& n0, const StaticVector<double,3>& n1, const StaticVector<double,3>& n2,
-                                                     const StaticVector<ctype,3>& target, StaticVector<double,3>& x)
+                                                     const StaticVector<ctype,3>& n0, const StaticVector<ctype,3>& n1, const StaticVector<ctype,3>& n2,
+                                                     const StaticVector<ctype,3>& target, StaticVector<ctype,3>& x)
 {
     int i;
-    const double eps = 1e-6;
+    const ctype eps = 1e-6;
     // Fix some initial value
     x.assign(1.0);
 
-    // transform to double
-    StaticVector<double,3> p0(p0_f[0], p0_f[1], p0_f[2]);
-    StaticVector<double,3> p1(p1_f[0], p1_f[1], p1_f[2]);
-    StaticVector<double,3> p2(p2_f[0], p2_f[1], p2_f[2]);
+    // transform to ctype
+    StaticVector<ctype,3> p0(p0_f[0], p0_f[1], p0_f[2]);
+    StaticVector<ctype,3> p1(p1_f[0], p1_f[1], p1_f[2]);
+    StaticVector<ctype,3> p2(p2_f[0], p2_f[1], p2_f[2]);
 
     for (i=0; i<10; i++) {
 
         // compute Newton correction
-        StaticVector<double,3> Fxk = x[0]*(p0-p2) + x[1]*(p1-p2) + x[2]*x[0]*(n0-n2) + x[2]*x[1]*(n1-n2) + x[2]*n2 + p2;// - target;
+        StaticVector<ctype,3> Fxk = x[0]*(p0-p2) + x[1]*(p1-p2) + x[2]*x[0]*(n0-n2) + x[2]*x[1]*(n1-n2) + x[2]*n2 + p2;// - target;
         Fxk[0] -= target[0];
         Fxk[1] -= target[1];
         Fxk[2] -= target[2];
 
-        StaticMatrix<double,3> FPrimexk(p0 - p2 + x[2]*(n0-n2),
+        StaticMatrix<ctype,3> FPrimexk(p0 - p2 + x[2]*(n0-n2),
                          p1 - p2 + x[2]*(n1-n2),
                          x[0]*(n0-n2) + x[1]*(n1-n2) + n2);
 
-        StaticMatrix<double,3> FPrimexkInv = FPrimexk.inverse();
+        StaticMatrix<ctype,3> FPrimexkInv = FPrimexk.inverse();
 
-        StaticVector<double,3> newtonCorrection; // = (-1) * FPrimexk.inverse() * Fxk;
+        StaticVector<ctype,3> newtonCorrection; // = (-1) * FPrimexk.inverse() * Fxk;
         
         FPrimexkInv.multMatrixVec(-Fxk, newtonCorrection);
 
@@ -1359,33 +1359,33 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<c
 template <class ctype>
 bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>& q0_f, const StaticVector<ctype,3>& q1_f,
                                               const StaticVector<ctype,3>& p0_f, const StaticVector<ctype,3>& p1_f,
-                                              const StaticVector<double,3>& n0, const StaticVector<double,3>& n1,
-                                              StaticVector<double,3>& x)
+                                              const StaticVector<ctype,3>& n0, const StaticVector<ctype,3>& n1,
+                                              StaticVector<ctype,3>& x)
 {
     int i;
-    // transform to double values
-    StaticVector<double,3> q0(q0_f[0], q0_f[1], q0_f[2]);
-    StaticVector<double,3> q1(q1_f[0], q1_f[1], q1_f[2]);
-    StaticVector<double,3> p0(p0_f[0], p0_f[1], p0_f[2]);
-    StaticVector<double,3> p1(p1_f[0], p1_f[1], p1_f[2]);
+    // transform to ctype values
+    StaticVector<ctype,3> q0(q0_f[0], q0_f[1], q0_f[2]);
+    StaticVector<ctype,3> q1(q1_f[0], q1_f[1], q1_f[2]);
+    StaticVector<ctype,3> p0(p0_f[0], p0_f[1], p0_f[2]);
+    StaticVector<ctype,3> p1(p1_f[0], p1_f[1], p1_f[2]);
 
     // Fix some initial value
     // sometimes it only works when the initial value is an intersection...
     x[0] = x[1] = 0.5;
     x[2] = 1;
-    StaticVector<double,3> newtonCorrection;
+    StaticVector<ctype,3> newtonCorrection;
 
     for (i=0; i<30; i++) {
 
         // compute Newton correction
 
-        StaticVector<double,3> Fxk = p0-q0 + x[0]*(p1-p0) + x[2]*n0 + x[2]*x[0]*(n1-n0) - x[1]*(q1-q0);
+        StaticVector<ctype,3> Fxk = p0-q0 + x[0]*(p1-p0) + x[2]*n0 + x[2]*x[0]*(n1-n0) - x[1]*(q1-q0);
 
-        StaticMatrix<double,3> FPrimexk(p1-p0 + x[2]*(n1-n0),
+        StaticMatrix<ctype,3> FPrimexk(p1-p0 + x[2]*(n1-n0),
                          q0-q1,
                          n0 + x[0]*(n1-n0));
 
-        StaticMatrix<double,3> FPrimexkInv = FPrimexk.inverse();
+        StaticMatrix<ctype,3> FPrimexkInv = FPrimexk.inverse();
         
         FPrimexkInv.multMatrixVec(-Fxk, newtonCorrection);
 
@@ -1404,7 +1404,7 @@ bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>
 template <class ctype>
 bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<ctype,3>& basePoint, const StaticVector<ctype,3>& direction,
                                             const StaticVector<ctype,3>& a_, const StaticVector<ctype,3>& b_, const StaticVector<ctype,3>& c_,
-                                            StaticVector<ctype,2>& localCoords, ctype& normalDist, double eps)
+                                            StaticVector<ctype,2>& localCoords, ctype& normalDist, ctype eps)
 {
     const StaticVector<ctype,3> &p = basePoint;
 
@@ -1538,7 +1538,7 @@ void NormalProjector<ctype>::setupEdgePointArrays()
                 continue;
             } 
                 
-            double lambda = cN.getDomainEdgeCoord();
+            ctype lambda = cN.getDomainEdgeCoord();
             int domainEdge = cN.getDomainEdge();
             std::vector<int>& cEP = cT.edgePoints[domainEdge];
             
@@ -1560,16 +1560,16 @@ void NormalProjector<ctype>::setupEdgePointArrays()
 // ///////////////////////////////////////////////////////////////
 
 template <class ctype>
-bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<double,2>& p0,
-                                                            const StaticVector<double,2>& p1,
-                                                            const StaticVector<double,2>& n0,
-                                                            const StaticVector<double,2>& n1,
-                                                            const StaticVector<double,2>& q,
-                                                            double& local)
+bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<ctype,2>& p0,
+                                                            const StaticVector<ctype,2>& p1,
+                                                            const StaticVector<ctype,2>& n0,
+                                                            const StaticVector<ctype,2>& n1,
+                                                            const StaticVector<ctype,2>& q,
+                                                            ctype& local)
 {
-    double a = (p1[1]-p0[1])*(n1[0]-n0[0]) - (p1[0]-p0[0])*(n1[1]-n0[1]);
-    double b = -(q[1]-p0[1])*(n1[0]-n0[0]) + (p1[1]-p0[1])*n0[0] + (q[0]-p0[0])*(n1[1]-n0[1]) - (p1[0]-p0[0])*n0[1];
-    double c = -(q[1]-p0[1])*n0[0] + (q[0]-p0[0])*n0[1];
+    ctype a = (p1[1]-p0[1])*(n1[0]-n0[0]) - (p1[0]-p0[0])*(n1[1]-n0[1]);
+    ctype b = -(q[1]-p0[1])*(n1[0]-n0[0]) + (p1[1]-p0[1])*n0[0] + (q[0]-p0[0])*(n1[1]-n0[1]) - (p1[0]-p0[0])*n0[1];
+    ctype c = -(q[1]-p0[1])*n0[0] + (q[0]-p0[0])*n0[1];
 
     // Is the quadratic formula degenerated to a linear one?
     if (std::abs(a) < 1e-10) {
@@ -1580,8 +1580,8 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<d
     }
 
     // The abc-formula
-    double mu_0 = (-b + std::sqrt(b*b - 4*a*c))/(2*a);
-    double mu_1 = (-b - std::sqrt(b*b - 4*a*c))/(2*a);
+    ctype mu_0 = (-b + std::sqrt(b*b - 4*a*c))/(2*a);
+    ctype mu_1 = (-b - std::sqrt(b*b - 4*a*c))/(2*a);
 
     if (mu_0 >= 0 && mu_0 <= 1) {
         local = mu_0;
@@ -1594,27 +1594,27 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<d
 }
 
 template <class ctype>
-bool NormalProjector<ctype>::normalProjection(const StaticVector<double,2>& base,
-                                              const StaticVector<double,2>& direction,
+bool NormalProjector<ctype>::normalProjection(const StaticVector<ctype,2>& base,
+                                              const StaticVector<ctype,2>& direction,
                                               int& bestSegment,
-                                              double& rangeLocalPosition,
+                                              ctype& rangeLocalPosition,
                                               const std::vector<std::tr1::array<int,2> >& targetSegments,
-                                              const std::vector<std::tr1::array<double, 2> >& coords)
+                                              const std::vector<std::tr1::array<ctype, 2> >& coords)
 {
     bestSegment = -1;
     int nTargetSegments = targetSegments.size();
-    double bestDistance = std::numeric_limits<double>::max();
+    ctype bestDistance = std::numeric_limits<ctype>::max();
 
     for (int i=0; i<nTargetSegments; i++) {
 
-        StaticVector<double,2> p0, p1;
+        StaticVector<ctype,2> p0, p1;
         p0[0] = coords[targetSegments[i][0]][0];
         p0[1] = coords[targetSegments[i][0]][1];
 
         p1[0] = coords[targetSegments[i][1]][0];
         p1[1] = coords[targetSegments[i][1]][1];
 
-        double distance, targetLocal;
+        ctype distance, targetLocal;
         if (!rayIntersectsLine(base, direction, p0, p1, distance, targetLocal))
             continue;
 
@@ -1631,31 +1631,31 @@ bool NormalProjector<ctype>::normalProjection(const StaticVector<double,2>& base
 
 template <class ctype>
 bool NormalProjector<ctype>::
-rayIntersectsLine(const StaticVector<double, 2>& basePoint, 
-                  const StaticVector<double, 2>& direction,
-                  const StaticVector<double, 2>& a, 
-                  const StaticVector<double, 2>& b, 
-                  double& distance, double& targetLocal)
+rayIntersectsLine(const StaticVector<ctype, 2>& basePoint, 
+                  const StaticVector<ctype, 2>& direction,
+                  const StaticVector<ctype, 2>& a, 
+                  const StaticVector<ctype, 2>& b, 
+                  ctype& distance, ctype& targetLocal)
 {
     // we solve the equation basePoint + x_0 * normal = a + x_1 * (b-a)
 
-    StaticMatrix<double,2> mat;
+    StaticMatrix<ctype,2> mat;
     mat[0][0] = direction[0];
     mat[1][0] = direction[1];
     mat[0][1] = a[0]-b[0];
     mat[1][1] = a[1]-b[1];
 
     /** \todo Easier with expression templates */
-    StaticVector<double,2> rhs;
+    StaticVector<ctype,2> rhs;
     rhs[0] = a[0]-basePoint[0];
     rhs[1] = a[1]-basePoint[1];
 
-    StaticVector<double,2> x;
+    StaticVector<ctype,2> x;
 
     // Solve the system.  If it is singular the normal and the segment
     // are parallel and there is no intersection
 
-    double detinv = mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0];
+    ctype detinv = mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0];
     if (std::abs(detinv)<1e-80)
         return false;
     detinv = 1/detinv;

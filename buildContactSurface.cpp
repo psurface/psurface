@@ -8,9 +8,10 @@
 #include <psurface/MultiDimOctree.h>
 #include <psurface/PointIntersectionFunctor.h>
 
-void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar, 
+template <class ctype>
+void ContactToolBox<ctype>::buildContactSurface(PSurface<2,ctype>* cPar, 
                                          const Surface* surf1,  const Surface* surf2,
-                                         float epsilon, 
+                                         ctype epsilon, 
                                          void (*obsDirections)(const double* pos, double* dir))
 {
     // set up parametrization
@@ -51,7 +52,8 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
     
     // the nonmortar side becomes the base grid of the parametrization
     for (size_t i=0; i<contactBoundary[0].vertices.size(); i++)
-        cPar->newVertex(*(StaticVector<float,3>*)&surf1->points[contactBoundary[0].vertices[i]][0]);
+#warning Illegal cast!
+        cPar->newVertex(*(StaticVector<ctype,3>*)&surf1->points[contactBoundary[0].vertices[i]][0]);
     
     cPar->domainSurfaceTriangleNumbers = contactBoundary[0].triIdx;
 
@@ -67,27 +69,28 @@ void ContactToolBox::buildContactSurface(PSurface<2,float>* cPar,
     }
     
     // compute projection
-    NormalProjector<float> projector(cPar);
+    NormalProjector<ctype> projector(cPar);
     
     projector.project(contactBoundary[1], obsDirections);
 
 }
 
 
-void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
+template <class ctype>
+void ContactToolBox<ctype>::contactOracle(const Surface* surf1, const Surface* surf2,
                                    std::vector<int>& contactNodes1, std::vector<int>& contactNodes2,
-                                   float epsilon)
+                                   ctype epsilon)
 {
-    const float epsSquared = epsilon*epsilon;
+    const ctype epsSquared = epsilon*epsilon;
     
-    Box<float,3> bbox1, bbox2;
+    Box<ctype,3> bbox1, bbox2;
 
     // stupid hack: The Amira Surface class wants a float* as the bounding box
     float bbox1_raw[6], bbox2_raw[6];
     surf1->getBoundingBox(bbox1_raw);
     surf2->getBoundingBox(bbox2_raw);
 
-    std::tr1::array<float,3> lower1, upper1, lower2, upper2;
+    std::tr1::array<ctype,3> lower1, upper1, lower2, upper2;
 
     for (int i=0; i<3; i++) {
         lower1[i] = bbox1_raw[2*i];
@@ -104,21 +107,21 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     bbox2.extendByEps(epsilon);
 
     // The possible contact patches must be in intersectBox
-    Box<float,3> intersectBox = bbox1.intersectWith(bbox2);
+    Box<ctype,3> intersectBox = bbox1.intersectWith(bbox2);
 
     // We first put the vertices of surface1 into an octree
-    std::tr1::array<float,3> lower, upper;
+    std::tr1::array<ctype,3> lower, upper;
     lower = bbox1.lower();
     upper = bbox1.upper();
 
-    Box<float, 3> mdBBox1(lower, upper);
-    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor<float>, float, 3, true> mdOctree1(mdBBox1);
-    PointIntersectionFunctor<float> intersectionFunctor;
+    Box<ctype, 3> mdBBox1(lower, upper);
+    MultiDimOctree<StaticVector<ctype,3>, PointIntersectionFunctor<ctype>, ctype, 3, true> mdOctree1(mdBBox1);
+    PointIntersectionFunctor<ctype> intersectionFunctor;
 
-    std::vector<StaticVector<float,3> > points1(surf1->points.size());        
+    std::vector<StaticVector<ctype,3> > points1(surf1->points.size());        
 
     for (int i=0; i<surf1->points.size(); i++) {
-        points1[i] = *(StaticVector<float,3>*)&surf1->points[i][0];
+        points1[i] = *(StaticVector<ctype,3>*)&surf1->points[i][0];
         mdOctree1.insert(&points1[i], &intersectionFunctor);
     }
 
@@ -129,14 +132,14 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     lower = intersectBox.lower();
     upper = intersectBox.upper();
 
-    Box<float, 3> mdIntersectBox(lower, upper);
-    MultiDimOctree<StaticVector<float,3>, PointIntersectionFunctor<float>, float, 3, true> mdOctree2(mdIntersectBox);
+    Box<ctype, 3> mdIntersectBox(lower, upper);
+    MultiDimOctree<StaticVector<ctype,3>, PointIntersectionFunctor<ctype>, ctype, 3, true> mdOctree2(mdIntersectBox);
 
-    std::vector<StaticVector<float,3> > points2(surf2->points.size());        
+    std::vector<StaticVector<ctype,3> > points2(surf2->points.size());        
 
     for (int i=0; i<surf2->points.size(); i++){
         
-        points2[i] = *(StaticVector<float,3>*)&surf2->points[i];
+        points2[i] = *(StaticVector<ctype,3>*)&surf2->points[i];
         if (intersectBox.contains(surf2->points[i]))
             mdOctree2.insert(&points2[i], &intersectionFunctor);
         
@@ -163,14 +166,15 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     //  Loop over all triangles in surface1
     for (int i=0; i<surf1->triangles.size(); i++) {
 
-        const StaticVector<float,3>& p0 = *(StaticVector<float,3>*)&surf1->points[surf1->triangles[i].points[0]];
-        const StaticVector<float,3>& p1 = *(StaticVector<float,3>*)&surf1->points[surf1->triangles[i].points[1]];
-        const StaticVector<float,3>& p2 = *(StaticVector<float,3>*)&surf1->points[surf1->triangles[i].points[2]];
+#warning Illegal cast!
+        const StaticVector<ctype,3>& p0 = *(StaticVector<ctype,3>*)&surf1->points[surf1->triangles[i].points[0]];
+        const StaticVector<ctype,3>& p1 = *(StaticVector<ctype,3>*)&surf1->points[surf1->triangles[i].points[1]];
+        const StaticVector<ctype,3>& p2 = *(StaticVector<ctype,3>*)&surf1->points[surf1->triangles[i].points[2]];
 
         //  Look up the octree for points in a conservative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
         std::vector<int> result;
-        Box<float, 3> mdQueryBox(p0,p1);
+        Box<ctype, 3> mdQueryBox(p0,p1);
         mdQueryBox.extendBy(p2);
         mdQueryBox.extendByEps(epsilon);
         mdOctree2.lookupIndex(mdQueryBox, result);
@@ -181,9 +185,10 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
             if (contactField2[result[j]])
                 continue;
 
-            const StaticVector<float,3>& candidatePoint = *(StaticVector<float,3>*)&surf2->points[result[j]];
+#warning Illegal cast!
+            const StaticVector<ctype,3>& candidatePoint = *(StaticVector<ctype,3>*)&surf2->points[result[j]];
 
-            StaticVector<float,3> q = getClosestPointOnTriangle(p0, p1, p2, candidatePoint);
+            StaticVector<ctype,3> q = getClosestPointOnTriangle(p0, p1, p2, candidatePoint);
 
             if ( (q-candidatePoint).length2() < epsSquared)
                 contactField2[result[j]] = true;
@@ -195,14 +200,15 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
     //  Loop over all triangles in surface2
     for (int i=0; i<surf2->triangles.size(); i++) {
 
-        const StaticVector<float,3>& p0 = *(StaticVector<float,3>*)&surf2->points[surf2->triangles[i].points[0]];
-        const StaticVector<float,3>& p1 = *(StaticVector<float,3>*)&surf2->points[surf2->triangles[i].points[1]];
-        const StaticVector<float,3>& p2 = *(StaticVector<float,3>*)&surf2->points[surf2->triangles[i].points[2]];
+#warning Illegal cast!
+        const StaticVector<ctype,3>& p0 = *(StaticVector<ctype,3>*)&surf2->points[surf2->triangles[i].points[0]];
+        const StaticVector<ctype,3>& p1 = *(StaticVector<ctype,3>*)&surf2->points[surf2->triangles[i].points[1]];
+        const StaticVector<ctype,3>& p2 = *(StaticVector<ctype,3>*)&surf2->points[surf2->triangles[i].points[2]];
 
         //  Look up the octree for points in a conversative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
         std::vector<int> result;
-        Box<float, 3> mdQueryBox(p0,p1);
+        Box<ctype, 3> mdQueryBox(p0,p1);
         mdQueryBox.extendBy(p2);
         mdQueryBox.extendByEps(epsilon);
         mdOctree1.lookupIndex(mdQueryBox, result);
@@ -233,30 +239,31 @@ void ContactToolBox::contactOracle(const Surface* surf1, const Surface* surf2,
 
 }
 
-StaticVector<float,3> ContactToolBox::getClosestPointOnTriangle(const StaticVector<float,3>& p0,
-                                                  const StaticVector<float,3>& p1,
-                                                  const StaticVector<float,3>& p2,          
-                                                  const StaticVector<float,3>& candidate)
+template <class ctype>
+StaticVector<ctype,3> ContactToolBox<ctype>::getClosestPointOnTriangle(const StaticVector<ctype,3>& p0,
+                                                  const StaticVector<ctype,3>& p1,
+                                                  const StaticVector<ctype,3>& p2,          
+                                                  const StaticVector<ctype,3>& candidate)
 {
         
     // local base
-    StaticVector<float,3> a = p1 - p0;
-    StaticVector<float,3> b = p2 - p0;
-    StaticVector<float,3> c = a.cross(b);
+    StaticVector<ctype,3> a = p1 - p0;
+    StaticVector<ctype,3> b = p2 - p0;
+    StaticVector<ctype,3> c = a.cross(b);
     c.normalize();
         
-    StaticVector<float,3> x = candidate - p0;
+    StaticVector<ctype,3> x = candidate - p0;
         
     // write x in the new base  (Cramer's rule)
-    //StaticMatrix<float,3> numerator(a, b, c);
-    double denominatorDet = StaticMatrix<float,3>(a, b, c).det();
-    StaticMatrix<float,3> alphaMat(x, b, c);
-    StaticMatrix<float,3> betaMat(a, x, c);
-    StaticMatrix<float,3> gammaMat(a, b, x);
+    //StaticMatrix<ctype,3> numerator(a, b, c);
+    double denominatorDet = StaticMatrix<ctype,3>(a, b, c).det();
+    StaticMatrix<ctype,3> alphaMat(x, b, c);
+    StaticMatrix<ctype,3> betaMat(a, x, c);
+    StaticMatrix<ctype,3> gammaMat(a, b, x);
     
-    float alpha = alphaMat.det()/denominatorDet;
-    float beta  = betaMat.det()/denominatorDet;
-    //float gamma = gammaMat.det()/denominatorDet;
+    ctype alpha = alphaMat.det()/denominatorDet;
+    ctype beta  = betaMat.det()/denominatorDet;
+    //ctype gamma = gammaMat.det()/denominatorDet;
     
     // check whether orthogonal projection onto the ab plane is in triangle
     if (alpha>=0 && beta>=0 && (1-alpha-beta)>=0) {
@@ -270,11 +277,11 @@ StaticVector<float,3> ContactToolBox::getClosestPointOnTriangle(const StaticVect
     //   _on_ the triangle is the closest point on the boundary of the triangle.
     // ////////////////////////////////////////////////////////////////////////////////
 
-    float bestDist = std::numeric_limits<float>::max();
-    StaticVector<float,3> bestPoint;
+    ctype bestDist = std::numeric_limits<ctype>::max();
+    StaticVector<ctype,3> bestPoint;
 
     // I need the points in an array
-    StaticVector<float,3> points[3];
+    StaticVector<ctype,3> points[3];
     points[0] = p0;
     points[1] = p1;
     points[2] = p2;
@@ -282,15 +289,15 @@ StaticVector<float,3> ContactToolBox::getClosestPointOnTriangle(const StaticVect
     // check point against edges
     for (int i=0; i<3; i++){
         
-        StaticVector<float,3> from = points[i];
-        StaticVector<float,3> to   = points[(i+1)%3];
+        StaticVector<ctype,3> from = points[i];
+        StaticVector<ctype,3> to   = points[(i+1)%3];
         
-        StaticVector<float,3> edge = to - from;
+        StaticVector<ctype,3> edge = to - from;
         
-        float projectLength = edge.dot(candidate - from)/edge.length();
-        StaticVector<float,3> projection = edge/edge.length() * projectLength;
+        ctype projectLength = edge.dot(candidate - from)/edge.length();
+        StaticVector<ctype,3> projection = edge/edge.length() * projectLength;
         
-        float orthoDist = ((candidate-from) - projection).length();
+        ctype orthoDist = ((candidate-from) - projection).length();
         
         if (projectLength>=0 && projectLength<=edge.length() && orthoDist<bestDist) {
             bestDist = orthoDist;
@@ -300,7 +307,7 @@ StaticVector<float,3> ContactToolBox::getClosestPointOnTriangle(const StaticVect
     
     // check point against vertices
     for (int i=0; i<3; i++){
-        float dist = (candidate - points[i]).length();
+        ctype dist = (candidate - points[i]).length();
         if (dist < bestDist){
             bestDist = dist;
             bestPoint = points[i];
@@ -312,12 +319,12 @@ StaticVector<float,3> ContactToolBox::getClosestPointOnTriangle(const StaticVect
 }
 
 
-void ContactToolBox::computeContactPatch(const Surface* surf, ContactBoundary& cBound)
+template <class ctype>
+void ContactToolBox<ctype>::computeContactPatch(const Surface* surf, ContactBoundary& cBound)
 {
     //////////////////////////////////////////////////
     // create triangles
     //////////////////////////////////////////////////
-    //cBound.vertices.sort(&mcStandardCompare);
 
     /** \todo Maybe cbound.vertices can be a std::set?
         Then we wouldn't have to copy
@@ -334,3 +341,11 @@ void ContactToolBox::computeContactPatch(const Surface* surf, ContactBoundary& c
         }
     }
 }
+
+// ////////////////////////////////////////////////////////
+//   Explicit template instantiations.
+//   If you need more, you can add them here.
+// ////////////////////////////////////////////////////////
+
+template class ContactToolBox<float>;
+template class ContactToolBox<double>;

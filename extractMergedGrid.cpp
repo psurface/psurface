@@ -10,8 +10,9 @@
 #include <psurface/ContactToolBox.h>
 
 
-void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
-                                       std::vector<IntersectionPrimitive<2,float> >& mergedGrid)
+template <class ctype>
+void ContactToolBox<ctype>::extractMergedGrid(PSurface<2,ctype>* psurface,
+                                       std::vector<IntersectionPrimitive<2,ctype> >& mergedGrid)
 {
     if (psurface->getNumTriangles()==0)
         return;
@@ -19,11 +20,11 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
 
     // ///////////////////////////////////////////////////
     // Set up point location structure
-    // Can we use the routine in PSurface<2,float> ???
+    // Can we use the routine in PSurface<2,ctype> ???
     // ///////////////////////////////////////////////////
     for (int i=0; i<psurface->getNumTriangles(); i++) {
 
-        DomainTriangle<float>& cT = psurface->triangles(i);
+        DomainTriangle<ctype>& cT = psurface->triangles(i);
 
         cT.insertExtraEdges();
 
@@ -36,7 +37,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
             // size() returns an unsigned type, which underflows if edgePoints[k] is empty
             for (int l=0; l<((int)cT.edgePoints[k].size())-1; l++) {
 
-                PlaneParam<float>::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
+                typename PlaneParam<ctype>::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
 
                 if (cE.isValid() && cE.getDPrev().from() != cE.getONext().to())
                     cT.addEdge(cE.getONext().to(), cE.to(), true);
@@ -71,20 +72,20 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
     //
     for (int i=0; i<psurface->getNumTriangles(); i++) {
 
-        const DomainTriangle<float>& cT = psurface->triangles(i);
+        const DomainTriangle<ctype>& cT = psurface->triangles(i);
 
         if (cT.nodes.size()<3)
             continue;
 
         ////////////////////////////////
-        PlaneParam<float>::TriangleIterator cPT;
+        typename PlaneParam<ctype>::TriangleIterator cPT;
         for (cPT = cT.firstTriangle(); cPT.isValid(); ++cPT) {
 
             
             int targetTri = -1;
             try {
                 targetTri = psurface->getImageSurfaceTriangle(i, cPT.vertices());
-            } catch (PSurface<2,float>::ParamError){
+            } catch (typename PSurface<2,ctype>::ParamError){
                 printf("exception caught!\n");
                 targetTri = -1;
             }
@@ -98,7 +99,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
             // //////////////////////////////////////////////
             // Assemble the triangles
             // //////////////////////////////////////////////
-            mergedGrid.push_back(IntersectionPrimitive<2,float>());
+            mergedGrid.push_back(IntersectionPrimitive<2,ctype>());
             mergedGrid.back().tris[0] = nonMortarTargetTris[i];
             mergedGrid.back().tris[1] = targetTri;
 
@@ -112,7 +113,7 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
             
                 // world coordinates in the domain triangle
                 mergedGrid.back().points[j] = 
-                    PlaneParam<float>::linearInterpol<StaticVector<float,3> >(cT.nodes[cPT.vertices(j)].domainPos(),
+                    PlaneParam<ctype>::template linearInterpol<StaticVector<ctype,3> >(cT.nodes[cPT.vertices(j)].domainPos(),
                                                                               psurface->vertices(cT.vertices[0]), 
                                                                               psurface->vertices(cT.vertices[1]), 
                                                                               psurface->vertices(cT.vertices[2]));
@@ -125,14 +126,14 @@ void ContactToolBox::extractMergedGrid(PSurface<2,float>* psurface,
 
 }
 
-
-void ContactToolBox::extractMergedGrid(const PSurface<1,double>* psurface,
-                                       std::vector<IntersectionPrimitive<1,float> >& mergedGrid)
+template <class ctype>
+void ContactToolBox<ctype>::extractMergedGrid(const PSurface<1,ctype>* psurface,
+                                       std::vector<IntersectionPrimitive<1,ctype> >& mergedGrid)
 {
     for (size_t i=0; i<psurface->domainSegments.size(); i++) {
 
-        const PSurface<1,double>::DomainSegment&    cS = psurface->domainSegments[i];
-        const std::vector<PSurface<1,double>::Node>& nodes = psurface->domainSegments[i].nodes;
+        const typename PSurface<1,ctype>::DomainSegment&    cS = psurface->domainSegments[i];
+        const std::vector<typename PSurface<1,ctype>::Node>& nodes = psurface->domainSegments[i].nodes;
 
         ////////////////////////////////
         for (int j=0; j<int(nodes.size())-1; j++) {
@@ -145,7 +146,7 @@ void ContactToolBox::extractMergedGrid(const PSurface<1,double>* psurface,
             // //////////////////////////////////////////////
             // Assemble new overlap
             // //////////////////////////////////////////////
-            IntersectionPrimitive<1,float> newOverlap;
+            IntersectionPrimitive<1,ctype> newOverlap;
             newOverlap.tris[0] = i;
             newOverlap.tris[1] = nodes[j].rightRangeSegment;
             
