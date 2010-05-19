@@ -51,9 +51,12 @@ void ContactToolBox<ctype>::buildContactSurface(PSurface<2,ctype>* cPar,
               << " (resp. " << contactBoundary[1].triIdx.size() << ") triangles." << std::endl;
     
     // the nonmortar side becomes the base grid of the parametrization
-    for (size_t i=0; i<contactBoundary[0].vertices.size(); i++)
-#warning Illegal cast!
-        cPar->newVertex(*(StaticVector<ctype,3>*)&surf1->points[contactBoundary[0].vertices[i]][0]);
+    for (size_t i=0; i<contactBoundary[0].vertices.size(); i++) {
+        StaticVector<ctype,3> newVertex;
+        for (int j=0; j<3; j++)
+            newVertex[j] = surf1->points[contactBoundary[0].vertices[i]][j];
+        cPar->newVertex(newVertex);
+    }
     
     cPar->domainSurfaceTriangleNumbers = contactBoundary[0].triIdx;
 
@@ -121,7 +124,8 @@ void ContactToolBox<ctype>::contactOracle(const Surface* surf1, const Surface* s
     std::vector<StaticVector<ctype,3> > points1(surf1->points.size());        
 
     for (int i=0; i<surf1->points.size(); i++) {
-        points1[i] = *(StaticVector<ctype,3>*)&surf1->points[i][0];
+        for (int j=0; j<3; j++)
+            points1[i][j] = surf1->points[i][j];
         mdOctree1.insert(&points1[i], &intersectionFunctor);
     }
 
@@ -167,10 +171,12 @@ void ContactToolBox<ctype>::contactOracle(const Surface* surf1, const Surface* s
     //  Loop over all triangles in surface1
     for (int i=0; i<surf1->triangles.size(); i++) {
 
-#warning Illegal cast!
-        const StaticVector<ctype,3>& p0 = *(StaticVector<ctype,3>*)&surf1->points[surf1->triangles[i].points[0]];
-        const StaticVector<ctype,3>& p1 = *(StaticVector<ctype,3>*)&surf1->points[surf1->triangles[i].points[1]];
-        const StaticVector<ctype,3>& p2 = *(StaticVector<ctype,3>*)&surf1->points[surf1->triangles[i].points[2]];
+        StaticVector<ctype,3> p0, p1, p2;
+        for (int j=0; j<3; j++) {
+            p0[j] = surf1->points[surf1->triangles[i].points[0]][j];
+            p1[j] = surf1->points[surf1->triangles[i].points[1]][j];
+            p2[j] = surf1->points[surf1->triangles[i].points[2]][j];
+        }
 
         //  Look up the octree for points in a conservative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
@@ -186,8 +192,9 @@ void ContactToolBox<ctype>::contactOracle(const Surface* surf1, const Surface* s
             if (contactField2[result[j]])
                 continue;
 
-#warning Illegal cast!
-            const StaticVector<ctype,3>& candidatePoint = *(StaticVector<ctype,3>*)&surf2->points[result[j]];
+            StaticVector<ctype,3> candidatePoint;
+            for (int k=0; k<3; k++)
+                candidatePoint[k] = surf2->points[result[j]][k];
 
             StaticVector<ctype,3> q = getClosestPointOnTriangle(p0, p1, p2, candidatePoint);
 
@@ -201,10 +208,12 @@ void ContactToolBox<ctype>::contactOracle(const Surface* surf1, const Surface* s
     //  Loop over all triangles in surface2
     for (int i=0; i<surf2->triangles.size(); i++) {
 
-#warning Illegal cast!
-        const StaticVector<ctype,3>& p0 = *(StaticVector<ctype,3>*)&surf2->points[surf2->triangles[i].points[0]];
-        const StaticVector<ctype,3>& p1 = *(StaticVector<ctype,3>*)&surf2->points[surf2->triangles[i].points[1]];
-        const StaticVector<ctype,3>& p2 = *(StaticVector<ctype,3>*)&surf2->points[surf2->triangles[i].points[2]];
+        StaticVector<ctype,3> p0, p1, p2;
+        for (int j=0; j<3; j++) {
+            p0[j] = surf2->points[surf2->triangles[i].points[0]][j];
+            p1[j] = surf2->points[surf2->triangles[i].points[1]][j];
+            p2[j] = surf2->points[surf2->triangles[i].points[2]][j];
+        }
 
         //  Look up the octree for points in a conversative neighborhood
         //  of the triangle.  The triangle's boundingbox + epsilon will do
