@@ -53,8 +53,7 @@ public:
 
     NodeIdx addTouchingNode(int tri, const StaticVector<ctype,2>& dP, int edge, int nodeNumber);
 
-    /** \todo Sollte vielleicht ein Bundle zurückgeben */
-    NodeIdx addTouchingNodePair(int tri1, int tri2,
+    NodeBundle addTouchingNodePair(int tri1, int tri2,
                                 const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
                                 int edge1, int edge2, int nodeNumber);
 

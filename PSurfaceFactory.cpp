@@ -94,11 +94,8 @@ void PSurfaceFactory<dim,ctype>::insertTargetVertexMapping(unsigned int targetVe
             StaticVector<ctype,2> dP2((dir2==0)*(mu) + (dir2==2)*(1-mu), (dir2==0)*(1-mu) + (dir2==1)*(mu));
             
             // insert touching node pair
-            NodeIdx newNodeNumber = addTouchingNodePair(domainTriangle, neighboringTri, domainLocalPosition, dP2, 
+            projectedTo = addTouchingNodePair(domainTriangle, neighboringTri, domainLocalPosition, dP2, 
                                                                    dir, dir2, targetVertex);
-            projectedTo.resize(2);
-            projectedTo[0].setValue(domainTriangle, newNodeNumber);
-            projectedTo[1].setValue(neighboringTri, psurface_->triangles(neighboringTri).nodes.size()-1);
         }
         
     } else if (newType==Node<ctype>::CORNER_NODE) {
@@ -229,10 +226,15 @@ NodeIdx PSurfaceFactory<dim,ctype>::addTouchingNode(int tri, const StaticVector<
 
 // BUG: The node needs to be entered in the edgepoint arrays
 template <int dim, class ctype>
-NodeIdx PSurfaceFactory<dim,ctype>::addTouchingNodePair(int tri1, int tri2,
+NodeBundle PSurfaceFactory<dim,ctype>::addTouchingNodePair(int tri1, int tri2,
                                             const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
                                             int edge1, int edge2, int nodeNumber)
 {
+    // We return the pair of new nodes
+    NodeBundle result(2);
+    result[0].tri = tri1;
+    result[1].tri = tri2;
+
     DomainTriangle<ctype>& cT1 = psurface_->triangles(tri1);
     DomainTriangle<ctype>& cT2 = psurface_->triangles(tri2);
 
@@ -245,7 +247,10 @@ NodeIdx PSurfaceFactory<dim,ctype>::addTouchingNodePair(int tri1, int tri2,
     cT1.nodes.back().setDomainEdge(edge1);
     cT2.nodes.back().setDomainEdge(edge2);
 
-    return cT1.nodes.size()-1;
+    result[0].idx = cT1.nodes.size()-1;
+    result[1].idx = cT2.nodes.size()-1;
+
+    return result;
 }
 
 template <int dim, class ctype>
