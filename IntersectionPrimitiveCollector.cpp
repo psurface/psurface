@@ -162,15 +162,15 @@ void IntersectionPrimitiveCollector<ctype>::collect(const PSurface<1,ctype>* psu
             newOverlap.localCoords[1][1][0] = nodes[j+1].rangeLocalPosition;
             
             // Compute the world position of the overlap on the domain side */
-            newOverlap.points[0][0] = psurface->vertices[cS.points[0]][0] * (1-nodes[j].domainLocalPosition)
-                + psurface->vertices[cS.points[1]][0] * nodes[j].domainLocalPosition;
-            newOverlap.points[0][1] = psurface->vertices[cS.points[0]][1] * (1-nodes[j].domainLocalPosition)
-                + psurface->vertices[cS.points[1]][1] * nodes[j].domainLocalPosition;
+            newOverlap.points[0][0] = psurface->domainVertices[cS.points[0]][0] * (1-nodes[j].domainLocalPosition)
+                + psurface->domainVertices[cS.points[1]][0] * nodes[j].domainLocalPosition;
+            newOverlap.points[0][1] = psurface->domainVertices[cS.points[0]][1] * (1-nodes[j].domainLocalPosition)
+                + psurface->domainVertices[cS.points[1]][1] * nodes[j].domainLocalPosition;
 
-            newOverlap.points[1][0] = psurface->vertices[cS.points[0]][0] * (1-cS.nodes[j+1].domainLocalPosition)
-                + psurface->vertices[cS.points[1]][0] * cS.nodes[j+1].domainLocalPosition;
-            newOverlap.points[1][1] = psurface->vertices[cS.points[0]][1] * (1-cS.nodes[j+1].domainLocalPosition)
-                + psurface->vertices[cS.points[1]][1] * cS.nodes[j+1].domainLocalPosition;
+            newOverlap.points[1][0] = psurface->domainVertices[cS.points[0]][0] * (1-cS.nodes[j+1].domainLocalPosition)
+                + psurface->domainVertices[cS.points[1]][0] * cS.nodes[j+1].domainLocalPosition;
+            newOverlap.points[1][1] = psurface->domainVertices[cS.points[0]][1] * (1-cS.nodes[j+1].domainLocalPosition)
+                + psurface->domainVertices[cS.points[1]][1] * cS.nodes[j+1].domainLocalPosition;
             
             mergedGrid.push_back(newOverlap);
         }

@@ -44,10 +44,10 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
     //   Build domain surface and its normal field
     // //////////////////////////////////////////////////
 
-    psurface_.vertices.resize(numVertices1);
+    psurface_.domainVertices.resize(numVertices1);
     for (int i=0; i<numVertices1; i++) 
         for (int j=0; j<2; j++)
-            psurface_.vertices[i][j] = coords1[i][j];
+            psurface_.domainVertices[i][j] = coords1[i][j];
 
     // Build the domain segments
     psurface_.domainSegments.resize(nTri1);
@@ -78,7 +78,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
     //   Build the segments-per-vertex arrays
     // /////////////////////////////////////////////////////
 
-    std::vector<std::tr1::array<int, 2> > segPerVertex1(psurface_.vertices.size());
+    std::vector<std::tr1::array<int, 2> > segPerVertex1(psurface_.domainVertices.size());
     for (size_t i=0; i<segPerVertex1.size(); i++)
         segPerVertex1[i][0] = segPerVertex1[i][1] = -1;
 
@@ -148,8 +148,8 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
         
         for (int j=0; j<psurface_.domainSegments.size(); j++) {
 
-            const StaticVector<ctype,2>& p0 = psurface_.vertices[psurface_.domainSegments[j].points[0]];
-            const StaticVector<ctype,2>& p1 = psurface_.vertices[psurface_.domainSegments[j].points[1]];
+            const StaticVector<ctype,2>& p0 = psurface_.domainVertices[psurface_.domainSegments[j].points[0]];
+            const StaticVector<ctype,2>& p1 = psurface_.domainVertices[psurface_.domainSegments[j].points[1]];
 
             const StaticVector<ctype,2>& n0 = domainNormals[psurface_.domainSegments[j].points[0]];
             const StaticVector<ctype,2>& n1 = domainNormals[psurface_.domainSegments[j].points[1]];
@@ -269,7 +269,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
             ctype rangeLocalPosition;
             int rangeSegment;
 
-            if (NormalProjector<ctype>::normalProjection(psurface_.vertices[cS.points[0]], domainNormals[cS.points[0]],
+            if (NormalProjector<ctype>::normalProjection(psurface_.domainVertices[cS.points[0]], domainNormals[cS.points[0]],
                                                           rangeSegment, rangeLocalPosition,
                                                           tri2, coords2)) {
 
@@ -289,7 +289,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
             ctype rangeLocalPosition;
             int rangeSegment;
 
-            if (NormalProjector<ctype>::normalProjection(psurface_.vertices[cS.points[1]], domainNormals[cS.points[1]],
+            if (NormalProjector<ctype>::normalProjection(psurface_.domainVertices[cS.points[1]], domainNormals[cS.points[1]],
                                                           rangeSegment, rangeLocalPosition,
                                                           tri2, coords2)) {
 
@@ -356,8 +356,8 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
         // //////////////////////////////////////////////////////////
         //  The contact directions are given as the vertex normals
         // //////////////////////////////////////////////////////////
-        normals.resize(psurface_.vertices.size());
-        for (size_t i=0; i<psurface_.vertices.size(); i++) 
+        normals.resize(psurface_.domainVertices.size());
+        for (size_t i=0; i<psurface_.domainVertices.size(); i++) 
             normals[i] = 0;
 
         for (size_t i=0; i<nElements; i++) {
@@ -367,8 +367,8 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
             int v1 = psurface_.domainSegments[i].points[1];
 
             StaticVector<ctype,2> segment;
-            segment[0] = psurface_.vertices[v1][0] - psurface_.vertices[v0][0];
-            segment[1] = psurface_.vertices[v1][1] - psurface_.vertices[v0][1];
+            segment[0] = psurface_.domainVertices[v1][0] - psurface_.domainVertices[v0][0];
+            segment[1] = psurface_.domainVertices[v1][1] - psurface_.domainVertices[v0][1];
 
             StaticVector<ctype,2> segmentNormal;
             segmentNormal[0] =  segment[1];
@@ -387,11 +387,11 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
     } else {
 
         // Sample the provided analytical contact direction field
-        normals.resize(psurface_.vertices.size());
-        for (size_t i=0; i<psurface_.vertices.size(); i++) {
+        normals.resize(psurface_.domainVertices.size());
+        for (size_t i=0; i<psurface_.domainVertices.size(); i++) {
 
             if (dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(direction))
-                normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(direction))(psurface_.vertices[i]);
+                normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(direction))(psurface_.domainVertices[i]);
             else if (dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(direction))
                 normals[i] = (*dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(direction))(i);
             else

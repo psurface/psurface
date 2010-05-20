@@ -422,12 +422,13 @@ public:
         int neighbor[2];
     };
 
-    std::vector<StaticVector<ctype, 2> > vertices;
+    std::vector<StaticVector<ctype, 2> > domainVertices;
 
     std::vector<DomainSegment> domainSegments;
 
     std::vector<StaticVector<ctype, 2> > targetVertices;
 
+    std::vector<std::tr1::array<int, 2> > targetSegments;
 };
 
 #endif
