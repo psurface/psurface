@@ -271,41 +271,50 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
     int nTargetTriangles = contactPatch.triIdx.size();
 
     targetNormals.assign(nTargetPoints, StaticVector<ctype,3>(0.0,0.0,0.0));
-    std::vector<bool> hasTargetNormal;
-    hasTargetNormal.assign(nTargetPoints, false);
 
-    for (int i=0; i<nTargetTriangles; i++) {
+    if (direction) {
         
-        int p0 = contactPatch.triangles(i).points[0];
-        int p1 = contactPatch.triangles(i).points[1];
-        int p2 = contactPatch.triangles(i).points[2];
+        for (int i=0; i<nTargetPoints; i++) {
+            
+            if (dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(direction)) {
+                normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(direction))(psurface_->vertices(i));
+            } else if (dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))
+                normals[i] = (*dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))(i);
+            else {
+                std::cerr << "Domain direction function not properly set!" << std::endl;
+                abort();
+            }
+            
+        }
         
-        StaticVector<ctype,3> a_, b_;
-
-        for (int j=0; j<3; j++) {
-            a_[j] = contactPatch.surf->points[p1][j] - contactPatch.surf->points[p0][j];
-            b_[j] = contactPatch.surf->points[p2][j] - contactPatch.surf->points[p0][j];
-        }        
-
-        StaticVector<ctype,3> a(a_[0], a_[1], a_[2]);
-        StaticVector<ctype,3> b(b_[0], b_[1], b_[2]);
-        StaticVector<ctype,3> triNormal = a.cross(b);
-        triNormal.normalize();
+    } else {
         
-        targetNormals[p0] += triNormal;
-        targetNormals[p1] += triNormal;
-        targetNormals[p2] += triNormal;
-             
-        hasTargetNormal[p0] = true;
-        hasTargetNormal[p1] = true;
-        hasTargetNormal[p2] = true;
-
-    }
-    
-    for (size_t i=0; i<contactPatch.vertices.size(); i++)
-        if (hasTargetNormal[contactPatch.vertices[i]])
+        for (int i=0; i<nTargetTriangles; i++) {
+            
+            int p0 = contactPatch.triangles(i).points[0];
+            int p1 = contactPatch.triangles(i).points[1];
+            int p2 = contactPatch.triangles(i).points[2];
+            
+            StaticVector<ctype,3> a, b;
+            
+            for (int j=0; j<3; j++) {
+                a[j] = contactPatch.surf->points[p1][j] - contactPatch.surf->points[p0][j];
+                b[j] = contactPatch.surf->points[p2][j] - contactPatch.surf->points[p0][j];
+            }        
+            
+            StaticVector<ctype,3> triNormal = a.cross(b);
+            triNormal.normalize();
+            
+            targetNormals[p0] += triNormal;
+            targetNormals[p1] += triNormal;
+            targetNormals[p2] += triNormal;
+            
+        }
+        
+        for (size_t i=0; i<contactPatch.vertices.size(); i++)
             targetNormals[contactPatch.vertices[i]].normalize();
-
+        
+    }
 
 }
 
