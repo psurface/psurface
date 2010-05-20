@@ -129,7 +129,7 @@ void PSurfaceFactory<dim,ctype>::insertGhostNode(unsigned int domainVertex,
 {
     std::vector<int> neighbors = psurface_->getTrianglesPerVertex(domainVertex);
     
-    for (int i=0; i<neighbors.size(); i++) {
+    for (size_t i=0; i<neighbors.size(); i++) {
         
         int corner = psurface_->triangles(neighbors[i]).getCorner(domainVertex);
         psurface_->addGhostNode(neighbors[i], corner, targetTriangle, targetLocalPosition);
@@ -147,7 +147,7 @@ void PSurfaceFactory<dim,ctype>::addCornerNodeBundle(int domainVertex, int targe
 {
     std::vector<int> neighbors = psurface_->getTrianglesPerVertex(domainVertex);
 
-    for (int i=0; i<neighbors.size(); i++) {
+    for (size_t i=0; i<neighbors.size(); i++) {
 
         int corner = psurface_->triangles(neighbors[i]).getCorner(domainVertex);
         psurface_->addCornerNode(neighbors[i], corner, targetVertex);

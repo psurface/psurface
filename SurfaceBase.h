@@ -537,7 +537,6 @@ public:
     /// \todo The copying could be sped up considerably...
     void garbageCollection()
     {
-        int i, j;
 #ifndef NDEBUG
         std::cout << "This is the SurfaceBase garbage collection..." << std::endl;
         std::cout << freeVertexStack.size() << " vertices, "
@@ -555,13 +554,13 @@ public:
             std::vector<int> vertexOffsets(vertexArray.size());
             isInvalid.resize(vertexArray.size());
 
-            for (i=0; i<isInvalid.size(); i++)
+            for (size_t i=0; i<isInvalid.size(); i++)
                 isInvalid[i] = false;
 
-            for (i=0; i<freeVertexStack.size(); i++)
+            for (size_t i=0; i<freeVertexStack.size(); i++)
                 isInvalid[freeVertexStack[i]] = true;
 
-            for (i=0; i<vertexArray.size(); i++){
+            for (size_t i=0; i<vertexArray.size(); i++){
                 vertexOffsets[i] = offset;
                 
                 if (isInvalid[i]) 
@@ -569,21 +568,21 @@ public:
             }
 
             ////////////////////
-            for (i=0; i<vertexOffsets.size(); i++)
+            for (size_t i=0; i<vertexOffsets.size(); i++)
                 vertexArray[i-vertexOffsets[i]] = vertexArray[i];
             
             vertexArray.resize(vertexArray.size()-offset);
             
             
             // Adjust edges
-            for (i=0; i<edgeArray.size(); i++) {
+            for (size_t i=0; i<edgeArray.size(); i++) {
                 edgeArray[i].from -= vertexOffsets[edgeArray[i].from];
                 edgeArray[i].to   -= vertexOffsets[edgeArray[i].to];
             }                
 
             // Adjust triangles
-            for (i=0; i<triangleArray.size(); i++) 
-                for (j=0; j<3; j++) 
+            for (size_t i=0; i<triangleArray.size(); i++) 
+                for (size_t j=0; j<3; j++) 
                     triangleArray[i].vertices[j] -= vertexOffsets[triangleArray[i].vertices[j]];
 
             freeVertexStack.resize(0);                
@@ -597,33 +596,33 @@ public:
             std::vector<int> edgeOffsets(edgeArray.size());
             isInvalid.resize(edgeArray.size());
 
-            for (i=0; i<isInvalid.size(); i++)
+            for (size_t i=0; i<isInvalid.size(); i++)
                 isInvalid[i] = false;
             
-            for (i=0; i<freeEdgeStack.size(); i++)
+            for (size_t i=0; i<freeEdgeStack.size(); i++)
                 isInvalid[freeEdgeStack[i]] = true;
             
-            for (i=0; i<edgeArray.size(); i++){
+            for (size_t i=0; i<edgeArray.size(); i++){
                 edgeOffsets[i] = offset;
                 
                 if (isInvalid[i]) 
                     offset++;
             }
-            //printf("1.3\n");
+
             ////////////////////
-            for (i=0; i<edgeOffsets.size(); i++)
+            for (size_t i=0; i<edgeOffsets.size(); i++)
                 edgeArray[i-edgeOffsets[i]] = edgeArray[i];
             
             edgeArray.resize(edgeArray.size()-offset);
             
             // Adjust vertices
-            for (i=0; i<vertexArray.size(); i++) 
-                for (j=0; j<vertexArray[i].degree(); j++)
+            for (size_t i=0; i<vertexArray.size(); i++) 
+                for (size_t j=0; j<vertexArray[i].degree(); j++)
                     vertexArray[i].edges[j] -= edgeOffsets[vertexArray[i].edges[j]];
             
             // Adjust triangles
-            for (i=0; i<triangleArray.size(); i++) 
-                for (j=0; j<3; j++) 
+            for (size_t i=0; i<triangleArray.size(); i++) 
+                for (size_t j=0; j<3; j++) 
                     if (triangleArray[i].edges[j]>=0)
                         triangleArray[i].edges[j] -= edgeOffsets[triangleArray[i].edges[j]];
 
@@ -638,13 +637,13 @@ public:
             std::vector<int> triangleOffsets(triangleArray.size());
             isInvalid.resize(triangleArray.size());
 
-            for (i=0; i<isInvalid.size(); i++)
+            for (size_t i=0; i<isInvalid.size(); i++)
                 isInvalid[i] = false;
 
-            for (i=0; i<freeTriangleStack.size(); i++)
+            for (size_t i=0; i<freeTriangleStack.size(); i++)
                 isInvalid[freeTriangleStack[i]] = true;
 
-            for (i=0; i<triangleArray.size(); i++){
+            for (size_t i=0; i<triangleArray.size(); i++){
                 triangleOffsets[i] = offset;
                 
                 if (isInvalid[i]) 
@@ -652,15 +651,15 @@ public:
             }
 
             ////////////////////
-            for (i=0; i<triangleOffsets.size(); i++)
+            for (size_t i=0; i<triangleOffsets.size(); i++)
                 triangleArray[i-triangleOffsets[i]] = triangleArray[i];
             
             triangleArray.resize(triangleArray.size()-offset);
             
             
             // Adjust edges
-            for (i=0; i<edgeArray.size(); i++) 
-                for (j=0; j<edgeArray[i].triangles.size(); j++) 
+            for (size_t i=0; i<edgeArray.size(); i++) 
+                for (size_t j=0; j<edgeArray[i].triangles.size(); j++) 
                     edgeArray[i].triangles[j] -= triangleOffsets[edgeArray[i].triangles[j]];
                 
             freeTriangleStack.resize(0);
