@@ -57,66 +57,9 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
     }
 
     // ///////////////////////////////
-    //   Build the normal field
+    //   Build the domain normal field
     // ///////////////////////////////
-    if (!domainDirection) {
-
-        // //////////////////////////////////////////////////////////
-        //  The contact directions are given as the vertex normals
-        // //////////////////////////////////////////////////////////
-        domainNormals.resize(psurface_.vertices.size());
-        for (size_t i=0; i<psurface_.vertices.size(); i++) 
-            domainNormals[i] = 0;
-
-        for (int i=0; i<nTri1; i++) {
-
-            // Compute segment normal
-            int v0 = tri1[i][0];
-            int v1 = tri1[i][1];
-
-            StaticVector<ctype,2> segment;
-            segment[0] = coords1[v1][0] - coords1[v0][0];
-            segment[1] = coords1[v1][1] - coords1[v0][1];
-
-            StaticVector<ctype,2> segmentNormal;
-            segmentNormal[0] =  segment[1];
-            segmentNormal[1] = -segment[0];
-
-            segmentNormal /= segmentNormal.length();
-
-            domainNormals[tri1[i][0]] += segmentNormal;
-            domainNormals[tri1[i][1]] += segmentNormal;
-
-//             std::cout << "Normal: " << segmentNormal << "   ";
-//             printf("added to %d %d   ---   %d %d\n", tri1[2*i], tri1[2*i+1],
-//                    tri1[2*i], tri1[2*i+1]);
-        }
-
-        for (size_t i=0; i<domainNormals.size(); i++) {
-            domainNormals[i] /= domainNormals[i].length();
-            //std::cout << "Normal " << i << ":   " << domainNormals[i] << std::endl;
-        }
-        
-
-    } else {
-
-        // Sample the provided analytical contact direction field
-        domainNormals.resize(psurface_.vertices.size());
-        for (size_t i=0; i<psurface_.vertices.size(); i++) {
-
-            if (dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(domainDirection))
-                domainNormals[i] = (*dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(domainDirection))(psurface_.vertices[i]);
-            else if (dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(domainDirection))
-                domainNormals[i] = (*dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(domainDirection))(i);
-            else {
-                std::cerr << "Domain direction function not properly set!" << std::endl;
-                abort();
-            }
-                
-        }
-
-    }
-
+    computeDiscreteDomainDirections(domainDirection, domainNormals);
 
     // //////////////////////////////////////////////////
     //   Build range surface and its normal field
@@ -187,43 +130,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
 
     }
 
-#if 0
-    for (int i=0; i<segPerVertex2.size(); i++)
-        printf("i %d:  %d  %d\n", i, segPerVertex2[i][0], segPerVertex2[i][1]);
-
-    exit(0);
-#endif
-
-    // Build the normal field
-    targetNormals.resize(psurface_.targetVertices.size());
-    for (size_t i=0; i<psurface_.targetVertices.size(); i++) 
-        targetNormals[i] = 0;
-
-    for (int i=0; i<nTri2; i++) {
-
-        // Compute segment normal
-        int v0 = tri2[i][0];
-        int v1 = tri2[i][1];
-        StaticVector<ctype,2> segment;
-        segment[0] = coords2[v1][0] - coords2[v0][0];
-        segment[1] = coords2[v1][1] - coords2[v0][1];
-
-        StaticVector<ctype,2> segmentNormal;
-        segmentNormal[0] =  segment[1];
-        segmentNormal[1] = -segment[0];
-
-        segmentNormal /= segmentNormal.length();
-
-        targetNormals[tri2[i][0]] += segmentNormal;
-        targetNormals[tri2[i][1]] += segmentNormal;
-
-    }
-
-    for (size_t i=0; i<targetNormals.size(); i++) {
-        targetNormals[i] /= targetNormals[i].length();
-        //std::cout << "Normal " << i << ":   " << targetNormals[i] << std::endl;
-    }
-    //exit(0);
+    computeDiscreteTargetDirections(tri2, targetDirection, targetNormals);
 
     // ///////////////////////////////////////////////////////////////////////
     //   Project the vertices of the target surface onto the domain surface
@@ -431,6 +338,109 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
 
         }
 
+    }
+
+}
+
+template <class ctype>
+void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFunction<2,ctype>* direction,
+                                                         std::vector<StaticVector<ctype,2> >& normals)
+{
+    size_t nElements = psurface_.domainSegments.size();
+
+    if (!direction) {
+
+        // //////////////////////////////////////////////////////////
+        //  The contact directions are given as the vertex normals
+        // //////////////////////////////////////////////////////////
+        domainNormals.resize(psurface_.vertices.size());
+        for (size_t i=0; i<psurface_.vertices.size(); i++) 
+            domainNormals[i] = 0;
+
+        for (size_t i=0; i<nElements; i++) {
+
+            // Compute segment normal
+            int v0 = psurface_.domainSegments[i].points[0];
+            int v1 = psurface_.domainSegments[i].points[1];
+
+            StaticVector<ctype,2> segment;
+            segment[0] = psurface_.vertices[v1][0] - psurface_.vertices[v0][0];
+            segment[1] = psurface_.vertices[v1][1] - psurface_.vertices[v0][1];
+
+            StaticVector<ctype,2> segmentNormal;
+            segmentNormal[0] =  segment[1];
+            segmentNormal[1] = -segment[0];
+
+            segmentNormal /= segmentNormal.length();
+
+            domainNormals[psurface_.domainSegments[i].points[0]] += segmentNormal;
+            domainNormals[psurface_.domainSegments[i].points[0]] += segmentNormal;
+
+//             std::cout << "Normal: " << segmentNormal << "   ";
+//             printf("added to %d %d   ---   %d %d\n", tri1[2*i], tri1[2*i+1],
+//                    tri1[2*i], tri1[2*i+1]);
+        }
+
+        for (size_t i=0; i<domainNormals.size(); i++) {
+            domainNormals[i] /= domainNormals[i].length();
+            //std::cout << "Normal " << i << ":   " << domainNormals[i] << std::endl;
+        }
+        
+
+    } else {
+
+        // Sample the provided analytical contact direction field
+        domainNormals.resize(psurface_.vertices.size());
+        for (size_t i=0; i<psurface_.vertices.size(); i++) {
+
+            if (dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(direction))
+                domainNormals[i] = (*dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(direction))(psurface_.vertices[i]);
+            else if (dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(direction))
+                domainNormals[i] = (*dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(direction))(i);
+            else {
+                std::cerr << "Domain direction function not properly set!" << std::endl;
+                abort();
+            }
+                
+        }
+
+    }
+
+}
+
+template <class ctype>
+void ContactMapping<2,ctype>::computeDiscreteTargetDirections(const std::vector<std::tr1::array<int,2> >& elements,
+                                                              const DirectionFunction<2,ctype>* direction,
+                                                              std::vector<StaticVector<ctype,2> >& normals)
+{
+    // Build the normal field
+    targetNormals.resize(psurface_.targetVertices.size());
+    for (size_t i=0; i<psurface_.targetVertices.size(); i++) 
+        targetNormals[i] = 0;
+
+    for (int i=0; i<elements.size(); i++) {
+
+        // Compute segment normal
+        int v0 = elements[i][0];
+        int v1 = elements[i][1];
+        StaticVector<ctype,2> segment;
+        segment[0] = psurface_.targetVertices[v1][0] - psurface_.targetVertices[v0][0];
+        segment[1] = psurface_.targetVertices[v1][1] - psurface_.targetVertices[v0][1];
+
+        StaticVector<ctype,2> segmentNormal;
+        segmentNormal[0] =  segment[1];
+        segmentNormal[1] = -segment[0];
+
+        segmentNormal /= segmentNormal.length();
+
+        targetNormals[elements[i][0]] += segmentNormal;
+        targetNormals[elements[i][1]] += segmentNormal;
+
+    }
+
+    for (size_t i=0; i<targetNormals.size(); i++) {
+        targetNormals[i] /= targetNormals[i].length();
+        //std::cout << "Normal " << i << ":   " << targetNormals[i] << std::endl;
     }
 
 }

@@ -39,6 +39,13 @@ public:
 
 private:
 
+    void computeDiscreteDomainDirections(const DirectionFunction<2,ctype>* direction,
+                                         std::vector<StaticVector<ctype,2> >& normals);
+
+    void computeDiscreteTargetDirections(const std::vector<std::tr1::array<int,2> >& elements,
+                                         const DirectionFunction<2,ctype>* direction,
+                                         std::vector<StaticVector<ctype,2> >& normals);
+
     PSurface<1,ctype> psurface_;
 
     std::vector<StaticVector<ctype, 2> > domainNormals;
