@@ -29,15 +29,15 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
     int nPoints = psurface_->getNumVertices();
         
-    std::vector<StaticVector<ctype,3> > normals(nPoints);
-    computeDiscreteDomainDirections(domainDirection,normals);
+    std::vector<StaticVector<ctype,3> > domainNormals(nPoints);
+    computeDiscreteDomainDirections(domainDirection, domainNormals);
 
     // /////////////////////////////////////////////////////////////
     //   Compute the vertex normals of the target side
     // /////////////////////////////////////////////////////////////
 
     std::vector<StaticVector<ctype,3> > targetNormals(contactPatch.surf->points.size());
-    computeDiscreteTargetDirections(contactPatch, domainDirection, targetNormals);
+    computeDiscreteTargetDirections(contactPatch, targetDirection, targetNormals);
         
     // /////////////////////////////////////////////////////////////////////////////////////
     // Insert the vertices of the contact boundary as nodes on the intermediate manifold
@@ -63,9 +63,9 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             const StaticVector<ctype,3>& p1 = psurface_->vertices(psurface_->triangles(j).vertices[1]);
             const StaticVector<ctype,3>& p2 = psurface_->vertices(psurface_->triangles(j).vertices[2]);
 
-            const StaticVector<ctype,3>& n0 = normals[psurface_->triangles(j).vertices[0]];
-            const StaticVector<ctype,3>& n1 = normals[psurface_->triangles(j).vertices[1]];
-            const StaticVector<ctype,3>& n2 = normals[psurface_->triangles(j).vertices[2]];
+            const StaticVector<ctype,3>& n0 = domainNormals[psurface_->triangles(j).vertices[0]];
+            const StaticVector<ctype,3>& n1 = domainNormals[psurface_->triangles(j).vertices[1]];
+            const StaticVector<ctype,3>& n2 = domainNormals[psurface_->triangles(j).vertices[2]];
 
             StaticVector<ctype,3> x; // the unknown...
 
@@ -139,9 +139,9 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
         const StaticVector<ctype,3>& basePoint = psurface_->vertices(i);
         StaticVector<ctype,3> normal;
-        normal[0] = normals[i][0];
-        normal[1] = normals[i][1];
-        normal[2] = normals[i][2];
+        normal[0] = domainNormals[i][0];
+        normal[1] = domainNormals[i][1];
+        normal[2] = domainNormals[i][2];
 
         for (int j=0; j<contactPatch.triIdx.size(); j++) {
 
@@ -190,8 +190,8 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             // tests for boundary edges
             if (from < to || contactPatch.containsEdge(from, to)==1) {
                 
-                if (edgeCanBeInserted(normals, from, to, projectedTo))
-                    insertEdge(normals, from, to, projectedTo);
+                if (edgeCanBeInserted(domainNormals, from, to, projectedTo))
+                    insertEdge(domainNormals, from, to, projectedTo);
                 else {
                     //std::cout << "Skipping edge (" << from << ", " << to << ") ..." << std::endl;
                 }
@@ -213,10 +213,6 @@ void NormalProjector<ctype>::computeDiscreteDomainDirections(const DirectionFunc
     int nTriangles = psurface_->getNumTriangles();
     
     normals.assign(nPoints, StaticVector<ctype,3>(0.0));
-    
-    std::vector<unsigned char> nTriPerVertex(nPoints);
-    
-    nTriPerVertex.assign(nTriPerVertex.size(), 0);
     
     if (direction) {
         
@@ -250,14 +246,10 @@ void NormalProjector<ctype>::computeDiscreteDomainDirections(const DirectionFunc
             normals[p1] += triNormal;
             normals[p2] += triNormal;
             
-            nTriPerVertex[p0]++;
-            nTriPerVertex[p1]++;
-            nTriPerVertex[p2]++;
         }
 
         for (int i=0; i<nPoints; i++)
-            if (nTriPerVertex[i])
-                normals[i].normalize();
+            normals[i].normalize();
 
     }
 
@@ -268,21 +260,24 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
                                                              const DirectionFunction<3,ctype>* direction,
                                                              std::vector<StaticVector<ctype,3> >& normals)
 {
-    int nTargetPoints = contactPatch.surf->points.size();
-    int nTargetTriangles = contactPatch.triIdx.size();
+    int nPoints = contactPatch.surf->points.size();
+    int nTriangles = contactPatch.triIdx.size();
 
-    normals.assign(nTargetPoints, StaticVector<ctype,3>(0.0,0.0,0.0));
+    normals.assign(nPoints, StaticVector<ctype,3>(0.0));
 
     if (direction) {
         
-        for (int i=0; i<nTargetPoints; i++) {
+        for (int i=0; i<nPoints; i++) {
             
             if (dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(direction)) {
-                normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(direction))(psurface_->vertices(i));
+                StaticVector<ctype,3> p;
+                for (int j=0; j<3; j++)
+                    p[j] = contactPatch.surf->points[contactPatch.vertices[i]][j];
+                normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(direction))(p);
             } else if (dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))
-                normals[i] = (*dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))(i);
+                normals[contactPatch.vertices[i]] = (*dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))(contactPatch.vertices[i]);
             else {
-                std::cerr << "Domain direction function not properly set!" << std::endl;
+                std::cerr << "Target direction function not properly set!" << std::endl;
                 abort();
             }
             
@@ -290,7 +285,7 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
         
     } else {
         
-        for (int i=0; i<nTargetTriangles; i++) {
+        for (int i=0; i<nTriangles; i++) {
             
             int p0 = contactPatch.triangles(i).points[0];
             int p1 = contactPatch.triangles(i).points[1];
