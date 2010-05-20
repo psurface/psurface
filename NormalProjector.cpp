@@ -1,6 +1,7 @@
 #include <psurface/ContactBoundary.h>
 #include <psurface/NormalProjector.h>
 #include <psurface/PSurfaceFactory.h>
+#include <psurface/DirectionFunction.h>
 
 #include <psurface/StaticVector.h>
 #include <psurface/StaticMatrix.h>
@@ -13,7 +14,8 @@
 
 template <class ctype>
 void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
-                                 void (*directions)(const double* pos, double* dir))
+                                     const DirectionFunction<3,ctype>* domainDirection,
+                                     const DirectionFunction<3,ctype>* targetDirection)
 {
     const double eps = 0.0001;
 
@@ -34,17 +36,18 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
     nTriPerVertex.assign(nTriPerVertex.size(), 0);
 
-    if (directions) {
+    if (domainDirection) {
 
         for (int i=0; i<nPoints; i++) {
-            double pos[3];
-            double dir[3];
 
-            for (int j=0; j<3; j++)
-                pos[j] = psurface_->vertices(i)[j];
-            (*directions)(pos, dir);
-            for (int j=0; j<3; j++)
-                normals[i][j] = dir[j];
+            if (dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(domainDirection)) {
+                normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(domainDirection))(psurface_->vertices(i));
+            } else if (dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(domainDirection))
+                normals[i] = (*dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(domainDirection))(i);
+            else {
+                std::cerr << "Domain direction function not properly set!" << std::endl;
+                abort();
+            }
 
         }
 

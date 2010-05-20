@@ -10,9 +10,11 @@
 
 template <class ctype>
 void ContactToolBox<ctype>::buildContactSurface(PSurface<2,ctype>* cPar, 
-                                         const Surface* surf1,  const Surface* surf2,
-                                         ctype epsilon, 
-                                         void (*obsDirections)(const double* pos, double* dir))
+                                                const Surface* surf1,  const Surface* surf2,
+                                                ctype epsilon, 
+                                                const DirectionFunction<3,ctype>* domainDirection,
+                                                const DirectionFunction<3,ctype>* targetDirection
+                                                )
 {
     // set up parametrization
     cPar->surface = const_cast<Surface*>(surf2);
@@ -74,7 +76,7 @@ void ContactToolBox<ctype>::buildContactSurface(PSurface<2,ctype>* cPar,
     // compute projection
     NormalProjector<ctype> projector(cPar);
     
-    projector.project(contactBoundary[1], obsDirections);
+    projector.project(contactBoundary[1], domainDirection, targetDirection);
 
 }
 

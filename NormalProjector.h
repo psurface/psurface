@@ -10,7 +10,8 @@ class NodeBundle;
 class Surface;
 class GlobalNodeIdx;
 class ContactBoundary;
-
+template <int dimworld, class ctype>
+class DirectionFunction;
 
 /** \brief Construct a PSurface object by projecting one surface in normal direction onto another
 
@@ -25,7 +26,8 @@ public:
     {}
 
     void project(const ContactBoundary& contactPatch,
-                    void (*directions)(const double* pos, double* dir)
+                 const DirectionFunction<3,ctype>* domainDirection,
+                 const DirectionFunction<3,ctype>* targetDirection
                     );
 
 protected:

@@ -9,7 +9,8 @@ template <int dim, class ctype>
 class PSurface;
 class ContactBoundary;
 class Surface;
-
+template <int dimworld, class ctype>
+class DirectionFunction;
 
 template <class ctype>
 struct ContactToolBox {
@@ -17,7 +18,8 @@ struct ContactToolBox {
     static void buildContactSurface(PSurface<2,ctype>* cPar,
                              const Surface* surf1,  const Surface* surf2,
                              ctype epsilon, 
-                             void (*obsDirections)(const double* pos, double* dir)
+                                    const DirectionFunction<3,ctype>* domainDirection,
+                                    const DirectionFunction<3,ctype>* targetDirection
                              );
 
     static void contactOracle(const Surface* surf1, const Surface* surf2,

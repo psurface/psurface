@@ -10,6 +10,7 @@
 #include <psurface/ContactMapping.h>
 #include <psurface/NormalProjector.h>
 #include <psurface/StaticMatrix.h>
+#include <psurface/DirectionFunction.h>
 
 template <class ctype>
 void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >& coords1,  ///< The vertex coordinates of the first surface
@@ -18,7 +19,8 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                const std::vector<std::tr1::array<int,2> >& tri2,
 
                ctype epsilon,
-               void (*obsDirections)(const double* pos, double* dir)
+                                    const DirectionFunction<2,ctype>* domainDirection,
+                                    const DirectionFunction<2,ctype>* targetDirection
                )
 {
     int numVertices1 = coords1.size();
@@ -57,7 +59,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
     // ///////////////////////////////
     //   Build the normal field
     // ///////////////////////////////
-    if (!obsDirections) {
+    if (!domainDirection) {
 
         // //////////////////////////////////////////////////////////
         //  The contact directions are given as the vertex normals
@@ -101,11 +103,16 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
         // Sample the provided analytical contact direction field
         domainNormals.resize(psurface_.vertices.size());
         for (size_t i=0; i<psurface_.vertices.size(); i++) {
-            double thisNormal[2];
-            double vertexPosition[2] = {psurface_.vertices[i][0], psurface_.vertices[i][1]};
-            obsDirections(vertexPosition, thisNormal);
-            domainNormals[i][0] = thisNormal[0];
-            domainNormals[i][1] = thisNormal[1];
+
+            if (dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(domainDirection))
+                domainNormals[i] = (*dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(domainDirection))(psurface_.vertices[i]);
+            else if (dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(domainDirection))
+                domainNormals[i] = (*dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(domainDirection))(i);
+            else {
+                std::cerr << "Domain direction function not properly set!" << std::endl;
+                abort();
+            }
+                
         }
 
     }
@@ -442,7 +449,9 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
                          const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
                          const std::vector<std::tr1::array<ctype,3> >& coords2,  ///< The vertices of the second surface
                          const std::vector<std::tr1::array<int,3> >& tri2,
-                         ctype epsilon, void (*obsDirections)(const double* pos, double* dir))
+                         ctype epsilon, 
+                                    const DirectionFunction<3,ctype>* domainDirection,
+                                    const DirectionFunction<3,ctype>* targetDirection)
 {
     int nVert1 = coords1.size();
     int nVert2 = coords2.size();
@@ -520,7 +529,8 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     surface2_->write("testSurf2.surf", 1);
 #endif
 
-    ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_, epsilon, obsDirections);
+    ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_, epsilon, 
+                                               domainDirection, targetDirection);
 
 }
 
