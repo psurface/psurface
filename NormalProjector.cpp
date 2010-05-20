@@ -455,17 +455,16 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurfaceFactory<2,ctype>
 
                 StaticVector<ctype,2> dom1Ctype(dom1[0], dom1[1]);
                 StaticVector<ctype,2> dom2Ctype(dom2[0], dom2[1]);
-                NodeIdx newNodeIn  = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
-                                                                  dom1Ctype, dom2Ctype, i, e, image);
-                NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
+                NodeBundle newNodePair  = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
+                                                                          dom1Ctype, dom2Ctype, i, e, image);
                     
                 // insert new parameter edge
-                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
+                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodePair[0].idx);
 
                 //
                 curr.resize(1);
-                curr[0].setValue(neighboringTri, newNodeOut);
-                lambda   = newLambda;
+                curr[0] = newNodePair[1];
+                lambda  = newLambda;
                 enteringEdge = e;
                 
             } else {
@@ -566,17 +565,16 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurfaceFactory<2,ct
                 for (int j=0; j<3; j++)
                     image[j] = surf->points[from][j] + newLambda*(surf->points[to][j]-surf->points[from][j]);
                     
-                NodeIdx newNodeIn  = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
-                                                                  dom1, dom2, i, e, image);
-                NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
+                NodeBundle newNodePair = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
+                                                                         dom1, dom2, i, e, image);
                     
                 // insert new parameter edge
-                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodeIn);
+                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodePair[0].idx);
 
                 //
                 curr.resize(1);
-                curr[0].setValue(neighboringTri, newNodeOut);
-                lambda   = newLambda;
+                curr[0] = newNodePair[1];
+                lambda  = newLambda;
                 enteringEdge = e;
                 
             } else {
@@ -678,15 +676,14 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurfaceFactory<2,ctype>
                     for (int k=0; k<3; k++)
                         image[k] = surf->points[from][k] + lambda*(surf->points[to][k]-surf->points[from][k]);
                     
-                    NodeIdx newNodeIn  = factory.addIntersectionNodePair(curr[i].tri, neighboringTri,
-                                                                        dom1, dom2, j, e, image);
-                    NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
+                    NodeBundle newNodePair = factory.addIntersectionNodePair(curr[i].tri, neighboringTri,
+                                                                             dom1, dom2, j, e, image);
                     
                     // insert new parameter edge
-                    psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, newNodeIn);
+                    psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, newNodePair[0].idx);
 
                     curr.resize(1);
-                    curr[0].setValue(neighboringTri, newNodeOut);
+                    curr[0] = newNodePair[1];
                     enteringTri = e;
                     
                 } else if (corner== ((currentEdge+2)%3)) {
@@ -789,15 +786,14 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurfaceFactory<2,ctype>& 
                 for (int j=0; j<3; j++)
                     image[j] = surf->points[from][j] + lambda*(surf->points[to][j]-surf->points[from][j]);
                 
-                NodeIdx newNodeIn  = factory.addIntersectionNodePair(cT, neighboringTri,
-                                                                  dom1, dom2, oppEdge, e, image);
-                NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
+                NodeBundle newNodePair = factory.addIntersectionNodePair(cT, neighboringTri,
+                                                                         dom1, dom2, oppEdge, e, image);
                 
                 // insert new parameter edge
-                psurface_->triangles(cT).addEdge(curr[i].idx, newNodeIn);
+                psurface_->triangles(cT).addEdge(curr[i].idx, newNodePair[0].idx);
 
                 curr.resize(1);
-                curr[0].setValue(neighboringTri, newNodeOut);
+                curr[0] = newNodePair[1];
                 enteringEdge = e;
                 
             } else {

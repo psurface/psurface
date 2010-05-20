@@ -47,8 +47,7 @@ public:
 
     NodeIdx addCornerNode(int tri, int corner, int nodeNumber);
 
-    /** \todo Sollte vielleicht ein Bundle zurückgeben */
-    NodeIdx addIntersectionNodePair(int tri1, int tri2,
+    NodeBundle addIntersectionNodePair(int tri1, int tri2,
                                     const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
                                     int edge1, int edge2, const StaticVector<ctype,3>& range);
 

@@ -184,10 +184,15 @@ NodeIdx PSurfaceFactory<dim,ctype>::addCornerNode(int tri, int corner, int nodeN
 
 // BUG: The node needs to be entered in the edgepoint arrays
 template <int dim, class ctype>
-NodeIdx PSurfaceFactory<dim,ctype>::addIntersectionNodePair(int tri1, int tri2,
+NodeBundle PSurfaceFactory<dim,ctype>::addIntersectionNodePair(int tri1, int tri2,
                                                 const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
                                                 int edge1, int edge2, const StaticVector<ctype,3>& range)
 {
+    // We return the pair of new nodes
+    NodeBundle result(2);
+    result[0].tri = tri1;
+    result[1].tri = tri2;
+
     DomainTriangle<ctype>& cT1 = psurface_->triangles(tri1);
     DomainTriangle<ctype>& cT2 = psurface_->triangles(tri2);
 
@@ -195,15 +200,18 @@ NodeIdx PSurfaceFactory<dim,ctype>::addIntersectionNodePair(int tri1, int tri2,
     int nodeNumber = psurface_->iPos.size()-1;
 
     cT1.nodes.push_back(Node<ctype>());
-    int newNode1 = cT1.nodes.size()-1;
     cT2.nodes.push_back(Node<ctype>());
+
+    result[0].idx = cT1.nodes.size()-1;
+    result[1].idx = cT2.nodes.size()-1;
     
     cT1.nodes.back().setValue(dP1, nodeNumber, Node<ctype>::INTERSECTION_NODE);
     cT2.nodes.back().setValue(dP2, nodeNumber, Node<ctype>::INTERSECTION_NODE);
 
     cT1.nodes.back().setDomainEdge(edge1);
     cT2.nodes.back().setDomainEdge(edge2);
-    return newNode1;
+
+    return result;
 }
 
 // BUG: The node needs to be entered in the edgepoint arrays
