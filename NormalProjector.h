@@ -6,6 +6,8 @@
 
 #include <vector>
 
+template <int dim, class ctype>
+class PSurfaceFactory;
 class NodeBundle;
 class Surface;
 class GlobalNodeIdx;
@@ -41,28 +43,33 @@ protected:
 
     void setupEdgePointArrays();
 
-    void insertEdge(const std::vector<StaticVector<ctype,3> >& normals,
+    void insertEdge(PSurfaceFactory<2,ctype>& factory,
+                    const std::vector<StaticVector<ctype,3> >& normals,
                     int from, 
                     int to,
                     const std::vector<NodeBundle>& projectedTo
                     );
 
-    void insertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals, 
+    void insertEdgeFromInteriorNode(PSurfaceFactory<2,ctype>& factory,
+                                    const std::vector<StaticVector<ctype,3> >& normals, 
                                     int from, int to, ctype& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals, 
+    void insertEdgeFromIntersectionNode(PSurfaceFactory<2,ctype>& factory,
+                                        const std::vector<StaticVector<ctype,3> >& normals, 
                                         int from, int to, ctype& lambda,
                                         const std::vector<NodeBundle>& projectedTo,
                                         NodeBundle& curr, int& enteringEdge);
 
-    void insertEdgeFromTouchingNode(const std::vector<StaticVector<ctype,3> >& normals, 
+    void insertEdgeFromTouchingNode(PSurfaceFactory<2,ctype>& factory,
+                                    const std::vector<StaticVector<ctype,3> >& normals, 
                                     int from, int to, ctype& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringTri);
 
-    void insertEdgeFromCornerNode(const std::vector<StaticVector<ctype,3> >& normals, 
+    void insertEdgeFromCornerNode(PSurfaceFactory<2,ctype>& factory,
+                                  const std::vector<StaticVector<ctype,3> >& normals, 
                                   int from, int to, ctype& lambda,
                                     const std::vector<NodeBundle>& projectedTo,
                                     NodeBundle& curr, int& enteringEdge);

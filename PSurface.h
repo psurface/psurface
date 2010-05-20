@@ -286,28 +286,6 @@ public:
      */
     void checkConsistency(const char* where) const;
 
-    NodeIdx addNode(int tri, const StaticVector<ctype,3>& p);
-
-    NodeIdx addInteriorNode(int tri, const StaticVector<ctype,2>& dom, int nodeNumber);
-
-    NodeIdx addGhostNode(int tri, int corner, int targetTri, const StaticVector<ctype,2>& localTargetCoords);
-
-    NodeIdx addCornerNode(int tri, int corner, int nodeNumber);
-
-    /** \todo Sollte vielleicht ein Bundle zurückgeben */
-    NodeIdx addIntersectionNodePair(int tri1, int tri2,
-                                    const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
-                                    int edge1, int edge2, const StaticVector<ctype,3>& range);
-
-    NodeIdx addTouchingNode(int tri, const StaticVector<ctype,2>& dP, int edge, int nodeNumber);
-
-    /** \todo Sollte vielleicht ein Bundle zurückgeben */
-    NodeIdx addTouchingNodePair(int tri1, int tri2,
-                                const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
-                                int edge1, int edge2, int nodeNumber);
-
-    void addParTriangle(int tri, const std::tr1::array<int,3>& p);
-    
     /** Not a fast implementation, but it works even if the edgePoint arrays
      * haven't been set up yet.
      */

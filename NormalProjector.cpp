@@ -191,7 +191,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             if (from < to || contactPatch.containsEdge(from, to)==1) {
                 
                 if (edgeCanBeInserted(domainNormals, from, to, projectedTo))
-                    insertEdge(domainNormals, from, to, projectedTo);
+                    insertEdge(factory, domainNormals, from, to, projectedTo);
                 else {
                     //std::cout << "Skipping edge (" << from << ", " << to << ") ..." << std::endl;
                 }
@@ -317,7 +317,8 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<ctype,3> >& normals,
+void NormalProjector<ctype>::insertEdge(PSurfaceFactory<2,ctype>& factory,
+                                        const std::vector<StaticVector<ctype,3> >& normals,
                                  int from, int to, 
                                  const std::vector<NodeBundle>& projectedTo)
 {
@@ -348,20 +349,20 @@ void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<ctype,3> 
             switch (currType) {
             case Node<ctype>::TOUCHING_NODE:
                 
-                insertEdgeFromTouchingNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromTouchingNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             case Node<ctype>::GHOST_NODE:
             case Node<ctype>::CORNER_NODE:
-                insertEdgeFromCornerNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromCornerNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             case Node<ctype>::INTERSECTION_NODE:
-                insertEdgeFromIntersectionNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromIntersectionNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             case Node<ctype>::INTERIOR_NODE:
-                insertEdgeFromInteriorNode(normals, from, to, lambda, projectedTo, curr, enteringEdge);
+                insertEdgeFromInteriorNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
                 break;
                 
             }
@@ -376,7 +377,8 @@ void NormalProjector<ctype>::insertEdge(const std::vector<StaticVector<ctype,3> 
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals,
+void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurfaceFactory<2,ctype>& factory,
+                                                        const std::vector<StaticVector<ctype,3> >& normals,
                                                  int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
@@ -453,7 +455,7 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
 
                 StaticVector<ctype,2> dom1Ctype(dom1[0], dom1[1]);
                 StaticVector<ctype,2> dom2Ctype(dom2[0], dom2[1]);
-                NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(curr[0].tri, neighboringTri,
+                NodeIdx newNodeIn  = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1Ctype, dom2Ctype, i, e, image);
                 NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
@@ -486,7 +488,8 @@ void NormalProjector<ctype>::insertEdgeFromInteriorNode(const std::vector<Static
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals,
+void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurfaceFactory<2,ctype>& factory,
+                                                            const std::vector<StaticVector<ctype,3> >& normals,
                                                  int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
@@ -563,7 +566,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
                 for (int j=0; j<3; j++)
                     image[j] = surf->points[from][j] + newLambda*(surf->points[to][j]-surf->points[from][j]);
                     
-                NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(curr[0].tri, neighboringTri,
+                NodeIdx newNodeIn  = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
                                                                   dom1, dom2, i, e, image);
                 NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
@@ -597,7 +600,8 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(const std::vector<St
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<StaticVector<ctype,3> >& normals,
+void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurfaceFactory<2,ctype>& factory,
+                                                        const std::vector<StaticVector<ctype,3> >& normals,
                                                  int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringTri)
@@ -674,7 +678,7 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
                     for (int k=0; k<3; k++)
                         image[k] = surf->points[from][k] + lambda*(surf->points[to][k]-surf->points[from][k]);
                     
-                    NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(curr[i].tri, neighboringTri,
+                    NodeIdx newNodeIn  = factory.addIntersectionNodePair(curr[i].tri, neighboringTri,
                                                                         dom1, dom2, j, e, image);
                     NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                     
@@ -718,7 +722,8 @@ void NormalProjector<ctype>::insertEdgeFromTouchingNode(const std::vector<Static
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVector<ctype,3> >& normals, int from, int to, ctype &lambda,
+void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurfaceFactory<2,ctype>& factory,
+                                                      const std::vector<StaticVector<ctype,3> >& normals, int from, int to, ctype &lambda,
                                                  const std::vector<NodeBundle>& projectedTo,
                                                  NodeBundle& curr, int& enteringEdge)
 {
@@ -784,7 +789,7 @@ void NormalProjector<ctype>::insertEdgeFromCornerNode(const std::vector<StaticVe
                 for (int j=0; j<3; j++)
                     image[j] = surf->points[from][j] + lambda*(surf->points[to][j]-surf->points[from][j]);
                 
-                NodeIdx newNodeIn  = psurface_->addIntersectionNodePair(cT, neighboringTri,
+                NodeIdx newNodeIn  = factory.addIntersectionNodePair(cT, neighboringTri,
                                                                   dom1, dom2, oppEdge, e, image);
                 NodeIdx newNodeOut = psurface_->triangles(neighboringTri).nodes.size()-1;
                 
