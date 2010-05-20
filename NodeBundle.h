@@ -9,6 +9,13 @@ class NodeBundle : public std::vector<GlobalNodeIdx> {
 
 public:
 
+    NodeBundle()
+    {}
+
+    NodeBundle(size_t size)
+        : std::vector<GlobalNodeIdx>(size)
+    {}
+
     /** \brief Get the index of that node of the bundle that is on triangle 'tri'
         \return -1 if none of the nodes is on triangle 'tri'
     */
