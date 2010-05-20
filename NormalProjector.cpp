@@ -36,6 +36,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     //   Compute the vertex normals of the target side
     // /////////////////////////////////////////////////////////////
 
+    std::vector<StaticVector<ctype,3> > targetNormals(contactPatch.surf->points.size());
     computeDiscreteTargetDirections(contactPatch, domainDirection, targetNormals);
         
     // /////////////////////////////////////////////////////////////////////////////////////
@@ -270,7 +271,7 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
     int nTargetPoints = contactPatch.surf->points.size();
     int nTargetTriangles = contactPatch.triIdx.size();
 
-    targetNormals.assign(nTargetPoints, StaticVector<ctype,3>(0.0,0.0,0.0));
+    normals.assign(nTargetPoints, StaticVector<ctype,3>(0.0,0.0,0.0));
 
     if (direction) {
         
@@ -305,14 +306,14 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
             StaticVector<ctype,3> triNormal = a.cross(b);
             triNormal.normalize();
             
-            targetNormals[p0] += triNormal;
-            targetNormals[p1] += triNormal;
-            targetNormals[p2] += triNormal;
+            normals[p0] += triNormal;
+            normals[p1] += triNormal;
+            normals[p2] += triNormal;
             
         }
         
         for (size_t i=0; i<contactPatch.vertices.size(); i++)
-            targetNormals[contactPatch.vertices[i]].normalize();
+            normals[contactPatch.vertices[i]].normalize();
         
     }
 

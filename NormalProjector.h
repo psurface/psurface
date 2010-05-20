@@ -176,8 +176,6 @@ protected:
 
     PSurface<2,ctype>* psurface_;
 
-    std::vector<StaticVector<ctype, 3> > targetNormals;
-
 };
 
 #endif
