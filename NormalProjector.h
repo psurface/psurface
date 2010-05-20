@@ -32,6 +32,13 @@ public:
 
 protected:
 
+    void computeDiscreteDomainDirections(const DirectionFunction<3,ctype>* direction,
+                                         std::vector<StaticVector<ctype,3> >& normals);
+
+    void computeDiscreteTargetDirections(const ContactBoundary& contactPatch,
+                                         const DirectionFunction<3,ctype>* direction,
+                                         std::vector<StaticVector<ctype,3> >& normals);
+
     void setupEdgePointArrays();
 
     void insertEdge(const std::vector<StaticVector<ctype,3> >& normals,
