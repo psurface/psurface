@@ -48,10 +48,6 @@ private:
 
     PSurface<1,ctype> psurface_;
 
-    std::vector<StaticVector<ctype, 2> > domainNormals;
-
-    std::vector<StaticVector<ctype, 2> > targetNormals;
-
 };
 
 
