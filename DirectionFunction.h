@@ -19,6 +19,7 @@ template <int dimworld, class ctype>
 struct AnalyticDirectionFunction
     : public DirectionFunction<dimworld,ctype>
 {
+    /** \brief Return a direction for a given world position */
     virtual StaticVector<ctype,dimworld> operator()(const StaticVector<ctype,dimworld>& position) const = 0;
 };
 
@@ -28,7 +29,8 @@ template <int dimworld, class ctype>
 struct DiscreteDirectionFunction
     : public DirectionFunction<dimworld,ctype>
 {
-    virtual StaticVector<ctype,dimworld> operator()(const StaticVector<ctype,dimworld>& position) const = 0;
+    /** \brief Return a direction for a given vertex index */
+    virtual StaticVector<ctype,dimworld> operator()(size_t index) const = 0;
 };
 
 
