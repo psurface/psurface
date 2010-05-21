@@ -17,7 +17,7 @@ public:
     {}
 
     /** \brief Construction from a single scalar */
-    StaticVector(const T& s) {
+    explicit StaticVector(const T& s) {
         this->assign(s);
     }
 
