@@ -25,7 +25,6 @@ public:
                const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface
                const std::vector<std::tr1::array<ctype,2> >& coords2,  ///< The vertices of the second surface
                const std::vector<std::tr1::array<int,2> >& tri2,
-               ctype epsilon,   ///< The estimate maximum deformation for the contact oracle
                const DirectionFunction<2,ctype>* domainDirection = NULL,
                const DirectionFunction<2,ctype>* targetDirection = NULL
                );
@@ -66,7 +65,6 @@ public:
                const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
                const std::vector<std::tr1::array<ctype,3> >& coords2,  ///< The vertices of the second surface
                const std::vector<std::tr1::array<int,3> >& tri2,       ///< The triangles of the second surface
-               ctype epsilon,   ///< The estimate maximum deformation for the contact oracle
                const DirectionFunction<3,ctype>* domainDirection = NULL,
                const DirectionFunction<3,ctype>* targetDirection = NULL
                );

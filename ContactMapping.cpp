@@ -17,8 +17,6 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface
                const std::vector<std::tr1::array<ctype,2> >& coords2,  ///< The vertices of the second surface
                const std::vector<std::tr1::array<int,2> >& tri2,
-
-               ctype epsilon,
                                     const DirectionFunction<2,ctype>* domainDirection,
                                     const DirectionFunction<2,ctype>* targetDirection
                )
@@ -471,7 +469,6 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
                          const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
                          const std::vector<std::tr1::array<ctype,3> >& coords2,  ///< The vertices of the second surface
                          const std::vector<std::tr1::array<int,3> >& tri2,
-                         ctype epsilon, 
                                     const DirectionFunction<3,ctype>* domainDirection,
                                     const DirectionFunction<3,ctype>* targetDirection)
 {
@@ -551,7 +548,7 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     surface2_->write("testSurf2.surf", 1);
 #endif
 
-    ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_, epsilon, 
+    ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_,
                                                domainDirection, targetDirection);
 
 }
