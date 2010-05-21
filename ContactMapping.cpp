@@ -358,7 +358,7 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
         // //////////////////////////////////////////////////////////
         normals.resize(psurface_.domainVertices.size());
         for (size_t i=0; i<psurface_.domainVertices.size(); i++) 
-            normals[i] = 0;
+            normals[i] = StaticVector<ctype,2>(0);
 
         for (size_t i=0; i<nElements; i++) {
 
@@ -411,7 +411,7 @@ void ContactMapping<2,ctype>::computeDiscreteTargetDirections(const std::vector<
     // Build the normal field
     normals.resize(psurface_.targetVertices.size());
     for (size_t i=0; i<psurface_.targetVertices.size(); i++) 
-        normals[i] = 0;
+        normals[i] = StaticVector<ctype,2>(0);
     
     if (!direction) {
         
