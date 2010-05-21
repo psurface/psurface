@@ -375,7 +375,7 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
             segmentNormal /= segmentNormal.length();
 
             normals[psurface_.domainSegments[i].points[0]] += segmentNormal;
-            normals[psurface_.domainSegments[i].points[0]] += segmentNormal;
+            normals[psurface_.domainSegments[i].points[1]] += segmentNormal;
 
         }
 
