@@ -21,7 +21,7 @@ cp CircularPatch.h              $BASENAME/include/psurface
 cp DomainPolygon.h              $BASENAME/include/psurface
 cp Domains.h                    $BASENAME/include/psurface
 cp GlobalNodeIdx.h              $BASENAME/include/psurface
-cp McPointerSurfaceParts.h      $BASENAME/include/psurface
+cp SurfaceParts.h               $BASENAME/include/psurface
 cp SurfaceBase.h                $BASENAME/include/psurface
 cp Node.h                       $BASENAME/include/psurface
 cp NodeBundle.h                 $BASENAME/include/psurface
