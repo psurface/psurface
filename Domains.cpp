@@ -82,9 +82,9 @@ void DomainTriangle<ctype>::flip()
 template <class ctype>
 void DomainTriangle<ctype>::rotate()
 {
-    rotate(vertices,1);
-    rotate(edges,1);
-    rotate(edgePoints,1);
+    std::rotate(vertices.begin(),   vertices.end()-1,   vertices.end());
+    std::rotate(edges.begin(),      edges.end()-1,      edges.end());
+    std::rotate(edgePoints.begin(), edgePoints.end()-1, edgePoints.end());
     
     // turn the parametrization
     /// \todo This is slow and should be replaced!
