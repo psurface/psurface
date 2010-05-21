@@ -95,9 +95,9 @@ public:
     }
 
     /** \brief Division */
-    StaticVector<T,N>& operator/=(const StaticVector<T,N>& other) {
+    StaticVector<T,N>& operator/=(const T& divisor) {
         for (size_t i=0; i<N; i++)
-            (*this)[i] /= other[i];
+            (*this)[i] /= divisor;
         return *this;
     }
 
