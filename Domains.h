@@ -3,7 +3,7 @@
 
 #include <psurface/StaticVector.h>
 
-#include "McPointerSurfaceParts.h"
+#include "SurfaceParts.h"
 #include "PlaneParam.h"
 
 
