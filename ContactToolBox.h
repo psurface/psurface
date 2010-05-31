@@ -7,7 +7,6 @@
 
 template <int dim, class ctype>
 class PSurface;
-class ContactBoundary;
 class Surface;
 template <int dimworld, class ctype>
 class DirectionFunction;
@@ -20,8 +19,6 @@ struct ContactToolBox {
                                     const DirectionFunction<3,ctype>* domainDirection,
                                     const DirectionFunction<3,ctype>* targetDirection
                                     );
-
-    static void computeContactPatch(const Surface* surf, ContactBoundary& cBound);
 
 };
 #endif

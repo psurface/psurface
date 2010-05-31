@@ -52,7 +52,6 @@ cp AmiraMeshIO.cpp              $BASENAME/src
 cp ContactToolBox.h             $BASENAME/include/psurface
 cp IntersectionPrimitive.h      $BASENAME/include/psurface
 cp IntersectionPrimitiveCollector.h   $BASENAME/include/psurface
-cp ContactBoundary.h            $BASENAME/include/psurface
 cp NormalProjector.h            $BASENAME/include/psurface
 cp DirectionFunction.h          $BASENAME/include/psurface
 cp ContactMapping.h             $BASENAME/include/psurface

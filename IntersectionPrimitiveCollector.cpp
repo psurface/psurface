@@ -66,9 +66,6 @@ void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,
 
     psurface->surface->computeTrianglesPerPoint();
 
-    // get the array that relates the base grid triangles with the whole nonmortar surface
-    std::vector<int> nonMortarTargetTris = psurface->domainSurfaceTriangleNumbers;
-
     //
     for (size_t i=0; i<psurface->getNumTriangles(); i++) {
 
@@ -100,7 +97,7 @@ void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,
             // Assemble the triangles
             // //////////////////////////////////////////////
             mergedGrid.push_back(IntersectionPrimitive<2,ctype>());
-            mergedGrid.back().tris[0] = nonMortarTargetTris[i];
+            mergedGrid.back().tris[0] = i;
             mergedGrid.back().tris[1] = targetTri;
 
             for (int j=0; j<3; j++) {

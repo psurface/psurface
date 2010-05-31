@@ -667,7 +667,7 @@ public:
 
 
 #ifndef NDEBUG
-        printf("   ...Garbage collection finished!\n");
+        std::cout << "   ...Garbage collection finished!" << std::endl;
 #endif
     }
     

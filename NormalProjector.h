@@ -11,7 +11,6 @@ class PSurfaceFactory;
 class NodeBundle;
 class Surface;
 class GlobalNodeIdx;
-class ContactBoundary;
 template <int dimworld, class ctype>
 class DirectionFunction;
 
@@ -27,7 +26,7 @@ public:
         : psurface_(psurface)
     {}
 
-    void project(const ContactBoundary& contactPatch,
+    void project(const Surface* targetSurface,
                  const DirectionFunction<3,ctype>* domainDirection,
                  const DirectionFunction<3,ctype>* targetDirection
                     );
@@ -37,10 +36,13 @@ protected:
     void computeDiscreteDomainDirections(const DirectionFunction<3,ctype>* direction,
                                          std::vector<StaticVector<ctype,3> >& normals);
 
-    void computeDiscreteTargetDirections(const ContactBoundary& contactPatch,
+    void computeDiscreteTargetDirections(const Surface* targetSurface,
                                          const DirectionFunction<3,ctype>* direction,
                                          std::vector<StaticVector<ctype,3> >& normals);
-
+					 
+    /// \todo Should be faster
+    int containsEdge(const Surface* surface, int from, int to) const;
+    
     void setupEdgePointArrays();
 
     void insertEdge(PSurfaceFactory<2,ctype>& factory,

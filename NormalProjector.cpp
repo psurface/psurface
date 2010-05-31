@@ -1,4 +1,3 @@
-#include <psurface/ContactBoundary.h>
 #include <psurface/NormalProjector.h>
 #include <psurface/PSurfaceFactory.h>
 #include <psurface/DirectionFunction.h>
@@ -8,12 +7,18 @@
 
 #include <psurface/NodeBundle.h>
 
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
+#include "hxsurface/Surface.h"
+#endif
+
 #include <stdexcept>
 #include <vector>
 
 
 template <class ctype>
-void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
+void NormalProjector<ctype>::project(const Surface* targetSurface,
                                      const DirectionFunction<3,ctype>* domainDirection,
                                      const DirectionFunction<3,ctype>* targetDirection)
 {
@@ -36,10 +41,10 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     //   Compute the vertex normals of the target side
     // /////////////////////////////////////////////////////////////
 
-    std::vector<StaticVector<ctype,3> > targetNormals(contactPatch.surf->points.size());
-    computeDiscreteTargetDirections(contactPatch, targetDirection, targetNormals);
+
+    std::vector<StaticVector<ctype,3> > targetNormals(targetSurface->points.size());
+    computeDiscreteTargetDirections(targetSurface, targetDirection, targetNormals);
         
-    // /////////////////////////////////////////////////////////////////////////////////////
     // Insert the vertices of the contact boundary as nodes on the intermediate manifold
     // /////////////////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +56,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     std::vector<bool> vertexHasBeenHandled(psurface_->getNumVertices(), false);
     
     // Loop over the vertices of the target surface
-    for (size_t i=0; i<contactPatch.vertices.size(); i++) {
+    for (size_t i=0; i<targetSurface->points.size(); i++) {
 
         StaticVector<ctype,2> bestDPos;
         int bestTri = -1;
@@ -72,7 +77,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             // magic to use a McVec3f as the argument
             StaticVector<ctype,3> targetVertex;
             for (int k=0; k<3; k++)
-                targetVertex[k] = surf->points[contactPatch.vertices[i]][k];
+                targetVertex[k] = surf->points[i][k];
 
             if (computeInverseNormalProjection(p0, p1, p2, n0, n1, n2, targetVertex, x)) {
 
@@ -84,13 +89,13 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
                 // domain surface
                 StaticVector<ctype,3> base       = p0*x[0] + p1*x[1] + (1-x[0]-x[1])*p2;
                 StaticVector<ctype,3> baseNormal = n0*x[0] + n1*x[1] + (1-x[0]-x[1])*n2;
-                StaticVector<ctype,3> segment(surf->points[contactPatch.vertices[i]][0] - base[0],
-                                surf->points[contactPatch.vertices[i]][1] - base[1],
-                                surf->points[contactPatch.vertices[i]][2] - base[2]);
+                StaticVector<ctype,3> segment(surf->points[i][0] - base[0],
+                                surf->points[i][1] - base[1],
+                                surf->points[i][2] - base[2]);
                 
                 ctype distance = segment.length() * segment.length();
 
-                if (segment.dot(targetNormals[contactPatch.vertices[i]]) > -eps
+                if (segment.dot(targetNormals[i]) > -eps
                     && segment.dot(baseNormal) > 0
                     && distance > 1e-10) {
                     continue;
@@ -115,8 +120,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
         if (bestTri != -1) {
 
             int domainVertex;
-            factory.insertTargetVertexMapping(contactPatch.vertices[i], bestTri, bestDPos, 
-                                              projectedTo[contactPatch.vertices[i]], domainVertex);
+            factory.insertTargetVertexMapping(i, bestTri, bestDPos, projectedTo[i], domainVertex);
             if (domainVertex >= 0)
                 vertexHasBeenHandled[domainVertex] = true;
             
@@ -143,7 +147,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
         normal[1] = domainNormals[i][1];
         normal[2] = domainNormals[i][2];
 
-        for (int j=0; j<contactPatch.triIdx.size(); j++) {
+        for (int j=0; j<targetSurface->triangles.size(); j++) {
 
             StaticVector<ctype,2> domainPos;
             ctype dist;
@@ -151,9 +155,9 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
             // copy the coordinates, because they are stored in a McVec3f when compiled as part of Amira
             StaticVector<ctype,3> p0, p1, p2;
             for (int k=0; k<3; k++) {
-                p0[k] = surf->points[contactPatch.triangles(j).points[0]][k];
-                p1[k] = surf->points[contactPatch.triangles(j).points[1]][k];
-                p2[k] = surf->points[contactPatch.triangles(j).points[2]][k];
+                p0[k] = surf->points[targetSurface->triangles[j].points[0]][k];
+                p1[k] = surf->points[targetSurface->triangles[j].points[1]][k];
+                p2[k] = surf->points[targetSurface->triangles[j].points[2]][k];
             }
 
             if (rayIntersectsTriangle(basePoint, normal, p0, p1, p2, domainPos, dist, eps)) {
@@ -170,7 +174,7 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
 
         // Set ghost node mapping to the closest triangle intersected by the normal ray
         if (bestTri != -1)
-            factory.insertGhostNode(i, contactPatch.triIdx[bestTri], bestDPos);
+            factory.insertGhostNode(i, bestTri, bestDPos);
 
     }
 
@@ -178,17 +182,17 @@ void NormalProjector<ctype>::project(const ContactBoundary& contactPatch,
     // Insert the edges
     // ////////////////////////////////////////////////////////////
 
-    for (int i=0; i<contactPatch.triIdx.size(); i++) {
+    for (int i=0; i<targetSurface->triangles.size(); i++) {
 
         for (int j=0; j<3; j++) {
             
-            int from = contactPatch.triangles(i).points[j];
-            int to   = contactPatch.triangles(i).points[(j+1)%3];
+            int from = targetSurface->triangles[i].points[j];
+            int to   = targetSurface->triangles[i].points[(j+1)%3];
 
             // If (from, to) is an inner edge we pass it twice, but want to
             // test it only once.  That's before the ||.  The second clause
             // tests for boundary edges
-            if (from < to || contactPatch.containsEdge(from, to)==1) {
+            if (from < to || containsEdge(targetSurface, from, to)==1) {
                 
                 if (edgeCanBeInserted(domainNormals, from, to, projectedTo))
                     insertEdge(factory, domainNormals, from, to, projectedTo);
@@ -256,12 +260,12 @@ void NormalProjector<ctype>::computeDiscreteDomainDirections(const DirectionFunc
 }
 
 template <class ctype>
-void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBoundary& contactPatch,
+void NormalProjector<ctype>::computeDiscreteTargetDirections(const Surface* targetSurface,
                                                              const DirectionFunction<3,ctype>* direction,
                                                              std::vector<StaticVector<ctype,3> >& normals)
 {
-    int nPoints = contactPatch.surf->points.size();
-    int nTriangles = contactPatch.triIdx.size();
+    int nPoints    = targetSurface->points.size();
+    int nTriangles = targetSurface->triangles.size();
 
     normals.assign(nPoints, StaticVector<ctype,3>(0.0));
 
@@ -272,10 +276,10 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
             if (dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(direction)) {
                 StaticVector<ctype,3> p;
                 for (int j=0; j<3; j++)
-                    p[j] = contactPatch.surf->points[contactPatch.vertices[i]][j];
+                    p[j] = targetSurface->points[i][j];
                 normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<3,ctype>*>(direction))(p);
             } else if (dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))
-                normals[contactPatch.vertices[i]] = (*dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))(contactPatch.vertices[i]);
+                normals[i] = (*dynamic_cast<const DiscreteDirectionFunction<3,ctype>*>(direction))(i);
             else {
                 std::cerr << "Target direction function not properly set!" << std::endl;
                 abort();
@@ -287,15 +291,15 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
         
         for (int i=0; i<nTriangles; i++) {
             
-            int p0 = contactPatch.triangles(i).points[0];
-            int p1 = contactPatch.triangles(i).points[1];
-            int p2 = contactPatch.triangles(i).points[2];
+            int p0 = targetSurface->triangles[i].points[0];
+            int p1 = targetSurface->triangles[i].points[1];
+            int p2 = targetSurface->triangles[i].points[2];
             
             StaticVector<ctype,3> a, b;
             
             for (int j=0; j<3; j++) {
-                a[j] = contactPatch.surf->points[p1][j] - contactPatch.surf->points[p0][j];
-                b[j] = contactPatch.surf->points[p2][j] - contactPatch.surf->points[p0][j];
+                a[j] = targetSurface->points[p1][j] - targetSurface->points[p0][j];
+                b[j] = targetSurface->points[p2][j] - targetSurface->points[p0][j];
             }        
             
             StaticVector<ctype,3> triNormal = a.cross(b);
@@ -307,14 +311,25 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const ContactBounda
             
         }
         
-        for (size_t i=0; i<contactPatch.vertices.size(); i++)
-            normals[contactPatch.vertices[i]].normalize();
+        for (size_t i=0; i<targetSurface->points.size(); i++)
+            normals[i].normalize();
         
     }
 
 }
 
+template <class ctype>
+int NormalProjector<ctype>::containsEdge(const Surface* surface, int from, int to) const
+{
+    int counter=0;
+    for (size_t i=0; i<surface->triangles.size(); i++)
+        for (int j=0; j<3; j++)
+	    if ((surface->triangles[i].points[j]==from && surface->triangles[i].points[(j+1)%3]==to) ||
+                (surface->triangles[i].points[j]==to   && surface->triangles[i].points[(j+1)%3]==from))
+                counter++;
 
+    return counter;
+}
 
 template <class ctype>
 void NormalProjector<ctype>::insertEdge(PSurfaceFactory<2,ctype>& factory,
