@@ -548,8 +548,47 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     surface2_->write("testSurf2.surf", 1);
 #endif
 
-    ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_,
-                                               domainDirection, targetDirection);
+//     ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_,
+//                                                domainDirection, targetDirection);
+   // set up parametrization
+    psurface_.surface = const_cast<Surface*>(surface2_);
+    psurface_.patches.resize(1);
+    psurface_.patches[0].innerRegion = 0;
+    psurface_.patches[0].outerRegion = 1;
+    psurface_.patches[0].boundaryId  = 0;
+            
+    // ///////
+    const_cast<Surface*>(surface1_)->removeUnusedPoints();
+    const_cast<Surface*>(surface2_)->removeUnusedPoints();
+    
+    std::cout << surface1_->points.size() << " resp. "
+              << surface2_->points.size() << " contact nodes found!" << std::endl;
+
+    std::cout << "Contact patches contain " << surface1_->triangles.size() 
+              << " (resp. " << surface2_->triangles.size() << ") triangles." << std::endl;
+    
+    // the nonmortar side becomes the base grid of the parametrization
+    for (size_t i=0; i<surface1_->points.size(); i++) {
+        StaticVector<ctype,3> newVertex;
+        for (int j=0; j<3; j++)
+            newVertex[j] = surface1_->points[i][j];
+        psurface_.newVertex(newVertex);
+    }
+    
+    for (size_t i=0; i<surface1_->triangles.size(); i++) {
+        
+        int newTri = psurface_.createSpaceForTriangle(surface1_->triangles[i].points[0],
+                                                  surface1_->triangles[i].points[1],
+                                                  surface1_->triangles[i].points[2]);
+        psurface_.integrateTriangle(newTri);
+        psurface_.triangles(newTri).patch = 0;
+        
+    }
+    
+    // compute projection
+    NormalProjector<ctype> projector(&psurface_);
+    
+    projector.project(surface2_, domainDirection, targetDirection);
 
 }
 

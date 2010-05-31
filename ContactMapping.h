@@ -7,7 +7,6 @@
 
 #include <psurface/StaticVector.h>
 #include <psurface/PSurface.h>
-#include <psurface/ContactToolBox.h>
 #include <psurface/IntersectionPrimitive.h>
 #include <psurface/IntersectionPrimitiveCollector.h>
 

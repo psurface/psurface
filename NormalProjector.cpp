@@ -313,7 +313,7 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const Surface* targ
         
         for (size_t i=0; i<targetSurface->points.size(); i++)
             normals[i].normalize();
-        
+	    
     }
 
 }

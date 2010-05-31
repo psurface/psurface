@@ -49,7 +49,6 @@ cp PSurfaceFactory.cpp          $BASENAME/src
 cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
 cp AmiraMeshIO.cpp              $BASENAME/src
 
-cp ContactToolBox.h             $BASENAME/include/psurface
 cp IntersectionPrimitive.h      $BASENAME/include/psurface
 cp IntersectionPrimitiveCollector.h   $BASENAME/include/psurface
 cp NormalProjector.h            $BASENAME/include/psurface
@@ -57,7 +56,6 @@ cp DirectionFunction.h          $BASENAME/include/psurface
 cp ContactMapping.h             $BASENAME/include/psurface
 
 cp NormalProjector.cpp          $BASENAME/src
-cp buildContactSurface.cpp      $BASENAME/src
 cp IntersectionPrimitiveCollector.cpp $BASENAME/src
 cp ContactMapping.cpp           $BASENAME/src
 
