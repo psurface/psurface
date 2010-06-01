@@ -54,12 +54,6 @@ class ContactMapping<3,ctype>
 {
 public:	
 
-    ContactMapping()
-        : surface1_(NULL), surface2_(NULL)
-    {}
-    
-    ~ContactMapping();
-
     void build(const std::vector<std::tr1::array<ctype,3> >& coords1,  ///< The vertices of the first surface as \f$x_0 ,y_0 ,z_0, x_1, y_1, z_1 ...\f$
                const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
                const std::vector<std::tr1::array<ctype,3> >& coords2,  ///< The vertices of the second surface
@@ -75,9 +69,6 @@ public:
 private:
 
     PSurface<2,ctype> psurface_;
-
-    Surface* surface1_;
-    Surface* surface2_;
 
 };
 

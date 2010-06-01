@@ -456,15 +456,6 @@ void ContactMapping<2,ctype>::computeDiscreteTargetDirections(const std::vector<
 }
 
 template <class ctype>
-ContactMapping<3,ctype>::~ContactMapping()
-{
-    if (surface1_)
-        delete surface1_;
-    if (surface2_)
-        delete surface2_;
-}
-
-template <class ctype>
 void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >& coords1,  ///< The vertices of the first surface
                          const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
                          const std::vector<std::tr1::array<ctype,3> >& coords2,  ///< The vertices of the second surface
@@ -478,7 +469,7 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     int nTri2  = tri2.size();
 
     // Create a first Surface object
-    surface1_ = new Surface;
+    Surface* surface1_ = new Surface;
 
 #ifndef PSURFACE_STANDALONE
     // Amira Surface class needs a 'patch' structure
@@ -511,7 +502,7 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     }
 
     // Create a second Surface object
-    surface2_ = new Surface;
+    Surface* surface2_ = new Surface;
     
 #ifndef PSURFACE_STANDALONE
     surface2_->patches.resize(1);
