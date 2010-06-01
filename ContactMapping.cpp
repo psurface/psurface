@@ -468,40 +468,7 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     int nTri1  = tri1.size();
     int nTri2  = tri2.size();
 
-    // Create a first Surface object
-    Surface* surface1_ = new Surface;
-
-#ifndef PSURFACE_STANDALONE
-    // Amira Surface class needs a 'patch' structure
-    surface1_->patches.resize(1);
-    surface1_->patches[0] = new Surface::Patch;
-    surface1_->patches[0]->innerRegion = 0;
-    surface1_->patches[0]->outerRegion = 1;
-    surface1_->patches[0]->boundaryId  = 0;
-#endif
-
-    surface1_->points.resize(nVert1);
-    for (int i=0; i<nVert1; i++) 
-        for (int j=0; j<3; j++)
-            surface1_->points[i][j] = coords1[i][j];
-
-    surface1_->triangles.resize(nTri1);
-#ifndef PSURFACE_STANDALONE
-    surface1_->patches[0]->triangles.resize(nTri1);
-#endif
-    for (int i=0; i<nTri1; i++) {
-
-        surface1_->triangles[i].points[0] = tri1[i][0];
-        surface1_->triangles[i].points[1] = tri1[i][1];
-        surface1_->triangles[i].points[2] = tri1[i][2];
-
-#ifndef PSURFACE_STANDALONE
-        surface1_->triangles[i].patch = 0;
-        surface1_->patches[0]->triangles[i] = i;
-#endif
-    }
-
-    // Create a second Surface object
+    // Create target Surface object
     Surface* surface2_ = new Surface;
     
 #ifndef PSURFACE_STANDALONE
@@ -533,8 +500,6 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
 #endif
     }
 
-//     ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_,
-//                                                domainDirection, targetDirection);
    // set up parametrization
     psurface_.surface = const_cast<Surface*>(surface2_);
     psurface_.patches.resize(1);
@@ -543,28 +508,23 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     psurface_.patches[0].boundaryId  = 0;
             
     // ///////
-    const_cast<Surface*>(surface1_)->removeUnusedPoints();
     const_cast<Surface*>(surface2_)->removeUnusedPoints();
     
-    std::cout << surface1_->points.size() << " resp. "
-              << surface2_->points.size() << " contact nodes found!" << std::endl;
+    std::cout << nVert1 << " resp. " << nVert2 << " contact nodes found!" << std::endl;
 
-    std::cout << "Contact patches contain " << surface1_->triangles.size() 
-              << " (resp. " << surface2_->triangles.size() << ") triangles." << std::endl;
+    std::cout << "Contact patches contain " << nTri1 << " (resp. " << nTri2 << ") triangles." << std::endl;
     
     // the nonmortar side becomes the base grid of the parametrization
-    for (size_t i=0; i<surface1_->points.size(); i++) {
+    for (size_t i=0; i<nVert1; i++) {
         StaticVector<ctype,3> newVertex;
         for (int j=0; j<3; j++)
-            newVertex[j] = surface1_->points[i][j];
+            newVertex[j] = coords1[i][j];
         psurface_.newVertex(newVertex);
     }
     
-    for (size_t i=0; i<surface1_->triangles.size(); i++) {
+    for (size_t i=0; i<nTri1; i++) {
         
-        int newTri = psurface_.createSpaceForTriangle(surface1_->triangles[i].points[0],
-                                                  surface1_->triangles[i].points[1],
-                                                  surface1_->triangles[i].points[2]);
+        int newTri = psurface_.createSpaceForTriangle(tri1[i][0],tri1[i][1],tri1[i][2]);
         psurface_.integrateTriangle(newTri);
         psurface_.triangles(newTri).patch = 0;
         
