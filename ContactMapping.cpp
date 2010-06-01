@@ -508,10 +508,7 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     psurface_.patches[0].boundaryId  = 0;
             
     // ///////
-    const_cast<Surface*>(surface2_)->removeUnusedPoints();
-    
     std::cout << nVert1 << " resp. " << nVert2 << " contact nodes found!" << std::endl;
-
     std::cout << "Contact patches contain " << nTri1 << " (resp. " << nTri2 << ") triangles." << std::endl;
     
     // the nonmortar side becomes the base grid of the parametrization

@@ -70,9 +70,6 @@ class Surface {
 
     /**@name Member methods */ //@{
 
-    /// Removes all points not referenced by any triangle.
-    int removeUnusedPoints();
-
     /// Returns bounding box of point coordinates.
     void getBoundingBox(float box[6]) const;
 

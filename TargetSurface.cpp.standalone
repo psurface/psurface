@@ -43,49 +43,6 @@ void Surface::getBoundingBox(float bbox[6]) const
 }
 
 
-int Surface::removeUnusedPoints()
-{
-    int i,k;
-    int nPoints = points.size();
-    int nTriangles = triangles.size();
-
-    std::vector<int> newIndex(nPoints);
-    newIndex.assign(newIndex.size(), -1);
-
-    for (i=0; i<nTriangles; i++) {
-        Triangle& tri = triangles[i];
-
-        newIndex[tri.points[0]] = 1;
-        newIndex[tri.points[1]] = 1;
-        newIndex[tri.points[2]] = 1;
-    }
-
-    for (i=k=0; i<nPoints; i++) {
-        if (newIndex[i]==1) {
-            newIndex[i] = k;
-            points[k] = points[i];
-            k++;
-        }
-    }
-
-    if (nPoints==k)
-        return 0; // No unused points found
-
-    for (i=0; i<nTriangles; i++) {
-        Triangle& tri = triangles[i];
-
-        tri.points[0] = newIndex[tri.points[0]];
-        tri.points[1] = newIndex[tri.points[1]];
-        tri.points[2] = newIndex[tri.points[2]];
-    }
-
-    points.resize(k);
-    trianglesPerPoint.resize(0);
-
-    return nPoints-k;
-}
-
-
 void Surface::computeTrianglesPerPoint()
 {
     int nPoints = points.size();
