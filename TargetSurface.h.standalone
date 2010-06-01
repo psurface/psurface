@@ -76,14 +76,6 @@ class Surface {
     /// Returns bounding box of point coordinates.
     void getBoundingBox(float box[6]) const;
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    /// Write surface + header to a file.
-    int write(const char *file, int ascii=0);
-
-    /// Write the surface without header to file.
-    int writeSurfaceData(FILE *out, int ascii=0);
-#endif
-
     //@}
 
     // ====================== Internal methods ======================

@@ -542,12 +542,6 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
 #endif
     }
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    // For debugging
-    surface1_->write("testSurf1.surf", 1);
-    surface2_->write("testSurf2.surf", 1);
-#endif
-
 //     ContactToolBox<ctype>::buildContactSurface(&psurface_, surface1_, surface2_,
 //                                                domainDirection, targetDirection);
    // set up parametrization

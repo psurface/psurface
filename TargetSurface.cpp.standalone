@@ -20,68 +20,6 @@
 
 #include "TargetSurface.h"
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-int Surface::write(const char *file, int ascii)
-{
-    ascii = true;
-
-    FILE *out=fopen(file,"wb");
-    if (!out) {
-        return(1);
-    }
-    fprintf(out,"# %s 0.1 %s\n\n","HyperSurface",ascii ? "ASCII" : "BINARY");
-    
-    int result = writeSurfaceData(out, ascii);
-
-    fclose(out);
-
-    return result;
-}
-
-int Surface::writeSurfaceData(FILE *out, int ascii)
-{
-    assert(ascii);  // only works for ascii == true
-    int err=0,i;
-
-    fprintf(out, "\n");
-        
-    fprintf(out,"Vertices %d\n",points.size());
-    for ( i=0 ; i<points.size() && !err; i++)
-        fprintf(out,"\t%f %f %f\n",
-                points[i][0], points[i][1], points[i][2]);
-
-    fprintf(out,
-            "NBranchingPoints %d\n"
-            "NVerticesOnCurves %d\n"
-            "BoundaryCurves %d\n",
-            0,0,0);
-
-    fprintf(out,"Patches %d\n",1);   // 1 dummy patch
-
-    // //////////////////////////
-    //   Write one dummy patch
-    // //////////////////////////
-    fprintf(out,"{\n");
-    
-    fprintf(out,
-            "BoundaryID %d\n"
-            "BranchingPoints %d\n    ",
-            0,
-            0);
-    
-    fprintf(out,"\nTriangles %d\n",triangles.size());
-    
-    for (int j=0 ; j<triangles.size() ; j++)
-        fprintf(out,"  %d %d %d\n",
-                triangles[j].points[0]+1,
-                triangles[j].points[1]+1,
-                triangles[j].points[2]+1);
-    
-    fprintf(out,"}\n");
-
-    return(0);
-}
-#endif
 
 void Surface::getBoundingBox(float bbox[6]) const
 {
