@@ -30,7 +30,7 @@ INCLUDES = -I../include -I$(AMIRAMESH_DIR)/include -I$(AMIRAMESH_DIR)/include/am
 OBJS = psurface.o CircularPatch.o DomainPolygon.o Domains.o Iterators.o \
        PSurface.o PSurfaceFactory.o PlaneParam.o TargetSurface.o AmiraMeshIO.o \
        NormalProjector.o IntersectionPrimitiveCollector.o \
-       ContactMapping.o
+       ContactMapping.o SurfaceBase.o
 
 all: ../lib/libpsurface.a
 
