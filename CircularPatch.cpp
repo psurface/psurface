@@ -1,6 +1,7 @@
 #include <limits>
 
 #include <psurface/CircularPatch.h>
+#include <psurface/StaticMatrix.h>
 #include <psurface/PSurface.h>
 
 
