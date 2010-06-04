@@ -1102,28 +1102,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                 
                 // get all ghost nodes for the base grid vertex
                 int vertex = psurface_->triangles(currTri).vertices[corner];
-                std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
-                
-                curr.resize(0);
-                for (int k=0; k<neighbors.size(); k++) {
-                    
-                    int cornerOnNeighbor = psurface_->triangles(neighbors[k]).getCorner(vertex);
-                    
-                    /** \todo Linear search: pretty slow */
-                    for (int l=0; l<psurface_->triangles(neighbors[k]).nodes.size(); l++) {
-                        
-                        if (psurface_->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
-                            && psurface_->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
-                            
-                            curr.push_back(GlobalNodeIdx(neighbors[k], l));
-                            break;
-                            
-                        }
-                        
-                    }
-                    
-                }
-                
+                curr = psurface_->getNodeBundleAtVertex(vertex);
                 currType = Node<ctype>::GHOST_NODE;
                 assert(currType==type(curr));
                 lambda = newLambda;
@@ -1217,28 +1196,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
 
                     // get all ghost nodes for the base grid vertex
                     int vertex = psurface_->triangles(curr[i].tri).vertices[corner];
-                    std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
-
-                    curr.resize(0);
-                    for (int k=0; k<neighbors.size(); k++) {
-                        
-                        int cornerOnNeighbor = psurface_->triangles(neighbors[k]).getCorner(vertex);
-
-                        /** \todo Linear search: pretty slow */
-                        for (int l=0; l<psurface_->triangles(neighbors[k]).nodes.size(); l++) {
-
-                            if (psurface_->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
-                                && psurface_->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
-
-                                curr.push_back(GlobalNodeIdx(neighbors[k], l));
-                                break;
-
-                            }
-                        
-                        }
-                        
-                    }
-
+                    curr = psurface_->getNodeBundleAtVertex(vertex); 
                     currType = Node<ctype>::GHOST_NODE;
                     assert(currType==type(curr));
                     lambda = newLambda;
@@ -1335,28 +1293,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
 
                 // get all ghost nodes for the base grid vertex
                 int vertex = psurface_->triangles(curr[i].tri).vertices[corner];
-                std::vector<int> neighbors = psurface_->getTrianglesPerVertex(vertex);
-                
-                curr.resize(0);
-                for (int k=0; k<neighbors.size(); k++) {
-                    
-                    int cornerOnNeighbor = psurface_->triangles(neighbors[k]).getCorner(vertex);
-                    
-                    /** \todo Linear search: pretty slow */
-                    for (int l=0; l<psurface_->triangles(neighbors[k]).nodes.size(); l++) {
-                        
-                        if (psurface_->triangles(neighbors[k]).nodes[l].isGHOST_NODE()
-                            && psurface_->triangles(neighbors[k]).nodes[l].getCorner() == cornerOnNeighbor){
-                            
-                            curr.push_back(GlobalNodeIdx(neighbors[k], l));
-                            break;
-                            
-                        }
-                        
-                    }
-                    
-                }
-                
+                curr = psurface_->getNodeBundleAtVertex(vertex);
                 currType = Node<ctype>::GHOST_NODE;
                 assert(currType == type(curr));
                 lambda = newLambda;
