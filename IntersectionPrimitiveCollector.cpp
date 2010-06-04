@@ -39,16 +39,27 @@ void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,
 
                 typename PlaneParam<ctype>::DirectedEdgeIterator cE = cT.getDirectedEdgeIterator(cT.edgePoints[k][l], cT.edgePoints[k][l+1]);
 
-                if (cE.isValid() && cE.getDPrev().from() != cE.getONext().to())
-                    cT.addEdge(cE.getONext().to(), cE.to(), true);
+                if (cE.isValid() && cE.getDPrev().from() != cE.getONext().to()) {
+                    int from = cE.getONext().to();
+                    int to   = cE.to();
+                    cT.addEdge(from, to, true);
+                    
+                    // recompute the cyclic edge orderings at the vertices that have 
+                    // the new edge
+                    cT.makeCyclicGeometrically(cT.nodes[from]);
+                    cT.makeCyclicGeometrically(cT.nodes[to]);
+                
+                }
                 
             }
             
         }
 
+#if 0   // we shouldn't need this anymore: all nodes that we touched have been remade cyclic immediately
         // and since we have added more edges, we have to redo the cyclic ordering
         for (size_t k=0; k<cT.nodes.size(); k++)
             cT.makeCyclicGeometrically(cT.nodes[k]);
+#endif
         
         //
         for (int k=0; k<3; k++){
