@@ -596,6 +596,7 @@ void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurfaceFactory<2,ct
                 enteringEdge = curr[0].tri;
                 psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(psurface_->triangles(cTIdx), corner));
                 curr = psurface_->getNodeBundleAtVertex(psurface_->triangles(cTIdx).vertices[corner]);
+                lambda = newLambda;
             }
             break;
         }
