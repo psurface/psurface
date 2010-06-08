@@ -383,11 +383,9 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     // /////////////////////////////////////////////////////
     psurface->iPos.resize(AMnodePos->location()->dims()[0]);
     
-    for (size_t i=0; i<psurface->iPos.size(); i++) {
-#warning Illegal cast in AmiraMeshIO
+    for (size_t i=0; i<psurface->iPos.size(); i++)
         for (int j=0; j<3; j++)
-            psurface->iPos[i][j] = ((ctype(*)[3])AMnodePos->dataPtr())[i][j];
-    }
+            psurface->iPos[i][j] = ((float(*)[3])AMnodePos->dataPtr())[i][j];
 
     ////////////////////////////////////////////////////////
     // copy triangles.  This takes care of the edges, too
