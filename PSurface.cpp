@@ -24,43 +24,15 @@
 #include <psurface/GlobalNodeIdx.h>
 #include <psurface/Box.h>
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-template <int dim, class ctype>
-PSurface<dim,ctype>::PSurface(HxParamBundle* bundle)
-{
-    if (bundle) {
-        params = bundle;
-        hasOwnParamBundle = false;
-    } else {
-        params = new HxParamBundle;
-        hasOwnParamBundle = true;
-    }
-}
-#else
-template <int dim, class ctype>
-PSurface<dim,ctype>::PSurface()
-{}
-#endif
-
 template <int dim, class ctype>
 PSurface<dim,ctype>::~PSurface() 
-{ 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    if (hasOwnParamBundle)
-        delete params;
-#endif
-}
+{}
 
 template <int dim, class ctype>
 void PSurface<dim,ctype>::clear()
 {
     surface = NULL;
     patches.clear();
-
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-    if (hasOwnParamBundle)
-        delete params;
-#endif
 
     iPos.clear();
     paths.clear();

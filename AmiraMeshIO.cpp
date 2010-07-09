@@ -48,7 +48,6 @@ template <class ctype>
 int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filename)
 {
     AmiraMesh am;
-    am.parameters = *(par->params);
 
     int i, j;
     int numVertices  = par->getNumVertices();
@@ -314,8 +313,6 @@ void* AmiraMeshIO<ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
 
         return NULL;
     }
-
-    *par->params = am->parameters;
 
     return par;
 }

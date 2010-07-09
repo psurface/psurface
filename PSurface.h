@@ -50,9 +50,6 @@ public:
         int boundaryId;
     };
 
-    /// Default constructor
-    PSurface(HxParamBundle* bundle=NULL);
-
     /// Destructor
     virtual ~PSurface();
 
@@ -318,16 +315,6 @@ public:
 
     /// All base grid patches
     std::vector<Patch> patches;
-
-    /** \brief A set of arbitrary parameters
-        
-    Only used when libamiramesh is present */
-    HxParamBundle* params;
-
-    /** \brief True if this class is the owner of the ParamBundle
-        
-    Only used when libamiramesh is present */
-    bool hasOwnParamBundle;
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
     std::vector<StaticVector<ctype,3> > iPos;
