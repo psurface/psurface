@@ -40,9 +40,6 @@ protected:
                                          const DirectionFunction<3,ctype>* direction,
                                          std::vector<StaticVector<ctype,3> >& normals);
 					 
-    /// \todo Should be faster
-    int containsEdge(const Surface* surface, int from, int to) const;
-    
     void setupEdgePointArrays();
 
     void insertEdge(PSurfaceFactory<2,ctype>& factory,

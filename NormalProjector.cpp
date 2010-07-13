@@ -15,7 +15,7 @@
 
 #include <stdexcept>
 #include <vector>
-
+#include <set>
 
 template <class ctype>
 void NormalProjector<ctype>::project(const Surface* targetSurface,
@@ -179,8 +179,12 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     }
 
     // ////////////////////////////////////////////////////////////
-    // Insert the edges
+    // Insert the edges.
+    // We loop over all sides of all triangles.  For each side we
+    // remember whether we have seen it before.
     // ////////////////////////////////////////////////////////////
+
+    std::set<std::pair<int,int> > visitedEdges;
 
     for (int i=0; i<targetSurface->triangles.size(); i++) {
 
@@ -188,11 +192,18 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
             
             int from = targetSurface->triangles[i].points[j];
             int to   = targetSurface->triangles[i].points[(j+1)%3];
+            
+            // The two numbers max and min uniquely identify 'from' and 'to'.
+            // However, we have always min<max, and hence we do not have to
+            // worry about orientation anymore
+            int max = std::max(from,to);
+            int min = from + to - max;
+            
+            // Mark this edge as visited.  The return value is true, if this
+            // edge has not been visited before.
+            bool wasInserted = visitedEdges.insert(std::make_pair(min,max)).second;
 
-            // If (from, to) is an inner edge we pass it twice, but want to
-            // test it only once.  That's before the ||.  The second clause
-            // tests for boundary edges
-            if (from < to || containsEdge(targetSurface, from, to)==1) {
+            if (wasInserted) {
                 
                 if (edgeCanBeInserted(domainNormals, from, to, projectedTo))
                     insertEdge(factory, domainNormals, from, to, projectedTo);
@@ -318,18 +329,6 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const Surface* targ
 
 }
 
-template <class ctype>
-int NormalProjector<ctype>::containsEdge(const Surface* surface, int from, int to) const
-{
-    int counter=0;
-    for (size_t i=0; i<surface->triangles.size(); i++)
-        for (int j=0; j<3; j++)
-	    if ((surface->triangles[i].points[j]==from && surface->triangles[i].points[(j+1)%3]==to) ||
-                (surface->triangles[i].points[j]==to   && surface->triangles[i].points[(j+1)%3]==from))
-                counter++;
-
-    return counter;
-}
 
 template <class ctype>
 void NormalProjector<ctype>::insertEdge(PSurfaceFactory<2,ctype>& factory,
