@@ -37,6 +37,11 @@ cp StaticMatrix.h               $BASENAME/include/psurface
 cp SparseMatrix.h               $BASENAME/include/psurface
 cp AmiraMeshIO.h                $BASENAME/include/psurface
 cp PSurfaceFactory.h            $BASENAME/include/psurface
+cp IntersectionPrimitive.h      $BASENAME/include/psurface
+cp IntersectionPrimitiveCollector.h   $BASENAME/include/psurface
+cp NormalProjector.h            $BASENAME/include/psurface
+cp DirectionFunction.h          $BASENAME/include/psurface
+cp ContactMapping.h             $BASENAME/include/psurface
 
 cp psurface.cpp                 $BASENAME/src
 cp CircularPatch.cpp            $BASENAME/src
@@ -49,13 +54,6 @@ cp PSurfaceFactory.cpp          $BASENAME/src
 cp SurfaceBase.cpp              $BASENAME/src
 cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
 cp AmiraMeshIO.cpp              $BASENAME/src
-
-cp IntersectionPrimitive.h      $BASENAME/include/psurface
-cp IntersectionPrimitiveCollector.h   $BASENAME/include/psurface
-cp NormalProjector.h            $BASENAME/include/psurface
-cp DirectionFunction.h          $BASENAME/include/psurface
-cp ContactMapping.h             $BASENAME/include/psurface
-
 cp NormalProjector.cpp          $BASENAME/src
 cp IntersectionPrimitiveCollector.cpp $BASENAME/src
 cp ContactMapping.cpp           $BASENAME/src
