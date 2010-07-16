@@ -45,8 +45,15 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     std::vector<StaticVector<ctype,3> > targetNormals(targetSurface->points.size());
     computeDiscreteTargetDirections(targetSurface, targetDirection, targetNormals);
         
+    // /////////////////////////////////////////////////////////////////////////////////////
     // Insert the vertices of the contact boundary as nodes on the intermediate manifold
     // /////////////////////////////////////////////////////////////////////////////////////
+
+    // TODO: Use an octree here.  The MultiDimOctree should get a method that returns
+    // all verticess close to the cone spanned by the search directions at the domain
+    // surface triangles.  Only those vertices should then be checked.
+    // We need this quickly, because it is mentioned in the psurface papers, which
+    // has already been submitted.
 
     // This array stores the preimages of each vertex in the target surface
     std::vector<NodeBundle> projectedTo(surf->points.size());
@@ -131,6 +138,12 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     // ///////////////////////////////////////////////////////////////////
     //   Place ghost nodes at the vertices of the domain surface
     // ///////////////////////////////////////////////////////////////////
+    
+    // TODO: Use an octree here.  The MultiDimOctree should get a method that returns
+    // all triangles close to a given ray.  Only those triangles should then be checked.
+    // We need this quickly, because it is mentioned in the psurface papers, which
+    // has already been submitted.
+
     for (int i=0; i<psurface_->getNumVertices(); i++) {
 
         // Has the vertex been hit by the projection of a target vertex already?
