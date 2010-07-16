@@ -9,6 +9,7 @@ mkdir $BASENAME/include
 mkdir $BASENAME/include/psurface
 mkdir $BASENAME/src
 mkdir $BASENAME/lib
+mkdir $BASENAME/doc
 
 # Copy the licence file
 cp COPYING                      $BASENAME
@@ -59,5 +60,6 @@ cp IntersectionPrimitiveCollector.cpp $BASENAME/src
 cp ContactMapping.cpp           $BASENAME/src
 
 cp Makefile.standalone          $BASENAME/src/Makefile
+cp doc/Doxyfile                 $BASENAME/doc/Doxyfile
 
 tar zvcf $BASENAME.tar.gz $BASENAME
