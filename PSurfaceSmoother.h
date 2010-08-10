@@ -1,7 +1,7 @@
 #ifndef PSURFACE_SMOOTHER_H
 #define PSURFACE_SMOOTHER_H
 
-#include <hxpsurface/HxParamToolBox.h>
+#include <psurface/HxParamToolBox.h>
 
 template <int dim, class ctype> class PSurface;
 
