@@ -1,6 +1,5 @@
 #include <psurface/PSurface.h>
-#include "PSurfaceSmoother.h"
-
+#include <psurface/PSurfaceSmoother.h>
 #include <psurface/CircularPatch.h>
 #include <psurface/DomainPolygon.h>
 #include <psurface/SparseMatrix.h>

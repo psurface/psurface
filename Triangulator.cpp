@@ -1,7 +1,7 @@
-#include "Triangulator.h"
+#include <psurface/Triangulator.h>
 #include <psurface/PSurface.h>
-#include "QualityRequest.h"
-#include "HxParamToolBox.h"
+#include <psurface/QualityRequest.h>
+#include <psurface/HxParamToolBox.h>
 #include <psurface/CircularPatch.h>
 
 
