@@ -43,6 +43,12 @@ cp IntersectionPrimitiveCollector.h   $BASENAME/include/psurface
 cp NormalProjector.h            $BASENAME/include/psurface
 cp DirectionFunction.h          $BASENAME/include/psurface
 cp ContactMapping.h             $BASENAME/include/psurface
+cp HxParamToolBox.h             $BASENAME/include/psurface
+cp PSurfaceSmoother.h           $BASENAME/include/psurface
+cp Triangulator.h               $BASENAME/include/psurface
+cp QualityRequest.h             $BASENAME/include/psurface
+cp EdgeIntersectionFunctor.h    $BASENAME/include/psurface
+cp VertexHeap.h                 $BASENAME/include/psurface
 
 cp psurface.cpp                 $BASENAME/src
 cp CircularPatch.cpp            $BASENAME/src
@@ -58,6 +64,9 @@ cp AmiraMeshIO.cpp              $BASENAME/src
 cp NormalProjector.cpp          $BASENAME/src
 cp IntersectionPrimitiveCollector.cpp $BASENAME/src
 cp ContactMapping.cpp           $BASENAME/src
+cp HxParamToolBox.cpp           $BASENAME/src
+cp PSurfaceSmoother.cpp         $BASENAME/src
+cp Triangulator.cpp             $BASENAME/src
 
 cp Makefile.standalone          $BASENAME/src/Makefile
 cp doc/Doxyfile                 $BASENAME/doc/Doxyfile
