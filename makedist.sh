@@ -16,8 +16,6 @@ cp COPYING                      $BASENAME
 
 cp TargetSurface.h.standalone   $BASENAME/include/TargetSurface.h
 
-cp psurface.h                   $BASENAME/include/psurface
-cp psurface.h                   $BASENAME/include/
 cp CircularPatch.h              $BASENAME/include/psurface
 cp DomainPolygon.h              $BASENAME/include/psurface
 cp Domains.h                    $BASENAME/include/psurface
@@ -50,7 +48,6 @@ cp QualityRequest.h             $BASENAME/include/psurface
 cp EdgeIntersectionFunctor.h    $BASENAME/include/psurface
 cp VertexHeap.h                 $BASENAME/include/psurface
 
-cp psurface.cpp                 $BASENAME/src
 cp CircularPatch.cpp            $BASENAME/src
 cp DomainPolygon.cpp            $BASENAME/src
 cp Domains.cpp                  $BASENAME/src

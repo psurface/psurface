@@ -27,7 +27,7 @@ INCLUDES = -I../include -I$(AMIRAMESH_DIR)/include -I$(AMIRAMESH_DIR)/include/am
 
 .SUFFIXES: .cpp .c .d
 
-OBJS = psurface.o CircularPatch.o DomainPolygon.o Domains.o Iterators.o \
+OBJS = CircularPatch.o DomainPolygon.o Domains.o Iterators.o \
        PSurface.o PSurfaceFactory.o PlaneParam.o TargetSurface.o AmiraMeshIO.o \
        NormalProjector.o IntersectionPrimitiveCollector.o \
        ContactMapping.o SurfaceBase.o HxParamToolBox.o Triangulator.o PSurfaceSmoother.o
