@@ -34,7 +34,7 @@ void Triangulator::triangulateStar(const std::vector<int> &border, int center,
     ParamToolBox::flattenStar(center, border, flatBorder, par);
 
     for (int j=0; j<flatBorder.size(); j++)
-        assert(!isnan(flatBorder[j][0]) &&!isnan(flatBorder[j][1]));
+        assert(!MC_isnan(flatBorder[j][0]) &&!MC_isnan(flatBorder[j][1]));
 
     ///////////////////////////////////////////
     // do a constrained Delaunay triangulation
@@ -55,7 +55,7 @@ void Triangulator::estimateStarError(const std::vector<int> &border, int center,
     ParamToolBox::flattenStar(center, border, flatBorder, par);
     
     for (int j=0; j<flatBorder.size(); j++)
-        assert(!isnan(flatBorder[j][0]) &&!isnan(flatBorder[j][1]));
+        assert(!MC_isnan(flatBorder[j][0]) &&!MC_isnan(flatBorder[j][1]));
     
     ///////////////////////////////////////////
     // do a constrained Delaunay triangulation
@@ -245,7 +245,7 @@ bool Triangulator::isLegalEdge(const StaticVector<float,2>& a, const StaticVecto
 
     float radius = 0.5*sqrt((d1+d2) * (d2+d3) * (d3+d1)/c123);
 
-    if (isnan(radius))
+    if (MC_isnan(radius))
         return false;
 
     StaticVector<float,2> center = ((c2+c3)*a + (c3+c1)*b + (c1+c2)*c)/(2*c123);
