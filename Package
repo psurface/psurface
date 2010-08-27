@@ -1,5 +1,5 @@
 set PACKAGE {psurface}
 
-set EXCLUDEARCH {MacX}
+set EXCLUDEARCH {MacX Win32VC8 Win64VC8}
 
 set LIBS {mclib amiramesh}
