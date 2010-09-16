@@ -19,7 +19,7 @@ public:
     void applyVertexRelaxation();
 
     ///
-    void applyHorizontalRelaxation(DomainPolygon& quadri, PSurface<2,ctype>* psurface);
+    static void applyHorizontalRelaxation(DomainPolygon& quadri, PSurface<2,ctype>* psurface);
     
 private:
 

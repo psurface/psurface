@@ -29,7 +29,7 @@ void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, i
 
     if (psurface->triangles(cE.triangles[0]).patch != psurface->triangles(cE.triangles[1]).patch && 
         keepPatches) {
-            applyHorizontalRelaxation(quadri);
+            applyHorizontalRelaxation(quadri, psurface);
         } else
             quadri.applyParametrization();
         
@@ -403,3 +403,5 @@ void PSurfaceSmoother<ctype>::moveSubGraph(int startingNode, DomainPolygon& from
             moveSubGraph(from.nodes[startingNode].neighbors(i), from, centerNode);
 #endif
 }
+
+template class PSurfaceSmoother<float>;
