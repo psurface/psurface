@@ -19,6 +19,10 @@
     #include <tr1/array>
 #endif
 
+#ifdef _MSC_VER
+    // Required to make cmath define M_PI etc.
+    #define _USE_MATH_DEFINES
+#endif
 #include <cmath>
 
 #ifdef PSURFACE_STANDALONE

@@ -1,8 +1,13 @@
 #include <vector>
 #include <set>
 
-#include <algorithm>
+#ifdef _MSC_VER
+    // Required to make cmath define M_PI etc.
+    #define _USE_MATH_DEFINES
+#endif
 #include <limits>
+
+#include <algorithm>
 #include <iostream>
 
 // Check for VC9 / VS2008 with installed feature pack.
