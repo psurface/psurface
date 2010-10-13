@@ -22,11 +22,11 @@ class HxParamBundle;
 
 /** The parametrization of an arbitrary surface over a simple base grid 
     \tparam dim Dimension of the surface
-    \tparam ctype The type used for coordinates
+    \tparam CTYPE The type used for coordinates
 */
-template <int dim, class ctype>
+template <int dim, class CTYPE>
 class PSurface
-    : public SurfaceBase<McVertex<ctype>, McEdge, DomainTriangle<ctype> >{
+    : public SurfaceBase<McVertex<CTYPE>, McEdge, DomainTriangle<CTYPE> >{
 
 public:
 
@@ -62,7 +62,7 @@ public:
     void clear();
 
     /// Get box containing all vertices.
-    virtual void getBoundingBox(Box<ctype,3>& bbox) const;
+    virtual void getBoundingBox(Box<CTYPE,3>& bbox) const;
 
     /** \brief Sets up the internal data structures needed by the map() method.
      * 
@@ -137,25 +137,25 @@ public:
     void removeExtraEdges();
 
     /// Returns a reference to the node specified by a GlobalNodeIdx
-    Node<ctype>& nodes(const GlobalNodeIdx& n) {return this->triangles(n.tri).nodes[n.idx];}
+    Node<CTYPE>& nodes(const GlobalNodeIdx& n) {return this->triangles(n.tri).nodes[n.idx];}
 
     /// Returns a const reference to the node specified by a GlobalNodeIdx
-    const Node<ctype>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
+    const Node<CTYPE>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    StaticVector<ctype,3> imagePos(const GlobalNodeIdx& n) const {
+    StaticVector<CTYPE,3> imagePos(const GlobalNodeIdx& n) const {
         return imagePos(n.tri, n.idx);
     }
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    StaticVector<ctype,3> imagePos(int tri, NodeIdx node) const;
+    StaticVector<CTYPE,3> imagePos(int tri, NodeIdx node) const;
 
     /** \brief Returns the local coordinates of the image of a node with
      * respect to a given image triangle.
      */
-    StaticVector<ctype,2> getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
+    StaticVector<CTYPE,2> getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
 
     /**@name Mapping functions */
     //@{
@@ -179,9 +179,9 @@ public:
      * 
      */
     int map(int tri,                ///< The triangle of the input point \f$x\f$
-            StaticVector<ctype,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
+            StaticVector<CTYPE,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
             std::tr1::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
-            StaticVector<ctype,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
+            StaticVector<CTYPE,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
             int seed=-1                      
             ) const;
 
@@ -196,7 +196,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int positionMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
+    int positionMap(int tri, StaticVector<CTYPE,2>& p, StaticVector<CTYPE,3>& result) const;
 
     /** \brief Convenience function for accessing the normals of the target surface.
      *
@@ -209,7 +209,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    int directNormalMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
+    int directNormalMap(int tri, StaticVector<CTYPE,2>& p, StaticVector<CTYPE,3>& result) const;
 
     //@}
 
@@ -295,8 +295,8 @@ protected:
 
     /** \brief Internal routine used by map() 
      */
-    void handleMapOnEdge(int tri, const StaticVector<ctype,2>& p, const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b,
-                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const;
+    void handleMapOnEdge(int tri, const StaticVector<CTYPE,2>& p, const StaticVector<CTYPE,2>& a, const StaticVector<CTYPE,2>& b,
+                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<CTYPE,2>& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
     void appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch);
@@ -317,7 +317,7 @@ public:
     std::vector<Patch> patches;
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
-    std::vector<StaticVector<ctype,3> > iPos;
+    std::vector<StaticVector<CTYPE,3> > iPos;
 
     /// The corresponding image surface
     Surface* surface;
@@ -333,10 +333,10 @@ public:
 
 
 /** \brief Mapping from one simplicial surface to another -- 1d-in-2d specialization
-    \tparam ctype The type used for coordinates
+    \tparam CTYPE The type used for coordinates
 */
-template <class ctype>
-class PSurface<1,ctype>
+template <class CTYPE>
+class PSurface<1,CTYPE>
 {
 public:
 
@@ -345,7 +345,7 @@ public:
 
         Node() {}
 
-        Node(ctype dLP, ctype rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
+        Node(CTYPE dLP, CTYPE rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
             : domainLocalPosition(dLP), rangeLocalPosition(rLP),
               isNodeOnVertex(nOV), isNodeOnTargetVertex(nOTV),
               rightRangeSegment(-1)
@@ -365,9 +365,9 @@ public:
             return s;
         }
 
-        ctype domainLocalPosition;
+        CTYPE domainLocalPosition;
 
-        ctype rangeLocalPosition;
+        CTYPE rangeLocalPosition;
 
         bool isNodeOnVertex;
         
@@ -387,11 +387,11 @@ public:
         int neighbor[2];
     };
 
-    std::vector<StaticVector<ctype, 2> > domainVertices;
+    std::vector<StaticVector<CTYPE, 2> > domainVertices;
 
     std::vector<DomainSegment> domainSegments;
 
-    std::vector<StaticVector<ctype, 2> > targetVertices;
+    std::vector<StaticVector<CTYPE, 2> > targetVertices;
 
     std::vector<std::tr1::array<int, 2> > targetSegments;
 };
