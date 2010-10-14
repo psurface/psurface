@@ -108,7 +108,11 @@ void PSurfaceSmoother<ctype>::applyHorizontalRelaxation(DomainPolygon& quadri, P
     for (int i=0; i<quadri.nodes.size(); i++)
         result[i] = quadri.nodes[i].domainPos()[0];
 
-#warning Smoothing linear system is not actually solved!
+#ifdef _MSC_VER
+    #pragma message("Smoothing linear system is not actually solved!")
+#else
+    #warning Smoothing linear system is not actually solved!
+#endif
     //lambda_ij.BiCGSTAB(b_x, result, residual, &maxIter, 0.000001);
 
     for (size_t i=0; i<quadri.nodes.size(); i++)
