@@ -21,7 +21,7 @@
 #include "IntersectionPrimitiveCollector.h"
 
 template <int dimworld, class ctype>
-class DirectionFunction;
+struct DirectionFunction;
 
 template <int dim, class ctype>
 class ContactMapping {};

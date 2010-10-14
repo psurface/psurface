@@ -14,7 +14,7 @@ class NodeBundle;
 class Surface;
 class GlobalNodeIdx;
 template <int dimworld, class ctype>
-class DirectionFunction;
+struct DirectionFunction;
 
 /** \brief Construct a PSurface object by projecting one surface in normal direction onto another
 

@@ -15,7 +15,7 @@
 class DomainPolygon;
 
 template <int dim, class ctype> class PSurface;
-class QualityRequest;
+struct QualityRequest;
 
 namespace ParamToolBox {
 
