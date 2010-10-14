@@ -1,7 +1,20 @@
 #ifndef INTERSECTIONPRIMITIVE_H
 #define INTERSECTIONPRIMITIVE_H
 
-#include <tr1/array>
+// Check for VC9 / VS2008 with installed feature pack.
+#if defined(_MSC_VER) && (_MSC_VER>=1500)
+    // Dummy-include to define _CPPLIB_VER.
+    #include <vector>
+
+    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
+        #include <array>
+    #else
+        #error Please install the Visual C++ 2008 Feature Pack for TR1 support.
+    #endif
+#else
+    #include <tr1/array>
+#endif
+
 #include <psurface/StaticVector.h>
 
 
