@@ -4,11 +4,13 @@
 #include <vector>
 #include "IntersectionPrimitive.h"
 
+#include "psurfaceAPI.h"
+
 template <int dim, class ctype>
 class PSurface;
 
 template <class ctype>
-class IntersectionPrimitiveCollector {
+class PSURFACE_API IntersectionPrimitiveCollector {
 
 public:
 

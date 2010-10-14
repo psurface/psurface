@@ -557,8 +557,8 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class AmiraMeshIO<float>;
-template class AmiraMeshIO<double>;
+template class PSURFACE_EXPORT AmiraMeshIO<float>;
+template class PSURFACE_EXPORT AmiraMeshIO<double>;
 
 #endif
 

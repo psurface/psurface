@@ -4,6 +4,8 @@
 #include "StaticVector.h"
 #include "PSurface.h"
 
+#include "psurfaceAPI.h"
+
 #include <vector>
 
 template <int dim, class ctype>
@@ -19,7 +21,7 @@ class DirectionFunction;
 \tparam ctype The type used for coordinates
 */
 template <class ctype>
-class NormalProjector {
+class PSURFACE_API NormalProjector {
 public:
 
     NormalProjector(PSurface<2,ctype>* psurface)

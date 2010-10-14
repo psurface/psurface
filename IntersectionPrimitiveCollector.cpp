@@ -199,5 +199,5 @@ void IntersectionPrimitiveCollector<ctype>::collect(const PSurface<1,ctype>* psu
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class IntersectionPrimitiveCollector<float>;
-template class IntersectionPrimitiveCollector<double>;
+template class PSURFACE_EXPORT IntersectionPrimitiveCollector<float>;
+template class PSURFACE_EXPORT IntersectionPrimitiveCollector<double>;

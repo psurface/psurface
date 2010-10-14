@@ -6,10 +6,11 @@
 #include "SurfaceParts.h"
 #include "PlaneParam.h"
 
+#include "psurfaceAPI.h"
 
 /** A triangle containing a plane triangulation */
 template <class ctype>
-class DomainTriangle : public McTriangle,
+class PSURFACE_API DomainTriangle : public McTriangle,
                        public PlaneParam<ctype>
 {
 public:

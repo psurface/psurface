@@ -19,6 +19,7 @@
 #include "StaticVector.h"
 #include "SurfaceParts.h"
 
+#include "psurfaceAPI.h"
 
 /** A simple pointer-based surface.  The @c VertexType, @c EdgeType, and @c TriangleType
     classes have to be derived from McVertex, McEdge, McTriangle,
@@ -30,7 +31,7 @@
     @see McVertex, McEdge, McTriangle
 */
 template <class VertexType, class EdgeType, class TriangleType>
-class SurfaceBase {
+class PSURFACE_API SurfaceBase {
 
 public:
 

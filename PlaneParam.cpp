@@ -762,5 +762,5 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PlaneParam<float>;
-template class PlaneParam<double>;
+template class PSURFACE_EXPORT PlaneParam<float>;
+template class PSURFACE_EXPORT PlaneParam<double>;

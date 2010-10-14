@@ -329,5 +329,5 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
 //   explicit template instantiations
 // ///////////////////////////////////////////////////////
 
-template class DomainTriangle<float>;
-template class DomainTriangle<double>;
+template class PSURFACE_EXPORT DomainTriangle<float>;
+template class PSURFACE_EXPORT DomainTriangle<double>;

@@ -5,6 +5,7 @@
 #include "Domains.h"
 #include "PSurface.h"
 
+#include "psurfaceAPI.h"
 
 template <int dim, class ctype>
 class PSurface;
@@ -13,7 +14,7 @@ class PSurface;
     It's basically a bunch of triangles.  The feature of this class are the
     routines that evaluate the quality of the retriangulation. */
 template <class ctype>
-class CircularPatch {
+class PSURFACE_API CircularPatch {
 public:
     
 

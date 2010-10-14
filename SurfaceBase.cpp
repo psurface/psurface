@@ -622,5 +622,5 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class SurfaceBase<McVertex<float>, McEdge, DomainTriangle<float> >;
-template class SurfaceBase<McVertex<double>, McEdge, DomainTriangle<double> >;
+template class PSURFACE_EXPORT SurfaceBase<McVertex<float>, McEdge, DomainTriangle<float> >;
+template class PSURFACE_EXPORT SurfaceBase<McVertex<double>, McEdge, DomainTriangle<double> >;

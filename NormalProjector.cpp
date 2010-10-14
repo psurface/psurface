@@ -1706,5 +1706,5 @@ rayIntersectsLine(const StaticVector<ctype, 2>& basePoint,
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class NormalProjector<float>;
-template class NormalProjector<double>;
+template class PSURFACE_EXPORT NormalProjector<float>;
+template class PSURFACE_EXPORT NormalProjector<double>;
