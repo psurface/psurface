@@ -3,10 +3,12 @@
 
 #include "HxParamToolBox.h"
 
+#include "psurfaceAPI.h"
+
 template <int dim, class ctype> class PSurface;
 
 template <class ctype>
-class PSurfaceSmoother
+class PSURFACE_API PSurfaceSmoother
 {
     
 public:

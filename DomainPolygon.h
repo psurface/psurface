@@ -5,12 +5,14 @@
 #include "PlaneParam.h"
 #include "PSurface.h"
 
+#include "psurfaceAPI.h"
+
 template <class ctype> class DomainTriangle;
 template <class ctype> class CircularPatch;
 
 
 /** A polygon carrying a plane triangulation */
-class DomainPolygon : public PlaneParam<float> {
+class PSURFACE_API DomainPolygon : public PlaneParam<float> {
 public:
     /// standard constructor
     DomainPolygon(PSurface<2,float>* _par) : par(_par) {};
