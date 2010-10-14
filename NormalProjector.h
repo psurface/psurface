@@ -1,8 +1,10 @@
 #ifndef NORMAL_PROJECTOR_H
 #define NORMAL_PROJECTOR_H
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 #include "PSurface.h"
+
+#include "psurfaceAPI.h"
 
 #include <vector>
 
@@ -12,14 +14,14 @@ class NodeBundle;
 class Surface;
 class GlobalNodeIdx;
 template <int dimworld, class ctype>
-class DirectionFunction;
+struct DirectionFunction;
 
 /** \brief Construct a PSurface object by projecting one surface in normal direction onto another
 
 \tparam ctype The type used for coordinates
 */
 template <class ctype>
-class NormalProjector {
+class PSURFACE_API NormalProjector {
 public:
 
     NormalProjector(PSurface<2,ctype>* psurface)

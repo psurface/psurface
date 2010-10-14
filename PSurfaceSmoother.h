@@ -1,12 +1,14 @@
 #ifndef PSURFACE_SMOOTHER_H
 #define PSURFACE_SMOOTHER_H
 
-#include <psurface/HxParamToolBox.h>
+#include "HxParamToolBox.h"
+
+#include "psurfaceAPI.h"
 
 template <int dim, class ctype> class PSurface;
 
 template <class ctype>
-class PSurfaceSmoother
+class PSURFACE_API PSurfaceSmoother
 {
     
 public:

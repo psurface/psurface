@@ -1,7 +1,7 @@
 #include <vector>
 
-#include <psurface/PSurface.h>
-#include <psurface/PSurfaceFactory.h>
+#include "PSurface.h"
+#include "PSurfaceFactory.h"
 
 template <int dim, class ctype>
 void PSurfaceFactory<dim,ctype>::setTargetSurface(Surface* surface)

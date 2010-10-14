@@ -6,13 +6,14 @@
 #ifndef PARAMETRIZATION_H
 #define PARAMETRIZATION_H
 
-#include <psurface/StaticVector.h>
-
+#include "StaticVector.h"
 #include "SurfaceBase.h"
 #include "Domains.h"
 #include "SurfacePathSet.h"
 #include "GlobalNodeIdx.h"
 #include "NodeBundle.h"
+
+#include "psurfaceAPI.h"
 
 class Surface;
 template <class type, int dim> class Box;
@@ -25,7 +26,7 @@ class HxParamBundle;
     \tparam CTYPE The type used for coordinates
 */
 template <int dim, class CTYPE>
-class PSurface
+class PSURFACE_API PSurface
     : public SurfaceBase<McVertex<CTYPE>, McEdge, DomainTriangle<CTYPE> >{
 
 public:
@@ -336,7 +337,7 @@ public:
     \tparam CTYPE The type used for coordinates
 */
 template <class CTYPE>
-class PSurface<1,CTYPE>
+class PSURFACE_API PSurface<1,CTYPE>
 {
 public:
 

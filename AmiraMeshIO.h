@@ -1,13 +1,15 @@
 #ifndef AMIRAMESH_IO_H
 #define AMIRAMESH_IO_H
 
+#include "psurfaceAPI.h"
+
 // forward declarations
 class Surface;
 class AmiraMesh;
 template <int dim, class ctype> class PSurface;
 
 template <class ctype>
-class AmiraMeshIO
+class PSURFACE_API AmiraMeshIO
 {
 public:
 

@@ -6,9 +6,20 @@
 
 #include <limits>
 
-#include <psurface/PlaneParam.h>
-#include <psurface/StaticMatrix.h>
-#include <psurface/SparseMatrix.h>
+#include "PlaneParam.h"
+#include "StaticMatrix.h"
+#include "SparseMatrix.h"
+
+// Check for VC9 / VS2008 without SP1, which lacks the C99 math conformance stuff.
+#if defined(_MSC_VER) && _MSC_VER==1500
+    #include <float.h>
+
+    namespace std {
+        inline double isnan(double x) {
+            return _isnan(x);
+        }
+    }
+#endif
 
 // Check for VC9 / VS2008 without SP1, which lacks the C99 math conformance stuff.
 #if defined(_MSC_VER) && _MSC_VER==1500
@@ -762,5 +773,5 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PlaneParam<float>;
-template class PlaneParam<double>;
+template class PSURFACE_EXPORT PlaneParam<float>;
+template class PSURFACE_EXPORT PlaneParam<double>;

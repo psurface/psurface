@@ -15,7 +15,7 @@
     #include <tr1/array>
 #endif
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 
 
 /** This class represents a part of the overlap of a basis function on the

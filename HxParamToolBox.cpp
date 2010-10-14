@@ -1,12 +1,12 @@
 #include <vector>
 
-#include <psurface/HxParamToolBox.h>
-#include <psurface/Domains.h>
-#include <psurface/DomainPolygon.h>
-#include <psurface/CircularPatch.h>
-#include <psurface/Triangulator.h>
-#include <psurface/PSurface.h>
-#include <psurface/QualityRequest.h>
+#include "HxParamToolBox.h"
+#include "Domains.h"
+#include "DomainPolygon.h"
+#include "CircularPatch.h"
+#include "Triangulator.h"
+#include "PSurface.h"
+#include "QualityRequest.h"
 
 signed char ParamToolBox::orientation(const StaticVector<float,2>& a, const StaticVector<float,2>& b, const StaticVector<float,2>& c, const float eps)
 {

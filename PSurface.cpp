@@ -35,9 +35,9 @@
 #include <amiramesh/AmiraMesh.h>
 #endif
 
-#include <psurface/PSurface.h>
-#include <psurface/GlobalNodeIdx.h>
-#include <psurface/Box.h>
+#include "PSurface.h"
+#include "GlobalNodeIdx.h"
+#include "Box.h"
 
 // Check for VC9 / VS2008 without SP1, which lacks the C99 math conformance stuff.
 #if defined(_MSC_VER) && _MSC_VER==1500
@@ -1104,5 +1104,5 @@ void PSurface<dim,CTYPE>::checkConsistency(const char* where) const
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PSurface<2,float>;
-template class PSurface<2,double>;
+template class PSURFACE_EXPORT PSurface<2,float>;
+template class PSURFACE_EXPORT PSurface<2,double>;

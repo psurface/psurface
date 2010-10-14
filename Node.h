@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 #include <stdio.h>
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 #include <vector>
 
 typedef int NodeIdx;

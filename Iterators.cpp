@@ -1,4 +1,4 @@
-#include <psurface/PlaneParam.h>
+#include "PlaneParam.h"
 
 template <class ctype>
 typename PlaneParam<ctype>::DirectedEdgeIterator& PlaneParam<ctype>::DirectedEdgeIterator::operator++()
@@ -121,11 +121,11 @@ bool PlaneParam<ctype>::TriangleIterator::isCorrectlyOriented() const
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PlaneParam<float>::DirectedEdgeIterator;
-template class PlaneParam<double>::DirectedEdgeIterator;
+template class PSURFACE_EXPORT PlaneParam<float>::DirectedEdgeIterator;
+template class PSURFACE_EXPORT PlaneParam<double>::DirectedEdgeIterator;
 
-template class PlaneParam<float>::UndirectedEdgeIterator;
-template class PlaneParam<double>::UndirectedEdgeIterator;
+template class PSURFACE_EXPORT PlaneParam<float>::UndirectedEdgeIterator;
+template class PSURFACE_EXPORT PlaneParam<double>::UndirectedEdgeIterator;
 
-template class PlaneParam<float>::TriangleIterator;
-template class PlaneParam<double>::TriangleIterator;
+template class PSURFACE_EXPORT PlaneParam<float>::TriangleIterator;
+template class PSURFACE_EXPORT PlaneParam<double>::TriangleIterator;

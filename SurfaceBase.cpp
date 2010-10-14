@@ -21,11 +21,11 @@
     #include <tr1/array>
 #endif
 
-#include <psurface/StaticVector.h>
-#include <psurface/StaticMatrix.h>
-#include <psurface/SurfaceParts.h>
-#include <psurface/SurfaceBase.h>
-#include <psurface/Domains.h>
+#include "StaticVector.h"
+#include "StaticMatrix.h"
+#include "SurfaceParts.h"
+#include "SurfaceBase.h"
+#include "Domains.h"
 
 
 template <class VertexType, class EdgeType, class TriangleType>
@@ -622,5 +622,5 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class SurfaceBase<McVertex<float>, McEdge, DomainTriangle<float> >;
-template class SurfaceBase<McVertex<double>, McEdge, DomainTriangle<double> >;
+template class PSURFACE_EXPORT SurfaceBase<McVertex<float>, McEdge, DomainTriangle<float> >;
+template class PSURFACE_EXPORT SurfaceBase<McVertex<double>, McEdge, DomainTriangle<double> >;

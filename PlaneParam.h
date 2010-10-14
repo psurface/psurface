@@ -6,11 +6,13 @@
 #ifndef PLANE_PARAM_H
 #define PLANE_PARAM_H
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 #include <vector>
 #include <algorithm>
 
 #include "Node.h"
+
+#include "psurfaceAPI.h"
 
 template<class T> class SparseMatrix;
 
@@ -21,10 +23,10 @@ class PSurface;
    having only triangular and unbounded faces.  The nodes of the graph store
    a 3D position, the rest is computed via linear interpolation. */
 template <class ctype>
-class PlaneParam{
+class PSURFACE_API PlaneParam{
 public:
 
-    class DirectedEdgeIterator {
+    class PSURFACE_API DirectedEdgeIterator {
     public:
         DirectedEdgeIterator() : fromNode(-1), neighborIdx(0) , nodes(0){}
 
@@ -73,7 +75,7 @@ public:
 
     };
 
-    class UndirectedEdgeIterator {
+    class PSURFACE_API UndirectedEdgeIterator {
     public:
         UndirectedEdgeIterator() : fromNode(-1), neighborIdx(0) , nodes(0){}
 
@@ -105,7 +107,7 @@ public:
     };
 
     /** \brief An iterator over all triangles in a plane graph */
-    class TriangleIterator {
+    class PSURFACE_API TriangleIterator {
     public:
 
         /** \brief Default constructor */

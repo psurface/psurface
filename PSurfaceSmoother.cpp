@@ -1,8 +1,8 @@
-#include <psurface/PSurface.h>
-#include <psurface/PSurfaceSmoother.h>
-#include <psurface/CircularPatch.h>
-#include <psurface/DomainPolygon.h>
-#include <psurface/SparseMatrix.h>
+#include "PSurface.h"
+#include "PSurfaceSmoother.h"
+#include "CircularPatch.h"
+#include "DomainPolygon.h"
+#include "SparseMatrix.h"
 
 
 template <class ctype>

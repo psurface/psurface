@@ -6,8 +6,8 @@
 #include "hxsurface/Surface.h"
 #endif
 
-#include <psurface/PSurface.h>
-#include <psurface/IntersectionPrimitiveCollector.h>
+#include "PSurface.h"
+#include "IntersectionPrimitiveCollector.h"
 
 
 template <class ctype>
@@ -199,5 +199,5 @@ void IntersectionPrimitiveCollector<ctype>::collect(const PSurface<1,ctype>* psu
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class IntersectionPrimitiveCollector<float>;
-template class IntersectionPrimitiveCollector<double>;
+template class PSURFACE_EXPORT IntersectionPrimitiveCollector<float>;
+template class PSURFACE_EXPORT IntersectionPrimitiveCollector<double>;

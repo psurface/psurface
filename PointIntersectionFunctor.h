@@ -1,7 +1,7 @@
 #ifndef POINT_INTERSECTION_FUNCTOR_H
 #define POINT_INTERSECTION_FUNCTOR_H
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 
 /** \brief Functor class needed to insert StaticVector<.,3> objects into a MultiDimOctree
  */

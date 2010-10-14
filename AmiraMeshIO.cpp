@@ -6,11 +6,11 @@
 #include "hxsurface/Surface.h"
 #endif
 
-#include <psurface/StaticVector.h>
-#include <psurface/AmiraMeshIO.h>
-#include <psurface/Domains.h>
-#include <psurface/PSurface.h>
-#include <psurface/PSurfaceFactory.h>
+#include "StaticVector.h"
+#include "AmiraMeshIO.h"
+#include "Domains.h"
+#include "PSurface.h"
+#include "PSurfaceFactory.h"
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
@@ -557,8 +557,8 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class AmiraMeshIO<float>;
-template class AmiraMeshIO<double>;
+template class PSURFACE_EXPORT AmiraMeshIO<float>;
+template class PSURFACE_EXPORT AmiraMeshIO<double>;
 
 #endif
 

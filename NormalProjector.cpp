@@ -1,11 +1,11 @@
-#include <psurface/NormalProjector.h>
-#include <psurface/PSurfaceFactory.h>
-#include <psurface/DirectionFunction.h>
+#include "NormalProjector.h"
+#include "PSurfaceFactory.h"
+#include "DirectionFunction.h"
 
-#include <psurface/StaticVector.h>
-#include <psurface/StaticMatrix.h>
+#include "StaticVector.h"
+#include "StaticMatrix.h"
 
-#include <psurface/NodeBundle.h>
+#include "NodeBundle.h"
 
 #ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"
@@ -1706,5 +1706,5 @@ rayIntersectsLine(const StaticVector<ctype, 2>& basePoint,
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class NormalProjector<float>;
-template class NormalProjector<double>;
+template class PSURFACE_EXPORT NormalProjector<float>;
+template class PSURFACE_EXPORT NormalProjector<double>;
