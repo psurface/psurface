@@ -21,11 +21,11 @@
     #include <tr1/array>
 #endif
 
-#include <psurface/StaticVector.h>
-#include <psurface/StaticMatrix.h>
-#include <psurface/SurfaceParts.h>
-#include <psurface/SurfaceBase.h>
-#include <psurface/Domains.h>
+#include "StaticVector.h"
+#include "StaticMatrix.h"
+#include "SurfaceParts.h"
+#include "SurfaceBase.h"
+#include "Domains.h"
 
 
 template <class VertexType, class EdgeType, class TriangleType>

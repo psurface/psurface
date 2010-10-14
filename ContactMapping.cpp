@@ -7,10 +7,10 @@
 #include "hxsurface/Surface.h"
 #endif
 
-#include <psurface/ContactMapping.h>
-#include <psurface/NormalProjector.h>
-#include <psurface/StaticMatrix.h>
-#include <psurface/DirectionFunction.h>
+#include "ContactMapping.h"
+#include "NormalProjector.h"
+#include "StaticMatrix.h"
+#include "DirectionFunction.h"
 
 template <class ctype>
 void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >& coords1,  ///< The vertex coordinates of the first surface

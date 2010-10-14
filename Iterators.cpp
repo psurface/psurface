@@ -1,4 +1,4 @@
-#include <psurface/PlaneParam.h>
+#include "PlaneParam.h"
 
 template <class ctype>
 typename PlaneParam<ctype>::DirectedEdgeIterator& PlaneParam<ctype>::DirectedEdgeIterator::operator++()

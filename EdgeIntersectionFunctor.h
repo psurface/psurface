@@ -15,7 +15,7 @@
     #include <tr1/array>
 #endif
 
-#include <psurface/SurfaceParts.h>
+#include "SurfaceParts.h"
 
 /** \brief Functor class needed to insert McEdge objects into a MultiDimOctree
  */

@@ -16,8 +16,8 @@
 
 #include <limits>
 
-#include <psurface/StaticVector.h>
-#include <psurface/SurfaceParts.h>
+#include "StaticVector.h"
+#include "SurfaceParts.h"
 
 
 /** A simple pointer-based surface.  The @c VertexType, @c EdgeType, and @c TriangleType

@@ -1,7 +1,7 @@
 #ifndef PSURFACE_DIRECTION_FUNCTION_H
 #define PSURFACE_DIRECTION_FUNCTION_H
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 
 /** \brief Abstract base class for direction fields on simplicial surfaces */
 template <int dimworld, class ctype>

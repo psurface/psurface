@@ -6,8 +6,8 @@
 #include "hxsurface/Surface.h"
 #endif
 
-#include <psurface/PSurface.h>
-#include <psurface/IntersectionPrimitiveCollector.h>
+#include "PSurface.h"
+#include "IntersectionPrimitiveCollector.h"
 
 
 template <class ctype>

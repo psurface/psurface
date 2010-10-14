@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include <psurface/StaticVector.h>
-#include <psurface/MultiDimOctree.h>
-#include <psurface/PlaneParam.h>
-#include <psurface/Domains.h>
+#include "StaticVector.h"
+#include "MultiDimOctree.h"
+#include "PlaneParam.h"
+#include "Domains.h"
 
 #include "EdgeIntersectionFunctor.h"
 

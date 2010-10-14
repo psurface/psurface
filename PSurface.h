@@ -6,8 +6,7 @@
 #ifndef PARAMETRIZATION_H
 #define PARAMETRIZATION_H
 
-#include <psurface/StaticVector.h>
-
+#include "StaticVector.h"
 #include "SurfaceBase.h"
 #include "Domains.h"
 #include "SurfacePathSet.h"

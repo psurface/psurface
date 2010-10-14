@@ -1,9 +1,9 @@
 #ifndef CIRCULAR_PATCH
 #define CIRCULAR_PATCH
 
-#include <psurface/Box.h>
-#include <psurface/Domains.h>
-#include <psurface/PSurface.h>
+#include "Box.h"
+#include "Domains.h"
+#include "PSurface.h"
 
 
 template <int dim, class ctype>

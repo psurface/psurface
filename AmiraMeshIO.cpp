@@ -6,11 +6,11 @@
 #include "hxsurface/Surface.h"
 #endif
 
-#include <psurface/StaticVector.h>
-#include <psurface/AmiraMeshIO.h>
-#include <psurface/Domains.h>
-#include <psurface/PSurface.h>
-#include <psurface/PSurfaceFactory.h>
+#include "StaticVector.h"
+#include "AmiraMeshIO.h"
+#include "Domains.h"
+#include "PSurface.h"
+#include "PSurfaceFactory.h"
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>

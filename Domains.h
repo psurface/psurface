@@ -1,7 +1,7 @@
 #ifndef DOMAINS_H
 #define DOMAINS_H
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 
 #include "SurfaceParts.h"
 #include "PlaneParam.h"

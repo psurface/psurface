@@ -1,11 +1,11 @@
-#include <psurface/NormalProjector.h>
-#include <psurface/PSurfaceFactory.h>
-#include <psurface/DirectionFunction.h>
+#include "NormalProjector.h"
+#include "PSurfaceFactory.h"
+#include "DirectionFunction.h"
 
-#include <psurface/StaticVector.h>
-#include <psurface/StaticMatrix.h>
+#include "StaticVector.h"
+#include "StaticMatrix.h"
 
-#include <psurface/NodeBundle.h>
+#include "NodeBundle.h"
 
 #ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"

@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include <psurface/Domains.h>
-#include <psurface/MultiDimOctree.h>
+#include "Domains.h"
+#include "MultiDimOctree.h"
 
 #include "EdgeIntersectionFunctor.h"
 #include "VertexHeap.h"

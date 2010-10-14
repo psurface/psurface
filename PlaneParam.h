@@ -6,7 +6,7 @@
 #ifndef PLANE_PARAM_H
 #define PLANE_PARAM_H
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 #include <vector>
 #include <algorithm>
 

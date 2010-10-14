@@ -15,10 +15,10 @@
     #include <tr1/array>
 #endif
 
-#include <psurface/StaticVector.h>
-#include <psurface/PSurface.h>
-#include <psurface/IntersectionPrimitive.h>
-#include <psurface/IntersectionPrimitiveCollector.h>
+#include "StaticVector.h"
+#include "PSurface.h"
+#include "IntersectionPrimitive.h"
+#include "IntersectionPrimitiveCollector.h"
 
 template <int dimworld, class ctype>
 class DirectionFunction;

@@ -1,7 +1,7 @@
 #ifndef NORMAL_PROJECTOR_H
 #define NORMAL_PROJECTOR_H
 
-#include <psurface/StaticVector.h>
+#include "StaticVector.h"
 #include "PSurface.h"
 
 #include <vector>

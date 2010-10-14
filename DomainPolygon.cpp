@@ -4,8 +4,8 @@
 #endif
 #include <cmath>
 
-#include <psurface/DomainPolygon.h>
-#include <psurface/CircularPatch.h>
+#include "DomainPolygon.h"
+#include "CircularPatch.h"
 
 // Check for VC9 / VS2008 without SP1, which lacks the C99 math conformance stuff.
 #if defined(_MSC_VER) && _MSC_VER==1500

@@ -6,9 +6,9 @@
 
 #include <limits>
 
-#include <psurface/PlaneParam.h>
-#include <psurface/StaticMatrix.h>
-#include <psurface/SparseMatrix.h>
+#include "PlaneParam.h"
+#include "StaticMatrix.h"
+#include "SparseMatrix.h"
 
 // Check for VC9 / VS2008 without SP1, which lacks the C99 math conformance stuff.
 #if defined(_MSC_VER) && _MSC_VER==1500

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <psurface/SurfacePath.h>
+#include "SurfacePath.h"
 
 
 class SurfacePathSet : public std::vector<SurfacePath> {

@@ -1,8 +1,8 @@
 #include <limits>
 
-#include <psurface/CircularPatch.h>
-#include <psurface/StaticMatrix.h>
-#include <psurface/PSurface.h>
+#include "CircularPatch.h"
+#include "StaticMatrix.h"
+#include "PSurface.h"
 
 
 template <class ctype>
