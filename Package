@@ -1,4 +1,5 @@
 set PACKAGE {psurface}
+set LABELS {noAmiraVI}
 
 set EXCLUDEARCH {MacX Win32VC8 Win64VC8}
 
