@@ -21,17 +21,6 @@
     }
 #endif
 
-// Check for VC9 / VS2008 without SP1, which lacks the C99 math conformance stuff.
-#if defined(_MSC_VER) && _MSC_VER==1500
-    #include <float.h>
-
-    namespace std {
-        inline double isnan(double x) {
-            return _isnan(x);
-        }
-    }
-#endif
-
 #ifdef _WIN32
 inline int random() {return rand();}
 #endif
