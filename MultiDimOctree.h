@@ -1,14 +1,3 @@
-/*
- *  Filename:    MultiDimOctree.hh
- *  Version:     1.0
- *  Created on:  Jan 14, 2009
- *  Author:      Gerrit Buse
- *  ---------------------------------
- *  Project:     liboctree
- *  Description: <short_description>
- *  subversion:  $Id$
- *
- */
 /**
  * @file MultiDimOctree.hh
  * @brief dimension independent octree functionality

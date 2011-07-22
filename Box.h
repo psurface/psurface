@@ -1,14 +1,3 @@
-/*
- *  Filename:    Box.hh
- *  Version:     1.0
- *  Created on:  Jan 13, 2009
- *  Author:      Gerrit Buse/Oliver Sander
- *  ---------------------------------
- *  Project:     liboctree
- *  Description: <short_description>
- *  subversion:  $Id$
- *
- */
 /**
  * @file Box.hh
  * @brief
