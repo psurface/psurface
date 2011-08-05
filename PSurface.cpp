@@ -5,7 +5,7 @@
     #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
         #include <array>
     #else
-        #error Please install the Visual C++ 2008 Feature Pack for TR1 support.
+        #error Please install the Visual Studio 2008 SP1 for TR1 support.
     #endif
 #else
     #include <tr1/array>
