@@ -16,6 +16,7 @@ cp COPYING                      $BASENAME
 
 cp TargetSurface.h.standalone   $BASENAME/include/TargetSurface.h
 
+cp psurfaceAPI.h                $BASENAME/include/psurface
 cp CircularPatch.h              $BASENAME/include/psurface
 cp DomainPolygon.h              $BASENAME/include/psurface
 cp Domains.h                    $BASENAME/include/psurface
