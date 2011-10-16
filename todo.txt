@@ -37,8 +37,6 @@
 
 - Factor out memory management of McSurfaceBase into a PoolAllocator class
 
-- integrate some 2d support from dune/contact
-
 
   Interna
 -------------
@@ -111,11 +109,5 @@
 
 - Should handle ghost nodes without creating redundant node copies
 
-
-  Contact Stuff
---------------------
-
-- Das Kontaktorakel muﬂ Knoten-Fl‰che-Distanzen ausrechnen und nicht
-  nur Knoten-Knoten.
 
 */
