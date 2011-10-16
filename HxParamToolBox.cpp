@@ -935,7 +935,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
                                           MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>* edgeOctree,
                                           std::vector<int>* featureEdges)
 {
-    int i, j, k;
+    int i, j;
     
     std::vector<std::vector<int> > halfStarTris(0);
     std::vector<std::vector<int> > halfStarVertices(0);
@@ -1190,7 +1190,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
             DomainPolygon halfStar(par);
             halfStar.init(par->triangles(halfStarTris[i][0]), triCoords);
             
-            for (k=1; k<halfStarTris[i].size(); k++){
+            for (int k=1; k<halfStarTris[i].size(); k++){
                 
                 const std::tr1::array<int, 3>& currentTriPoints = par->triangles(halfStarTris[i][k]).vertices;
                 
