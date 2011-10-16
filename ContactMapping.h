@@ -20,6 +20,8 @@
 #include "IntersectionPrimitive.h"
 #include "IntersectionPrimitiveCollector.h"
 
+namespace psurface {
+
 template <int dimworld, class ctype>
 struct DirectionFunction;
 
@@ -81,5 +83,7 @@ private:
     PSurface<2,ctype> psurface_;
 
 };
+
+} // namespace psurface
 
 #endif

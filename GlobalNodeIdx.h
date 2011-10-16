@@ -1,6 +1,8 @@
 #ifndef GLOBAL_NODE_IDX_H
 #define GLOBAL_NODE_IDX_H
 
+namespace psurface {
+
 /** This class represents a global index for parametrization nodes on the base grid.
  * It consists of the base grid triangle number and the node index on that triangle.
  */
@@ -31,5 +33,7 @@ public:
     int idx;
 
 };
+
+} // namespace psurface
 
 #endif

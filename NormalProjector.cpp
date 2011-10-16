@@ -17,6 +17,8 @@
 #include <vector>
 #include <set>
 
+using namespace psurface;
+
 template <class ctype>
 void NormalProjector<ctype>::project(const Surface* targetSurface,
                                      const DirectionFunction<3,ctype>* domainDirection,

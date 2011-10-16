@@ -7,6 +7,8 @@
 #include "StaticVector.h"
 #include <vector>
 
+namespace psurface {
+
 typedef int NodeIdx;
 
 
@@ -443,5 +445,7 @@ protected:
     unsigned int edgePosition:24;
                 
 };
+
+} // namespace psurface
 
 #endif

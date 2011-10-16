@@ -6,6 +6,8 @@
 
 #include "psurfaceAPI.h"
 
+namespace psurface {
+
 template <int dim, class ctype>
 class PSurface;
 
@@ -23,4 +25,7 @@ public:
                         std::vector<IntersectionPrimitive<1,ctype> >& mergedGrid);
 
 };
+
+} // namespace psurface
+
 #endif

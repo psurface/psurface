@@ -10,11 +10,20 @@
 
 #include "psurfaceAPI.h"
 
-class Surface;
-template <class type, int dim> class Box;
-
+// forward declarations
 class AmiraMesh;
 class HxParamBundle;
+
+#ifdef PSURFACE_STANDALONE
+namespace psurface { class Surface; }
+#else
+class Surface;
+#endif
+
+namespace psurface {
+
+template <class type, int dim> class Box;
+
 
 /** The parametrization of an arbitrary surface over a simple base grid 
     \tparam dim Dimension of the surface
@@ -391,6 +400,8 @@ public:
 
     std::vector<std::tr1::array<int, 2> > targetSegments;
 };
+
+} // namespace psurface
 
 #endif
 

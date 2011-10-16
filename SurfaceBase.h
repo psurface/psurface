@@ -21,6 +21,9 @@
 
 #include "psurfaceAPI.h"
 
+
+namespace psurface {
+
 /** A simple pointer-based surface.  The @c VertexType, @c EdgeType, and @c TriangleType
     classes have to be derived from McVertex, McEdge, McTriangle,
     respectively.
@@ -242,5 +245,7 @@ protected:
     std::vector<int>  freeVertexStack;
 
 };
+
+} // namespace psurface
 
 #endif

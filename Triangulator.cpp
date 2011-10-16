@@ -10,6 +10,8 @@
 inline int isnan(double x) {return _isnan(x);}
 #endif
 
+using namespace psurface;
+
 signed char Triangulator::orientation(const StaticVector<float,2>& a, const StaticVector<float,2>& b, const StaticVector<float,2>& c, const float eps)
 {
 

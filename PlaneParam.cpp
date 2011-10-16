@@ -25,6 +25,8 @@
 inline int random() {return rand();}
 #endif
 
+using namespace psurface;
+
 template <class ctype>
 typename PlaneParam<ctype>::DirectedEdgeIterator PlaneParam<ctype>::BFLocate(const StaticVector<ctype,2> &p, int seed) const
 {

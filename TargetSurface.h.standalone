@@ -22,6 +22,8 @@
 #include <vector>
 #include <psurface/StaticVector.h>
 
+namespace psurface {
+
 /** This class implements unstructured, triangulated surfaces.
     
     This implementation works with indices instead of pointers, this allows
@@ -85,6 +87,8 @@ class Surface {
     //@}
 
 };
+
+} // namespace psurface
 
 #endif
 

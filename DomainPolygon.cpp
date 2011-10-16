@@ -18,6 +18,8 @@
     }
 #endif
 
+using namespace psurface;
+
 static int counter = 0;
 
 void DomainPolygon::init(const DomainTriangle<float>& tri, const StaticVector<float,2> coords[3]){

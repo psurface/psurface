@@ -4,8 +4,11 @@
 #include <vector>
 #include <complex>
 
-/** A template class for sparse matrices.  The first template parameter
-    should be one of float, double, complex<float> or complex<double>.
+namespace psurface {
+
+/** A template class for sparse matrices. 
+ *
+ * \tparam T one of float, double, complex<float> or complex<double>.
 */
 template<class T> class SparseMatrix
 {
@@ -266,5 +269,7 @@ startAgain:
 };
 
 /// @endif
+
+} // namespace psurface
 
 #endif

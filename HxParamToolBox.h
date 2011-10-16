@@ -12,6 +12,8 @@
 
 #include "psurfaceAPI.h"
 
+namespace psurface {
+
 class DomainPolygon;
 
 template <int dim, class ctype> class PSurface;
@@ -129,5 +131,6 @@ namespace ParamToolBox {
     
 };
 
+} // namespace psurface
 
 #endif

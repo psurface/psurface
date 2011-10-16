@@ -3,9 +3,17 @@
 
 #include "psurfaceAPI.h"
 
-// forward declarations
-class Surface;
+// forward declaration for stuff outside of namespace 'psurface'
 class AmiraMesh;
+#ifdef PSURFACE_STANDALONE
+namespace psurface { class Surface; }
+#else
+class Surface;
+#endif
+
+namespace psurface {
+
+// further forward declarations
 template <int dim, class ctype> class PSurface;
 
 template <class ctype>
@@ -27,5 +35,7 @@ public:
 #endif
 
 };
+
+} // namespace psurface
 
 #endif

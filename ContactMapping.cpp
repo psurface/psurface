@@ -12,6 +12,8 @@
 #include "StaticMatrix.h"
 #include "DirectionFunction.h"
 
+using namespace psurface;
+
 template <class ctype>
 void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >& coords1,  ///< The vertex coordinates of the first surface
                const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface

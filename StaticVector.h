@@ -24,6 +24,8 @@
 
 #include <assert.h>
 
+namespace psurface {
+
 template <class T, int N>
 class StaticVector
     : public std::tr1::array<T,N>
@@ -168,5 +170,7 @@ public:
         return result;
     }
 };
+
+} // namespace psurface
 
 #endif

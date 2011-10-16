@@ -6,6 +6,7 @@
 
 #include "StaticVector.h"
 
+namespace psurface {
 
 /** This is the base class for vertices in a McSurfaceBase.  
 
@@ -276,6 +277,6 @@ public:
 
 };
 
-
+} // namespace psurface
 
 #endif

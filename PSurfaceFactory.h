@@ -15,8 +15,15 @@
     #include <tr1/array>
 #endif
 
-template <int dim, class ctype> class PSurface;
+#ifdef PSURFACE_STANDALONE
+namespace psurface { class Surface; }
+#else
 class Surface;
+#endif
+
+namespace psurface {
+
+template <int dim, class ctype> class PSurface;
 template <class ctype, int dim> class StaticVector;
 
 template <int dim, class ctype>
@@ -82,5 +89,7 @@ private:
     PSurface<dim,ctype>* psurface_;
 
 };
+
+} // namespace psurface;
 
 #endif

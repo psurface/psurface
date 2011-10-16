@@ -11,6 +11,8 @@
 
 #include "psurfaceAPI.h"
 
+namespace psurface {
+
 template <class ctype> class CircularPatch;
 template <int dim, class ctype> class PSurface;
 struct QualityRequest;
@@ -79,6 +81,6 @@ namespace Triangulator {
 
 };
 
+} // namespace psurface
+
 #endif
-
-

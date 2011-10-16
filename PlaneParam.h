@@ -9,6 +9,8 @@
 
 #include "psurfaceAPI.h"
 
+namespace psurface {
+
 template<class T> class SparseMatrix;
 
 template <int dim, class ctype>
@@ -524,5 +526,7 @@ public:
     std::vector<Node<ctype> > nodes;
 
 };
+
+} // namespace psurface
 
 #endif

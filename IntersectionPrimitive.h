@@ -17,6 +17,7 @@
 
 #include "StaticVector.h"
 
+namespace psurface {
 
 /** This class represents a part of the overlap of a basis function on the
  * mortar and the nonmortar side.  The exact part stored is the following:
@@ -69,5 +70,6 @@ public:
 
 };
 
+} // namespace psurface
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef QUALITY_REQUEST
 #define QUALITY_REQUEST
 
+namespace psurface {
+
 /// A class encapsulating the exact definition of a 'good' point removal step
 struct QualityRequest {
 
@@ -49,5 +51,7 @@ struct QualityRequest {
     }
 
 };
+
+} // namespace
 
 #endif

@@ -8,10 +8,17 @@
 
 #include <vector>
 
+#ifdef PSURFACE_STANDALONE
+namespace psurface { class Surface; }
+#else
+class Surface;
+#endif
+
+namespace psurface {
+
 template <int dim, class ctype>
 class PSurfaceFactory;
 class NodeBundle;
-class Surface;
 class GlobalNodeIdx;
 template <int dimworld, class ctype>
 struct DirectionFunction;
@@ -185,5 +192,7 @@ protected:
     PSurface<2,ctype>* psurface_;
 
 };
+
+} // namespace psurface
 
 #endif

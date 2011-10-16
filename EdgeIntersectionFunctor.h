@@ -17,6 +17,8 @@
 
 #include "SurfaceParts.h"
 
+namespace psurface {
+
 /** \brief Functor class needed to insert McEdge objects into a MultiDimOctree
  */
 struct EdgeIntersectionFunctor
@@ -123,5 +125,6 @@ protected:
 
 };
 
+} // namespace psurface
 
 #endif

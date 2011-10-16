@@ -4,6 +4,8 @@
 #include <vector>
 #include "GlobalNodeIdx.h"
 
+namespace psurface {
+
 /** \brief Set of graph nodes */
 class NodeBundle : public std::vector<GlobalNodeIdx> {
 
@@ -51,5 +53,7 @@ public:
     }
 
 };
+
+} // namespace psurface
 
 #endif

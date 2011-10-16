@@ -1,7 +1,10 @@
 #ifndef STATIC_MATRIX_H
 #define STATIC_MATRIX_H
 
+#include "StaticVector.h"
 
+
+namespace psurface {
 
 template <class T, int N>
 class StaticMatrix
@@ -68,5 +71,7 @@ public:
         dst[2] = src[0]*(*this)[2][0]+src[1]*(*this)[2][1]+src[2]*(*this)[2][2];
     }
 };
+
+} // namespace psurface
 
 #endif

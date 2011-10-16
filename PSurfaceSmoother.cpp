@@ -5,6 +5,8 @@
 #include "SparseMatrix.h"
 
 
+using namespace psurface;
+
 template <class ctype>
 void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, int edge, 
                                                   bool keepPatches, std::vector<unsigned int>& nodeStack)

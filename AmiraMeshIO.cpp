@@ -16,6 +16,7 @@
 #include <amiramesh/AmiraMesh.h>
 #endif
 
+using namespace psurface;
 
 /** \brief Tiny array class with controlled length
 
@@ -45,7 +46,7 @@ struct MiniArray
 
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 template <class ctype>
-int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filename)
+int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filename)
 {
     AmiraMesh am;
 
@@ -301,7 +302,7 @@ int AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const char* filen
 }
 
 template <class ctype>
-void* AmiraMeshIO<ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
+void* psurface::AmiraMeshIO<ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
 {
     PSurface<2,ctype>* par = new PSurface<2,ctype>;
 
@@ -318,18 +319,18 @@ void* AmiraMeshIO<ctype>::readAmiraMesh(AmiraMesh* am, const char* filename)
 }
 
 template <class ctype>
-bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMesh* am, const char* filename, Surface* surf)
+bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>* psurf, AmiraMesh* am, const char* filename, Surface* surf)
 {
     // //////////////////////////////////
     //   Create PSurface factory
     // //////////////////////////////////
 
-    PSurfaceFactory<2,ctype> factory(psurface);
+    PSurfaceFactory<2,ctype> factory(psurf);
     
     // Target surface already exists
     factory.setTargetSurface(surf);
     
-    psurface->getPaths(am->parameters);
+    psurf->getPaths(am->parameters);
 
     ///////////////////////////////////////////////
     // test for file format
@@ -351,10 +352,10 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         return false;
     }
     
-    psurface->patches.resize(AMpatches->location()->dims()[0]);
+    psurf->patches.resize(AMpatches->location()->dims()[0]);
 
-    for (size_t i=0; i<psurface->patches.size(); i++)
-        psurface->patches[i] = ((typename PSurface<2,ctype>::Patch*)AMpatches->dataPtr())[i];
+    for (size_t i=0; i<psurf->patches.size(); i++)
+        psurf->patches[i] = ((typename PSurface<2,ctype>::Patch*)AMpatches->dataPtr())[i];
     
     //////////////////////////////////
     // load the base grid vertices
@@ -378,11 +379,11 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     // /////////////////////////////////////////////////////
     //  copy node positions
     // /////////////////////////////////////////////////////
-    psurface->iPos.resize(AMnodePos->location()->dims()[0]);
+    psurf->iPos.resize(AMnodePos->location()->dims()[0]);
     
-    for (size_t i=0; i<psurface->iPos.size(); i++)
+    for (size_t i=0; i<psurf->iPos.size(); i++)
         for (int j=0; j<3; j++)
-            psurface->iPos[i][j] = ((float(*)[3])AMnodePos->dataPtr())[i][j];
+            psurf->iPos[i][j] = ((float(*)[3])AMnodePos->dataPtr())[i][j];
 
     ////////////////////////////////////////////////////////
     // copy triangles.  This takes care of the edges, too
@@ -442,7 +443,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
                                                              ((int*)AMtriangles->dataPtr())[3*i+2]};
         int newTriIdx = factory.insertSimplex(triangleVertices);
 
-        psurface->triangles(newTriIdx).patch = numNodesAndEdgesData[11*i+4];
+        psurf->triangles(newTriIdx).patch = numNodesAndEdgesData[11*i+4];
 
         ///////////////////////////////////////////////
         // get the parametrization on this triangle
@@ -458,23 +459,23 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
         // first the nodes
         ////////////////////////////////////
 
-        psurface->triangles(newTriIdx).nodes.resize(numIntersectionNodes + numTouchingNodes + numInteriorNodes + 3);
+        psurf->triangles(newTriIdx).nodes.resize(numIntersectionNodes + numTouchingNodes + numInteriorNodes + 3);
 
         // three corner nodes
         StaticVector<ctype,2> domainPos(1, 0);
         int nodeNumber = numNodesAndEdgesData[11*i+8];
-        psurface->triangles(newTriIdx).nodes[0].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
-        psurface->triangles(newTriIdx).nodes[0].makeCornerNode(0, nodeNumber);
+        psurf->triangles(newTriIdx).nodes[0].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
+        psurf->triangles(newTriIdx).nodes[0].makeCornerNode(0, nodeNumber);
 
         domainPos = StaticVector<ctype,2>(0, 1);
         nodeNumber = numNodesAndEdgesData[11*i+9];
-        psurface->triangles(newTriIdx).nodes[1].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
-        psurface->triangles(newTriIdx).nodes[1].makeCornerNode(1, nodeNumber);
+        psurf->triangles(newTriIdx).nodes[1].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
+        psurf->triangles(newTriIdx).nodes[1].makeCornerNode(1, nodeNumber);
 
         domainPos = StaticVector<ctype,2>(0, 0);
         nodeNumber = numNodesAndEdgesData[11*i+10];
-        psurface->triangles(newTriIdx).nodes[2].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
-        psurface->triangles(newTriIdx).nodes[2].makeCornerNode(2, nodeNumber);
+        psurf->triangles(newTriIdx).nodes[2].setValue(domainPos, nodeNumber, Node<ctype>::CORNER_NODE);
+        psurf->triangles(newTriIdx).nodes[2].makeCornerNode(2, nodeNumber);
 
         int nodeCounter = 3;
 
@@ -488,7 +489,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
             
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
 
-            psurface->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::INTERSECTION_NODE);
+            psurf->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::INTERSECTION_NODE);
         }
 
         // the touching nodes
@@ -501,7 +502,7 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
             
-            psurface->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::TOUCHING_NODE);
+            psurf->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::TOUCHING_NODE);
         }
 
         // the interior nodes
@@ -514,27 +515,27 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
 
-            psurface->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::INTERIOR_NODE);
+            psurf->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::INTERIOR_NODE);
         }
 
         ///////////////////////////////
         // the parameterEdges
         ///////////////////////////////
         for (int j=0; j<numParamEdges; j++, edgeCounter++)
-            psurface->triangles(newTriIdx).addEdge(edgeData[edgeCounter][0], edgeData[edgeCounter][1]);
+            psurf->triangles(newTriIdx).addEdge(edgeData[edgeCounter][0], edgeData[edgeCounter][1]);
 
         //////////////////////////////////
         // the edgePoints arrays
         //////////////////////////////////
         for (int j=0; j<3; j++){
 
-            psurface->triangles(newTriIdx).edgePoints[j].resize(numNodesAndEdgesData[11*i+5+j] + 2);
+            psurf->triangles(newTriIdx).edgePoints[j].resize(numNodesAndEdgesData[11*i+5+j] + 2);
 
-            psurface->triangles(newTriIdx).edgePoints[j][0]     = j;
-            psurface->triangles(newTriIdx).edgePoints[j].back() = (j+1)%3;
+            psurf->triangles(newTriIdx).edgePoints[j][0]     = j;
+            psurf->triangles(newTriIdx).edgePoints[j].back() = (j+1)%3;
 
             for (int k=0; k<numNodesAndEdgesData[11*i+5+j]; k++){
-                psurface->triangles(newTriIdx).edgePoints[j][k+1] = edgePointData[edgePointCounter];
+                psurf->triangles(newTriIdx).edgePoints[j][k+1] = edgePointData[edgePointCounter];
                 edgePointCounter++;
             }
 
@@ -544,9 +545,9 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
     }
 
     // sad but true ...
-    psurface->hasUpToDatePointLocationStructure = false;
+    psurf->hasUpToDatePointLocationStructure = false;
 
-    psurface->setupOriginalSurface();
+    psurf->setupOriginalSurface();
 
     return true;
 }
@@ -557,8 +558,8 @@ bool AmiraMeshIO<ctype>::initFromAmiraMesh(PSurface<2,ctype>* psurface, AmiraMes
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PSURFACE_EXPORT AmiraMeshIO<float>;
-template class PSURFACE_EXPORT AmiraMeshIO<double>;
+template class PSURFACE_EXPORT psurface::AmiraMeshIO<float>;
+template class PSURFACE_EXPORT psurface::AmiraMeshIO<double>;
 
 #endif
 

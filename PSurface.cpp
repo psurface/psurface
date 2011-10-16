@@ -42,6 +42,8 @@
     }
 #endif
 
+using namespace psurface;
+
 template <int dim, class CTYPE>
 PSurface<dim,CTYPE>::~PSurface() 
 {}

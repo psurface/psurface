@@ -20,6 +20,7 @@
 
 #include "TargetSurface.h"
 
+using namespace psurface;
 
 void Surface::getBoundingBox(float bbox[6]) const
 {

@@ -9,6 +9,7 @@
 #include "PSurface.h"
 #include "IntersectionPrimitiveCollector.h"
 
+using namespace psurface;
 
 template <class ctype>
 void IntersectionPrimitiveCollector<ctype>::collect(PSurface<2,ctype>* psurface,

@@ -27,6 +27,7 @@
 #include "SurfaceBase.h"
 #include "Domains.h"
 
+using namespace psurface;
 
 template <class VertexType, class EdgeType, class TriangleType>
 void SurfaceBase<VertexType,EdgeType,TriangleType>::removeTriangle(int tri)

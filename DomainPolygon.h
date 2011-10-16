@@ -7,6 +7,9 @@
 
 #include "psurfaceAPI.h"
 
+
+namespace psurface {
+
 template <class ctype> class DomainTriangle;
 template <class ctype> class CircularPatch;
 
@@ -198,5 +201,6 @@ public:
 
 };
 
+} // namespace psurface
 
 #endif

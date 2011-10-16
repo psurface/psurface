@@ -3,6 +3,8 @@
 
 #include "StaticVector.h"
 
+namespace psurface {
+
 /** \brief Abstract base class for direction fields on simplicial surfaces */
 template <int dimworld, class ctype>
 struct DirectionFunction
@@ -33,6 +35,6 @@ struct DiscreteDirectionFunction
     virtual StaticVector<ctype,dimworld> operator()(size_t index) const = 0;
 };
 
-
+} // namespace psurface
 
 #endif

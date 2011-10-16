@@ -7,6 +7,8 @@
 
 #include "psurfaceAPI.h"
 
+namespace psurface {
+
 template <int dim, class ctype>
 class PSurface;
 
@@ -150,5 +152,7 @@ public:
     PSurface<2,ctype>* par;
 
 };
+
+} // namespace psurface
 
 #endif

@@ -1,5 +1,5 @@
 /**
- * @file MultiDimOctree.hh
+ * @file
  * @brief dimension independent octree functionality
  */
 #ifndef MULTI_DIM_OCTREE_HH
@@ -15,6 +15,8 @@
 #ifndef MEMINCREMENT
 #define MEMINCREMENT 15
 #endif
+
+namespace psurface {
 
 /** This class implements a dimension independent structure suitable for point
  *  location. It works like a quadtree or an octree, hence the name.
@@ -919,6 +921,8 @@ bool MultiDimOctree<T, F, C, dim, uniform_access>::remove(int elem, const BoxTyp
 
 /// @endif
 
-#endif // MULTI_DIM_POINT_LOCATOR_HH
+} // namespace psurface
+
+#endif // MULTI_DIM_OCTREE_HH
 
 /// @}

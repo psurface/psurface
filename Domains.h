@@ -8,6 +8,8 @@
 
 #include "psurfaceAPI.h"
 
+namespace psurface {
+
 /** A triangle containing a plane triangulation */
 template <class ctype>
 class PSURFACE_API DomainTriangle : public McTriangle,
@@ -159,5 +161,7 @@ public:
     int patch;
 
 };
+
+} // namespace psurface
 
 #endif

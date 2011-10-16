@@ -3,6 +3,8 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 
+using namespace psurface;
+
 template <int dim, class ctype>
 void PSurfaceFactory<dim,ctype>::setTargetSurface(Surface* surface)
 {

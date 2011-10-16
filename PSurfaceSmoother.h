@@ -2,8 +2,11 @@
 #define PSURFACE_SMOOTHER_H
 
 #include "HxParamToolBox.h"
+#include "DomainPolygon.h"
 
 #include "psurfaceAPI.h"
+
+namespace psurface {
 
 template <int dim, class ctype> class PSurface;
 
@@ -28,5 +31,7 @@ private:
     static void moveSubGraph(int startingNode, DomainPolygon& from, int centerNode);
 
 };
+
+}
 
 #endif

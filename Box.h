@@ -1,6 +1,6 @@
 /**
  * @file Box.hh
- * @brief
+ * @brief Implement an axis-parallel box
  */
 
 #ifndef BOX_H
@@ -22,6 +22,8 @@
 #ifndef PSURFACE_STANDALONE
 #include <mclib/McVec3f.h>
 #endif
+
+namespace psurface {
 
 /** \brief A axis-parallel box in a Euclidean space
     \tparam C Type used for coordinate components
@@ -183,5 +185,7 @@ private:
 	std::tr1::array<C,dim> _lower;
 	std::tr1::array<C,dim> _upper;
 };
+
+} // namespace psurface
 
 #endif // BOX_HH_

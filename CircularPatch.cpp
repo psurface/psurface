@@ -4,6 +4,7 @@
 #include "StaticMatrix.h"
 #include "PSurface.h"
 
+using namespace psurface;
 
 template <class ctype>
 bool CircularPatch<ctype>::inducesTopologyChange() const

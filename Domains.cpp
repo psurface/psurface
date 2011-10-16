@@ -1,5 +1,6 @@
 #include "Domains.h"
 
+using namespace psurface;
 
 template <class ctype>
 void DomainTriangle<ctype>::insertExtraEdges()
