@@ -20,6 +20,7 @@
     #define _USE_MATH_DEFINES
 #endif
 #include <cmath>
+#include <cstring>  // for size_t
 
 #include <assert.h>
 
