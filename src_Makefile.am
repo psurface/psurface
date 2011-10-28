@@ -1,0 +1,60 @@
+include_HEADERS = \
+	$(top_srcdir)/include/TargetSurface.h
+
+include_psurface_HEADERS = \
+	$(top_srcdir)/include/psurface/AmiraMeshIO.h \
+	$(top_srcdir)/include/psurface/Box.h \
+	$(top_srcdir)/include/psurface/CircularPatch.h \
+	$(top_srcdir)/include/psurface/ContactMapping.h \
+	$(top_srcdir)/include/psurface/DirectionFunction.h \
+	$(top_srcdir)/include/psurface/DomainPolygon.h \
+	$(top_srcdir)/include/psurface/Domains.h \
+	$(top_srcdir)/include/psurface/EdgeIntersectionFunctor.h \
+	$(top_srcdir)/include/psurface/GlobalNodeIdx.h \
+	$(top_srcdir)/include/psurface/HxParamToolBox.h \
+	$(top_srcdir)/include/psurface/IntersectionPrimitiveCollector.h \
+	$(top_srcdir)/include/psurface/IntersectionPrimitive.h \
+	$(top_srcdir)/include/psurface/MultiDimOctree.h \
+	$(top_srcdir)/include/psurface/NodeBundle.h \
+	$(top_srcdir)/include/psurface/Node.h \
+	$(top_srcdir)/include/psurface/NormalProjector.h \
+	$(top_srcdir)/include/psurface/PlaneParam.h \
+	$(top_srcdir)/include/psurface/PointIntersectionFunctor.h \
+	$(top_srcdir)/include/psurface/psurfaceAPI.h \
+	$(top_srcdir)/include/psurface/PSurfaceFactory.h \
+	$(top_srcdir)/include/psurface/PSurface.h \
+	$(top_srcdir)/include/psurface/PSurfaceSmoother.h \
+	$(top_srcdir)/include/psurface/QualityRequest.h \
+	$(top_srcdir)/include/psurface/SparseMatrix.h \
+	$(top_srcdir)/include/psurface/StaticMatrix.h \
+	$(top_srcdir)/include/psurface/StaticVector.h \
+	$(top_srcdir)/include/psurface/SurfaceBase.h \
+	$(top_srcdir)/include/psurface/SurfaceParts.h \
+	$(top_srcdir)/include/psurface/SurfacePath.h \
+	$(top_srcdir)/include/psurface/SurfacePathSet.h \
+	$(top_srcdir)/include/psurface/Triangulator.h \
+	$(top_srcdir)/include/psurface/VertexHeap.h
+
+include_psurfacedir = $(includedir)/psurface
+
+lib_LTLIBRARIES= libpsurface.la
+
+libpsurface_la_SOURCES= \
+	AmiraMeshIO.cpp \
+	CircularPatch.cpp \
+	ContactMapping.cpp \
+	DomainPolygon.cpp \
+	Domains.cpp \
+	HxParamToolBox.cpp \
+	IntersectionPrimitiveCollector.cpp \
+	Iterators.cpp \
+	NormalProjector.cpp \
+	PlaneParam.cpp \
+	PSurface.cpp \
+	PSurfaceFactory.cpp \
+	PSurfaceSmoother.cpp \
+	SurfaceBase.cpp \
+	TargetSurface.cpp \
+	Triangulator.cpp
+
+AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE

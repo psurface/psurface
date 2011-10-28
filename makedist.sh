@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASENAME=libpsurface-1.2beta-rc4
+BASENAME=libpsurface-1.3beta-rc1
 
 # Clean directory structure
 rm -rf $BASENAME
@@ -8,7 +8,6 @@ mkdir $BASENAME
 mkdir $BASENAME/include
 mkdir $BASENAME/include/psurface
 mkdir $BASENAME/src
-mkdir $BASENAME/lib
 mkdir $BASENAME/doc
 
 # Copy the licence file
@@ -66,7 +65,10 @@ cp HxParamToolBox.cpp           $BASENAME/src
 cp PSurfaceSmoother.cpp         $BASENAME/src
 cp Triangulator.cpp             $BASENAME/src
 
-cp Makefile.standalone          $BASENAME/src/Makefile
+cp configure.ac                 $BASENAME/configure.ac
+cp Makefile.am                  $BASENAME/Makefile.am
+cp src_Makefile.am              $BASENAME/src/Makefile.am
+
 cp doc/Doxyfile                 $BASENAME/doc/Doxyfile
 
 tar zvcf $BASENAME.tar.gz $BASENAME
