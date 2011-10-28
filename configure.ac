@@ -20,7 +20,7 @@ AC_DEFUN([CHECK_FOR_AMIRAMESH],[
         ac_save_LDFLAGS="$LDFLAGS"
         ac_save_LIBS="$LIBS"
         LIBS="$LIBS -lamiramesh"
-        AS_IF([test "x$1" != x],[CPPFLAGS="$CPPFLAGS -I$1/include"; LDFLAGS="$LDFLAGS -L$1/lib"])
+        AS_IF([test "x$1" != x],[CPPFLAGS="$CPPFLAGS -DHX_HAS_STDIOSTREAM -I$1/include"; LDFLAGS="$LDFLAGS -L$1/lib"])
         AC_CHECK_HEADER([amiramesh/AmiraMesh.h],
                         [AC_LINK_IFELSE([
                            AC_LANG_PROGRAM([[#include "amiramesh/AmiraMesh.h"]],
