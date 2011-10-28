@@ -9,10 +9,7 @@ namespace psurface {
 template <int dimworld, class ctype>
 struct DirectionFunction
 {
-    /** \brief Abstract virtual destructor, to prevent people 
-        from creating objects of this class directly.
-    */
-    virtual ~DirectionFunction() = 0;
+    virtual ~DirectionFunction() {};
 };
 
 /** \brief Abstract base class for direction fields that are given by closed-form expressions. 
