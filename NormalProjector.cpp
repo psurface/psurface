@@ -1,3 +1,4 @@
+#include <cstddef>
 #include "NormalProjector.h"
 #include "PSurfaceFactory.h"
 #include "DirectionFunction.h"
