@@ -13,7 +13,7 @@ mkdir $BASENAME/doc
 # Copy the licence file
 cp COPYING                      $BASENAME
 
-cp TargetSurface.h.standalone   $BASENAME/include/TargetSurface.h
+cp TargetSurface.h.standalone   $BASENAME/include/psurface/TargetSurface.h
 
 cp psurfaceAPI.h                $BASENAME/include/psurface
 cp CircularPatch.h              $BASENAME/include/psurface

@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #include <vector>
-#include <psurface/StaticVector.h>
+#include <StaticVector.h>
 
 namespace psurface {
 

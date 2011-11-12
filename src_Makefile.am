@@ -1,6 +1,3 @@
-include_HEADERS = \
-	$(top_srcdir)/include/TargetSurface.h
-
 include_psurface_HEADERS = \
 	$(top_srcdir)/include/psurface/AmiraMeshIO.h \
 	$(top_srcdir)/include/psurface/Box.h \
@@ -32,6 +29,7 @@ include_psurface_HEADERS = \
 	$(top_srcdir)/include/psurface/SurfaceParts.h \
 	$(top_srcdir)/include/psurface/SurfacePath.h \
 	$(top_srcdir)/include/psurface/SurfacePathSet.h \
+        $(top_srcdir)/include/psurface/TargetSurface.h \
 	$(top_srcdir)/include/psurface/Triangulator.h \
 	$(top_srcdir)/include/psurface/VertexHeap.h
 
@@ -57,4 +55,4 @@ libpsurface_la_SOURCES= \
 	TargetSurface.cpp \
 	Triangulator.cpp
 
-AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
+AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
