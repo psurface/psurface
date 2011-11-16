@@ -125,15 +125,14 @@ public:
 	 */
 	bool remove(T* element)
 	{
-		typename FunctorMapType::iterator it = this->mapping.find(element);
 		if (!this->loadFunctor(element) || !remove(0, box, element))
 		{
 			return false;
 		}
 		else
 		{
-			this->mapping.erase(it);
-			return true;
+                    mapping.erase(element);
+                    return true;
 		}
 	}
 
