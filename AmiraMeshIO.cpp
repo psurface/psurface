@@ -97,7 +97,7 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
 
     AmiraMesh::Data* triangleCoords = new AmiraMesh::Data("BaseGridTriangles", triangles,
                                                           McPrimType::mc_int32, 3, 
-                                                          (void*)&baseGridTriArray);
+                                                          (void*)&baseGridTriArray[0]);
     am.insert(triangleCoords);
 
     ////////////////////////////////////////
