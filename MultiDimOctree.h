@@ -46,23 +46,16 @@ namespace psurface {
  *  \tparam F the data type of the above mentioned functor; this class has to support operator() (see class description)
  *  \tparam C the type of the coordinates used; (const) access via operator[] is required
  *  \tparam dim the dimension of the tree (has to be the same as for the coordinates)
- *  \tparam uniform_access If TRUE, the user claims that access to the items geometry is uniform, and so only one
- *  functor is stored, which is, of course, much more efficient! For more information see insert
  */
-template <class T, typename F, typename C, int dim, bool uniform_access = false>
+template <class T, typename F, typename C, int dim>
 class MultiDimOctree
 {
-private:
-	typedef std::map<const T*, const F*>   FunctorMapType;
-
-
 public:
 
 	/// @brief the type of the stored data
 	typedef T                 DataType;
 
-	/// @brief the type of the functor that tells
-	/// about the items' geometry
+	/// @brief the type of the functor that tells about the items' geometry
 	typedef F                 CoordFunctor;
 
 	/// @brief a type describing a box in dim dimensions
@@ -97,7 +90,7 @@ public:
 	 * @param maxDepth the maximum # of refined levels
 	 * @param maxElemPerLeaf if reached in a cell the cell will be subdivided
    */
-	MultiDimOctree(const BoxType &bbox, int maxDepth=6, int maxElemPerLeaf=10);
+	MultiDimOctree(const BoxType &bbox, const F* f_, int maxDepth=6, int maxElemPerLeaf=10);
 
 	/// @brief Default constructor.
 	MultiDimOctree();
@@ -108,16 +101,9 @@ public:
 	/** Inserts a single element into the octree. Elements are not
    *  copied, but are referenced via a pointer. Therefore, elements must
    *  not be moved or deleted after insertion.
-   *  Note that if uniform_access was specified TRUE, that each element's
-   *  geometric data must be accessible in the same way, i.e. with the functor
-   *  object given here. Otherwise a map is managed that holds the functor for
-   *  each single item inserted. When performing lookups this obviously is a
-   *  drawback since for each item touched the map has to be questioned to
-   *  have the functor decide about the item being in the query box or not.
    *  @param element the to-insert element
-   *  @param f_ the functor associated with the element
    */
-	bool insert(T* element, F* f_);
+	bool insert(T* element);
 
 	/**
 	 * @brief removes an element from the octree
@@ -125,16 +111,8 @@ public:
 	 */
 	bool remove(T* element)
 	{
-		if (!this->loadFunctor(element) || !remove(0, box, element))
-		{
-			return false;
-		}
-		else
-		{
-                    mapping.erase(element);
-                    return true;
-		}
-	}
+            return remove(0, box, element);
+        }
 
 	/**@name lookup methods */
 	//@{
@@ -159,7 +137,7 @@ public:
 	void clear();
 
 	/// Calls @c clear and initializes octree from scratch.
-	void init(const BoxType &bbox, int maxDepth=6, int maxElemPerLeaf=10);
+	void init(const BoxType &bbox, const F* f_, int maxDepth=6, int maxElemPerLeaf=10);
 
 	/// Print some statistics to stdout.
 	void info();
@@ -286,71 +264,46 @@ protected:
 
 	void subdivide(int elem, const BoxType &elemBox);
 
-	/**
-	 * fills this->f with the functor for the given item
-	 * @param item the item
-	 * @return TRUE if uniform_access is TRUE or if the map contains
-	 * a functor associated with the item
-	 */
-	bool loadFunctor(const T* item)
-	{
-		if (uniform_access)
-			return this->f != NULL;
-		else
-		{
-			typename FunctorMapType::iterator it = this->mapping.find(item);
-			if (it != this->mapping.end())
-			{
-				this->f = (*it).second;
-				return true;
-			}
-			else
-				return false;
-		}
-	}
-
-
 	BoxType                      box;
 	int                          maxDepth;
 	unsigned int                 maxElemPerLeaf;
 	const T*                     baseAddress;
 	std::vector<bool>            lookupFlags;
-	// only needed if !uniform_access:
-	// this map stores the associated functors for the items
-	FunctorMapType               mapping;
-	// currently "loaded" functor
+
+        // The functor used to determine whether an element is contained in a given box
 	const F*                     f;
 };
 
 /// @if EXCLUDETHIS
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-MultiDimOctree<T, F, C, dim, uniform_access>::MultiDimOctree(const BoxType &box, int maxDepth, int maxElemPerLeaf) : box(box)
+template <class T, typename F, typename C, int dim>
+MultiDimOctree<T, F, C, dim>::MultiDimOctree(const BoxType &box, const F* f_, int maxDepth, int maxElemPerLeaf) : box(box)
 {
-	init(box, maxDepth, maxElemPerLeaf);
+	init(box, f_, maxDepth, maxElemPerLeaf);
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-MultiDimOctree<T, F, C, dim, uniform_access>::MultiDimOctree()
+template <class T, typename F, typename C, int dim>
+MultiDimOctree<T, F, C, dim>::MultiDimOctree()
 {
 	baseAddress = 0;
 	maxDepth = 0;
+        f = NULL;
 	maxElemPerLeaf = 0;
 	allElements.clear();
 	allElements.push_back(Element());
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-MultiDimOctree<T, F, C, dim, uniform_access>::~MultiDimOctree()
+template <class T, typename F, typename C, int dim>
+MultiDimOctree<T, F, C, dim>::~MultiDimOctree()
 {
 	// Empty, new std::vector frees all memory automatically
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::enableUniqueLookup(int n, const T* addr)
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::enableUniqueLookup(int n, const T* addr)
 {
 	baseAddress = addr;
 	lookupFlags.resize(n);
@@ -359,16 +312,16 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::enableUniqueLookup(int n, con
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::disableUniqueLookup()
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::disableUniqueLookup()
 {
 	baseAddress = 0;
 	lookupFlags.resize(0);
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::clear()
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::clear()
 {
 	baseAddress = 0;
 	lookupFlags.resize(0);
@@ -380,10 +333,11 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::clear()
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::init(const BoxType& b, int depth, int elemPerLeaf)
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::init(const BoxType& b, const F* f_, int depth, int elemPerLeaf)
 {
 	box = b;
+        f = f_;
 
 	baseAddress = 0;
 	lookupFlags.resize(0);
@@ -396,47 +350,23 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::init(const BoxType& b, int de
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-bool MultiDimOctree<T, F, C, dim, uniform_access>::insert(T* element, F* f_)
+template <class T, typename F, typename C, int dim>
+bool MultiDimOctree<T, F, C, dim>::insert(T* element)
 {
-	if (uniform_access)
-	{
-		// set the functor
-		this->f = f_;
-		if (this->f != NULL && (*this->f)(this->box.lower(), this->box.upper(), *element))
-		{
-			// return the success of the insert method
-			return insert(0, 0 , box, element);
-		}
-	}
-	else
-	{
-		// check if the element is already inserted and whether it lies
-		// inside the octree's bounding box
-		if (f_ != NULL && this->mapping.find(element) == this->mapping.end() &&
-				(*f_)(this->box.lower(), this->box.upper(), *element))
-		{
-			this->mapping[element] = f_;
-			if (!insert(0, 0 , box, element))
-			{
-				this->mapping.erase(element);
-				return false;
-			}
-			else
-				return true;
-		}
-		else
-			return false;
-	}
-	return false;
+    if (this->f != NULL && (*this->f)(this->box.lower(), this->box.upper(), *element))
+    {
+        // return the success of the insert method
+        return insert(0, 0 , box, element);
+    }
+    return false;
 }
 
 
 
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-bool MultiDimOctree<T, F, C, dim, uniform_access>::insert(int elem, int depth, const BoxType &elemBox, T* idx)
+template <class T, typename F, typename C, int dim>
+bool MultiDimOctree<T, F, C, dim>::insert(int elem, int depth, const BoxType &elemBox, T* idx)
 {
 	// if element is leaf -> simply insert and be done!
 	Element& element = allElements[elem];
@@ -472,10 +402,6 @@ bool MultiDimOctree<T, F, C, dim, uniform_access>::insert(int elem, int depth, c
 	// this element is a parent, so go visit its children
 	// and insert there
 	DESCEND:
-
-	// get the functor of the element
-	if (!this->loadFunctor(idx))
-		return false; // if not found in map => abort!
 
 	int firstChild = element.n;
 
@@ -514,8 +440,8 @@ bool MultiDimOctree<T, F, C, dim, uniform_access>::insert(int elem, int depth, c
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::iterateCells(int leafsOnly)
+template <class T, typename F, typename C, int dim>
+int MultiDimOctree<T, F, C, dim>::iterateCells(int leafsOnly)
 {
 	int indices[dim];
 	for (int i = 0; i < dim; ++i)
@@ -524,8 +450,8 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::iterateCells(int leafsOnly)
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::iterateCells(int elem, int depth, const BoxType &elemBox,
+template <class T, typename F, typename C, int dim>
+int MultiDimOctree<T, F, C, dim>::iterateCells(int elem, int depth, const BoxType &elemBox,
 		int leafsOnly, int indices[dim])
 {
 	Element& element = allElements[elem];
@@ -577,8 +503,8 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::iterateCells(int elem, int dep
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::subdivide(int elem, const BoxType &elemBox)
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::subdivide(int elem, const BoxType &elemBox)
 {
 	int childIndex = allElements.size();
 
@@ -615,8 +541,8 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::subdivide(int elem, const Box
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::memSize()
+template <class T, typename F, typename C, int dim>
+int MultiDimOctree<T, F, C, dim>::memSize()
 {
 	int bytes = allElements.size() * sizeof(Element);
 	for (typename std::deque<Element>::reverse_iterator rit = allElements.rbegin(); rit != allElements.rend(); ++rit)
@@ -632,8 +558,8 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::memSize()
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::info()
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::info()
 {
 	int nNodes = allElements.size();
 	int nLeafs = 0;
@@ -663,8 +589,8 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::info()
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::lookup(const std::tr1::array<C,dim>& pos, ResultContainer& result)
+template <class T, typename F, typename C, int dim>
+int MultiDimOctree<T, F, C, dim>::lookup(const std::tr1::array<C,dim>& pos, ResultContainer& result)
 {
 	BoxType b(box);
 
@@ -684,8 +610,8 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::lookup(const std::tr1::array<C
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::lookup(const BoxType& queryBox, ResultContainer& result)
+template <class T, typename F, typename C, int dim>
+int MultiDimOctree<T, F, C, dim>::lookup(const BoxType& queryBox, ResultContainer& result)
 {
 	BoxType b(box);
 
@@ -705,8 +631,8 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::lookup(const BoxType& queryBox
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::lookupIndex(const BoxType& queryBox, std::vector<int>& result)
+template <class T, typename F, typename C, int dim>
+int MultiDimOctree<T, F, C, dim>::lookupIndex(const BoxType& queryBox, std::vector<int>& result)
 {
 	ResultContainer tmpResult;
 	lookup(queryBox, tmpResult);
@@ -718,8 +644,8 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::lookupIndex(const BoxType& que
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, const BoxType &elemBox, const BoxType& queryBox, ResultContainer& result)
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::lookup(int elem, const BoxType &elemBox, const BoxType& queryBox, ResultContainer& result)
 {
 	Element& element = allElements[elem];
 
@@ -730,7 +656,7 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, const BoxTyp
 			T* t = element.indices[i];
 
 			// get the functor of the element and check for intersection
-			if (this->loadFunctor(t) && (*this->f)(queryBox.lower(), queryBox.upper(), *t))
+			if ((*this->f)(queryBox.lower(), queryBox.upper(), *t))
 			{
 				if (baseAddress)
 				{ // this indicates unique lookup strategy
@@ -784,8 +710,8 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, const BoxTyp
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-int MultiDimOctree<T, F, C, dim, uniform_access>::lookupIndex(const std::tr1::array<C,dim>& pos, std::vector<int>& result)
+template <class T, typename F, typename C, int dim>
+int MultiDimOctree<T, F, C, dim>::lookupIndex(const std::tr1::array<C,dim>& pos, std::vector<int>& result)
 {
 	ResultContainer tmpResult;
 	lookup(pos, tmpResult);
@@ -797,8 +723,8 @@ int MultiDimOctree<T, F, C, dim, uniform_access>::lookupIndex(const std::tr1::ar
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, BoxType &elemBox, const std::tr1::array<C,dim>& pos, ResultContainer& result)
+template <class T, typename F, typename C, int dim>
+void MultiDimOctree<T, F, C, dim>::lookup(int elem, BoxType &elemBox, const std::tr1::array<C,dim>& pos, ResultContainer& result)
 {
 	Element& element = allElements[elem];
 
@@ -848,8 +774,8 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::lookup(int elem, BoxType &ele
 }
 
 
-template <class T, typename F, typename C, int dim, bool uniform_access>
-bool MultiDimOctree<T, F, C, dim, uniform_access>::remove(int elem, const BoxType &elemBox, const T* toBeDeleted)
+template <class T, typename F, typename C, int dim>
+bool MultiDimOctree<T, F, C, dim>::remove(int elem, const BoxType &elemBox, const T* toBeDeleted)
 {
 	Element& element = allElements[elem];
 

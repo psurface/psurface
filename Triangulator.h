@@ -42,7 +42,7 @@ namespace Triangulator {
                                             const QualityRequest &quality, 
                                             const std::vector<int> &fullStar, 
                                             VertexHeap::ErrorValue& qualityValue,
-                                            MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>& edgeOctree, 
+                                            MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
                            PSurface<2,float>* par); 
 
     ///
@@ -50,7 +50,7 @@ namespace Triangulator {
                                                 const QualityRequest &quality,
                                                 const std::vector<int> &fullStar, 
                                                 VertexHeap::ErrorValue& qualityValue,
-                                                MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>& edgeOctree, 
+                                                MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
                                PSurface<2,float>* par); 
 
 
@@ -76,7 +76,7 @@ namespace Triangulator {
                                    const QualityRequest &quality, 
                                    VertexHeap::ErrorValue& qualityValue, 
                                    const std::vector<int> &fullStar, 
-                                   MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>& edgeOctree, 
+                                   MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
                   const PSurface<2,float>* par);
 
 };

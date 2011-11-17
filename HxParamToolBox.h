@@ -87,7 +87,7 @@ namespace ParamToolBox {
     bool PSURFACE_API removeRegularPoint(PSurface<2,float>* par, 
                                              int centerPoint, 
                                              const QualityRequest &quality,
-                                             MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>* edgeOctree
+                                             MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>* edgeOctree
                                              );
 
     ///
@@ -97,7 +97,7 @@ namespace ParamToolBox {
                                                  int numHalfStars,
                                                  int featureEdgeA,
                                                  int featureEdgeB,
-                                                 MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>* edgeOctree,
+                                                 MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>* edgeOctree,
                                                  std::vector<int>* featureEdges
                                                  );
 

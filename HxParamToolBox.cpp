@@ -733,7 +733,7 @@ void ParamToolBox::moveSubGraph(int startingNode, DomainPolygon& from, std::vect
 
 
 bool ParamToolBox::removeRegularPoint(PSurface<2,float>* par, int centerPoint, const QualityRequest &quality,
-                                      MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>* edgeOctree)
+                                      MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>* edgeOctree)
 {
     std::vector<unsigned int> nodeStack;
     int i, j;
@@ -920,7 +920,7 @@ bool ParamToolBox::removeRegularPoint(PSurface<2,float>* par, int centerPoint, c
             //printf("inserting edge %d\n", par->findEdge(fillIn.innerEdges[i][0], fillIn.innerEdges[i][1]));
             McEdge& cE = par->edges(par->findEdge(fillIn.innerEdges[i][0], fillIn.innerEdges[i][1]));
             
-            edgeOctree->insert(&cE, &edgeIntersectionFunctor);
+            edgeOctree->insert(&cE);
         }
     }
     
@@ -934,7 +934,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
                                           int numHalfStars,
                                           int featureEdgeA,
                                           int featureEdgeB,
-                                          MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>* edgeOctree,
+                                          MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>* edgeOctree,
                                           std::vector<int>* featureEdges)
 {
     int i, j;
@@ -1273,13 +1273,11 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
             // update edge octree, if used
             if (quality.intersections){
                 
-                EdgeIntersectionFunctor edgeIntersectionFunctor(&par->vertices(0));
-
                 // add new edges
                 for (j=0; j<fillIns[i].innerEdges.size(); j++) {
                     
                     McEdge& cE = par->edges(par->findEdge(fillIns[i].innerEdges[j][0], fillIns[i].innerEdges[j][1]));
-                    edgeOctree->insert(&cE, &edgeIntersectionFunctor);
+                    edgeOctree->insert(&cE);
                 }
                 
             }
@@ -1289,12 +1287,10 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
     // enter new feature edge into octree
     if (quality.intersections){
         
-        EdgeIntersectionFunctor edgeIntersectionFunctor(&par->vertices(0));
-
         int newFeatureEdge = par->findEdge(newFeatureEdgeFrom, newFeatureEdgeTo);
         assert(newFeatureEdge>=0);
         
-        edgeOctree->insert(&par->edges(newFeatureEdge), &edgeIntersectionFunctor);
+        edgeOctree->insert(&par->edges(newFeatureEdge));
         
     }
     

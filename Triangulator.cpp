@@ -47,7 +47,7 @@ void Triangulator::triangulateStar(const std::vector<int> &border, int center,
 void Triangulator::estimateStarError(const std::vector<int> &border, int center, 
                                      const QualityRequest &quality, const std::vector<int> &fullStar, 
                                      VertexHeap::ErrorValue& qualityValue,
-                                     MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>& edgeOctree, 
+                                     MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
                                      PSurface<2,float>* par)
 {
     /////////////////////////////////////
@@ -94,7 +94,7 @@ void Triangulator::triangulateHalfStar(const std::vector<int> &border, int cente
 void Triangulator::estimateHalfStarError(const std::vector<int> &border, int center, 
                                          const QualityRequest &quality, const std::vector<int> &fullStar, 
                                          VertexHeap::ErrorValue& qualityValue,
-                                         MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>& edgeOctree, 
+                                         MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
                                          PSurface<2,float>* par)
 {
     /////////////////////////////////////
@@ -264,7 +264,7 @@ bool Triangulator::isLegalEdge(const StaticVector<float,2>& a, const StaticVecto
 void Triangulator::evaluate(const CircularPatch<float>* cP, int removedVertex, 
                             const QualityRequest &quality, VertexHeap::ErrorValue& error,
                             const std::vector<int> &fullStar, 
-                            MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3, true>& edgeOctree, 
+                            MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
                             const PSurface<2,float>* par)
 {
     error.unblock();
