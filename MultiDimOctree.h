@@ -203,9 +203,6 @@ public:
 	/// Returns current base address.
 	const T* getBaseAddress() const { return baseAddress; }
 
-	/// This pointer is passed in any call of @c T::intersect().
-	void setUserData(void* userData)	{ this->userData = userData; }
-
 	/// Returns global bounding box as defined in constructor or @c init.
 	void getBoundingBox(BoxType &bb) const { bb = box; }
 
@@ -316,7 +313,6 @@ protected:
 	BoxType                      box;
 	int                          maxDepth;
 	unsigned int                 maxElemPerLeaf;
-	void*                        userData;
 	const T*                     baseAddress;
 	std::vector<bool>            lookupFlags;
 	// only needed if !uniform_access:
@@ -331,7 +327,6 @@ protected:
 template <class T, typename F, typename C, int dim, bool uniform_access>
 MultiDimOctree<T, F, C, dim, uniform_access>::MultiDimOctree(const BoxType &box, int maxDepth, int maxElemPerLeaf) : box(box)
 {
-	userData = 0;
 	init(box, maxDepth, maxElemPerLeaf);
 }
 
@@ -339,7 +334,6 @@ MultiDimOctree<T, F, C, dim, uniform_access>::MultiDimOctree(const BoxType &box,
 template <class T, typename F, typename C, int dim, bool uniform_access>
 MultiDimOctree<T, F, C, dim, uniform_access>::MultiDimOctree()
 {
-	userData = 0;
 	baseAddress = 0;
 	maxDepth = 0;
 	maxElemPerLeaf = 0;
