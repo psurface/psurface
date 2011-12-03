@@ -47,11 +47,6 @@ typename PlaneParam<ctype>::DirectedEdgeIterator PlaneParam<ctype>::BFLocate(con
 
     while (true){
 
-        StaticVector<ctype,2> from = nodes[cE.from()].domainPos();
-        StaticVector<ctype,2> to   = nodes[cE.to()].domainPos();
-
-        //printf("cE:  %d (%f %f) --> %d (%f %f)\n", cE.from(), from.x, from.y, cE.to(), to.x, to.y);
-
         if (abort++ >20000){
             printf("loop found trying to map (%f %f)\n", p[0], p[1]);
             cE.fromNode = -1;
@@ -193,15 +188,13 @@ bool PlaneParam<ctype>::DFSVisit(const std::vector<typename Node<ctype>::Neighbo
                                  const typename Node<ctype>::NeighborReference& u, 
                                  std::vector<typename Node<ctype>::NeighborReference> &outStar)
 {
-    int i, j;
-    
-    for (i=0; i<star.size(); i++){
+    for (size_t i=0; i<star.size(); i++){
         if (!nodes[u].isConnectedTo(star[i])) continue;
         const typename Node<ctype>::NeighborReference& v = star[i];
 
         // a cycle?
         bool isNew = true;
-        for (j=0; j<outStar.size(); j++)
+        for (size_t j=0; j<outStar.size(); j++)
             if (outStar[j]==v){
                 isNew=false;
                 break;
@@ -414,8 +407,6 @@ void PlaneParam<ctype>::unflipTriangles(const std::vector<StaticVector<ctype,3> 
 template <class ctype>
 void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctype,3> >& nodePositions)
 {
-    int i;
-    
     // compute lambdas
     SparseMatrix<ctype> lambda_ij(nodes.size());
 
@@ -424,7 +415,7 @@ void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctyp
     // build matrix 
     lambda_ij *= -1;
 
-    for (i=0; i<lambda_ij.nRows(); i++)
+    for (size_t i=0; i<lambda_ij.nRows(); i++)
         lambda_ij.setEntry(i, i, 1);
     
     // Compute the right side. We use complex numbers for solving the systems
@@ -434,7 +425,7 @@ void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctyp
     
     std::fill(b.begin(), b.end(), 0);
     
-    for (i=0; i<nodes.size(); i++) 
+    for (size_t i=0; i<nodes.size(); i++) 
         if (!nodes[i].isINTERIOR_NODE()) {
             // not elegant
             b[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
@@ -445,12 +436,12 @@ void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctyp
     std::vector<std::complex<ctype> > residue;
     std::vector<std::complex<ctype> > result(nodes.size());
     
-    for (i=0; i<nodes.size(); i++)
+    for (size_t i=0; i<nodes.size(); i++)
         result[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
     
     lambda_ij.BiCGSTABC(b, result, residue, &maxIter, 1e-6);
     
-    for (i=0; i<nodes.size(); i++)
+    for (size_t i=0; i<nodes.size(); i++)
         if (nodes[i].isINTERIOR_NODE())
             nodes[i].setDomainPos(StaticVector<ctype,2>(real(result[i]), imag(result[i])));
 
@@ -466,15 +457,14 @@ template <class ctype>
 void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij, 
                                        const std::vector<StaticVector<ctype,3> >& nodePositions)
 {
-    int i, k, l;
-    int N = nodes.size();
+    int k, l;
 
-    assert(lambda_ij.nRows()==N && lambda_ij.nCols()==N);
+    assert(lambda_ij.nRows()==nodes.size() && lambda_ij.nCols()==nodes.size());
 
     // init lambda array
 
     // for all interiorPoints do
-    for (i=0; i<nodes.size(); i++) {
+    for (size_t i=0; i<nodes.size(); i++) {
         if (nodes[i].isINTERIOR_NODE()) {
             
             Node<ctype>& p = nodes[i];
@@ -713,7 +703,7 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
         for (size_t j=0; j<cN.degree(); j++)
             if (!nodes[cN.neighbors(j)].isConnectedTo(i)) {
                 printf(where);
-                printf("\n***** Neighbor relation is not mutual j=%d   k=%d *****\n", j, i);
+                std::cout << "\n***** Neighbor relation is not mutual j=" << j << "   k=" << i << " *****" << std::endl;
                 cN.print();
                 nodes[cN.neighbors(j)].print();
                 assert(false);
@@ -745,8 +735,8 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
         if (!cN.degree() && !cN.isCORNER_NODE()){
             printf(where);
             cN.print();
-            printf("NodeNumber = %d\n", i);
-            printf("****** solitary Node found!\n");
+            std::cout << "NodeNumber = " << i << std::endl;
+            std::cout << "****** solitary Node found!" << std::endl;
             assert(false);
         }
 

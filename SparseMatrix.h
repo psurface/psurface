@@ -54,18 +54,18 @@ public:
     }
 
     /// The number of rows of the matrix
-    int nRows() const {
+    size_t nRows() const {
 	return data.size();
     }
 
     /// The number of columns of the matrix
-    int nCols() const {
+    size_t nCols() const {
 	return numCols;
     }
 
     ///
     void setEntry(int i, int j, const T& newValue) {
-	for (int k=0; k<data[i].size(); k++)
+	for (size_t k=0; k<data[i].size(); k++)
 	    if (data[i][k].col==j){
 		data[i][k].value = newValue;
 		return;
@@ -76,7 +76,7 @@ public:
 
     ///
     void addToEntry(int i, int j, const T& newValue) {
-	for (int k=0; k<data[i].size(); k++)
+	for (size_t k=0; k<data[i].size(); k++)
 	    if (data[i][k].col==j){
 		data[i][k].value += newValue;
 		return;
@@ -93,7 +93,7 @@ public:
 	result.resize(nRows());
 	result.assign(result.size(), std::complex<T>(0.));
 
-        for (int i=0; i<nRows(); i++)
+        for (size_t i=0; i<nRows(); i++)
             for (size_t j=0; j<data[i].size(); j++)
                 result[i] += data[i][j].value * v[data[i][j].col];
 
