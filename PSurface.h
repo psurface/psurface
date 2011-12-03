@@ -392,6 +392,24 @@ public:
         int neighbor[2];
     };
 
+    /** \brief Convenience function for accessing the position of points on the target surface.
+     *
+     * Given a point \f$x\f$ on the base grid, this routine returns the position
+     * of \f$\phi(x)\f$. 
+     * 
+     * \bug This method is a stub, and not actually implemented yet.  It will print an
+     *    error message and abort.
+     * 
+     * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
+     */
+    bool positionMap(int tri, StaticVector<CTYPE,1>& p, StaticVector<CTYPE,2>& result) const
+    {
+        std::cerr << "Method PSurface<1,...>::positionMap is not implemented yet!" << std::endl;
+        abort();
+    }
+
+
+    
     std::vector<StaticVector<CTYPE, 2> > domainVertices;
 
     std::vector<DomainSegment> domainSegments;
