@@ -27,11 +27,11 @@ template <class type, int dim> class Box;
 
 /** The parametrization of an arbitrary surface over a simple base grid 
     \tparam dim Dimension of the surface
-    \tparam CTYPE The type used for coordinates
+    \tparam ctype The type used for coordinates
 */
-template <int dim, class CTYPE>
+template <int dim, class ctype>
 class PSURFACE_API PSurface
-    : public SurfaceBase<Vertex<CTYPE>, Edge, DomainTriangle<CTYPE> >{
+    : public SurfaceBase<Vertex<ctype>, Edge, DomainTriangle<ctype> >{
 
 public:
 
@@ -67,7 +67,7 @@ public:
     void clear();
 
     /// Get box containing all vertices.
-    virtual void getBoundingBox(Box<CTYPE,3>& bbox) const;
+    virtual void getBoundingBox(Box<ctype,3>& bbox) const;
 
     /** \brief Sets up the internal data structures needed by the map() method.
      * 
@@ -142,25 +142,25 @@ public:
     void removeExtraEdges();
 
     /// Returns a reference to the node specified by a GlobalNodeIdx
-    Node<CTYPE>& nodes(const GlobalNodeIdx& n) {return this->triangles(n.tri).nodes[n.idx];}
+    Node<ctype>& nodes(const GlobalNodeIdx& n) {return this->triangles(n.tri).nodes[n.idx];}
 
     /// Returns a const reference to the node specified by a GlobalNodeIdx
-    const Node<CTYPE>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
+    const Node<ctype>& nodes(const GlobalNodeIdx& n) const {return this->triangles(n.tri).nodes[n.idx];}
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    StaticVector<CTYPE,3> imagePos(const GlobalNodeIdx& n) const {
+    StaticVector<ctype,3> imagePos(const GlobalNodeIdx& n) const {
         return imagePos(n.tri, n.idx);
     }
 
     /** \brief Procedural interface to the target Position in \f$R^3\f$ of a node.
      */
-    StaticVector<CTYPE,3> imagePos(int tri, NodeIdx node) const;
+    StaticVector<ctype,3> imagePos(int tri, NodeIdx node) const;
 
     /** \brief Returns the local coordinates of the image of a node with
      * respect to a given image triangle.
      */
-    StaticVector<CTYPE,2> getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
+    StaticVector<ctype,2> getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const;
 
     /**@name Mapping functions */
     //@{
@@ -184,9 +184,9 @@ public:
      * 
      */
     bool map(int tri,                ///< The triangle of the input point \f$x\f$
-            StaticVector<CTYPE,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
+            StaticVector<ctype,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
             std::tr1::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
-            StaticVector<CTYPE,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
+            StaticVector<ctype,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
             int seed=-1                      
             ) const;
 
@@ -201,7 +201,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    bool positionMap(int tri, StaticVector<CTYPE,2>& p, StaticVector<CTYPE,3>& result) const;
+    bool positionMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
 
     /** \brief Convenience function for accessing the normals of the target surface.
      *
@@ -214,7 +214,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    bool directNormalMap(int tri, StaticVector<CTYPE,2>& p, StaticVector<CTYPE,3>& result) const;
+    bool directNormalMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
 
     //@}
 
@@ -300,8 +300,8 @@ protected:
 
     /** \brief Internal routine used by map() 
      */
-    void handleMapOnEdge(int tri, const StaticVector<CTYPE,2>& p, const StaticVector<CTYPE,2>& a, const StaticVector<CTYPE,2>& b,
-                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<CTYPE,2>& coords) const;
+    void handleMapOnEdge(int tri, const StaticVector<ctype,2>& p, const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b,
+                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
     void appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch);
@@ -322,7 +322,7 @@ public:
     std::vector<Patch> patches;
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
-    std::vector<StaticVector<CTYPE,3> > iPos;
+    std::vector<StaticVector<ctype,3> > iPos;
 
     /// The corresponding image surface
     Surface* surface;
@@ -334,10 +334,10 @@ public:
 
 
 /** \brief Mapping from one simplicial surface to another -- 1d-in-2d specialization
-    \tparam CTYPE The type used for coordinates
+    \tparam ctype The type used for coordinates
 */
-template <class CTYPE>
-class PSURFACE_API PSurface<1,CTYPE>
+template <class ctype>
+class PSURFACE_API PSurface<1,ctype>
 {
 public:
 
@@ -346,7 +346,7 @@ public:
 
         Node() {}
 
-        Node(CTYPE dLP, CTYPE rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
+        Node(ctype dLP, ctype rLP, bool nOV, bool nOTV, int rangeSegment0, int rangeSegment1)
             : domainLocalPosition(dLP), rangeLocalPosition(rLP),
               isNodeOnVertex(nOV), isNodeOnTargetVertex(nOTV),
               rightRangeSegment(-1)
@@ -366,9 +366,9 @@ public:
             return s;
         }
 
-        CTYPE domainLocalPosition;
+        ctype domainLocalPosition;
 
-        CTYPE rangeLocalPosition;
+        ctype rangeLocalPosition;
 
         bool isNodeOnVertex;
         
@@ -398,7 +398,7 @@ public:
      * 
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    bool positionMap(int tri, StaticVector<CTYPE,1>& p, StaticVector<CTYPE,2>& result) const
+    bool positionMap(int tri, StaticVector<ctype,1>& p, StaticVector<ctype,2>& result) const
     {
         std::cerr << "Method PSurface<1,...>::positionMap is not implemented yet!" << std::endl;
         abort();
@@ -406,11 +406,11 @@ public:
 
 
     
-    std::vector<StaticVector<CTYPE, 2> > domainVertices;
+    std::vector<StaticVector<ctype, 2> > domainVertices;
 
     std::vector<DomainSegment> domainSegments;
 
-    std::vector<StaticVector<CTYPE, 2> > targetVertices;
+    std::vector<StaticVector<ctype, 2> > targetVertices;
 
     std::vector<std::tr1::array<int, 2> > targetSegments;
 };
