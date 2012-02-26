@@ -115,7 +115,7 @@ public:
 
     ///
     bool hasSmallDihedralAngles(ctype threshold, const PSurface<2,ctype>* par, 
-                                 const McVertex<ctype>* centerVertex) const;
+                                 const Vertex<ctype>* centerVertex) const;
 
     /// returns the largest triangle aspect ratio
     ctype maxAspectRatio() const {

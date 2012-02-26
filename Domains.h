@@ -12,7 +12,7 @@ namespace psurface {
 
 /** A triangle containing a plane triangulation */
 template <class ctype>
-class PSURFACE_API DomainTriangle : public McTriangle,
+class PSURFACE_API DomainTriangle : public Triangle,
                        public PlaneParam<ctype>
 {
 public:
@@ -25,10 +25,10 @@ public:
     }
 
     /// creates a domain triangle with an empty parametrization
-    DomainTriangle(int vertexIdx[3]) : McTriangle(vertexIdx), PlaneParam<ctype>() {}
+    DomainTriangle(int vertexIdx[3]) : Triangle(vertexIdx), PlaneParam<ctype>() {}
 
     /// creates a domain triangle with an empty parametrization
-    DomainTriangle(int a, int b, int c) : McTriangle(a, b, c), PlaneParam<ctype>() {}
+    DomainTriangle(int a, int b, int c) : Triangle(a, b, c), PlaneParam<ctype>() {}
 
 public:
 

@@ -12,7 +12,7 @@ void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, i
                                                   bool keepPatches, std::vector<unsigned int>& nodeStack)
 {
         
-    McEdge& cE = psurface->edges(edge);
+    Edge& cE = psurface->edges(edge);
 
     if (cE.triangles.size()!=2)
         return;

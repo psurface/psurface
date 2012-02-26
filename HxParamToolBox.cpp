@@ -194,8 +194,8 @@ void ParamToolBox::mergeTwoTrianglesIntoQuadrangle(int tri1Idx, int tri2Idx,
         assert(false);
     }
                 
-    const McVertex<float> &thirdPoint1 = par->vertices(tri1.getThirdVertex(commonVertices[0], commonVertices[1]));
-    const McVertex<float> &thirdPoint2 = par->vertices(tri2.getThirdVertex(commonVertices[0], commonVertices[1]));
+    const Vertex<float> &thirdPoint1 = par->vertices(tri1.getThirdVertex(commonVertices[0], commonVertices[1]));
+    const Vertex<float> &thirdPoint2 = par->vertices(tri2.getThirdVertex(commonVertices[0], commonVertices[1]));
 
     while (tri1.vertices[1] != tri1.getThirdVertex(commonVertices[0], commonVertices[1])){
         tri1.rotate();
@@ -221,8 +221,8 @@ void ParamToolBox::mergeTwoTrianglesIntoQuadrangle(int tri1Idx, int tri2Idx,
     // 'folds up' the two triangles along their common edge
     // that's obviously the most distortion-free mapping into R2
 
-    const McVertex<float> &from = par->vertices(commonVertices[0]);
-    const McVertex<float> &to   = par->vertices(commonVertices[1]);
+    const Vertex<float> &from = par->vertices(commonVertices[0]);
+    const Vertex<float> &to   = par->vertices(commonVertices[1]);
     
     //  move the first triangle into the real plane
     float l  = (from-to).length();
@@ -372,7 +372,7 @@ bool ParamToolBox::mergeStarIntoPolygon(int centerIdx, DomainPolygon& fullStar,
 {
     int i, j;
 
-    McVertex<float>& centerVertex = par->vertices(centerIdx);
+    Vertex<float>& centerVertex = par->vertices(centerIdx);
 
     std::vector<std::vector<int> >   halfStarTris(0);
     std::vector<std::vector<int> >     halfStarVertices(0);
@@ -508,8 +508,8 @@ void ParamToolBox::flattenStar(int center, const std::vector<int> &threeDStarVer
     theta[0] = 0;
 
     for (k=1; k<K+1; k++){
-        const McVertex<float>& pLeft  = par->vertices(threeDStarVertices[k-1]);
-        const McVertex<float>& pRight = par->vertices(threeDStarVertices[k%K]);
+        const Vertex<float>& pLeft  = par->vertices(threeDStarVertices[k-1]);
+        const Vertex<float>& pRight = par->vertices(threeDStarVertices[k%K]);
 
         theta[k] = theta[k-1] + (pLeft - par->vertices(center)).angle(pRight - par->vertices(center));
         
@@ -543,8 +543,8 @@ void ParamToolBox::flattenHalfStar(int center,
     theta[0] = 0;
 
     for (k=1; k<K; k++){
-        const McVertex<float>& pLeft  = par->vertices(threeDStarVertices[k-1]);
-        const McVertex<float>& pRight = par->vertices(threeDStarVertices[k]);
+        const Vertex<float>& pLeft  = par->vertices(threeDStarVertices[k-1]);
+        const Vertex<float>& pRight = par->vertices(threeDStarVertices[k]);
 
         theta[k] = theta[k-1] + (pLeft - par->vertices(center)).angle(pRight - par->vertices(center));
     }
@@ -733,7 +733,7 @@ void ParamToolBox::moveSubGraph(int startingNode, DomainPolygon& from, std::vect
 
 
 bool ParamToolBox::removeRegularPoint(PSurface<2,float>* par, int centerPoint, const QualityRequest &quality,
-                                      MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>* edgeOctree)
+                                      MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>* edgeOctree)
 {
     std::vector<unsigned int> nodeStack;
     int i, j;
@@ -918,7 +918,7 @@ bool ParamToolBox::removeRegularPoint(PSurface<2,float>* par, int centerPoint, c
         
         for (i=0; i<fillIn.innerEdges.size(); i++) {
             //printf("inserting edge %d\n", par->findEdge(fillIn.innerEdges[i][0], fillIn.innerEdges[i][1]));
-            McEdge& cE = par->edges(par->findEdge(fillIn.innerEdges[i][0], fillIn.innerEdges[i][1]));
+            Edge& cE = par->edges(par->findEdge(fillIn.innerEdges[i][0], fillIn.innerEdges[i][1]));
             
             edgeOctree->insert(&cE);
         }
@@ -934,7 +934,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
                                           int numHalfStars,
                                           int featureEdgeA,
                                           int featureEdgeB,
-                                          MultiDimOctree<McEdge, EdgeIntersectionFunctor, float, 3>* edgeOctree,
+                                          MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>* edgeOctree,
                                           std::vector<int>* featureEdges)
 {
     int i, j;
@@ -1019,7 +1019,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
         if (halfStarTris[i].size()==1){
             printf("special case ... ");
             
-            const McEdge& oppEdge = par->edges(par->triangles(halfStarTris[i][0]).getOppositeEdge(centerPoint));
+            const Edge& oppEdge = par->edges(par->triangles(halfStarTris[i][0]).getOppositeEdge(centerPoint));
             if (oppEdge.numTriangles()!=2 || 
                 par->triangles(oppEdge.triangles[0]).patch != 
                 par->triangles(oppEdge.triangles[1]).patch){
@@ -1111,7 +1111,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
             printf("%d Halfstar with one triangle\n", i);
             printf("WARNING:  THIS CODE POTENTIALLY LEADS TO BUGS!\n");
             int tri1Idx = halfStarTris[i][0];
-            const McEdge& outerEdge = par->edges(par->triangles(tri1Idx).getOppositeEdge(centerPoint));
+            const Edge& outerEdge = par->edges(par->triangles(tri1Idx).getOppositeEdge(centerPoint));
             int tri2Idx = (outerEdge.triangles[0]==halfStarTris[i][0]) 
                 ? outerEdge.triangles[1]
                 : outerEdge.triangles[0];
@@ -1276,7 +1276,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
                 // add new edges
                 for (j=0; j<fillIns[i].innerEdges.size(); j++) {
                     
-                    McEdge& cE = par->edges(par->findEdge(fillIns[i].innerEdges[j][0], fillIns[i].innerEdges[j][1]));
+                    Edge& cE = par->edges(par->findEdge(fillIns[i].innerEdges[j][0], fillIns[i].innerEdges[j][1]));
                     edgeOctree->insert(&cE);
                 }
                 

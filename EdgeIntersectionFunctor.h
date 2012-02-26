@@ -44,12 +44,12 @@ struct EdgeIntersectionFunctor
     };
 
     /** \brief Constructor */
-    EdgeIntersectionFunctor(const McVertex<float>* vertices)
+    EdgeIntersectionFunctor(const Vertex<float>* vertices)
         : vertices_(vertices)
     {}
 
     bool operator()(const std::tr1::array<float,3>& lower,
-                    const std::tr1::array<float,3>& upper, const McEdge& item) const {
+                    const std::tr1::array<float,3>& upper, const Edge& item) const {
 
         // The edge intersects the box if one of the endpoints is within the box
         if (Box<float,3>(lower,upper).contains(vertices_[item.from]) 
@@ -67,7 +67,7 @@ struct EdgeIntersectionFunctor
 
 protected:
 
-    bool intersectsXYPatch(const MyMcBox2f& rect, float z, const McEdge* item) const {
+    bool intersectsXYPatch(const MyMcBox2f& rect, float z, const Edge* item) const {
 
         const StaticVector<float,3>& f = vertices_[item->from];
         const StaticVector<float,3>& t = vertices_[item->to];
@@ -86,7 +86,7 @@ protected:
 
 
 
-   bool intersectsXZPatch(const MyMcBox2f& rect, float y, const McEdge* item) const {
+   bool intersectsXZPatch(const MyMcBox2f& rect, float y, const Edge* item) const {
 
         const StaticVector<float,3>& f = vertices_[item->from];
         const StaticVector<float,3>& t = vertices_[item->to];
@@ -103,7 +103,7 @@ protected:
         return rect.intersect(intersection);
     }
 
-    bool intersectsYZPatch(const MyMcBox2f& rect, float x, const McEdge* item) const {
+    bool intersectsYZPatch(const MyMcBox2f& rect, float x, const Edge* item) const {
 
         const StaticVector<float,3>& f = vertices_[item->from];
         const StaticVector<float,3>& t = vertices_[item->to];
@@ -121,7 +121,7 @@ protected:
     }
 
     //const std::vector<McVertex>& vertices_;
-    const McVertex<float>* vertices_;
+    const Vertex<float>* vertices_;
 
 };
 

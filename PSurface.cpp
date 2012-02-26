@@ -56,7 +56,7 @@ void PSurface<dim,CTYPE>::clear()
 
     iPos.clear();
     paths.clear();
-    SurfaceBase<McVertex<CTYPE>, McEdge, DomainTriangle<CTYPE> >::clear();
+    SurfaceBase<Vertex<CTYPE>, Edge, DomainTriangle<CTYPE> >::clear();
 }
 
 template <int dim, class CTYPE>
@@ -332,7 +332,7 @@ void PSurface<dim,CTYPE>::garbageCollection()
 
     }
 
-    SurfaceBase<McVertex<CTYPE>, McEdge, DomainTriangle<CTYPE> >::garbageCollection();
+    SurfaceBase<Vertex<CTYPE>, Edge, DomainTriangle<CTYPE> >::garbageCollection();
     
 #ifndef NDEBUG
         printf("   ...Garbage collection finished!\n");
@@ -1056,7 +1056,7 @@ void PSurface<dim,CTYPE>::checkConsistency(const char* where) const
             this->triangles(i).checkConsistency("where");
 
             for (j=0; j<3; j++) {
-                const McEdge& cE = this->edges(this->triangles(i).edges[j]);
+                const Edge& cE = this->edges(this->triangles(i).edges[j]);
                 if (!(cE.from == this->triangles(i).vertices[j] && cE.to   == this->triangles(i).vertices[(j+1)%3]) &&
                     !(cE.to   == this->triangles(i).vertices[j] && cE.from == this->triangles(i).vertices[(j+1)%3])){
                     printf(where);
@@ -1068,7 +1068,7 @@ void PSurface<dim,CTYPE>::checkConsistency(const char* where) const
 
     // checks whether matching edgepoint arrays have the same size
     for (i=0; i<this->getNumEdges(); i++) {
-        const McEdge& cE = this->edges(i);
+        const Edge& cE = this->edges(i);
 
         if (cE.triangles.size()!=2)
             continue;

@@ -26,7 +26,7 @@ bool CircularPatch<ctype>::inducesTopologyChange() const
 
 template <class ctype>
 bool CircularPatch<ctype>::hasSmallDihedralAngles(ctype threshold, const PSurface<2,ctype>* par, 
-                                           const McVertex<ctype>* centerVertex) const
+                                           const Vertex<ctype>* centerVertex) const
 {
     printf("hasSmallDihedralAngles has been commented out!\n");
 #if 0
@@ -214,7 +214,7 @@ bool CircularPatch<ctype>::intersectsParametrization(const std::vector<int> &clo
 template <class ctype>
 bool CircularPatch<ctype>::hasSelfintersections() const
 {
-    McEdge tmpEdge;
+    Edge tmpEdge;
     
     for (size_t i=0; i<innerEdges.size(); i++){
         

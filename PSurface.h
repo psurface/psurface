@@ -31,7 +31,7 @@ template <class type, int dim> class Box;
 */
 template <int dim, class CTYPE>
 class PSURFACE_API PSurface
-    : public SurfaceBase<McVertex<CTYPE>, McEdge, DomainTriangle<CTYPE> >{
+    : public SurfaceBase<Vertex<CTYPE>, Edge, DomainTriangle<CTYPE> >{
 
 public:
 

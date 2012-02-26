@@ -201,13 +201,13 @@ public:
     /** Tests whether this triangle intersects the given edge.  This routine is not
         faster than the one that returns the intersection point. */
     bool intersectionTriangleEdge(int tri, 
-                                  const McEdge*edge,
+                                  const Edge*edge,
                                   ctype eps=0) const;
 
     /** Tests whether this triangle intersects the given edge, and returns the intersection
         point if there is one. If not, the variable @c where is untouched. */
     bool intersectionTriangleEdge(int tri, 
-                                  const McEdge *edge, 
+                                  const Edge *edge, 
                                   StaticVector<ctype,3>& where, 
                                   bool& parallel, ctype eps=0) const;
 

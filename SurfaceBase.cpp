@@ -335,7 +335,7 @@ typename SurfaceBase<VertexType,EdgeType,TriangleType>::ctype SurfaceBase<Vertex
     /** Tests whether this triangle intersects the given edge.  This routine is not
         faster than the one that returns the intersection point. */
 template <class VertexType, class EdgeType, class TriangleType>
-bool SurfaceBase<VertexType,EdgeType,TriangleType>:: intersectionTriangleEdge(int tri, const McEdge*edge, ctype eps) const
+bool SurfaceBase<VertexType,EdgeType,TriangleType>:: intersectionTriangleEdge(int tri, const Edge*edge, ctype eps) const
 {
     bool parallel;
     StaticVector<ctype,3> where;
@@ -346,7 +346,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>:: intersectionTriangleEdge(in
         point if there is one. If not, the variable @c where is untouched. */
 template <class VertexType, class EdgeType, class TriangleType>
 bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int tri, 
-									    const McEdge *edge, 
+									    const Edge *edge, 
 									    StaticVector<ctype,3>& where, 
                                                                             bool& parallel, ctype eps) const
 {
@@ -623,5 +623,5 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PSURFACE_EXPORT SurfaceBase<McVertex<float>, McEdge, DomainTriangle<float> >;
-template class PSURFACE_EXPORT SurfaceBase<McVertex<double>, McEdge, DomainTriangle<double> >;
+template class PSURFACE_EXPORT SurfaceBase<Vertex<float>, Edge, DomainTriangle<float> >;
+template class PSURFACE_EXPORT SurfaceBase<Vertex<double>, Edge, DomainTriangle<double> >;

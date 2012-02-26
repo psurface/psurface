@@ -1,5 +1,5 @@
-#ifndef MC_POINTER_SURFACE_PARTS
-#define MC_POINTER_SURFACE_PARTS
+#ifndef PSURFACE_SURFACE_PARTS
+#define PSURFACE_SURFACE_PARTS
 
 #include <vector>
 #include <algorithm>
@@ -8,14 +8,14 @@
 
 namespace psurface {
 
-/** This is the base class for vertices in a McSurfaceBase.  
+/** This is the base class for vertices in a SurfaceBase.  
 
 \tparam ctype The type used for coordinates
 
-    @see McPointerSurface, McEdge, McTriangle
+    @see SurfaceBase, Edge, Triangle
 */
 template <class ctype>
-class McVertex: public StaticVector<ctype,3>
+class Vertex: public StaticVector<ctype,3>
 {
 public:
 
@@ -23,10 +23,10 @@ public:
     typedef ctype coordtype;
 
     /** \brief Default constructor */
-    McVertex() {}
+    Vertex() {}
 
     /** \brief Constructor for a given position */
-    McVertex(const StaticVector<ctype,3> &a) 
+    Vertex(const StaticVector<ctype,3> &a) 
         : StaticVector<ctype,3>(a) 
     {}
 
@@ -51,19 +51,19 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////
-/** The base class for an edge in a McPointerSurface 
-    @see McPointerSurface, McVertex, McTriangle
+/** The base class for an edge in a SurfaceBase
+    @see SurfaceBase, Vertex, Triangle
 */
 ///////////////////////////////////////////////////////////////
 
-class McEdge
+class Edge
 {
 public:
     ///
-    McEdge(){}
+    Edge(){}
 
     ///
-    McEdge(int a, int b)
+    Edge(int a, int b)
         : from(b), to(a)
     {}
 
@@ -130,22 +130,22 @@ public:
 
 
 ///////////////////////////////////////////////////////////////
-/** The base class for triangles in a McPointerSurface
-    @see McPointerSurface, McVertex, McEdge
+/** The base class for triangles in a SurfaceBase
+    @see SurfaceBase, Vertex, Edge
  */
 ///////////////////////////////////////////////////////////////
 
-class McTriangle 
+class Triangle 
 {
 public:
     /// default constructor
-    McTriangle() {
+    Triangle() {
         vertices[0] = vertices[1] = vertices[2] = -1;
         edges[0]  = edges[1]  = edges[2]  = -1;
     }
 
     /// creates a triangle using three given vertices
-    McTriangle(int vertexIdx[3]) {
+    Triangle(int vertexIdx[3]) {
 
         vertices[0] = vertexIdx[0];
         vertices[1] = vertexIdx[1];
@@ -155,7 +155,7 @@ public:
     }
 
     ///
-    McTriangle(int a, int b, int c) {
+    Triangle(int a, int b, int c) {
         vertices[0] = a;
         vertices[1] = b;
         vertices[2] = c;
@@ -169,7 +169,7 @@ public:
     }
 
     ///
-    bool isCorrectlyOriented(const McTriangle& other) const {
+    bool isCorrectlyOriented(const Triangle& other) const {
         for (int i=0; i<3; i++)
             for (int j=0; j<3; j++) 
                 if (vertices[i]==other.vertices[j] && vertices[(i+1)%3]==other.vertices[(j+1)%3])
@@ -235,7 +235,7 @@ public:
         return -1;
     }
 
-    int getCommonEdgeWith(const McTriangle& other) const {
+    int getCommonEdgeWith(const Triangle& other) const {
         int i, j;
         for (i=0; i<3; i++)
             for (j=0; j<3; j++)
