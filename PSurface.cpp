@@ -963,10 +963,10 @@ bool PSurface<dim,ctype>::positionMap(int triIdx, StaticVector<ctype,2>& p, Stat
 
 
 
-template <int dim, class CTYPE>
-bool PSurface<dim,CTYPE>::directNormalMap(int triIdx, StaticVector<CTYPE,2>& p, StaticVector<CTYPE,3>& result) const
+template <int dim, class ctype>
+bool PSurface<dim,ctype>::directNormalMap(int triIdx, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const
 {
-    StaticVector<CTYPE,2> localCoords;
+    StaticVector<ctype,2> localCoords;
     std::tr1::array<int,3> tri;
 
     int status = map(triIdx, p, tri, localCoords);
@@ -974,8 +974,8 @@ bool PSurface<dim,CTYPE>::directNormalMap(int triIdx, StaticVector<CTYPE,2>& p, 
     if (!status)
         return false;
 
-    const StaticVector<CTYPE,3> a = iPos[tri[1]] - iPos[tri[0]];
-    const StaticVector<CTYPE,3> b = iPos[tri[2]] - iPos[tri[0]];
+    const StaticVector<ctype,3> a = iPos[tri[1]] - iPos[tri[0]];
+    const StaticVector<ctype,3> b = iPos[tri[2]] - iPos[tri[0]];
     result = a.cross(b);
     result.normalize();
 
@@ -984,8 +984,8 @@ bool PSurface<dim,CTYPE>::directNormalMap(int triIdx, StaticVector<CTYPE,2>& p, 
     return true;
 }
 
-template <int dim, class CTYPE>
-int PSurface<dim,CTYPE>::invertTriangles(int patch)
+template <int dim, class ctype>
+int PSurface<dim,ctype>::invertTriangles(int patch)
 {
     
     int i;
@@ -1009,8 +1009,8 @@ int PSurface<dim,CTYPE>::invertTriangles(int patch)
 }
 
 
-template <int dim, class CTYPE>
-NodeBundle PSurface<dim,CTYPE>::getNodeBundleAtVertex(int v) const
+template <int dim, class ctype>
+NodeBundle PSurface<dim,ctype>::getNodeBundleAtVertex(int v) const
 {
     NodeBundle result;
     std::vector<int> neighbors = this->getTrianglesPerVertex(v);
@@ -1020,7 +1020,7 @@ NodeBundle PSurface<dim,CTYPE>::getNodeBundleAtVertex(int v) const
     for (int i=0; i<neighbors.size(); i++) {
 
         result[i].tri = neighbors[i];
-        const DomainTriangle<CTYPE>& cT = this->triangles(neighbors[i]);
+        const DomainTriangle<ctype>& cT = this->triangles(neighbors[i]);
         int corner = cT.getCorner(v);
 
         for (int j=0; j<cT.nodes.size(); j++)
@@ -1037,8 +1037,8 @@ NodeBundle PSurface<dim,CTYPE>::getNodeBundleAtVertex(int v) const
 }
 
 
-template <int dim, class CTYPE>
-void PSurface<dim,CTYPE>::checkConsistency(const char* where) const
+template <int dim, class ctype>
+void PSurface<dim,ctype>::checkConsistency(const char* where) const
 {
 #ifndef NDEBUG
     int i, j;
@@ -1073,8 +1073,8 @@ void PSurface<dim,CTYPE>::checkConsistency(const char* where) const
         if (cE.triangles.size()!=2)
             continue;
 
-        const DomainTriangle<CTYPE>& tri1 = this->triangles(cE.triangles[0]);
-        const DomainTriangle<CTYPE>& tri2 = this->triangles(cE.triangles[1]);
+        const DomainTriangle<ctype>& tri1 = this->triangles(cE.triangles[0]);
+        const DomainTriangle<ctype>& tri2 = this->triangles(cE.triangles[1]);
 
         if (tri1.edgePoints[tri1.getEdge(i)].size() != tri2.edgePoints[tri2.getEdge(i)].size()) {
             printf(where);
