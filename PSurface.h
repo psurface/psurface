@@ -184,7 +184,7 @@ public:
      * 
      */
     bool map(int tri,                ///< The triangle of the input point \f$x\f$
-            StaticVector<ctype,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
+            const StaticVector<ctype,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
             std::tr1::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
             StaticVector<ctype,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
             int seed=-1                      
@@ -201,7 +201,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    bool positionMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
+    bool positionMap(int tri, const StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
 
     /** \brief Convenience function for accessing the normals of the target surface.
      *
@@ -214,7 +214,7 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
-    bool directNormalMap(int tri, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
+    bool directNormalMap(int tri, const StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const;
 
     //@}
 

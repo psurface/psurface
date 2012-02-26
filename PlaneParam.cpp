@@ -339,7 +339,7 @@ StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVe
 }
 
 template <class ctype>
-int PlaneParam<ctype>::map(StaticVector<ctype,2> &domainCoord, std::tr1::array<NodeIdx, 3>& tri, StaticVector<ctype,2>& localBarycentricCoords,
+int PlaneParam<ctype>::map(const StaticVector<ctype,2> &domainCoord, std::tr1::array<NodeIdx, 3>& tri, StaticVector<ctype,2>& localBarycentricCoords,
                     int seed) const
 {
     DirectedEdgeIterator e = BFLocate(domainCoord);

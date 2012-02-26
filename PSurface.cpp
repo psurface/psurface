@@ -564,7 +564,7 @@ void PSurface<dim,ctype>::savePaths(HxParamBundle& parameters)
 
 
 template <int dim, class ctype>
-bool PSurface<dim,ctype>::map(int triIdx, StaticVector<ctype,2>& p, std::tr1::array<int,3>& vertices, 
+bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::tr1::array<int,3>& vertices, 
                          StaticVector<ctype,2>& coords, int seed) const
 {
     int i;
@@ -942,7 +942,7 @@ void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<ctype,2
 
 
 template <int dim, class ctype>
-bool PSurface<dim,ctype>::positionMap(int triIdx, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const
+bool PSurface<dim,ctype>::positionMap(int triIdx, const StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const
 {
     StaticVector<ctype,2> localCoords;
     std::tr1::array<int,3> tri;
@@ -964,7 +964,7 @@ bool PSurface<dim,ctype>::positionMap(int triIdx, StaticVector<ctype,2>& p, Stat
 
 
 template <int dim, class ctype>
-bool PSurface<dim,ctype>::directNormalMap(int triIdx, StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const
+bool PSurface<dim,ctype>::directNormalMap(int triIdx, const StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const
 {
     StaticVector<ctype,2> localCoords;
     std::tr1::array<int,3> tri;

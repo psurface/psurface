@@ -376,7 +376,7 @@ public:
     /**@name access methods */
     //@{
     ///
-    int map(StaticVector<ctype,2>& domainCoord, std::tr1::array<NodeIdx, 3>& vertices, StaticVector<ctype,2>& coords,
+    int map(const StaticVector<ctype,2>& domainCoord, std::tr1::array<NodeIdx, 3>& vertices, StaticVector<ctype,2>& coords,
             int seed=-1) const;
     //@}
 
