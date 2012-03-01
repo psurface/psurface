@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "Domains.h"
 #include "MultiDimOctree.h"
 
 #include "EdgeIntersectionFunctor.h"
