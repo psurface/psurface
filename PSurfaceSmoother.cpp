@@ -163,8 +163,6 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
         ////////////////////////////////////////
         // apply the requested parametrization
 
-        //ParamToolBox::display(fullStar, vCounter);
-
         if (portRadius.getValue() > 0.995) {
             
             fullStar.applyParametrization();
@@ -250,8 +248,6 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
         }
 
 
-        //ParamToolBox::display(fullStar, 20+vCounter);
-
         //////////////////////////////////////////////////////////////////////
         // look for the nodes that is closest to (0, 0).  It will become
         // the new centerPoint
@@ -282,11 +278,8 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
         for (i=0; i<fullStarTris.size(); i++){
             fullStar.slice(newCenterNode, centerPoint, i*3);
             fullStar.checkConsistency("Slicing");
-            //display(fullStar, i+2);
         }
 
-        //ParamToolBox::display(fullStar, 40+vCounter);
-        
         // the polygon has been cut.  Move each slice to its
         // original triangle
 

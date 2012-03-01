@@ -115,12 +115,6 @@ namespace ParamToolBox {
     // debug stuff
 
     ///
-    void PSURFACE_API display(const DomainPolygon& pol, int idx);
-    
-    ///
-    void PSURFACE_API display(const DomainTriangle<float>& tri, int idx);
-
-    ///
     int PSURFACE_API hasIntersections(const PSurface<2,float>* par);
 
     ///

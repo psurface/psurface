@@ -605,11 +605,8 @@ void ParamToolBox::pizzaCutter(DomainPolygon& fullStar, NodeIdx newCenterNode,
     for (i=0; i<newTriangles.size(); i++){
         fullStar.slice(newCenterNode, newVertex, i*3);
         fullStar.checkConsistency("Slicing");
-        //display(fullStar, i+2);
     }
     
-    //ParamToolBox::display(fullStar, 40+vCounter);
-
     ///////////////////////////////////////////////////////////////////
     // the polygon has been cut.  Move each slice to its original triangle.
     
@@ -1212,8 +1209,6 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
                 int dummy;
                 halfStar.mergeTriangle(halfStarTris[i][k], triCoords, dummy, nodeStack);
             }
-            //ParamToolBox::display(halfStar, 100);
-            //assert(false);
             // remove centerPoint as a polygon vertex, it remains as a touching node
             //halfStar.checkConsistency("feature before removeVertex");
             

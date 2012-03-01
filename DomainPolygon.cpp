@@ -1461,7 +1461,6 @@ void DomainPolygon::checkConsistency(const char* where)
 //          edgePoints[i].last()->type != Node::CORNER_NODE){
 //          printf(where);
 //          printf("***** corner node is not CORNER_NODE *****\n");
-//          display(counter++);
 //          assert(FALSE);
 //      }
         // check if two subsequent TOUCHING_NODES are connected by an edge
