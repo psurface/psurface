@@ -361,8 +361,6 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
 {
     int i, j, k;
 
-    // debugging counter
-
     if (fillIn.size()>=2) {
         insertExtraEdges();
         createPointLocationStructure();
@@ -431,12 +429,10 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
         nodeLocs[cornerNode(boundaryIdx)] = ON_SEGMENT;
         nodeLocs[edgePoints[(boundaryIdx+1)%boundaryPoints.size()].back()] = ON_SEGMENT;
         
-        int cN;
-
         /////////////////////////////////////////////////////////////////
         // interior nodes.  here we have to make a geometric decision
         /////////////////////////////////////////////////////////////////
-        for (cN=0; cN<nodes.size(); cN++) {
+        for (int cN=0; cN<nodes.size(); cN++) {
 
             if (nodes[cN].isINTERIOR_NODE()) {
 
