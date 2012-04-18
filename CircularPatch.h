@@ -98,7 +98,7 @@ public:
             par->removeTriangle(triangles[i]);
     }
 
-    /**@name Evaluatation methods */
+    /**@name Evaluation methods */
     //@{
     /// gets the smallest internal angle found in any of the triangles
     ctype getMinInteriorAngle() const{
