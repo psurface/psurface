@@ -35,7 +35,7 @@ void Triangulator::triangulateStar(const std::vector<int> &border, int center,
     // computes the flattened coordinates
     ParamToolBox::flattenStar(center, border, flatBorder, par);
 
-    for (int j=0; j<flatBorder.size(); j++)
+    for (size_t j=0; j<flatBorder.size(); j++)
         assert(!isnan(flatBorder[j][0]) &&!isnan(flatBorder[j][1]));
 
     ///////////////////////////////////////////
@@ -56,7 +56,7 @@ void Triangulator::estimateStarError(const std::vector<int> &border, int center,
     
     ParamToolBox::flattenStar(center, border, flatBorder, par);
     
-    for (int j=0; j<flatBorder.size(); j++)
+    for (size_t j=0; j<flatBorder.size(); j++)
         assert(!isnan(flatBorder[j][0]) &&!isnan(flatBorder[j][1]));
     
     ///////////////////////////////////////////
@@ -252,7 +252,7 @@ bool Triangulator::isLegalEdge(const StaticVector<float,2>& a, const StaticVecto
 
     StaticVector<float,2> center = ((c2+c3)*a + (c3+c1)*b + (c1+c2)*c)/(2*c123);
 
-    for (int i=0; i<polygon.size(); i++)
+    for (size_t i=0; i<polygon.size(); i++)
         if (polygon[i]!=a && polygon[i]!=b && polygon[i]!=c &&
             (polygon[i]-center).length()<radius)
             return false;
@@ -325,7 +325,7 @@ void Triangulator::evaluate(const CircularPatch<float>* cP, int removedVertex,
         //printf("ev 13\n");
         int nNodes = 0;
         
-        for (int i=0; i<fullStar.size(); i++){
+        for (size_t i=0; i<fullStar.size(); i++){
 
             const DomainTriangle<float>& cT = par->triangles(fullStar[i]);
             
@@ -352,7 +352,7 @@ void Triangulator::evaluate(const CircularPatch<float>* cP, int removedVertex,
         //printf("ev 15\n");
         // compute max aspect ratio of the star at the vertex
         float oldMaxAspectRatio = 0;
-        for (int i=0; i<fullStar.size(); i++){
+        for (size_t i=0; i<fullStar.size(); i++){
             const float thisAspectRatio = par->aspectRatio(fullStar[i]);
             if (thisAspectRatio>oldMaxAspectRatio)
                 oldMaxAspectRatio = thisAspectRatio;
