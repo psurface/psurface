@@ -144,13 +144,13 @@ void DomainTriangle<ctype>::createPointLocationStructure()
 
     for (int i=0; i<this->nodes.size(); i++)
         if (this->nodes[i].isINTERIOR_NODE())
-            makeCyclicInteriorNode(this->nodes[i]);
+            this->makeCyclicInteriorNode(this->nodes[i]);
 
     checkConsistency("AfterInterior");
 
     for (int i=0; i<3; i++) {
         
-        makeCyclicBoundaryNode(this->nodes[edgePoints[i][0]], 
+        this->makeCyclicBoundaryNode(this->nodes[edgePoints[i][0]], 
                                edgePoints[i][1], 
                                edgePoints[(i+2)%3][edgePoints[(i+2)%3].size()-2]);
 
@@ -158,7 +158,7 @@ void DomainTriangle<ctype>::createPointLocationStructure()
         this->nodes[edgePoints[i][0]].setDomainEdge(i);
 
         for (int j=1; j<edgePoints[i].size()-1; j++){
-            makeCyclicBoundaryNode(this->nodes[edgePoints[i][j]], edgePoints[i][j+1], edgePoints[i][j-1]);
+            this->makeCyclicBoundaryNode(this->nodes[edgePoints[i][j]], edgePoints[i][j+1], edgePoints[i][j-1]);
 
             if (this->nodes[edgePoints[i][j]].isINTERSECTION_NODE() || this->nodes[edgePoints[i][j]].isTOUCHING_NODE()){
                 this->nodes[edgePoints[i][j]].setDomainEdge(i);
