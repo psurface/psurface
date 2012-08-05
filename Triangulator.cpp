@@ -247,7 +247,7 @@ bool Triangulator::isLegalEdge(const StaticVector<float,2>& a, const StaticVecto
 
     float radius = 0.5*sqrt((d1+d2) * (d2+d3) * (d3+d1)/c123);
 
-    if (isnan(radius))
+    if (std::isnan(radius))
         return false;
 
     StaticVector<float,2> center = ((c2+c3)*a + (c3+c1)*b + (c1+c2)*c)/(2*c123);
