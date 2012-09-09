@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASENAME=libpsurface-1.3.0
+BASENAME=libpsurface-1.3.1
 
 # Clean directory structure
 rm -rf $BASENAME
