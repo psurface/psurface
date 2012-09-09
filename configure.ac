@@ -3,6 +3,7 @@ AC_PREREQ([2.60]) # FIXME: what version do we really need?
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign silent-rules])
+AM_PROG_AR   # needed for some non-standard archivers
 LT_INIT
 
 AC_PROG_CXX
