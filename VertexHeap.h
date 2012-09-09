@@ -2,6 +2,7 @@
 #define VERTEX_HEAP
 
 #include <vector>
+#include <iostream>
 
 class VertexHeap{
 
@@ -62,7 +63,7 @@ public:
 
     void print() {
         for (int i=0; i<heapSize; i++)
-            printf("Nr. %d,   value = %f,   blocked = %d\n", i, array[i].error.value, array[i].error.isBlocked());
+            std::cout << "Nr. " << i << ",   value = " << array[i].error.value << ",   blocked = " << array[i].error.isBlocked() << std::endl;
     }
 
     void buildHeap(const std::vector<ErrorValue>& errors) {
