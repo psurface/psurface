@@ -117,7 +117,7 @@ bool PlaneParam<ctype>::TriangleIterator::isCorrectlyOriented() const
 //     return vertices(0) < vertices(1);
 }
 
-
+#ifndef __APPLE__
 // ////////////////////////////////////////////////////////
 //   Explicit template instantiations.
 //   If you need more, you can add them here.
@@ -131,3 +131,4 @@ template class PSURFACE_EXPORT PlaneParam<double>::UndirectedEdgeIterator;
 
 template class PSURFACE_EXPORT PlaneParam<float>::TriangleIterator;
 template class PSURFACE_EXPORT PlaneParam<double>::TriangleIterator;
+#endif
