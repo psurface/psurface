@@ -58,6 +58,13 @@ public:
         (*this)[2] = c;
     }
 
+    /** \brief Copy constructor */
+    StaticVector(const StaticVector<T,N>& other) {
+        for (int i=0; i<N; i++)
+            (*this)[i] = other[i];
+    }
+
+
     /** \brief Vector product */
     T dot(const StaticVector<T,N>& a) const {
         T result = 0;
