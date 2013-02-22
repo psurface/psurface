@@ -22,6 +22,7 @@
 #include <cmath>
 #include <cstring>  // for size_t
 
+#include <iostream>
 #include <assert.h>
 
 namespace psurface {
@@ -170,6 +171,14 @@ public:
         return result;
     }
 };
+    template<class P, int K>
+    std::ostream& operator<< (std::ostream& s, const StaticVector<P,K>& v)
+    {
+        for (int i=0; i<K; i++)
+           s << ((i>0) ? " " : "") << v[i];
+         return s;
+    }
+
 
 } // namespace psurface
 
