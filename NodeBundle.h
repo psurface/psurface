@@ -18,6 +18,14 @@ public:
         : std::vector<GlobalNodeIdx>(size)
     {}
 
+    NodeBundle(const NodeBundle& other)
+    {
+        (*this).resize(other.size());
+        for (size_t i=0; i<other.size(); i++)
+            (*this)[i] = other[i];
+    }
+
+
     /** \brief Get the index of that node of the bundle that is on triangle 'tri'
         \return -1 if none of the nodes is on triangle 'tri'
     */
@@ -33,6 +41,14 @@ public:
     void print() const {
         for (size_t i=0; i<size(); i++)
             printf("triangle: %d,   index: %d\n", (*this)[i].tri, (*this)[i].idx);
+    }
+
+    /** \brief Assignment operator */
+    NodeBundle& operator=(const NodeBundle& other) {
+        (*this).resize(other.size());
+        for (size_t i=0; i<other.size(); i++)
+            (*this)[i] = other[i];
+        return *this;
     }
 
     /** \brief Two NodeBundles are equal if they consist of the same nodes in the same order */
