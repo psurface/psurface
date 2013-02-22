@@ -9,27 +9,32 @@ namespace psurface {
 class GlobalNodeIdx {
 
 public:
-
+    //! Default constructor
     GlobalNodeIdx() : tri(-1), idx(-1) {}
 
+    //! Construct from integers
     GlobalNodeIdx(int t, int i) {
         tri = t;
         idx = i;
     }
 
+    //! Set index
     void setValue(int t, int i) {
         tri = t;
         idx = i;
     }
 
+    //! Check if the index is valid
     bool isValid() const { return tri >= 0;}
 
+    //! Print index
     void print() const {
         printf("tri: %d   idx: %d\n", tri, idx);
     }
 
+    //! Base grid triangle index
     int tri;
-
+    //! Local index of the node
     int idx;
 
 };
