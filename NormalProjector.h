@@ -3,6 +3,7 @@
 
 #include "StaticVector.h"
 #include "PSurface.h"
+#include "PathVertex.h"
 
 #include "psurfaceAPI.h"
 
@@ -51,71 +52,54 @@ protected:
 					 
     void setupEdgePointArrays();
 
+    /** \brief Insert a target edge using the vertices stored the edgePath vector. */
     void insertEdge(PSurfaceFactory<2,ctype>& factory,
-                    const std::vector<StaticVector<ctype,3> >& normals,
-                    int from, 
-                    int to,
-                    const std::vector<NodeBundle>& projectedTo
-                    );
+                    int from, int to,
+                    std::vector<PathVertex<ctype> >& edgePath);
 
-    void insertEdgeFromInteriorNode(PSurfaceFactory<2,ctype>& factory,
-                                    const std::vector<StaticVector<ctype,3> >& normals, 
-                                    int from, int to, ctype& lambda,
-                                    const std::vector<NodeBundle>& projectedTo,
-                                    NodeBundle& curr, int& enteringEdge);
-
-    void insertEdgeFromIntersectionNode(PSurfaceFactory<2,ctype>& factory,
-                                        const std::vector<StaticVector<ctype,3> >& normals, 
-                                        int from, int to, ctype& lambda,
-                                        const std::vector<NodeBundle>& projectedTo,
-                                        NodeBundle& curr, int& enteringEdge);
-
-    void insertEdgeFromTouchingNode(PSurfaceFactory<2,ctype>& factory,
-                                    const std::vector<StaticVector<ctype,3> >& normals, 
-                                    int from, int to, ctype& lambda,
-                                    const std::vector<NodeBundle>& projectedTo,
-                                    NodeBundle& curr, int& enteringTri);
-
-    void insertEdgeFromCornerNode(PSurfaceFactory<2,ctype>& factory,
-                                  const std::vector<StaticVector<ctype,3> >& normals, 
-                                  int from, int to, ctype& lambda,
-                                    const std::vector<NodeBundle>& projectedTo,
-                                    NodeBundle& curr, int& enteringEdge);
-
+    /** \brief Insert a segment on the edge path of a target edge. */
+    void insertEdgeSegment(PSurfaceFactory<2,ctype>& factory,
+                                int from, int to,
+                                std::vector<PathVertex<ctype> >& edgePath);
 
     // ///////////////////////////////////////////////////////////////////////
     //   Methods needed to test whether an edge can be projected completely
     // ///////////////////////////////////////////////////////////////////////
 
+    /** \brief Check if we can insert a target edge and store the path on the domain surface. */
     bool edgeCanBeInserted(const std::vector<StaticVector<ctype,3> >& normals,
                            int from, 
                            int to,
-                           const std::vector<NodeBundle>& projectedTo
-                           );
+                           const std::vector<NodeBundle>& projectedTo,
+                           std::vector<PathVertex<ctype> >& edgePath);
 
     bool testInsertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals, 
                                         int from, int to, ctype& lambda,
                                         NodeBundle& curr,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
-                                        int& enteringEdge);
+                                        int& enteringEdge, std::vector<PathVertex<ctype> >& edgePath,
+                                        int offset);
 
     bool testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals, 
                                             int from, int to, ctype& lambda,
                                             NodeBundle& curr,
                                             typename Node<ctype>::NodeType& currType, int& currTri,
-                                            int& enteringEdge);
+                                            int& enteringEdge,std::vector<PathVertex<ctype> >& edgePath,
+                                            int offset);
 
     bool testInsertEdgeFromTouchingNode(const std::vector<StaticVector<ctype,3> >& normals, 
                                         int from, int to, ctype& lambda,
                                         NodeBundle& curr,
                                         typename Node<ctype>::NodeType& currType, int& currTri,
-                                        int& enteringEdge);
+                                        int& enteringEdge, std::vector<PathVertex<ctype> >& edgePath,
+                                        int offset);
 
     bool testInsertEdgeFromCornerNode(const std::vector<StaticVector<ctype,3> >& normals, 
                                       int from, int to, ctype& lambda,
                                       NodeBundle& curr, 
                                       typename Node<ctype>::NodeType& currType, int& currTri,
-                                      int& enteringEdge);
+                                      int& enteringEdge, std::vector<PathVertex<ctype> >& edgePath,
+                                      int offset);
 
     void addCornerNodeBundle(int v, 
                              int nN

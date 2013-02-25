@@ -7,6 +7,7 @@
 #include "StaticMatrix.h"
 
 #include "NodeBundle.h"
+#include "PathVertex.h"
 
 #ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"
@@ -15,17 +16,40 @@
 #endif
 
 #include <stdexcept>
+#include <exception>
 #include <vector>
 #include <set>
 
 using namespace psurface;
+
+/** \brief An Exception that is thrown whenever during the insertion of a target edge
+ *         the inverse projection is not unique or does not exist at all.
+ */
+class WrongEdgeException: public std::exception
+{
+public:
+    WrongEdgeException(std::string str) :
+        str_(str)
+    {}
+
+    virtual const char* what() const throw()
+    {
+        return str_.c_str();
+    }
+
+    virtual ~WrongEdgeException() throw()
+    {}
+
+private:
+    const std::string str_;
+};
 
 template <class ctype>
 void NormalProjector<ctype>::project(const Surface* targetSurface,
                                      const DirectionFunction<3,ctype>* domainDirection,
                                      const DirectionFunction<3,ctype>* targetDirection)
 {
-    const double eps = 0.0001;
+    const double eps = 1e-4;
 
     PSurfaceFactory<2,ctype> factory(psurface_);
 
@@ -47,7 +71,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
 
     std::vector<StaticVector<ctype,3> > targetNormals(targetSurface->points.size());
     computeDiscreteTargetDirections(targetSurface, targetDirection, targetNormals);
-        
+
     // /////////////////////////////////////////////////////////////////////////////////////
     // Insert the vertices of the contact boundary as nodes on the intermediate manifold
     // /////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +88,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     // This bitfield marks whether base grid vertices already have a
     // corresponding image
     std::vector<bool> vertexHasBeenHandled(psurface_->getNumVertices(), false);
-    
+
     // Loop over the vertices of the target surface
     for (size_t i=0; i<targetSurface->points.size(); i++) {
 
@@ -72,8 +96,12 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
         int bestTri = -1;
         ctype bestDist = std::numeric_limits<ctype>::max();
 
-        for (size_t j=0; j<psurface_->getNumTriangles(); j++) {
+        // magic to use a McVec3f as the argument
+        StaticVector<ctype,3> targetVertex;
+        for (int k=0; k<3; k++)
+            targetVertex[k] = surf->points[i][k];
 
+        for (size_t j=0; j<psurface_->getNumTriangles(); j++) {
             const StaticVector<ctype,3>& p0 = psurface_->vertices(psurface_->triangles(j).vertices[0]);
             const StaticVector<ctype,3>& p1 = psurface_->vertices(psurface_->triangles(j).vertices[1]);
             const StaticVector<ctype,3>& p2 = psurface_->vertices(psurface_->triangles(j).vertices[2]);
@@ -83,12 +111,6 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
             const StaticVector<ctype,3>& n2 = domainNormals[psurface_->triangles(j).vertices[2]];
 
             StaticVector<ctype,3> x; // the unknown...
-
-            // magic to use a McVec3f as the argument
-            StaticVector<ctype,3> targetVertex;
-            for (int k=0; k<3; k++)
-                targetVertex[k] = surf->points[i][k];
-
             if (computeInverseNormalProjection(p0, p1, p2, n0, n1, n2, targetVertex, x)) {
 
                 // We want that the line from the domain surface to its projection
@@ -133,7 +155,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
             factory.insertTargetVertexMapping(i, bestTri, bestDPos, projectedTo[i], domainVertex);
             if (domainVertex >= 0)
                 vertexHasBeenHandled[domainVertex] = true;
-            
+
         }
         
     }
@@ -220,16 +242,18 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
             bool wasInserted = visitedEdges.insert(std::make_pair(min,max)).second;
 
             if (wasInserted) {
-                
-                if (edgeCanBeInserted(domainNormals, from, to, projectedTo))
-                    insertEdge(factory, domainNormals, from, to, projectedTo);
+
+                // store the path so we don't have to compute it twice
+                std::vector<PathVertex<ctype> > edgePath;
+                if (edgeCanBeInserted(domainNormals, from, to, projectedTo, edgePath))
+                    insertEdge(factory, from, to, edgePath);
                 else {
                     //std::cout << "Skipping edge (" << from << ", " << to << ") ..." << std::endl;
                 }
-            } 
-                
+            }
+
         }
-        
+
     }
 
     setupEdgePointArrays();
@@ -345,530 +369,147 @@ void NormalProjector<ctype>::computeDiscreteTargetDirections(const Surface* targ
 
 }
 
-
 template <class ctype>
 void NormalProjector<ctype>::insertEdge(PSurfaceFactory<2,ctype>& factory,
-                                        const std::vector<StaticVector<ctype,3> >& normals,
-                                 int from, int to, 
-                                 const std::vector<NodeBundle>& projectedTo)
+                                        int from, int to, 
+                                        std::vector<PathVertex<ctype> >& edgePath)
 {
-    int enteringEdge=-1;
-    NodeBundle curr = projectedTo[from];
-
-    // parameter value for the edge to be inserted
-    ctype lambda = 0;
-
-    while (curr!=projectedTo[to]) {
+    
+    // start inserting the edge path by starting at the "to" node
+    while(edgePath.size() > 1) 
+    {
 
         // Connect two nodes that are on the same triangle
-        if (onSameTriangle(curr, projectedTo[to])) {
-            
+        if (onSameTriangle(edgePath.back().bundle_, edgePath[0].bundle_)) {
+            //assert(edgePath.size()==2);    
+
             // Get the common triangle
-            std::vector<int> commonTris = getCommonTris(curr, projectedTo[to]);
-            for (int i=0; i<commonTris.size(); i++) {
-                psurface_->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
-                                                      projectedTo[to].triToIdx(commonTris[i]));
-            }
-            
+            std::vector<int> commonTris = getCommonTris(edgePath.back().bundle_, edgePath[0].bundle_);
+
+            for (int i=0; i<commonTris.size(); i++) 
+                psurface_->triangles(commonTris[i]).addEdge(edgePath.back().bundle_.triToIdx(commonTris[i]), 
+                                                        edgePath[0].bundle_.triToIdx(commonTris[i]));
             break;
         }
+        // insert next edge path segment and remove the last node
+        insertEdgeSegment(factory, from, to, edgePath);
+        edgePath.pop_back();
 
-        try {
-            
-            typename Node<ctype>::NodeType currType = psurface_->nodes(curr[0]).type;
-            switch (currType) {
-            case Node<ctype>::TOUCHING_NODE:
-                
-                insertEdgeFromTouchingNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
-                break;
-                
-            case Node<ctype>::GHOST_NODE:
-            case Node<ctype>::CORNER_NODE:
-                insertEdgeFromCornerNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
-                break;
-                
-            case Node<ctype>::INTERSECTION_NODE:
-                insertEdgeFromIntersectionNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
-                break;
-                
-            case Node<ctype>::INTERIOR_NODE:
-                insertEdgeFromInteriorNode(factory, normals, from, to, lambda, projectedTo, curr, enteringEdge);
-                break;
-                
-            }
-            
-        } catch (std::runtime_error e) {
-            std::cout << "Exception caught!" << std::endl;
-            return;
-        }
     }
-    
 }
 
 
 template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromInteriorNode(PSurfaceFactory<2,ctype>& factory,
-                                                        const std::vector<StaticVector<ctype,3> >& normals,
-                                                 int from, int to, ctype &lambda,
-                                                 const std::vector<NodeBundle>& projectedTo,
-                                                 NodeBundle& curr, int& enteringEdge)
+void NormalProjector<ctype>::insertEdgeSegment(PSurfaceFactory<2,ctype>& factory, int from, int to,
+                                               std::vector<PathVertex<ctype> >& edgePath)
 {
-    int i;
-    ctype eps = 1e-5;
-    int cT = curr[0].tri;
+        //assert(edgeNodes.size()>2);
 
-    // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the paramPolyEdge leaves the triangle via this edge
-    for (i=0; i<3; i++) {
-            
-        if (i==enteringEdge)
-            continue;
-            
-        StaticVector<ctype,3> x;
-        int p = psurface_->triangles(curr[0].tri).vertices[i];
-        int q = psurface_->triangles(curr[0].tri).vertices[(i+1)%3];
+        // the next node on that edge path
+        PathVertex<ctype>& node = edgePath[edgePath.size()-2];
+        PathVertex<ctype>& lastNode = edgePath.back();
 
         const Surface* surf = psurface_->surface;
-
-        StaticVector<ctype,3> targetFrom, targetTo;
-        for (int j=0; j<3; j++) {
-            targetFrom[j] = surf->points[from][j];
-            targetTo[j]   = surf->points[to][j];
-        }
-
-        if (edgeIntersectsNormalFan(targetFrom, targetTo,
-                                    psurface_->vertices(p), psurface_->vertices(q),
-                                    normals[p], normals[q], x)) {
-
-            const ctype& newLambda = x[1];
-            const ctype& mu        = x[0];
-                
-            if (newLambda < lambda) {
-                throw(std::runtime_error("[FromInteriorNode] Error: the normal projection is not continuous!"));
-            }
-
-            int corner = -1;
-            if (mu<eps) 
-                corner = i;
-            else if (mu>1-eps)
-                corner = (i+1)%3;
-
-            if (corner==-1) {
-
-                // get neighboring triangle
-                int neighboringTri = psurface_->getNeighboringTriangle(curr[0].tri, i);
-                    
-                // if no neighboring triangle --> error
-                if (neighboringTri==-1) {
-                        
-                    printf("[FromInteriorNode] Warning: Normal images leaves domain surface!\n");
-                    curr = projectedTo[to];
-                    return;
-                        
-                }
-                    
-                // add intersection nodes on both sides
-                    
-                // the domain position of the new intersection node on the next triangle
-                // better: using getEdge()
-                int e = psurface_->triangles(neighboringTri).getCorner(q);
-                    
-                // the domain position of the new intersection node on this triangle
-                StaticVector<ctype,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
-                StaticVector<ctype,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
-                    
-                StaticVector<ctype,3> image;
-
-                // hack: within Amira this is assignment from a McVec3f
-                for (int j=0; j<3; j++)
-                    image[j] = surf->points[from][j] + newLambda*(surf->points[to][j]-surf->points[from][j]);
-
-                StaticVector<ctype,2> dom1Ctype(dom1[0], dom1[1]);
-                StaticVector<ctype,2> dom2Ctype(dom2[0], dom2[1]);
-                NodeBundle newNodePair  = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
-                                                                          dom1Ctype, dom2Ctype, i, e, image);
-                    
-                // insert new parameter edge
-                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodePair[0].idx);
-
-                //
-                curr.resize(1);
-                curr[0] = newNodePair[1];
-                lambda  = newLambda;
-                enteringEdge = e;
-                
-            } else {
-                enteringEdge = curr[0].tri;
-                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(psurface_->triangles(cT), corner));
-                curr = psurface_->getNodeBundleAtVertex(psurface_->triangles(cT).vertices[corner]);
-                lambda  = newLambda;
-            }
-            break;
-        }
-            
-    }
-    if (i==3) {
-        printf("No intersection found (in insertEdgeFromInteriorNode)!\n");
-        curr = projectedTo[to];
-        assert(false);
-        return;
-    }
         
-}
+        // the image point of that edge path point 
+        StaticVector<ctype,3> image;
 
+        // trick: within Amira this is assignment from a McVec3f
+        for (int j=0; j<3; j++)
+            image[j] = surf->points[from][j] + node.lambda_*(surf->points[to][j]-surf->points[from][j]);
 
-template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromIntersectionNode(PSurfaceFactory<2,ctype>& factory,
-                                                            const std::vector<StaticVector<ctype,3> >& normals,
-                                                 int from, int to, ctype &lambda,
-                                                 const std::vector<NodeBundle>& projectedTo,
-                                                 NodeBundle& curr, int& enteringEdge)
-{
-    int i;
-    ctype eps = 1e-5;
-    int cTIdx = curr[0].tri;
+        // get neighboring triangle
+        int tri = node.tri_;
 
-    // loop over the three edges of the current triangle (except for the entering edge) and
-    // check whether the paramPolyEdge leaves the triangle via this edge
-    //int currentEdge = cT.nodes[curr[0].idx].getDomainEdge();
-    //printf("currentEdge: %d\n", currentEdge);
+        // edge goes through an intersection node
+        if (node.corner_==-1) {
 
-    for (i=0; i<3; i++) {
-            
-        if (i==enteringEdge)
-            continue;
-            
-        StaticVector<ctype,3> x;
-        int p = psurface_->triangles(curr[0].tri).vertices[i];
-        int q = psurface_->triangles(curr[0].tri).vertices[(i+1)%3];
+            // edge the node lives on
+            int edge = node.edge_;
+            // neighboring triangle
+            int neighboringTri = lastNode.tri_;
 
-        const Surface* surf = psurface_->surface;
-
-        StaticVector<ctype,3> targetFrom, targetTo;
-        for (int j=0; j<3; j++) {
-            targetFrom[j] = surf->points[from][j];
-            targetTo[j]   = surf->points[to][j];
-        }
-
-        if (edgeIntersectsNormalFan(targetFrom, targetTo,
-                                    psurface_->vertices(p), psurface_->vertices(q),
-                                    normals[p], normals[q], x)) {
-
-            const ctype& newLambda = x[1];
-            const ctype& mu        = x[0];
-                
-            if (newLambda < lambda)
-                throw(std::runtime_error("[FromIntersectionNode] Error: the normal projection is not continuous!"));
-
-            int corner = -1;
-            if (mu<eps) 
-                corner = i;
-            else if (mu>1-eps)
-                corner = (i+1)%3;
-
-            if (corner==-1) {
-                // get neighboring triangle
-                int neighboringTri = psurface_->getNeighboringTriangle(curr[0].tri, i);
-                    
-                // if no neighboring triangle --> error
-                if (neighboringTri==-1) {
-                        
-                    std::cout << "[FromIntersectionNode] Warning: Normal images leaves domain surface!" << std::endl;
-                    curr = projectedTo[to];
-                    //assert(false);
-                    return;
-                        
-                }
-                    
-                // add intersection nodes on both sides
-                    
-                // the domain position of the new intersection node on the next triangle
-                // better: using getEdge()
-                int e = psurface_->triangles(neighboringTri).getCorner(q);
-                    
-                // the domain position of the new intersection node on this triangle
-                StaticVector<ctype,2> dom1((i==0)*(1-mu) + (i==2)*mu, (i==0)*mu + (i==1)*(1-mu));
-                StaticVector<ctype,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
-                    
-                StaticVector<ctype,3> image;
-
-                // trick: within Amira this is assignment from a McVec3f
-                for (int j=0; j<3; j++)
-                    image[j] = surf->points[from][j] + newLambda*(surf->points[to][j]-surf->points[from][j]);
-                    
-                NodeBundle newNodePair = factory.addIntersectionNodePair(curr[0].tri, neighboringTri,
-                                                                         dom1, dom2, i, e, image);
-                    
-                // insert new parameter edge
-                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, newNodePair[0].idx);
-
-                //
-                curr.resize(1);
-                curr[0] = newNodePair[1];
-                lambda  = newLambda;
-                enteringEdge = e;
-                
-            } else {
-                enteringEdge = curr[0].tri;
-                psurface_->triangles(curr[0].tri).addEdge(curr[0].idx, getCornerNode(psurface_->triangles(cTIdx), corner));
-                curr = psurface_->getNodeBundleAtVertex(psurface_->triangles(cTIdx).vertices[corner]);
-                lambda = newLambda;
-            }
-            break;
-        }
-            
-    }
-    if (i==3) {
-        printf("No intersection found (in insertEdgeFromIntersectionNode)!\n");
-        psurface_->triangles(curr[0].tri).nodes.erase(psurface_->triangles(curr[0].tri).nodes.begin() + curr[0].idx);
-        curr = projectedTo[to];
-        assert(false);
-        return;
-    }
-        
-}
-
-
-template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromTouchingNode(PSurfaceFactory<2,ctype>& factory,
-                                                        const std::vector<StaticVector<ctype,3> >& normals,
-                                                 int from, int to, ctype &lambda,
-                                                 const std::vector<NodeBundle>& projectedTo,
-                                                 NodeBundle& curr, int& enteringTri)
-{
-    const Surface* surf = psurface_->surface;
-
-    // The other end of the edge is *not* on this triangle
-    for (int i=0; i<curr.size(); i++) {
-
-        // I don't think the following if-clause is ever true
-        assert(enteringTri==-1);
-        if (curr[i].tri == enteringTri)
-            continue;
-
-        DomainTriangle<ctype>& cT = psurface_->triangles(curr[i].tri);
-        int currentEdge = cT.nodes[curr[i].idx].getDomainEdge();
-        
-        for (int j=0; j<3; j++) {
-            
-            if (j==currentEdge)
-                continue;
-            
-            StaticVector<ctype,3> x;
-            int p = cT.vertices[j];
-            int q = cT.vertices[(j+1)%3];
-
-            StaticVector<ctype,3> targetFrom, targetTo;
-            for (int k=0; k<3; k++) {
-                targetFrom[k] = surf->points[from][k];
-                targetTo[k]   = surf->points[to][k];
-            }
-
-            if (edgeIntersectsNormalFan(targetFrom, targetTo,
-                                        psurface_->vertices(p), psurface_->vertices(q),
-                                        normals[p], normals[q], x)) {
-                
-                if (x[1] < lambda) {
-                    throw(std::runtime_error("[FromTouchingNode] Error: the normal projection is not continuous!"));
-                }
-                
-                lambda = x[1];
-                const ctype& mu = x[0];
-
-                int corner = -1;
-                if (x[0]<0.00001) 
-                    corner = j;
-                else if (x[0]>0.99999)
-                    corner = (j+1)%3;
-
-                if (corner==-1) {
-                    // parameter polyedge is leaving basegrid triangle through an edge
-                    
-                    // get neighboring triangle
-                    int neighboringTri = psurface_->getNeighboringTriangle(curr[i].tri, j);
-
-                    // if no neighboring triangle --> error
-                    if (neighboringTri==-1) {
-                        
-                        printf("[FromTouchingNode] Error: Normal images leaves intermediate surface!\n");
-                        abort();
-                        
-                    }
-                    // add intersection nodes on both sides
-                    
-                    // better: using getEdge()
-                    int e = psurface_->triangles(neighboringTri).getCorner(q);
-
-                    // the domain position of the new intersection node on this triangle
-                    StaticVector<ctype,2> dom1((j==0)*(1-mu) + (j==2)*mu, (j==0)*mu + (j==1)*(1-mu));
-                    StaticVector<ctype,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
-                    
-                    StaticVector<ctype,3> image;
-
-                    for (int k=0; k<3; k++)
-                        image[k] = surf->points[from][k] + lambda*(surf->points[to][k]-surf->points[from][k]);
-                    
-                    NodeBundle newNodePair = factory.addIntersectionNodePair(curr[i].tri, neighboringTri,
-                                                                             dom1, dom2, j, e, image);
-                    
-                    // insert new parameter edge
-                    psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, newNodePair[0].idx);
-
-                    curr.resize(1);
-                    curr[0] = newNodePair[1];
-                    enteringTri = e;
-                    
-                } else if (corner== ((currentEdge+2)%3)) {
-
-                    // parameter polyedge leaves BG triangle through the opposite vertex
-                    psurface_->triangles(curr[i].tri).addEdge(curr[i].idx, getCornerNode(cT, corner));
-                    enteringTri = curr[i].tri;
-                    curr = psurface_->getNodeBundleAtVertex(cT.vertices[corner]);
-
-                } else {
-                    // parameter polyedge leaves BG triangle through an adjacent vertex
-                    NodeBundle target = psurface_->getNodeBundleAtVertex(cT.vertices[corner]);
-                    for (int k=0; k<curr.size(); k++)
-                        psurface_->triangles(curr[k].tri).addEdge(curr[k].idx, target.triToIdx(curr[k].tri));
-
-                    curr = target;
-                    
-                }
-                
+            // if no neighboring triangle --> error
+            if (neighboringTri==-1) {
+                std::cout << "[FromInsertEdgeSegment] Warning: Normal images leaves domain surface!" << std::endl;
                 return;
-                
             }
-            
-        }
-        
-    }
 
-    printf("No Intersection found (in insertEdgeFromTouchingNode)!\n");
-    curr = projectedTo[to];
-    assert(false);
-    return;
+            // add intersection nodes on both sides
+
+            // the neighboring edge is the entering edge of the next edge path node
+            int e = lastNode.enteringEdge_;
+
+            // the domain position of the new intersection node on the two triangles
+            ctype mu = node.locEdge_;
+            StaticVector<ctype,2> dom1((edge==0)*(1-mu) + (edge==2)*mu, (edge==0)*mu + (edge==1)*(1-mu));
+            StaticVector<ctype,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
+
+            // now that we created the node, we can add the bundle to the edge path
+            node.bundle_ = factory.addIntersectionNodePair(tri, neighboringTri,
+                    dom1, dom2, edge, e, image);
+
+            // insert new parameter edge
+            psurface_->triangles(neighboringTri).addEdge(lastNode.bundle_.triToIdx(neighboringTri), node.bundle_[1].idx);
+
+            // else edge goes through a ghost node
+        } else {
+            int corner = node.corner_;
+
+            DomainTriangle<ctype>& cT = psurface_->triangles(tri);
+            node.bundle_ = psurface_->getNodeBundleAtVertex(cT.vertices[corner]);
+
+            // for touching nodes it may be the case that the ghost and touching node are on the same edge
+            // case that the edge path is aligned with a domain edge
+            if( ((lastNode.type_ == Node<ctype>::TOUCHING_NODE) 
+                && ( node.bundle_.triToIdx(lastNode.tri_) == 
+                        ((psurface_->triangles(lastNode.tri_).nodes[lastNode.bundle_.triToIdx(lastNode.tri_)].getDomainEdge()+2)%3))  ) 
+                    || (lastNode.type_ == Node<ctype>::CORNER_NODE)
+                        || (lastNode.type_ == Node<ctype>::GHOST_NODE) ) {
+
+                std::vector<int> commonTris = getCommonTris(node.bundle_, lastNode.bundle_);
+                for (size_t i=0; i<commonTris.size(); i++)
+                    psurface_->triangles(commonTris[i]).addEdge(lastNode.bundle_.triToIdx(commonTris[i]), 
+                                                          node.bundle_.triToIdx(commonTris[i]));
+            } else
+                psurface_->triangles(lastNode.tri_).addEdge(lastNode.bundle_.triToIdx(lastNode.tri_), 
+                    node.bundle_.triToIdx(lastNode.tri_));
+        }
 }
-
-
-template <class ctype>
-void NormalProjector<ctype>::insertEdgeFromCornerNode(PSurfaceFactory<2,ctype>& factory,
-                                                      const std::vector<StaticVector<ctype,3> >& normals, int from, int to, ctype &lambda,
-                                                 const std::vector<NodeBundle>& projectedTo,
-                                                 NodeBundle& curr, int& enteringEdge)
-{
-    const Surface* surf = psurface_->surface;
-
-    // The other end of the edge is *not* on this triangle
-    for (int i=0; i<curr.size(); i++) {
-        
-        int cT = curr[i].tri;
-
-        int thisCorner = psurface_->triangles(cT).nodes[curr[i].idx].getCorner();
-        int oppEdge = (thisCorner+1)%3;
-
-        StaticVector<ctype,3> x;
-        int p = psurface_->triangles(cT).vertices[(thisCorner+1)%3];
-        int q = psurface_->triangles(cT).vertices[(thisCorner+2)%3];
-
-        StaticVector<ctype,3> targetFrom, targetTo;
-        for (int j=0; j<3; j++) {
-            targetFrom[j] = surf->points[from][j];
-            targetTo[j]   = surf->points[to][j];
-        }
-
-        if (edgeIntersectsNormalFan(targetFrom, targetTo,
-                                    psurface_->vertices(p), psurface_->vertices(q),
-                                    normals[p], normals[q], x)) {
-            
-            if (x[1] < lambda) {
-                continue;
-            }
-            
-            lambda = x[1];
-            const ctype& mu = x[0];
-            int corner = -1;
-            if (x[0]<0.00001) 
-                corner = (thisCorner+1)%3;
-            else if (x[0]>0.99999)
-                corner = (thisCorner+2)%3;
-            
-            if (corner==-1) {
-                // parameter polyedge is leaving basegrid triangle 
-                // through the opposite edge
-                
-                // get neighboring triangle
-                int neighboringTri = psurface_->getNeighboringTriangle(cT, oppEdge);
-                // if no neighboring triangle --> error
-                if (neighboringTri==-1) {
-                    
-                    throw(std::runtime_error("[FromCornerNode] Error: Normal images leaves intermediate surface!"));
-                    
-                }
-                // add intersection nodes on both sides
-                
-                // better: using getEdge()
-                int e = psurface_->triangles(neighboringTri).getCorner(q);
-
-                // the domain position of the new intersection node on this triangle
-                StaticVector<ctype,2> dom1((oppEdge==0)*(1-mu) + (oppEdge==2)*mu, (oppEdge==0)*mu + (oppEdge==1)*(1-mu));
-                StaticVector<ctype,2> dom2((e==0)*mu + (e==2)*(1-mu), (e==0)*(1-mu) + (e==1)*mu);
-                
-                StaticVector<ctype,3> image;
-
-                for (int j=0; j<3; j++)
-                    image[j] = surf->points[from][j] + lambda*(surf->points[to][j]-surf->points[from][j]);
-                
-                NodeBundle newNodePair = factory.addIntersectionNodePair(cT, neighboringTri,
-                                                                         dom1, dom2, oppEdge, e, image);
-                
-                // insert new parameter edge
-                psurface_->triangles(cT).addEdge(curr[i].idx, newNodePair[0].idx);
-
-                curr.resize(1);
-                curr[0] = newNodePair[1];
-                enteringEdge = e;
-                
-            } else {
-
-                // edge leaves through a corner
-                NodeBundle target = psurface_->getNodeBundleAtVertex(psurface_->triangles(cT).vertices[corner]);
-                std::vector<int> commonTris = getCommonTris(curr, target);
-                for (i=0; i<commonTris.size(); i++) {
-                    psurface_->triangles(commonTris[i]).addEdge(curr.triToIdx(commonTris[i]), 
-                                                          target.triToIdx(commonTris[i]));
-                }
-                
-                curr = target;
-                
-            }
-            
-            return;
-            
-        }
-        
-    }
-
-    printf("no intersection found (in insertEdgeFromCornerNode)!\n");
-    curr = projectedTo[to];
-    assert(false);
-}
-
-
 
 template <class ctype>
 bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ctype,3> >& normals,
                                         int from, int to, 
-                                        const std::vector<NodeBundle>& projectedTo)
+                                        const std::vector<NodeBundle>& projectedTo, 
+                                        std::vector<PathVertex<ctype> >& edgePath)
 {
     if (projectedTo[from].size() == 0 || projectedTo[to].size() == 0)
         return false;
 
     int enteringEdge=-1;
     NodeBundle curr = projectedTo[from];
+    
+    // initialize first node on the edge path
+    edgePath.push_back(PathVertex<ctype>(projectedTo[from]));
+    edgePath.back().type_ = psurface_->nodes(curr[0]).type;
+    edgePath.back().tri_ = projectedTo[from][0].tri;
 
     // If the two nodes are on the same triangle it is surely possible to enter the edge
-    if (onSameTriangle(curr, projectedTo[to]))
-        return true;
+    if (onSameTriangle(curr, projectedTo[to])) {
+
+        edgePath.push_back(PathVertex<ctype>(projectedTo[to]));
+        edgePath.back().type_ = psurface_->nodes(projectedTo[to][0]).type;
+
+        // set triangle the both are contained in,
+        // if there is more than one we'll handle it later
+        for (int i=0; i<curr.size(); i++)
+            for (int j=0; j<edgePath.back().bundle_.size(); j++)
+                if (curr[i].tri==edgePath.back().bundle_[j].tri) {
+                    edgePath.back().tri_ = curr[i].tri;
+                    return true;
+                } 
+    }
+
 
     typename Node<ctype>::NodeType currType = psurface_->nodes(curr[0]).type;
     int currTri     = curr[0].tri;
@@ -876,70 +517,133 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ct
     // parameter value for the edge to be inserted
     ctype lambda = 0;
 
+    // sometimes more than one domain edge hits the target edge
+    // in this case we might need to restart the search from an earlier 
+    // intersection node and start looking at the other edge first
+    int offset = 0;
+    
+    // avoid running into infinity-loops
+    PathVertex<ctype> wrongEdgeNode;
+
     while (true) {
 
         // If the two nodes are on the same triangle it is surely possible to enter the edge
-        if (onSameTriangle(currTri, projectedTo[to])
-            || ((currType==Node<ctype>::GHOST_NODE || currType==Node<ctype>::CORNER_NODE)
-                && onSameTriangle(curr, projectedTo[to])))
+        if (onSameTriangle(currTri, projectedTo[to])) {
+            edgePath.push_back(PathVertex<ctype>(projectedTo[to]));
+            edgePath.back().tri_ = currTri;
+            edgePath.back().type_ = psurface_->nodes(projectedTo[to][0]).type;
+            edgePath.back().enteringEdge_ = enteringEdge;
             return true;
+        }
+
+        if ((currType==Node<ctype>::GHOST_NODE || currType==Node<ctype>::CORNER_NODE)
+                && onSameTriangle(curr, projectedTo[to])) {
+                
+            edgePath.push_back(PathVertex<ctype>(projectedTo[to]));
+            edgePath.back().type_ = psurface_->nodes(projectedTo[to][0]).type;
+            edgePath.back().enteringEdge_ = enteringEdge;
+            // set triangle the both are contained in,
+            // if there is more than one we'll handle it later
+            for (int i=0; i<curr.size(); i++)
+                for (int j=0; j<edgePath.back().bundle_.size(); j++)
+                    if (curr[i].tri==edgePath.back().bundle_[j].tri) {
+                        edgePath.back().tri_ = curr[i].tri;
+                        return true;
+                } 
+        }
+
 
         switch (currType) {
         case Node<ctype>::TOUCHING_NODE:
 
-            if (!testInsertEdgeFromTouchingNode(normals, 
-                                                from, to, 
-                                                lambda,
-                                                curr, currType, currTri, enteringEdge))
+            if (!testInsertEdgeFromTouchingNode(normals, from, to, lambda, curr, currType, 
+                        currTri, enteringEdge, edgePath, offset))
                 return false;
-
             break;
-            
+
         case Node<ctype>::GHOST_NODE:
         case Node<ctype>::CORNER_NODE:
 
-            if (!testInsertEdgeFromCornerNode(normals, 
-                                              from, to, 
-                                              lambda,
-                                              curr, currType, currTri, enteringEdge))
+            try {
+                if (!testInsertEdgeFromCornerNode(normals, from, to, lambda,
+                                              curr, currType, currTri, enteringEdge,edgePath, offset))
                 return false;
+            } catch (WrongEdgeException e) {
+
+                std::cout<<"Exception caught! "<<e.what()<<std::endl;
+                
+                // if we were already ran into that node, then the projection of the path does not exist
+                if (edgePath.back()==wrongEdgeNode)
+                    return false;
+
+                // this edge led to a wrong triangle so check if another edge is also feasible
+                offset = (edgePath.back().edge_+1)%3;
+                currTri = edgePath.back().tri_;
+                currType = edgePath.back().type_;
+                lambda = edgePath[edgePath.size()-2].lambda_;
+                enteringEdge = edgePath.back().enteringEdge_;
+                wrongEdgeNode = edgePath.back();
+                edgePath.pop_back();
+            }
             break;
 
         case Node<ctype>::INTERSECTION_NODE:
-            if (!testInsertEdgeFromIntersectionNode(normals, from, to, lambda, curr, currType, currTri, enteringEdge))
+
+            try {
+                if (!testInsertEdgeFromIntersectionNode(normals, from, to, lambda, 
+                        curr, currType, currTri, enteringEdge, edgePath, offset))
                 return false;
+            } catch (WrongEdgeException e) {
+
+                std::cout<<"Exception caught! "<<e.what()<<std::endl;
+
+                // if we were already ran into that node, then the projection of the path does not exist
+                if (edgePath.back()==wrongEdgeNode)
+                    return false;
+
+                // this edge led to a wrong triangle so check if another edge is also feasible
+                offset = (edgePath.back().edge_+1)%3;
+                currTri = edgePath.back().tri_;
+                currType = edgePath.back().type_;
+                lambda = edgePath[edgePath.size()-2].lambda_;
+                enteringEdge = edgePath.back().enteringEdge_;
+                wrongEdgeNode = edgePath.back();
+                edgePath.pop_back();
+            }
             break;
             
         case Node<ctype>::INTERIOR_NODE:
-            if (!testInsertEdgeFromInteriorNode(normals, from, to, lambda, curr, currType, currTri, enteringEdge))
+
+            if (!testInsertEdgeFromInteriorNode(normals, from, to, lambda, 
+                        curr, currType, currTri, enteringEdge, edgePath, offset))
                 return false;
+
             break;
-            
+
         default:
             std::cout << "ERROR: unknown node type found!" << std::endl;
             abort();
         }
-            
     }
     
-    std::cout << "should not occur" << std::endl;
+    //std::cout << "should not occur" << std::endl;
     return true;
 }
-
 
 
 template <class ctype>
 bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<StaticVector<ctype,3> >& normals,
                                                      int from, int to, ctype &lambda,
                                                      NodeBundle& curr,
-                                                            typename Node<ctype>::NodeType& currType, int& currTri,
-                                                     int& enteringEdge)
+                                                     typename Node<ctype>::NodeType& currType, int& currTri,
+                                                     int& enteringEdge, std::vector<PathVertex<ctype> >& edgePath, 
+                                                     int offset)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
     ctype eps = 1e-5;
-
-    for (int i=0; i<3; i++) {
+    int i=offset;
+    for (int j=0; j<3; j++,i=(i+1)%3) {
             
         if (i==enteringEdge)
             continue;
@@ -991,10 +695,15 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
                 int e = psurface_->triangles(neighboringTri).getCorner(q);
                     
                 currType = Node<ctype>::INTERSECTION_NODE;
+
+                // add node on the path to the array
+                edgePath.push_back(PathVertex<ctype>(currTri,i,mu,currType,NodeBundle(),newLambda,enteringEdge));
+
                 currTri  = neighboringTri;
                 lambda   = newLambda;
                 enteringEdge = e;
 
+    
                 return true;
                 
             } else {
@@ -1028,7 +737,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
                 currType = Node<ctype>::GHOST_NODE;
                 assert(currType==type(curr));
                 lambda = newLambda;
-
+                edgePath.push_back(PathVertex<ctype>(currTri,i,mu,currType,curr, newLambda, enteringEdge, corner));
                 return true;
    
             }
@@ -1037,7 +746,6 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
             
     }
 
-    printf("No intersection found (in testInsertEdgeFromInteriorNode)!\n");
     return false;
 }
 
@@ -1046,15 +754,18 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
 template <class ctype>
 bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vector<StaticVector<ctype,3> >& normals,
                                                          int from, int to, ctype &lambda,
-                                                                NodeBundle& curr,
+                                                         NodeBundle& curr,
                                                          typename Node<ctype>::NodeType& currType, int& currTri,
-                                                         int& enteringEdge)
+                                                         int& enteringEdge,  
+                                                         std::vector<PathVertex<ctype> >& edgePath, 
+                                                         int offset)
 {
     // loop over the three edges of the current triangle (except for the entering edge) and
     // check whether the paramPolyEdge leaves the triangle via this edge
     ctype eps = 1e-5;
-
-    for (int i=0; i<3; i++) {
+    
+    int i=offset;
+    for (int j=0; j<3; j++,i=(i+1)%3) {
             
         if (i==enteringEdge)
             continue;
@@ -1106,10 +817,13 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                 int e = psurface_->triangles(neighboringTri).getCorner(q);
 
                 currType = Node<ctype>::INTERSECTION_NODE;
+                edgePath.push_back(PathVertex<ctype>(currTri, i, mu, currType,
+                                NodeBundle(), newLambda, enteringEdge));
                 currTri  = neighboringTri;
                 lambda   = newLambda;
                 enteringEdge = e;
                 
+
                 return true;
 
             } else {
@@ -1123,15 +837,16 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                 assert(currType==type(curr));
                 lambda = newLambda;
                 
+                edgePath.push_back(PathVertex<ctype>(currTri,i,mu,currType,curr, 
+                                newLambda, enteringEdge, corner));
                 return true;
 
             }
 
         }
-            
     }
 
-    printf("No intersection found (in testInsertEdgeFromIntersectionNode)!\n");
+    throw(WrongEdgeException("No intersection found (in testInsertEdgeFromIntersectionNode)!\n"));
     return false;
 }
 
@@ -1142,19 +857,21 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                                                      int from, int to, ctype &lambda,
                                                      NodeBundle& curr,
                                                      typename Node<ctype>::NodeType& currType, int& currTri,
-                                                     int& enteringEdge)
+                                                     int& enteringEdge, std::vector<PathVertex<ctype> >& edgePath,
+                                                     int offset)
 {
     const Surface* surf = psurface_->surface;
     ctype eps = 1e-5;
-
+    
     // The other end of the edge is *not* on this triangle
     for (int i=0; i<curr.size(); i++) {
 
         const DomainTriangle<ctype>& cT = psurface_->triangles(curr[i].tri);
         int currentEdge = cT.nodes[curr[i].idx].getDomainEdge();
-        
-        for (int j=0; j<3; j++) {
-            
+
+        int j=offset;
+        for (int k=0; k<3; k++,j=(j+1)%3) {
+        //for (int j=0; j<3; j++) {
             if (j==currentEdge)
                 continue;
         
@@ -1163,9 +880,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
             int q = cT.vertices[(j+1)%3];
 
             StaticVector<ctype,3> targetFrom, targetTo;
-            for (int k=0; k<3; k++) {
-                targetFrom[k] = surf->points[from][k];
-                targetTo[k]   = surf->points[to][k];
+            for (int l=0; l<3; l++) {
+                targetFrom[l] = surf->points[from][l];
+                targetTo[l]   = surf->points[to][l];
             }
 
             if (edgeIntersectsNormalFan(targetFrom, targetTo,
@@ -1199,12 +916,15 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                 
                     // better: using getEdge()
                     int e = psurface_->triangles(neighboringTri).getCorner(q);
-                
+                     
                     currType = Node<ctype>::INTERSECTION_NODE;
+                    edgePath.push_back(PathVertex<ctype>(curr[i].tri,j,x[0],currType,NodeBundle(), 
+                                            newLambda, enteringEdge));
                     currTri  = neighboringTri;
                     lambda   = newLambda;
                     enteringEdge = e;
                     
+
                     return true;
                 
                 } else {
@@ -1212,11 +932,14 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
 
                     // get all ghost nodes for the base grid vertex
                     int vertex = psurface_->triangles(curr[i].tri).vertices[corner];
+                    int copyTri = curr[i].tri;
                     curr = psurface_->getNodeBundleAtVertex(vertex); 
                     currType = Node<ctype>::GHOST_NODE;
                     assert(currType==type(curr));
                     lambda = newLambda;
 
+                    edgePath.push_back(PathVertex<ctype>(copyTri,j,x[0],currType,curr,
+                                    newLambda, enteringEdge,corner));
                     return true;
 
                 }
@@ -1226,9 +949,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
         }
 
     }
-    
-    printf("No intersection found (in testInsertEdgeFromTouchingNode)!\n");
-    assert(false);
+
     return false;
 
 }
@@ -1240,7 +961,8 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                                                    int from, int to, ctype &lambda,
                                                    NodeBundle& curr, 
                                                    typename Node<ctype>::NodeType& currType, int& currTri,
-                                                   int& leavingEdge)
+                                                   int& leavingEdge, std::vector<PathVertex<ctype> >& edgePath,
+                                                   int offset)
 {
     const Surface* surf = psurface_->surface;
     ctype eps = 1e-5;
@@ -1297,9 +1019,12 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 int e = psurface_->triangles(neighboringTri).getCorner(q);
 
                 currType = Node<ctype>::INTERSECTION_NODE;
+                edgePath.push_back(PathVertex<ctype>(cT,oppEdge, x[0],currType,NodeBundle(),
+                                    leavingEdge,newLambda));
                 currTri  = neighboringTri;
                 lambda   = newLambda;
                 leavingEdge = e;
+
 
                 return true;
 
@@ -1314,6 +1039,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 assert(currType == type(curr));
                 lambda = newLambda;
                 
+                edgePath.push_back(PathVertex<ctype>(cT,oppEdge,x[0],currType,curr, leavingEdge, newLambda, corner));
                 return true;
                 
             }
@@ -1321,6 +1047,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
         }
         
     }
+
+    // TODO think about the case below
+    throw(WrongEdgeException("No intersection found (in testInsertEdgeFromCornerNode)!\n"));
 
     // If we get to here this means that the intersection of the edge from 'from' to 'to' with
     // the star around the vertex corresponding to the corner node we are testing consists
@@ -1555,7 +1284,7 @@ void NormalProjector<ctype>::setupEdgePointArrays()
         for (j=0; j<cT.nodes.size(); j++) {
                 
             Node<ctype>& cN = cT.nodes[j];
-                
+
             if (cN.isINTERIOR_NODE())
                 continue;
                 
@@ -1578,7 +1307,7 @@ void NormalProjector<ctype>::setupEdgePointArrays()
             cEP.insert(cEP.begin()+idx, j);
             
         }
-        
+
     }   
     
 }
