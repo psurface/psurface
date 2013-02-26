@@ -127,11 +127,14 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
                 
                 ctype distance = segment.length() * segment.length();
 
-                if (segment.dot(targetNormals[i]) > -eps
-                    && segment.dot(baseNormal) > 0
-                    && distance > 1e-10) {
+                // if both conditions are not fulfilled we might want to allow some overlaps
+                if(segment.dot(targetNormals[i]) > eps
+                    && segment.dot(baseNormal) < -eps) {
+                        if (distance > 0.01) // TODO this value should be set problem dependent
+                            continue;
+                } else if( segment.dot(targetNormals[i]) > eps
+                    || segment.dot(baseNormal) < -eps)
                     continue;
-                }
 
                 // There may be several inverse orthogonal projections.
                 // We want the shortest one.
@@ -1471,6 +1474,10 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<ctype,3>& 
 
         // triangle and edge are not parallel
         ctype nu = StaticMatrix<ctype,3>(b-a, c-a, p-a).det() / det;
+       
+        // only allow a certain overlaps 
+        if (nu>1e-2)
+            return false;
 
         ctype lambda = StaticMatrix<ctype,3>(p-a, c-a, direction).det() / det;
         if (lambda<-eps) return false;
