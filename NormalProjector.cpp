@@ -1089,16 +1089,187 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<c
                                                      const StaticVector<ctype,3>& target, StaticVector<ctype,3>& x)
 {
     const ctype eps = 1e-6;
-    // Fix some initial value
-    x.assign(1.0);
 
-    for (int i=0; i<10; i++) {
+    // try to solve a cubic equation for the distance parameter nu, then compute the barycentric coordinates from it
+
+    // cubic coefficient
+    StaticVector<ctype,3> n02 = n0 - n2;
+    StaticVector<ctype,3> n12 = n1 - n2;
+    StaticVector<ctype,3> n02n12 = n02.cross(n12);
+
+    double cubic = n2.dot(n02n12);
+
+    // quadratic coefficient
+
+    StaticVector<ctype,3> p02 = p0 - p2;
+    StaticVector<ctype,3> p12 = p1 - p2;
+    StaticVector<ctype,3> p2q = p2 -target;
+    StaticVector<ctype,3> p02n12 = p02.cross(n12);
+    StaticVector<ctype,3> n02p12 = n02.cross(p12);
+
+    ctype quadratic = n2.dot(p02n12)+n2.dot(n02p12)+p2q.dot(n02n12);
+
+    // constant coefficient
+    StaticVector<ctype,3> p02p12 = p02.cross(p12);
+    ctype constant = p2q.dot(p02p12);
+
+    // linear coefficient
+    ctype linear = n2.dot(p02p12) + p2q.dot(n02p12) + p2q.dot(p02n12);
+
+    // save all zeros we find
+    std::vector<ctype> zeros;
+
+    if (std::fabs(cubic) <1e-10 && std::fabs(quadratic)<1e-10 && std::fabs(linear)<1e-10) {
+        return false;
+    } else if (std::fabs(cubic) <1e-10 && std::fabs(quadratic)<1e-10) {
+
+        // problem is linear
+        zeros.push_back(-constant/linear);
+
+    } else if(std::fabs(cubic)<1e-10) {
+
+        // problem is quadratic
+        ctype p = linear/quadratic;
+        ctype q = constant/quadratic;
+
+        ctype sqt = 0.25*p*p -q;
+
+        // no real solution
+        if (sqt<-1e-10)
+            return false;
+
+        zeros.push_back(-0.5*p + std::sqrt(sqt));
+        zeros.push_back(-0.5*p -std::sqrt(sqt));
+
+    } else {
+
+        // problem is cubic
+        quadratic /= cubic;
+        linear /= cubic;
+        constant /= cubic;
+
+        // Transform to reduced form z^3 + p*z + q = 0 where x = z-quadratic/3
+        ctype p= linear - quadratic*quadratic/3;
+        ctype q=quadratic*(2*quadratic*quadratic/27 - linear/3) + constant;
+
+        // use Cardano's method to solve the problem
+        ctype D = 0.25*q*q + std::pow(p,3)/27;
+
+        if (D>1e-10) {
+            // one real zero
+
+            // be careful when computing the cubic roots
+            ctype nu = -q/2+std::sqrt(D);
+            ctype zer = std::pow(std::fabs(nu),1.0/3.0) * ((nu<-1e-10) ? -1 : 1);
+
+            nu = -q/2-std::sqrt(D);
+            zer += std::pow(std::fabs(nu),1.0/3.0) * ((nu<-1e-10) ? -1 : 1);
+
+            zeros.push_back(zer-quadratic/3);
+
+        } else if (D<-1e-10) {
+
+            // three real zeros, using trigonometric functions to compute them
+            ctype a = std::sqrt(-4*p/3);
+            ctype b = std::acos(-0.5*q*std::sqrt(-27/(std::pow(p,3))));
+
+            for (int i=0;i<3; i++)
+                zeros.push_back(std::pow(-1,i+1)*a*std::cos((b+(1-i)*M_PI)/3) -quadratic/3);
+
+
+        } else {
+            // one single and one double zero
+
+            if (std::fabs(q)<1e-10) {
+                zeros.push_back(-quadratic/3);
+
+                if (p<-1e-10)
+                    zeros.push_back(std::sqrt(-p)-quadratic/3);
+
+            } else if (std::fabs(p)<1e-10) { // is this case correct?
+
+                double nu = std::pow(std::fabs(q),1.0/3.0) * ((q<-eps) ? -1 : 1);
+                zeros.push_back(nu-quadratic/3);
+
+            } else {
+                zeros.push_back(3*q/p - quadratic/3);
+                zeros.push_back(-1.5*q/p - quadratic/3);
+            }
+        }
+    }
+
+    int index = -1;
+    StaticVector<ctype,3> r;
+    std::vector<StaticVector<ctype,3> > lamb(zeros.size());
+    for (int i=0;i<zeros.size();i++) {
+
+        ctype nu=zeros[i];
+        // only look in the direction of the outer normals
+        if (nu<-1e-1) // allowed overlaps
+            continue;
+
+        if (index != -1)
+            if (nu > zeros[index]) // is this one really closer ?
+                continue;
+
+        r[2] = nu;
+
+        // the computation of the other components might lead to nan or inf
+        // if this happens use a different equation to compute them
+        StaticVector<ctype,3> c = (p2q+nu*n2).cross(p02+nu*(n02));
+        StaticVector<ctype,3> d = (p02 +nu*n02).cross(p12+nu*n12);
+        StaticVector<ctype,3> e = p2q+nu*n2;
+        StaticVector<ctype,3> f = p12+nu*n12;
+        StaticVector<ctype,3> g = p02+nu*n02;
+
+        // computation of the other components is unstable
+        for (int j=0;j<3; j++) {
+
+            r[1] = c[j]/d[j];
+
+            if (isnan(r[1]) || isinf(r[1]))
+                continue;
+
+            r[0] = -(e[(j+1)%3]+r[1]*f[(j+1)%3])/g[(j+1)%3];
+
+            if (!(isnan(r[0]) || isinf(r[0])) && (p2q +r[0]*p02 + r[1]*p12 + r[2]*r[0]*n02+r[2]*r[1]*n12+r[2]*n2).length()<1e-3)
+                break;
+
+            r[0] = -(e[(j+2)%3]+r[1]*f[(j+2)%3])/g[(j+2)%3];
+
+
+            if (!(isnan(r[0]) || isinf(r[0])) && (p2q + r[0]*p02 + r[1]*p12 + r[2]*r[0]*n02+r[2]*r[1]*n12+r[2]*n2).length()<1e-3)
+                break;
+
+        }
+        lamb[i] = r;
+        if (r[0] > -eps && r[1]> -eps && (r[0]+r[1] < 1+eps)) {
+            index = i;
+            x = r;
+        }
+    }
+
+    StaticVector<ctype,3> res = p2q + x[0]*p02 + x[1]*p12 + x[2]*x[0]*n02+x[2]*x[1]*n12+x[2]*n2;
+
+    if (res.length()<1e-6) {
+        if (index >= 0)
+            return true;
+
+        return false;
+    }
+
+    //std::cout<<"Direct solution failed, use Newton method\n";
+
+    StaticVector<ctype,3> oldX = x;
+
+    // Fix some initial value
+    // Some problems have two solutions and the Newton converges to the wrong one
+    x.assign(0.5);
+
+    for (int i=0; i<30; i++) {
 
         // compute Newton correction
-        StaticVector<ctype,3> Fxk = x[0]*(p0-p2) + x[1]*(p1-p2) + x[2]*x[0]*(n0-n2) + x[2]*x[1]*(n1-n2) + x[2]*n2 + p2;// - target;
-        Fxk[0] -= target[0];
-        Fxk[1] -= target[1];
-        Fxk[2] -= target[2];
+        StaticVector<ctype,3> Fxk = x[0]*(p0-p2) + x[1]*(p1-p2) + x[2]*x[0]*(n0-n2) + x[2]*x[1]*(n1-n2) + x[2]*n2 + p2 - target;
 
         StaticMatrix<ctype,3> FPrimexk(p0 - p2 + x[2]*(n0-n2),
                          p1 - p2 + x[2]*(n1-n2),
@@ -1107,17 +1278,24 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<c
         StaticMatrix<ctype,3> FPrimexkInv = FPrimexk.inverse();
 
         StaticVector<ctype,3> newtonCorrection; // = (-1) * FPrimexk.inverse() * Fxk;
-        
+
         FPrimexkInv.multMatrixVec(-Fxk, newtonCorrection);
 
         x += newtonCorrection;
 
     }
 
-    if (x[0]>=-eps && x[1]>=-eps && (x[0]+x[1] <=1+eps)){
+    StaticVector<ctype,3> res2 = p2q + x[0]*p02 + x[1]*p12 + x[2]*x[0]*n02+x[2]*x[1]*n12+x[2]*n2;
+
+    if (x[0]>-eps && x[1]>-eps && (x[0]+x[1] <1+eps)) {
+
+        // Newton did not converge either
+        if (res2.length()>1e-6)
+            return false;
+
         return true;
     } 
-        
+
     return false;
 }
 
@@ -1130,10 +1308,112 @@ bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>
 {
     int i;
 
+    ctype eps = 1e-6;
+    // solve a quadratic scalar equation for the distance parameter eta, then compute the barycentric coordinates from it
+
+    StaticVector<ctype,3> n10 = n1 - n0;
+    StaticVector<ctype,3> p10 = p1 - p0;
+    StaticVector<ctype,3> q10 = q1 - q0;
+    StaticVector<ctype,3> q10n10 = q10.cross(n10);
+    StaticVector<ctype,3> q10p10 = q10.cross(p10);
+    StaticVector<ctype,3> p0q0 = p0 - q0;
+
+    // quadratic coefficient
+    ctype quadratic = n0.dot(q10n10);
+
+    // linear coefficient
+    ctype linear = n0.dot(q10p10) + p0q0.dot(q10n10);
+
+    // constant coefficient
+    ctype constant = p0q0.dot(q10p10);
+
+    // save all zeros we find
+    std::vector<ctype> zeros;
+
+    if (std::fabs(quadratic)<1e-10 && std::fabs(linear)<1e-10) {
+        return false;
+    } else if (std::fabs(quadratic)<1e-10) {
+
+        // problem is linear
+        zeros.push_back(-constant/linear);
+
+    } else {
+
+        // problem is quadratic
+        ctype p = linear/quadratic;
+        ctype q = constant/quadratic;
+
+        ctype sqt = 0.25*p*p -q;
+
+        // no real solution
+        if (sqt<-1e-10)
+            return false;
+
+        zeros.push_back(-0.5*p + std::sqrt(sqt));
+        zeros.push_back(-0.5*p -std::sqrt(sqt));
+
+    }
+
+    int index = -1;
+    StaticVector<ctype,3> r;
+    std::vector<StaticVector<ctype,3> > lamb(zeros.size());
+    for (int i=0;i<zeros.size();i++) {
+
+        ctype eta=zeros[i];
+
+        // only look in the direction of the outer normals
+        if (eta<-1e-1)
+            continue;
+
+        r[2] = eta;
+
+        // the computation of the other components might lead to nan or inf
+        // if this happens use a different equation to compute them
+        StaticVector<ctype,3> c =(p0q0+eta*n0).cross(q10);
+        StaticVector<ctype,3> d =q10.cross(p10+eta*n10);
+        for (int j=0;j<3; j++) {
+
+            r[0] = c[j]/d[j];
+            if (isnan(r[0]) || isinf(r[0]))
+                continue;
+
+            r[1] = (p0q0[(j+1)%3]+eta*n0[(j+1)%3] + r[0]*(p10[(j+1)%3]+eta*n10[(j+1)%3]))/q10[(j+1)%3];
+
+            // computation of the other components can be instable
+            if (!(isnan(r[1]) || isinf(r[1])) && (p0q0 + r[0]*p10 + r[2]*n0 +r[2]*r[0]*n10 -r[1]*q10).length()<1e-3  )
+                break;
+
+            r[1] = (p0q0[(j+2)%3]+eta*n0[(j+2)%3] + r[0]*(p10[(j+2)%3]+eta*n10[(j+2)%3]))/q10[(j+2)%3];
+
+            // computation of the other components can be instable
+            if (!(isnan(r[1]) || isinf(r[1])) && (p0q0 + r[0]*p10 + r[2]*n0 + r[2]*r[0]*n10 -r[1]*q10).length()<1e-3)
+                break;
+
+        }
+        lamb[i] = r;
+        if (r[0] >= -eps && r[1]>= -eps && (r[0]<=1+eps)  && (r[1] <= 1+eps)) {
+            index = i;
+            x = r;
+        }
+
+    }
+
+    StaticVector<ctype,3> res = p0q0 + x[0]*p10 + x[2]*n0 + x[2]*x[0]*n10 -x[1]*q10;
+    if (res.length()<eps)
+    {
+        if (index >= 0)
+            return true;
+
+        return false;
+    }
+
+    // if the direct compuation failed, use a Newton method to compute at least one zero
+    StaticVector<ctype,3> oldX = x;
+
     // Fix some initial value
     // sometimes it only works when the initial value is an intersection...
     x[0] = x[1] = 0.5;
-    x[2] = 1;
+    x[2] = 0.5;
     StaticVector<ctype,3> newtonCorrection;
 
     for (i=0; i<30; i++) {
@@ -1147,17 +1427,25 @@ bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>
                          n0 + x[0]*(n1-n0));
 
         StaticMatrix<ctype,3> FPrimexkInv = FPrimexk.inverse();
-        
+
         FPrimexkInv.multMatrixVec(-Fxk, newtonCorrection);
 
         x += newtonCorrection;
 
     }
 
-    if (x[0]>=0 && x[0]<=1 && x[1]>=0 && x[1]<=1 && newtonCorrection.length()<1e-4){
-        return true;
-    } 
-           
+    StaticVector<ctype,3> res2 = p0q0 + x[0]*p10 + x[2]*n0 + x[2]*x[0]*n10 -x[1]*q10;
+    if (res2.length()<=eps) {
+
+        if (x[0]>=-eps && x[0]<=(1+eps) && x[1]>=-eps && x[1]<=(1+eps))
+            return true;
+
+        return false;
+
+    }
+
+    std::cout<<"Newton did not converge either!\n";
+
     return false;
 }
 
@@ -1174,45 +1462,45 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<ctype,3>& 
     e1.normalize();
     e2.normalize();
     bool parallel = fabs(StaticMatrix<ctype,3>(e1, e2, direction).det()) <eps;
-        
-        // Cramer's rule
-        
-        if (!parallel){
 
-            ctype det = StaticMatrix<ctype,3>(b-a, c-a, direction).det();
-            
-            // triangle and edge are not parallel
-            ctype nu = StaticMatrix<ctype,3>(b-a, c-a, p-a).det() / det;
+    // Cramer's rule
 
-            ctype lambda = StaticMatrix<ctype,3>(p-a, c-a, direction).det() / det;
-            if (lambda<-eps) return false;
+    if (!parallel){
 
-            ctype mu = StaticMatrix<ctype,3>(b-a, p-a, direction).det() / det;
-            if (mu<-eps) return false;
+        ctype det = StaticMatrix<ctype,3>(b-a, c-a, direction).det();
 
-            if (lambda + mu > 1+eps) 
-                return false;
-            else {
-                localCoords[0] = 1-lambda-mu;
-                localCoords[1] = lambda;
-                normalDist     = -nu;
+        // triangle and edge are not parallel
+        ctype nu = StaticMatrix<ctype,3>(b-a, c-a, p-a).det() / det;
 
-                return true;
-            }
+        ctype lambda = StaticMatrix<ctype,3>(p-a, c-a, direction).det() / det;
+        if (lambda<-eps) return false;
 
-        } else {
+        ctype mu = StaticMatrix<ctype,3>(b-a, p-a, direction).det() / det;
+        if (mu<-eps) return false;
 
-            // triangle and edge are parallel
-            ctype alpha = StaticMatrix<ctype,3>(b-a, c-a, p-a).det();
-            if (alpha<-eps || alpha>eps)
-                return false;
-            else {
-                printf("ray and triangle are parallel!\n");
-                return false;
+        if (lambda + mu > 1+eps)
+            return false;
+        else {
+            localCoords[0] = 1-lambda-mu;
+            localCoords[1] = lambda;
+            normalDist     = -nu;
 
-            }
-                
+            return true;
         }
+
+    } else {
+
+        // triangle and edge are parallel
+        ctype alpha = StaticMatrix<ctype,3>(b-a, c-a, p-a).det();
+        if (alpha<-eps || alpha>eps)
+            return false;
+        else {
+            printf("ray and triangle are parallel!\n");
+            return false;
+
+        }
+
+    }
 
 
 }
@@ -1225,7 +1513,7 @@ NodeIdx NormalProjector<ctype>::getCornerNode(const DomainTriangle<ctype>& cT, i
 
     for (size_t i=0; i<cT.nodes.size(); i++)
         if ((cT.nodes[i].isCORNER_NODE() || cT.nodes[i].isGHOST_NODE()) &&
-            cT.nodes[i].getCorner()==corner)
+                cT.nodes[i].getCorner()==corner)
             return i;
 
     return -1;
@@ -1280,36 +1568,36 @@ void NormalProjector<ctype>::setupEdgePointArrays()
         cT.edgePoints[0].clear();
         cT.edgePoints[1].clear();
         cT.edgePoints[2].clear();
-            
+
         for (j=0; j<cT.nodes.size(); j++) {
-                
+
             Node<ctype>& cN = cT.nodes[j];
 
             if (cN.isINTERIOR_NODE())
                 continue;
-                
+
             if (cN.isCORNER_NODE() || cN.isGHOST_NODE()) {
                 int corner = cN.getCorner();
                 cT.edgePoints[corner].insert(cT.edgePoints[corner].begin(), j);
                 cT.edgePoints[(corner+2)%3].push_back(j);
                 continue;
             } 
-                
+
             ctype lambda = cN.getDomainEdgeCoord();
             int domainEdge = cN.getDomainEdge();
             std::vector<int>& cEP = cT.edgePoints[domainEdge];
-            
+
             int idx = 0;
             while (idx<cEP.size() && cT.nodes[cEP[idx]].getDomainEdgeCoord(domainEdge)<lambda) {
                 idx++;
             }                
-            
+
             cEP.insert(cEP.begin()+idx, j);
-            
+
         }
 
     }   
-    
+
 }
 
 // ///////////////////////////////////////////////////////////////
@@ -1332,7 +1620,7 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<c
     if (std::abs(a) < 1e-10) {
         local = -c/b;
         //printf("mu:  %g,  old local %g\n", mu, ((q[0]-p0[0]) / (p1[0]-p0[0])));
-        
+
         return local >= 0 && local <= 1;
     }
 
@@ -1416,10 +1704,10 @@ rayIntersectsLine(const StaticVector<ctype, 2>& basePoint,
     if (std::abs(detinv)<1e-80)
         return false;
     detinv = 1/detinv;
-    
+
     x[0] = detinv*(mat[1][1]*rhs[0]-mat[0][1]*rhs[1]);
     x[1] = detinv*(mat[0][0]*rhs[1]-mat[1][0]*rhs[0]);
-    
+
     // x[0] is the distance, x[1] is the intersection point 
     // in local coordinates on the segment
     if (x[1]<0 || x[1] > 1)
