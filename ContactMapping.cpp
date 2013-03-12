@@ -50,6 +50,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
             psurface_.domainVertices[i][j] = coords1[i][j];
 
     // Build the domain segments
+    psurface_.domainSegments.clear();  // may contain old stuff from previous runs
     psurface_.domainSegments.resize(nTri1);
     for (int i=0; i<nTri1; i++) {
         psurface_.domainSegments[i].points[0] = tri1[i][0];
