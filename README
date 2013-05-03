@@ -1,23 +1,17 @@
 ##################################################################
 ##################################################################
 #
-# INSTALLATION AND PROGRAMMER INFORMATION FOR THE PARAMETRIZED
-# SURFACE EXTENSIONS FOR AMIRA
+# DOCUMENTATION OF THE NATIVE FILE FORMAT
 #
-# written by Oliver Sander on 12.18.01
-# revision by Oliver Sander on 26.6.09
+# written by Oliver Sander on 12.18.2001
+# revision by Oliver Sander on 26.6.2009
+# revision by Oliver Sander on 3.5.2013
 #
 ##################################################################
 ##################################################################
 
-This is a brief text explaining some details about the installation
-and use of parametrized surfaces in Amira and the separate
-standalone library that goes with it.  Details about the theory
-and the implementation can be found in my diploma thesis.
-
-This text contains:  A description of the file-format.
-
-
+This is a brief text explaining some details about the native
+file format for psurface objects.
 
 ############################################################
 # THE FILE FORMAT
@@ -26,8 +20,8 @@ This text contains:  A description of the file-format.
 Amira saves parametrized surfaces using a subformat of AmiraMesh.
 Since the files are usually very large, only the binary AmiraMesh
 format is used.  Files can be read and written by using the appropriate
-member functions of the Parametrization class.  For completeness'
-sake, we'll describe the exact format here:
+member functions of the Parametrization class.
+We'll describe the exact format here:
 
 - The ContentType needs to be 'Parametrization'
 
