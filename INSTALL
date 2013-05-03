@@ -1,0 +1,7 @@
+psurface uses the AutoTools.  To build and install psurface
+on your compute type
+
+autoreconf -isf
+./configure
+make
+make install
