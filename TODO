@@ -1,6 +1,3 @@
-  Standalone library
-----------------------
-
 - README
 
 - better interface
@@ -9,9 +6,6 @@
 
 - Factor out memory management of McSurfaceBase into a PoolAllocator class
 
-
-  Interna
--------------
 - McOctree::merge()
 
 - BFLocate: better edge handling
@@ -28,16 +22,18 @@
 
 - remove the blocking mechanism in VertexHeap.h
 
-- Remesher::createSurface sollte Patches exportieren
+- Remesher::createSurface should export patches
 
-  Bekannte Fehler
+
+
+  Known bugs
 ------------------
 
 - Vertex Relaxation
 
 - Normals and invertOrientation
 
-- Polygonize erzeugt doppelte Dreiecke!
+- Polygonize created duplicate triangles!
 
 
 
