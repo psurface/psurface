@@ -1,10 +1,3 @@
-/** \page mytodo Oli's ToDo-List
-
-########################################
-## TODO TODO TODO TODO TODO TODO TODO ##
-########################################
-
-
   Standalone library
 ----------------------
 
@@ -60,5 +53,3 @@
 
 - better triangle unflipping
 
-
-*/
