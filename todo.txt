@@ -5,25 +5,6 @@
 ########################################
 
 
-  Editor
-----------------------
-
-- better display for intersection test
-
-- undo for point removal
-
-- undo for point insertion
-
-- edge split
-
-- Der dihedral angle test scheint die Dreiecke nach dem GROESSTEN angrenzenden
-  Winkel zu sortieren.  Sollte es nicht der kleinste sein?  Im ZIB fragen.
-
-- Im Dihedral Angle Test doppelte Konfigurationen aussortieren.
-
-- Show Paths implementieren
-
-
   Standalone library
 ----------------------
 
@@ -48,8 +29,6 @@
 
 - getBoundingBox
 
-- triangle/corner-based data
-
 - topology-change check doesn't need to be checked beforehand
 
 - garbage collector for imagePos-array
@@ -65,26 +44,10 @@
 
 - Vertex Relaxation
 
-- Der Morpher
-
 - Normals and invertOrientation
-
-- saveNetwork doesn't save selection of ParametrizationView
-
-- ContactSurfaceView stürzt bei leerer Fläche ab
-
-- Im ParamEditor:  Selektion mittels Draw funktioniert nicht
 
 - Polygonize erzeugt doppelte Dreiecke!
 
-- saveNetwork speichert die Originalfläche mit
-
-  Invasive Stuff
------------------
-
-- extract partial parametrization
-
-- deleteHighlightedTriangles
 
 
   Simplifier
@@ -96,18 +59,6 @@
 - mapping to best convex polygon instead of circle? 
 
 - better triangle unflipping
-
-
-  DisplayParam
--------------------
-
-- ColorField
-
-- BumpMap
-
-- Darstellung der Oberflächennormalen im Remesher
-
-- Should handle ghost nodes without creating redundant node copies
 
 
 */
