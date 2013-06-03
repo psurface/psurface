@@ -22,7 +22,6 @@
 
 - remove the blocking mechanism in VertexHeap.h
 
-- Remesher::createSurface should export patches
 
 
 
