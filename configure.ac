@@ -1,4 +1,4 @@
-AC_INIT([psurface],[1.3.1],[sander@mi.fu-berlin.de])
+AC_INIT([psurface],[1.3.1],[sander@igpm.rwth-aachen.de])
 AC_PREREQ([2.60]) # FIXME: what version do we really need?
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_AUX_DIR([build-aux])
