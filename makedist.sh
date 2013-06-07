@@ -13,7 +13,7 @@ mkdir $BASENAME/doc
 # Copy the licence file
 cp COPYING                      $BASENAME
 
-cp TargetSurface.h.standalone   $BASENAME/include/psurface/TargetSurface.h
+cp TargetSurface.h              $BASENAME/include/psurface/TargetSurface.h
 
 cp psurfaceAPI.h                $BASENAME/include/psurface
 cp CircularPatch.h              $BASENAME/include/psurface
@@ -56,7 +56,7 @@ cp PSurface.cpp                 $BASENAME/src
 cp PlaneParam.cpp               $BASENAME/src
 cp PSurfaceFactory.cpp          $BASENAME/src
 cp SurfaceBase.cpp              $BASENAME/src
-cp TargetSurface.cpp.standalone $BASENAME/src/TargetSurface.cpp
+cp TargetSurface.cpp            $BASENAME/src/TargetSurface.cpp
 cp AmiraMeshIO.cpp              $BASENAME/src
 cp NormalProjector.cpp          $BASENAME/src
 cp IntersectionPrimitiveCollector.cpp $BASENAME/src
