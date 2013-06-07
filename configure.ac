@@ -1,6 +1,6 @@
 AC_INIT([psurface],[1.3.1],[sander@igpm.rwth-aachen.de])
 AC_PREREQ([2.60]) # FIXME: what version do we really need?
-AC_CONFIG_SRCDIR([src])
+AC_CONFIG_SRCDIR([.])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign silent-rules])
 AM_PROG_AR   # needed for some non-standard archivers
@@ -65,6 +65,5 @@ AS_IF([test "x$enable_assertions" = "xyes"],
 
 AC_CONFIG_FILES([
   Makefile
-  src/Makefile
 ])
 AC_OUTPUT
