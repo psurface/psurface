@@ -247,7 +247,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
             if (wasInserted) {
 
                 // store the path so we don't have to compute it twice
-                std::vector<PathVertex<ctype> > edgePath;
+                std::vector<PathVertex<ctype> > edgePath(1);
                 if (edgeCanBeInserted(domainNormals, from, to, projectedTo, edgePath))
                     insertEdge(factory, from, to, edgePath);
                 else {
@@ -493,9 +493,10 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ct
     NodeBundle curr = projectedTo[from];
     
     // initialize first node on the edge path
-    edgePath.push_back(PathVertex<ctype>(projectedTo[from]));
-    edgePath.back().type_ = psurface_->nodes(curr[0]).type;
-    edgePath.back().tri_ = projectedTo[from][0].tri;
+    edgePath.resize(1);
+    edgePath[0].bundle_ = curr;
+    edgePath[0].type_ = psurface_->nodes(curr[0]).type;
+    edgePath[0].tri_ = curr[0].tri;
 
     // If the two nodes are on the same triangle it is surely possible to enter the edge
     if (onSameTriangle(curr, projectedTo[to])) {
