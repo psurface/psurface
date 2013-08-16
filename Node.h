@@ -28,6 +28,9 @@ typedef int NodeIdx;
  * <li> <b> Intersection Nodes: </b> When an edge of a target triangle leaves a base triangle
  *      through an edge, then the intersection points are mapped onto target edge points.
  * <li> <b> Ghost Nodes: </b> Each base vertex that is not a Corner node, becomes a ghost node.
+ * <li> <b> Boundary Nodes: </b> If an edge leaves the image of the projection, e.g. when the domain boundary end
+ *          a boundary node is added at the leaving edge. These nodes store the target vertex index of the point
+ *          the edge is pointing to in the member "boundary".
  * </ul>
 
  \tparam ctype The type used for coordinates
@@ -99,10 +102,10 @@ public:
                    GHOST_NODE=4};
 
     ///
-    Node() : valid(true) {}
+    Node() : valid(true), boundary(-1) {}
         
     /** \brief  Construct node from the local coords, the index and the node type. */
-    Node(const StaticVector<ctype,2> &domain, int number, NodeType nodeType) : valid(true) {
+    Node(const StaticVector<ctype,2> &domain, int number, NodeType nodeType) : valid(true), boundary(-1) {
         setDomainPos(domain);
         nodeNumber = number;
 
@@ -116,11 +119,12 @@ public:
     ~Node() {}
 
     /** \brief Set local coordinates, node index and type. */
-    void setValue(const StaticVector<ctype,2> &domain, int nN, NodeType nodeType) {
+    void setValue(const StaticVector<ctype,2> &domain, int nN, NodeType nodeType, int targetIndex = -1) {
         setDomainPos(domain);
         nodeNumber = nN;
             
         type = nodeType;
+        boundary = targetIndex;
     }
 
     void makeInteriorNode() {
@@ -166,6 +170,11 @@ public:
         assert(isINTERSECTION_NODE());
         nbs.resize(1);
         nbs[0] = n;
+    }
+
+    /** \brief Is boundary node, i.e. an intersection node on an edge that leaves the image of the projection. */
+    bool isBoundary() const {
+        return (boundary>=0);
     }
 
     /** \brief Check if the node is on a segment given by local coords of the endpoints. */
@@ -412,6 +421,7 @@ public:
         }
         
         printf(" number %d", nodeNumber);
+        printf(" is Boundary %d", boundary);
         
         if (isOnEdge())
             std::cout << "  edge: " << getDomainEdge() << "  edgePos " << getDomainEdgePosition() << std::endl;
@@ -454,6 +464,9 @@ public:
 
     //! Index of target vertex
     unsigned int nodeNumber:28;
+
+    //! This value is set to the target vertex index for boundary nodes and -1 else
+    int boundary;
 
 public:
     //! Vector containing all nodes that are connected to this one.
