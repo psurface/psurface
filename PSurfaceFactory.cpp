@@ -215,6 +215,29 @@ NodeBundle PSurfaceFactory<dim,ctype>::addIntersectionNodePair(int tri1, int tri
 
 // BUG: The node needs to be entered in the edgepoint arrays
 template <int dim, class ctype>
+NodeBundle PSurfaceFactory<dim,ctype>::addBoundaryNode(int tri, const StaticVector<ctype,2>& dP,
+                                                int edge, const StaticVector<ctype,3>& range, int targetVert)
+{
+    // We return the pair of new nodes
+    NodeBundle result(1);
+    result[0].tri = tri;
+
+    DomainTriangle<ctype>& cT = psurface_->triangles(tri);
+
+    psurface_->iPos.push_back(range);
+    int nodeNumber = psurface_->iPos.size()-1;
+
+    cT.nodes.push_back(Node<ctype>());
+
+    result[0].idx = cT.nodes.size()-1;
+    cT.nodes.back().setValue(dP, nodeNumber, Node<ctype>::INTERSECTION_NODE, targetVert);
+    cT.nodes.back().setDomainEdge(edge);
+
+    return result;
+}
+
+// BUG: The node needs to be entered in the edgepoint arrays
+template <int dim, class ctype>
 NodeIdx PSurfaceFactory<dim,ctype>::addTouchingNode(int tri, const StaticVector<ctype,2>& dP, int edge, int nodeNumber)
 {
     DomainTriangle<ctype>& cT = psurface_->triangles(tri);

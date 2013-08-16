@@ -70,6 +70,9 @@ public:
                                     const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
                                     int edge1, int edge2, const StaticVector<ctype,3>& range);
 
+    NodeBundle addBoundaryNode(int tri, const StaticVector<ctype,2>& dP, int edge,
+                            const StaticVector<ctype,3>& range, int targetVert);
+
     NodeIdx addTouchingNode(int tri, const StaticVector<ctype,2>& dP, int edge, int nodeNumber);
 
     NodeBundle addTouchingNodePair(int tri1, int tri2,
