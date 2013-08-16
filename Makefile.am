@@ -1,3 +1,4 @@
+bin_PROGRAMS =  hdf5IO
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
 	$(top_srcdir)/Box.h \
@@ -53,6 +54,76 @@ libpsurface_la_SOURCES= \
 	PSurfaceSmoother.cpp \
 	SurfaceBase.cpp \
 	TargetSurface.cpp \
-	Triangulator.cpp
-
+	Triangulator.cpp 
 AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
+hdf5IO_SOURCES = hdf5IO.h\
+		 hdf5test.cpp\
+		 AmiraMeshIO.cpp \
+		 AmiraMeshIO.h \
+	CircularPatch.cpp \
+	ContactMapping.cpp \
+	DomainPolygon.cpp \
+	Domains.cpp \
+	HxParamToolBox.cpp \
+	IntersectionPrimitiveCollector.cpp \
+	Iterators.cpp \
+	NormalProjector.cpp \
+	PlaneParam.cpp \
+	PSurface.cpp \
+	PSurfaceFactory.cpp \
+	PSurfaceSmoother.cpp \
+	SurfaceBase.cpp \
+	TargetSurface.cpp \
+	Triangulator.cpp \
+	$(top_srcdir)/Box.h \
+	$(top_srcdir)/CircularPatch.h \
+	$(top_srcdir)/ContactMapping.h \
+	$(top_srcdir)/DirectionFunction.h \
+	$(top_srcdir)/DomainPolygon.h \
+	$(top_srcdir)/Domains.h \
+	$(top_srcdir)/EdgeIntersectionFunctor.h \
+	$(top_srcdir)/GlobalNodeIdx.h \
+	$(top_srcdir)/HxParamToolBox.h \
+	$(top_srcdir)/IntersectionPrimitiveCollector.h \
+	$(top_srcdir)/IntersectionPrimitive.h \
+	$(top_srcdir)/MultiDimOctree.h \
+	$(top_srcdir)/NodeBundle.h \
+	$(top_srcdir)/Node.h \
+	$(top_srcdir)/NormalProjector.h \
+	$(top_srcdir)/PlaneParam.h \
+	$(top_srcdir)/PointIntersectionFunctor.h \
+	$(top_srcdir)/psurfaceAPI.h \
+	$(top_srcdir)/PSurfaceFactory.h \
+	$(top_srcdir)/PSurface.h \
+	$(top_srcdir)/PSurfaceSmoother.h \
+	$(top_srcdir)/QualityRequest.h \
+	$(top_srcdir)/SparseMatrix.h \
+	$(top_srcdir)/StaticMatrix.h \
+	$(top_srcdir)/StaticVector.h \
+	$(top_srcdir)/SurfaceBase.h \
+	$(top_srcdir)/SurfaceParts.h \
+	$(top_srcdir)/SurfacePath.h \
+	$(top_srcdir)/SurfacePathSet.h \
+        $(top_srcdir)/TargetSurface.h \
+	$(top_srcdir)/Triangulator.h \
+	$(top_srcdir)/VertexHeap.h
+hdf5IO_CPPFLAGS = $(AM_CPPFLAGS) \
+	$(DUNEMPICPPFLAGS) \
+	$(AMIRAMESH_CPPFLAGS) \
+	-I/usr/local/hdf5/include/
+hdf5IO_LDADD = \
+	$(DUNE_LDFLAGS) $(DUNE_LIBS) \
+	$(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) \
+	/usr/local/hdf5/lib/libhdf5_cpp.a \
+	/usr/local/hdf5/lib/libhdf5_cpp.la \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.a \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.la \
+	/usr/local/hdf5/lib/libhdf5_cpp.so.8.0.0 \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.so.8.0.0 \
+	$(DUNEMPILIBS)	\
+	$(LDADD)
+hdf5IO_LDFLAGS = $(AM_LDFLAGS) \
+	$(DUNEMPILDFLAGS) \
+	$(AMIRAMESH_LDFLAGS) \
+	-L/usr/local/hdf5/lib
+	$(DUNE_LDFLAGS)
