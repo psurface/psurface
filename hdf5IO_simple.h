@@ -36,7 +36,7 @@ namespace psurface{
  */
 template<class ctype,int dim>
 class Hdf5IO{
-   typedef typename PSurface<2,ctype>::Patch PATCH;
+  typedef typename PSurface<2,ctype>::Patch PATCH;
   public:
   ///The psurface object we need to read
   PSurface<dim,ctype>* par;
@@ -44,9 +44,6 @@ class Hdf5IO{
   //@{
   ///the position of corner nodes in global coordinate
   std::vector<StaticVector<ctype,3> > baseGridVertexCoordsArray;
-  ///the position of other nodes in global coordinate
-  //namely, interior_node, intersection_node, touching_node. we do not consider ghost node
-  std::vector<StaticVector<ctype,3> > nodePositions;
   ///the position of nodes in local coordinate on each triangle
   std::vector<StaticVector<ctype,2> > domainPositions;
 
@@ -54,14 +51,10 @@ class Hdf5IO{
   std::vector<StaticVector<int, 3> > baseGridTriArray;
 
   ///edges
-  std::vector<StaticVector<int,2> > parameterEdgeArray;
   std::vector<StaticVector<int,2> > parameterEdgeArrayLocal;
 
   //edgepoints
   std::vector<int>  edgePointsArray;
-
-  ///nodetype
-  std::vector<int> nodeType;
 
   ///nodeNumber
   std::vector<int> nodeNumber;
@@ -69,11 +62,7 @@ class Hdf5IO{
   ///patches
   std::vector<PATCH> patches;
 
-
-  ///triangle index;
-  std::vector<int> triId;
   ///coordinates of the image position
-  std::vector<StaticVector<ctype,3> > imagePos;
   std::vector<StaticVector<ctype,3> > iPos;
   ///local information on planer graphs
   std::vector<int> numNodesAndEdgesArray;
@@ -89,16 +78,6 @@ class Hdf5IO{
   ///total number of triangles and edges
   int nvertices;
 
-  /**@name data structure to store psurface nodes, triangles and edges on target surface*/
-  //@{
-  //vertices
-  std::vector<StaticVector<ctype,3> > VertexCoordsArray;
-  ///triangles
-  std::vector<StaticVector<int, 3> > TriArray;
-  int nV;
-  int nTri;
-  //@}
-  //
   ///read data array from hdf5 data structure into the data arrary in hdf5IO
   bool readHdf5Data(const char* filename)
   {
@@ -195,22 +174,6 @@ class Hdf5IO{
               for(i = 0; i < 2; i++)
                   (parameterEdgeArrayLocal[j])[i] = lparam[2*j + i];
 
-          //nodetype
-          dataset = H5Dopen(file,"/NodeType", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
-          int nodetype[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-             H5P_DEFAULT,nodetype);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
-          nodeType.resize(nvertices);
-          for(i = 0; i < nvertices;i++) nodeType[i] = nodetype[i];
-
           //nodeNumber
           dataset = H5Dopen(file,"/NodeNumber",H5P_DEFAULT);
           filespace = H5Dget_space(dataset);
@@ -263,23 +226,6 @@ class Hdf5IO{
           numNodesAndEdgesArray.resize(11*numTriangles);
           for(i = 0; i < 11*numTriangles;i++)
               numNodesAndEdgesArray[i] = nodearray[i];
-
-          //triangle index
-          dataset = H5Dopen(file,"/TriangleIndx", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
-          int tridx[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-               H5P_DEFAULT,tridx);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
-          triId.resize(numNodes);
-          for(i = 0; i < numNodes;i++)
-              triId[i] = tridx[i];
 
           //local position of nodes on triangle
           dataset = H5Dopen(file,"/LocalNodePosition", H5P_DEFAULT);
@@ -421,23 +367,12 @@ class Hdf5IO{
     free(topo_array);
 
     ///local position on trianlge
-    int *tri_n = (int *) malloc(numNodes * sizeof(int));
     float *dp = (float *) malloc(2*numNodes * sizeof(float));
     for(i = 0; i < numNodes; i++)
     {
-        tri_n[i] = triId[i];
         dp[2*i] = (domainPositions[i])[0];
         dp[2*i+1] = (domainPositions[i])[1];
     }
-    //triangle index
-    dims[0] = numNodes;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/TriangleIndx", H5T_NATIVE_INT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, tri_n);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
     //local position of nodes on triangle
     dims[0] = numNodes*2;
     dataspace_id = H5Screate_simple(1, dims, NULL);
@@ -487,24 +422,6 @@ class Hdf5IO{
     status = H5Sclose(dataspace_id);
     free(patches_vec);
 
-    // create the scalar data on triangle
-    int *patch = (int *) malloc(ncells * sizeof(int));
-    for (i = 0; i < numTriangles; i++)
-      patch[i] = numNodesAndEdgesArray[11*i+4];
-    for(i = 0; i < numParamEdges;i++)
-        patch[i + numTriangles] = 0;
-
-    //patches
-    dims[0] = numTriangles + numParamEdges;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/patches", H5T_NATIVE_INT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, patch);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
-    free(patch);
-
     int *edgepointsarray = (int*)malloc(edgePointsArray.size()*sizeof(int));
     for(i = 0; i < edgePointsArray.size();i++)
       edgepointsarray[i] = edgePointsArray[i];
@@ -518,25 +435,6 @@ class Hdf5IO{
     status = H5Dclose(dataset_id);
     status = H5Sclose(dataspace_id);
     free(edgepointsarray);
-
-    //create the scalar data on nodes
-    //nodetype
-    int *nodetype = (int *) malloc(nvertices * sizeof(int));
-    for (i = 0; i < nvertices; i++)
-    {
-      nodetype[i] = nodeType[i];
-    }
-
-    // nodestype
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/NodeType", H5T_NATIVE_INT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, nodetype);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
-    free(nodetype);
 
     //node number
     int *nodenumber = (int*)malloc(numNodes*sizeof(int));
@@ -554,47 +452,6 @@ class Hdf5IO{
     status = H5Sclose(dataspace_id);
     free(nodenumber);
 
-    //image position
-    float* imageX = (float *) malloc(nvertices * sizeof(float));
-    float* imageY = (float *) malloc(nvertices * sizeof(float));
-    float* imageZ = (float *) malloc(nvertices * sizeof(float));
-    for (i = 0; i< nvertices; i++)
-    {
-      imageX[i] = (imagePos[i])[0];
-      imageY[i] = (imagePos[i])[1];
-      imageY[i] = (imagePos[i])[2];
-    }
-    //images
-    //x
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/imageX", H5T_NATIVE_FLOAT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, imageX);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
-    //y
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/imageY", H5T_NATIVE_FLOAT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, imageY);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
-    //z
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/imageZ", H5T_NATIVE_FLOAT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, imageZ);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
-    free(imageX);
-    free(imageY);
-    free(imageZ);
 
     //ipos
     float *ipos = (float *) malloc(iPos.size()*3*sizeof(float));
@@ -651,63 +508,6 @@ class Hdf5IO{
     return 0;
   };
 
-  ///writhe the xdmf file which store the structure information of hdf5 file.
-  void writeXdmf(const char* xdf_filename, const char* hdf_filename)
-  {
-    FILE *xmf = 0;
-    xmf = fopen(xdf_filename, "w");
-    fprintf(xmf, "<?xml version=\"1.0\" ?>\n");
-    fprintf(xmf, "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n");
-    fprintf(xmf, "<Xdmf Version=\"2.0\">\n");
-    fprintf(xmf, "<Domain>\n");
-    fprintf(xmf, "<Grid Name=\"psurface\" GridType=\"Uniform\">\n");
-    fprintf(xmf, "<Topology TopologyType=\"Mixed\" NumberOfElements=\"%d\">\n", numTriangles + numParamEdges);
-    fprintf(xmf, "<DataItem Dimensions = \"%d\" NumberType=\"int\" Format=\"HDF\">\n",  4*numTriangles + 4*numParamEdges);
-    fprintf(xmf, "%s:/Topo\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "</Topology>\n");
-    fprintf(xmf, "<Geometry GeometryType=\"X_Y_Z\">\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"Float\" Format=\"HDF\">\n", nvertices);
-    fprintf(xmf, "%s:/X\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"Float\" Format=\"HDF\">\n", nvertices);
-    fprintf(xmf, "%s:/Y\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"Float\" Format=\"HDF\">\n", nvertices);
-    fprintf(xmf, "%s:/Z\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "</Geometry>\n");
-    fprintf(xmf, "<Attribute Name=\"Patches\" AttributeType=\"Scalar\" Center=\"Cell\">\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"int\" Format=\"HDF\">\n", ncells);
-    fprintf(xmf, "%s:/patches\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "</Attribute>\n");
-    fprintf(xmf, "<Attribute Name=\"Nodetype\" AttributeType=\"Scalar\" Center=\"Node\">\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"int\" Format=\"HDF\">\n", nvertices);
-    fprintf(xmf, "%s:/NodeType\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "</Attribute>\n");
-    fprintf(xmf, "<Attribute Name=\"imageX\" AttributeType=\"Scalar\" Center=\"Node\">\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"float\" Format=\"HDF\">\n", nvertices);
-    fprintf(xmf, "%s:/imageX\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "</Attribute>\n");
-    fprintf(xmf, "<Attribute Name=\"imageY\" AttributeType=\"Scalar\" Center=\"Node\">\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"float\" Format=\"HDF\">\n", nvertices);
-    fprintf(xmf, "%s:/imageY\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "</Attribute>\n");
-    fprintf(xmf, "<Attribute Name=\"imageZ\" AttributeType=\"Scalar\" Center=\"Node\">\n");
-    fprintf(xmf, "<DataItem Dimensions=\"%d\" NumberType=\"float\" Format=\"HDF\">\n", nvertices);
-    fprintf(xmf, "%s:/imageZ\n", hdf_filename);
-    fprintf(xmf, "</DataItem>\n");
-    fprintf(xmf, "</Attribute>\n");
-    fprintf(xmf, "</Grid>\n");
-    fprintf(xmf, "</Domain>\n");
-    fprintf(xmf, "</Xdmf>\n");
-    fclose(xmf);
-  };
-
   ///Read information from the psurface object and stored it in local vector containers in hdf5Writer
   void update()
   {
@@ -719,7 +519,6 @@ class Hdf5IO{
     for (size_t i=0; i< par->getNumVertices(); i++)
     {
       baseGridVertexCoordsArray.push_back(par->vertices(i));
-      nodeType.push_back(CORNER_NODE);
     }
 
     ///base grid triangles
@@ -734,21 +533,6 @@ class Hdf5IO{
     ///patch
     patches.resize(par->patches.size());
     for (size_t i=0; i<par->patches.size(); i++)  patches[i] = par->patches[i];
-    
-    ///imagePosition on vertices
-    std::vector<StaticVector<float,3> > imagearray;
-    imagearray.resize(numVertices);
-    for (size_t i=0; i<par->getNumTriangles(); i++)
-    {
-      for (int j=0; j<3; j++)
-      {
-        vertices[j] = par->triangles(i).vertices[j];
-        imagearray[vertices[j]] = par->imagePos(i,j);
-      }
-    }
-
-    for (size_t i=0; i< par->getNumVertices(); i++)
-      imagePos.push_back(imagearray[i]);
 
     ///nodes image positions(only for intersection points)
     for(i = 0; i < par->iPos.size();i++) iPos.push_back(par->iPos[i]);
@@ -797,30 +581,18 @@ class Hdf5IO{
     StaticVector<float,3> imagepos;
 
     //plane graph on each base grid triangle, saved as a list of nodes and a list of edges.
-    int arrayIdx           = 0;
     int edgeArrayIdx       = 0;
     int edgePointsArrayIdx = 0;
     ctype cCoords[3][3];
 
-    triId.resize(numNodes);
-    imagePos.resize(numVertices + numNodes);
-    nodeType.resize(numVertices + numNodes);
-    nodePositions.resize(numNodes);
     domainPositions.resize(numNodes);
     nodeNumber.resize(numNodes);
-    parameterEdgeArray.resize(numParamEdges);
     parameterEdgeArrayLocal.resize(numParamEdges);
     edgePointsArray.resize(numEdgePoints);
     for(i = 0; i < numVertices; i++) nodeType[i] = CORNER_NODE;
     for (i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
-
-        std::vector<int> newIdx(cT.nodes.size());
         std::vector<int> newIdxlocal(cT.nodes.size());
-        for(j = 0; j < 3; j++)
-          for(k = 0; k < 3; k++)
-            cCoords[j][k] = par->vertices(par->triangles(i).vertices[j])[k];
-
         // the cornerNode are not saved, because everything about them
         // can be deduced from the base grid
         // the three remaining types are saved separately, in order to avoid
@@ -836,17 +608,8 @@ class Hdf5IO{
         int localArrayIdx = 3;
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
             if (cT.nodes[cN].isINTERSECTION_NODE()){
-
                 domainPositions[arrayIdx] = cT.nodes[cN].domainPos();
-                for(k = 0; k < 3; k++)
-                (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
-                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
-                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx+ numVertices] = INTERSECTION_NODE;
-                triId[arrayIdx] = i;
-                imagePos[arrayIdx+ numVertices] = par->imagePos(i,cN);
-                newIdx[cN] = arrayIdx;
                 newIdxlocal[cN] = localArrayIdx;
                 arrayIdx++;
                 localArrayIdx++;
@@ -856,17 +619,8 @@ class Hdf5IO{
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isTOUCHING_NODE()){
-
                 domainPositions[arrayIdx] = cT.nodes[cN].domainPos();
-                for(k = 0; k < 3; k++)
-                (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
-                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
-                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx+ numVertices] = TOUCHING_NODE;
-                imagePos[arrayIdx+ numVertices] = par->imagePos(i,cN);
-                triId[arrayIdx] = i;
-                newIdx[cN] = arrayIdx;
                 newIdxlocal[cN] = localArrayIdx;
                 arrayIdx++;
                 localArrayIdx++;
@@ -876,20 +630,9 @@ class Hdf5IO{
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isINTERIOR_NODE()){
-
                 domainPositions[arrayIdx] = cT.nodes[cN].domainPos();
-                for(k = 0; k < 3; k++)
-                (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
-                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
-                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx+ numVertices] = INTERIOR_NODE;
-                triId[arrayIdx] = i;
-                imagePos[arrayIdx+ numVertices] = par->imagePos(i,cN);
-                newIdxlocal[cN] = INTERIOR_NODE;
-                newIdx[cN] = arrayIdx;
                 newIdxlocal[cN] = localArrayIdx;
-
                 arrayIdx++;
                 localArrayIdx++;
             }
@@ -899,10 +642,6 @@ class Hdf5IO{
         for (cE = cT.firstUndirectedEdge(); cE.isValid(); ++cE){
             if(cE.isRegularEdge())
             {
-                //////////////////////////////////////////////////////
-                parameterEdgeArray[edgeArrayIdx][0] = newIdx[cE.from()] + numVertices;
-                parameterEdgeArray[edgeArrayIdx][1] = newIdx[cE.to()] + numVertices;
-                //////////////////////////////////////////////////////
                 parameterEdgeArrayLocal[edgeArrayIdx][0] = newIdxlocal[cE.from()];
                 parameterEdgeArrayLocal[edgeArrayIdx][1] = newIdxlocal[cE.to()];
                 edgeArrayIdx++;
@@ -929,7 +668,6 @@ class Hdf5IO{
     ///(Assume) Target surface already exists
     factory.setTargetSurface(surf);
 
-    //set param for psurface
     AmiraMesh am;
     am.parameters.set("ContentType", "Parametrization");
     am.parameters.remove(am.parameters[0]);
@@ -958,8 +696,6 @@ class Hdf5IO{
     for (size_t i=0; i<psurf->iPos.size(); i++)
       for (int j=0; j<3; j++)
         psurf->iPos[i][j] =((iPos[i])[j]);
-
-
 
     ///insert trianlges and the plain graph onto it.
     int edgeCounter=0, edgePointCounter=0;
@@ -1036,6 +772,7 @@ class Hdf5IO{
     return true;
   };
 };
+
 template <class ctype>
 class Hdf5IO<ctype,1>
 {
