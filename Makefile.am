@@ -15,6 +15,7 @@ include_psurface_HEADERS = \
 	$(top_srcdir)/NodeBundle.h \
 	$(top_srcdir)/Node.h \
 	$(top_srcdir)/NormalProjector.h \
+	$(top_srcdir)/PathVertex.h \
 	$(top_srcdir)/PlaneParam.h \
 	$(top_srcdir)/PointIntersectionFunctor.h \
 	$(top_srcdir)/psurfaceAPI.h \
