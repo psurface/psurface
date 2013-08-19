@@ -44,6 +44,28 @@ private:
     const std::string str_;
 };
 
+/** \brief An Exception that is thrown whenever during the insertion of a target edge
+ *         the inverse projection is leaving the image of the projection.
+ */
+class EdgeLeavingImageException: public std::exception
+{
+public:
+    EdgeLeavingImageException(std::string str) :
+        str_(str)
+    {}
+
+    virtual const char* what() const throw()
+    {
+        return str_.c_str();
+    }
+
+    virtual ~EdgeLeavingImageException() throw()
+    {}
+
+private:
+    const std::string str_;
+};
+
 template <class ctype>
 void NormalProjector<ctype>::project(const Surface* targetSurface,
                                      const DirectionFunction<3,ctype>* domainDirection,
@@ -89,6 +111,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     // corresponding image
     std::vector<bool> vertexHasBeenHandled(psurface_->getNumVertices(), false);
 
+    int target = 0;
     // Loop over the vertices of the target surface
     for (size_t i=0; i<targetSurface->points.size(); i++) {
 
@@ -158,11 +181,12 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
             factory.insertTargetVertexMapping(i, bestTri, bestDPos, projectedTo[i], domainVertex);
             if (domainVertex >= 0)
                 vertexHasBeenHandled[domainVertex] = true;
+            target++;
 
         }
         
     }
-
+    std::cout<<target<<" target nodes added\n";
     // ///////////////////////////////////////////////////////////////////
     //   Place ghost nodes at the vertices of the domain surface
     // ///////////////////////////////////////////////////////////////////
@@ -171,7 +195,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     // all triangles close to a given ray.  Only those triangles should then be checked.
     // We need this quickly, because it is mentioned in the psurface papers, which
     // has already been submitted.
-
+    int ghost = 0;
     for (int i=0; i<psurface_->getNumVertices(); i++) {
 
         // Has the vertex been hit by the projection of a target vertex already?
@@ -214,10 +238,12 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
         }
 
         // Set ghost node mapping to the closest triangle intersected by the normal ray
-        if (bestTri != -1)
+        if (bestTri != -1) {
+            ghost++;
             factory.insertGhostNode(i, bestTri, bestDPos);
-
+        }
     }
+    std::cout<<ghost<<" ghost nodes added\n";
 
     // ////////////////////////////////////////////////////////////
     // Insert the edges.
@@ -244,14 +270,31 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
             // edge has not been visited before.
             bool wasInserted = visitedEdges.insert(std::make_pair(min,max)).second;
 
+            // If both nodes are not in the preimage we cannot insert the edge
+            if (projectedTo[from].size() == 0 && projectedTo[to].size() == 0)
+                continue;
+
             if (wasInserted) {
+
+                // if only one node is projected then start from that one so we can add
+                // the boundary node target vertex index into the last intersection node
+                if (projectedTo[from].size()==0) {
+                    int dummy = from;
+                    from = to;
+                    to = dummy;
+                }
 
                 // store the path so we don't have to compute it twice
                 std::vector<PathVertex<ctype> > edgePath(1);
+                try {
                 if (edgeCanBeInserted(domainNormals, from, to, projectedTo, edgePath))
                     insertEdge(factory, from, to, edgePath);
-                else {
-                    //std::cout << "Skipping edge (" << from << ", " << to << ") ..." << std::endl;
+                else
+                    //std::cout<< "Skipping edge (" << from << ", " << to << ") ..." << std::endl;
+                    // catch the Leaving edge exception and add the edge as far as possible
+                } catch (EdgeLeavingImageException e) {
+                    //std::cout<<"Exception caught! "<<e.what()<<std::endl;
+                    insertEdge(factory, from, to, edgePath);
                 }
             }
 
@@ -377,7 +420,38 @@ void NormalProjector<ctype>::insertEdge(PSurfaceFactory<2,ctype>& factory,
                                         int from, int to, 
                                         std::vector<PathVertex<ctype> >& edgePath)
 {
-    
+    // if the last node on the edge path is not a target vertex then add a boundary node
+    if (edgePath.back().lambda_<1) {
+
+        PathVertex<ctype>& node = edgePath.back();
+
+        //by now this should only happen for intersection nodes
+        assert(node.type_ == Node<ctype>::INTERSECTION_NODE);
+
+        // add a fake intersection node
+        const Surface* surf = psurface_->surface;
+
+        // the image point of that edge path point
+        StaticVector<ctype,3> image;
+
+        // trick: within Amira this is assignment from a McVec3f
+        for (int j=0; j<3; j++)
+            image[j] = surf->points[from][j] + node.lambda_*(surf->points[to][j]-surf->points[from][j]);
+
+        // get neighboring triangle
+        int tri = node.tri_;
+
+        // edge the node lives on
+        int edge = node.edge_;
+
+        // the domain position of the new intersection node on the two triangles
+        ctype mu = node.locEdge_;
+        StaticVector<ctype,2> dom((edge==0)*(1-mu) + (edge==2)*mu, (edge==0)*mu + (edge==1)*(1-mu));
+
+        // now that we created the node, we can add the bundle to the edge path
+        node.bundle_ = factory.addBoundaryNode(tri, dom, edge, image, to);
+    }
+
     // start inserting the edge path by starting at the "to" node
     while(edgePath.size() > 1) 
     {
@@ -486,8 +560,6 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ct
                                         const std::vector<NodeBundle>& projectedTo, 
                                         std::vector<PathVertex<ctype> >& edgePath)
 {
-    if (projectedTo[from].size() == 0 || projectedTo[to].size() == 0)
-        return false;
 
     int enteringEdge=-1;
     NodeBundle curr = projectedTo[from];
@@ -497,12 +569,14 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ct
     edgePath[0].bundle_ = curr;
     edgePath[0].type_ = psurface_->nodes(curr[0]).type;
     edgePath[0].tri_ = curr[0].tri;
+    edgePath[0].lambda_ = 0.0;
 
     // If the two nodes are on the same triangle it is surely possible to enter the edge
     if (onSameTriangle(curr, projectedTo[to])) {
 
         edgePath.push_back(PathVertex<ctype>(projectedTo[to]));
         edgePath.back().type_ = psurface_->nodes(projectedTo[to][0]).type;
+        edgePath.back().lambda_ = 1.0;
 
         // set triangle the both are contained in,
         // if there is more than one we'll handle it later
@@ -537,6 +611,7 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ct
             edgePath.back().tri_ = currTri;
             edgePath.back().type_ = psurface_->nodes(projectedTo[to][0]).type;
             edgePath.back().enteringEdge_ = enteringEdge;
+            edgePath.back().lambda_ = 1.0;
             return true;
         }
 
@@ -546,6 +621,7 @@ bool NormalProjector<ctype>::edgeCanBeInserted(const std::vector<StaticVector<ct
             edgePath.push_back(PathVertex<ctype>(projectedTo[to]));
             edgePath.back().type_ = psurface_->nodes(projectedTo[to][0]).type;
             edgePath.back().enteringEdge_ = enteringEdge;
+            edgePath.back().lambda_ = 1.0;
             // set triangle the both are contained in,
             // if there is more than one we'll handle it later
             for (int i=0; i<curr.size(); i++)
@@ -659,9 +735,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
         const Surface* surf = psurface_->surface;
 
         StaticVector<ctype,3> targetFrom, targetTo;
-        for (int j=0; j<3; j++) {
-            targetFrom[j] = surf->points[from][j];
-            targetTo[j]   = surf->points[to][j];
+        for (int k=0; k<3; k++) {
+            targetFrom[k] = surf->points[from][k];
+            targetTo[k]   = surf->points[to][k];
         }
 
         if (edgeIntersectsNormalFan(targetFrom, targetTo,
@@ -686,10 +762,17 @@ bool NormalProjector<ctype>::testInsertEdgeFromInteriorNode(const std::vector<St
                 // get neighboring triangle
                 int neighboringTri = psurface_->getNeighboringTriangle(currTri, i);
                     
-                // if no neighboring triangle --> error
+                // if no neighboring triangle then we add a boundary node
                 if (neighboringTri==-1) {
-                    // Error: Normal images leaves domain surface!
+
+                    currType = Node<ctype>::INTERSECTION_NODE;
+                    lambda   = newLambda;
+
+                    // add node on the path to the array
+                    edgePath.push_back(PathVertex<ctype>(currTri,i,mu,currType,NodeBundle(),newLambda,enteringEdge)); 
+                    throw(EdgeLeavingImageException("In [testInsertEdgeFromInteriorNode] Edge leaving the image!\n"));
                     return false;
+
                 }
                     
                 // add intersection nodes on both sides
@@ -781,9 +864,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
         const Surface* surf = psurface_->surface;
 
         StaticVector<ctype,3> targetFrom, targetTo;
-        for (int j=0; j<3; j++) {
-            targetFrom[j] = surf->points[from][j];
-            targetTo[j]   = surf->points[to][j];
+        for (int k=0; k<3; k++) {
+            targetFrom[k] = surf->points[from][k];
+            targetTo[k]   = surf->points[to][k];
         }
 
         if (edgeIntersectsNormalFan(targetFrom, targetTo,
@@ -808,8 +891,15 @@ bool NormalProjector<ctype>::testInsertEdgeFromIntersectionNode(const std::vecto
                 // get neighboring triangle
                 int neighboringTri = psurface_->getNeighboringTriangle(currTri, i);
                     
-                // if no neighboring triangle --> error
+                // if no neighboring triangle then we add a boundary node
                 if (neighboringTri==-1) {
+
+                    currType = Node<ctype>::INTERSECTION_NODE;
+                    lambda   = newLambda;
+
+                    // add node on the path to the array
+                    edgePath.push_back(PathVertex<ctype>(currTri,i,mu,currType,NodeBundle(),newLambda,enteringEdge)); 
+                    throw(EdgeLeavingImageException("In [testInsertEdgeFromIntersectionNode] Edge leaving the image!\n"));
                     // Error: Normal images leaves domain surface!
                     return false;
                 }
@@ -912,10 +1002,19 @@ bool NormalProjector<ctype>::testInsertEdgeFromTouchingNode(const std::vector<St
                     // get neighboring triangle
                     int neighboringTri = psurface_->getNeighboringTriangle(curr[i].tri, j);
 
-                    // if no neighboring triangle --> error
-                    if (neighboringTri==-1)
+                    // if no neighboring triangle then we add a boundary node
+                    if (neighboringTri==-1) {
+
+                        currType = Node<ctype>::INTERSECTION_NODE;
+                        lambda   = newLambda;
+
+                        // add node on the path to the array
+                        edgePath.push_back(PathVertex<ctype>(curr[i].tri,j,x[0],currType,NodeBundle(),newLambda,enteringEdge)); 
+                        throw(EdgeLeavingImageException("In [testInsertEdgeFromTouchingNode] Edge leaving the image!\n"));
+                        // Error: Normal images leaves domain surface!
                         return false;
-                    
+                    }
+
                     // add intersection nodes on both sides
                 
                     // better: using getEdge()
@@ -1014,8 +1113,16 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 int neighboringTri = psurface_->getNeighboringTriangle(cT, oppEdge);
 
                 // if no neighboring triangle --> error
-                if (neighboringTri==-1)
+                if (neighboringTri==-1) {
+
+                    currType = Node<ctype>::INTERSECTION_NODE;
+                    edgePath.push_back(PathVertex<ctype>(cT,oppEdge, x[0],currType,NodeBundle(),
+                                        leavingEdge,newLambda));
+
+                    throw(EdgeLeavingImageException("In [testInsertEdgeFromCornerNode]: Edge leaving the image!\n"));
+
                     return false;
+                }
 
                 // add intersection nodes on both sides
                 
