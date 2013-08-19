@@ -121,10 +121,14 @@ StaticVector<ctype,2> PSurface<dim,ctype>::getLocalTargetCoords(const GlobalNode
 template <int dim, class ctype>
 GlobalNodeIdx PSurface<dim,ctype>::getOtherEndNode(int triIdx, NodeIdx cN) const
 {
+    // boundary nodes already store the target vertex index the edge is pointing to
+    if (this->triangles(triIdx).nodes[cN].isBoundary())
+        return GlobalNodeIdx(triIdx, cN);
+
     int i;
-    
+
     while (this->triangles(triIdx).nodes[cN].isINTERSECTION_NODE()) {
-        
+
         const DomainTriangle<ctype>& cT = this->triangles(triIdx);
         
         // get the edge the node is on and its position in the edgePoints array
@@ -186,6 +190,9 @@ GlobalNodeIdx PSurface<dim,ctype>::getOtherEndNode(int triIdx, NodeIdx cN) const
         triIdx = oppT;
         cN = newPoint;
         
+        // boundary nodes already store the target vertex index the edge is pointing to
+        if (this->triangles(triIdx).nodes[cN].isBoundary())
+            break;
     }
     
     return GlobalNodeIdx(triIdx, cN);
@@ -248,7 +255,7 @@ StaticVector<ctype,3> PSurface<dim,ctype>::imagePos(int tri, NodeIdx node) const
     }
     case Node<ctype>::INTERSECTION_NODE:
         return iPos[cN.getNodeNumber()];
-        
+
     default:
         // Do a componentwise copy to get from McVec3f to StaticVector<ctype>
         StaticVector<ctype,3> result;
@@ -661,14 +668,23 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
     int mode = cT.nodes[nds[0]].isINTERSECTION_NODE() +
         2*cT.nodes[nds[1]].isINTERSECTION_NODE() +
         4*cT.nodes[nds[2]].isINTERSECTION_NODE();
+
     //printf("MODE %d \n", mode);
     for (int i=0; i<3; i++)
         vertices[i] = getOtherEndNode(tri, nds[i]);
+
+    // determine which nodes are boundary nodes
+    int boundary = nodes(vertices[0]).isBoundary() +
+        2*nodes(vertices[1]).isBoundary() +
+        4*nodes(vertices[2]).isBoundary();
+
     //printf("***************MODE %d \n", mode);
     if (mode==6) {
 
-        if (this->triangles(vertices[1].tri).nodes[vertices[1].idx].getNodeNumber() == 
-            this->triangles(vertices[2].tri).nodes[vertices[2].idx].getNodeNumber()) {
+        if ( (nodes(vertices[1]).getNodeNumber() == nodes(vertices[2]).getNodeNumber())
+                // or if both nodes are boundary nodes that point on the same target vertex
+                || ((boundary==6) && (nodes(vertices[1]).boundary == nodes(vertices[2]).boundary)))
+        {
 
             int int1 = cT.nodes[nds[1]].theInteriorNode();
             int int2 = cT.nodes[nds[2]].theInteriorNode();
@@ -684,7 +700,10 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
 
     } else if (mode==5) {
 
-        if (nodes(vertices[0]).getNodeNumber() == nodes(vertices[2]).getNodeNumber()) {
+        if ((nodes(vertices[0]).getNodeNumber() == nodes(vertices[2]).getNodeNumber())
+                // or if the two nodes are boundary nodes and point on the same target vertex
+                || ((boundary==5) && (nodes(vertices[0]).boundary == nodes(vertices[2]).boundary)))
+        {
 
             int int0 = cT.nodes[nds[0]].theInteriorNode();
             int int2 = cT.nodes[nds[2]].theInteriorNode();
@@ -700,11 +719,13 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
 
     } else if (mode==3) {
 
-        if (this->triangles(vertices[1].tri).nodes[vertices[1].idx].getNodeNumber() == 
-            this->triangles(vertices[0].tri).nodes[vertices[0].idx].getNodeNumber()) {
-
+        if ((nodes(vertices[1]).getNodeNumber() == nodes(vertices[0]).getNodeNumber())
+                // or if the two nodes are boundary nodes and point on the same target vertex
+                || ((boundary==3) && (nodes(vertices[1]).boundary == nodes(vertices[0]).boundary)))
+        {
             int int1 = cT.nodes[nds[1]].theInteriorNode();
             int int0 = cT.nodes[nds[0]].theInteriorNode();
+
             assert(int1!=int0);
             assert(int1==nds[2] || int0==nds[2]);
             
@@ -718,9 +739,11 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
     } else {
         // They are all three intersection nodes...
 
-        if (nodes(vertices[1]).getNodeNumber() == nodes(vertices[0]).getNodeNumber() &&
+        if ( (nodes(vertices[1]).getNodeNumber() == nodes(vertices[0]).getNodeNumber() &&
             cT.nodes[nds[1]].isINTERSECTION_NODE() &&
-            cT.nodes[nds[0]].isINTERSECTION_NODE()) {
+            cT.nodes[nds[0]].isINTERSECTION_NODE()) ||
+            // or if the two nodes are boundary nodes and point on the same target vertex
+            (boundary==3 &&  nodes(vertices[1]).boundary == nodes(vertices[0]).boundary)) {
 
             NodeIdx int1 = cT.nodes[nds[1]].theInteriorNode();
             NodeIdx int0 = cT.nodes[nds[0]].theInteriorNode();
@@ -732,9 +755,11 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
             else
                 vertices[1] = getOtherEndNode(tri, int1);
 
-        } else if (nodes(vertices[1]).getNodeNumber() == nodes(vertices[2]).getNodeNumber() &&
+        } else if ( (nodes(vertices[1]).getNodeNumber() == nodes(vertices[2]).getNodeNumber() &&
                    cT.nodes[nds[1]].isINTERSECTION_NODE() &&
-                   cT.nodes[nds[2]].isINTERSECTION_NODE()) {
+                   cT.nodes[nds[2]].isINTERSECTION_NODE()) ||
+                   // or if the two nodes are boundary nodes and point on the same target vertex
+                   (boundary==6 &&  nodes(vertices[1]).boundary == nodes(vertices[2]).boundary)) {
 
             int int1 = cT.nodes[nds[1]].theInteriorNode();
             int int2 = cT.nodes[nds[2]].theInteriorNode();
@@ -746,9 +771,11 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
             else
                 vertices[1] = getOtherEndNode(tri, int1);
 
-        } else if (nodes(vertices[2]).getNodeNumber() == nodes(vertices[0]).getNodeNumber() &&
+        } else if ( (nodes(vertices[2]).getNodeNumber() == nodes(vertices[0]).getNodeNumber() &&
                    cT.nodes[nds[2]].isINTERSECTION_NODE() &&
-                   cT.nodes[nds[0]].isINTERSECTION_NODE()) {
+                   cT.nodes[nds[0]].isINTERSECTION_NODE()) ||
+                   // or if the two nodes are boundary nodes and point on the same target vertex
+                   (boundary==5 &&  nodes(vertices[2]).boundary == nodes(vertices[0]).boundary)) {
 
             int int0 = cT.nodes[nds[0]].theInteriorNode();
             int int2 = cT.nodes[nds[2]].theInteriorNode();
@@ -843,7 +870,16 @@ std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNode
         
     }
     case Node<ctype>::INTERSECTION_NODE:
-        assert(false);
+        //this case should only occur for boundary nodes
+        if (!cN.isBoundary())
+            assert(false);
+
+        std::vector<int> result;
+        result.resize(surface->trianglesPerPoint[cN.boundary].size());
+        for (int i=0; i<result.size(); i++)
+            result[i] = surface->trianglesPerPoint[cN.boundary][i];
+
+        return result;
     }
 
     // Copying from a McSmallVector to a std::vector
