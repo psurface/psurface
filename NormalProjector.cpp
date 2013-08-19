@@ -289,7 +289,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
                 try {
                 if (edgeCanBeInserted(domainNormals, from, to, projectedTo, edgePath))
                     insertEdge(factory, from, to, edgePath);
-                else
+                //else
                     //std::cout<< "Skipping edge (" << from << ", " << to << ") ..." << std::endl;
                     // catch the Leaving edge exception and add the edge as far as possible
                 } catch (EdgeLeavingImageException e) {
