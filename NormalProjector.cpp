@@ -123,7 +123,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
         StaticVector<ctype,3> targetVertex;
         for (int k=0; k<3; k++)
             targetVertex[k] = surf->points[i][k];
-
+        //std::cout<<i<<". target vertex "<<targetVertex<<std::endl;
         for (size_t j=0; j<psurface_->getNumTriangles(); j++) {
             const StaticVector<ctype,3>& p0 = psurface_->vertices(psurface_->triangles(j).vertices[0]);
             const StaticVector<ctype,3>& p1 = psurface_->vertices(psurface_->triangles(j).vertices[1]);
@@ -153,7 +153,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
                 // if both conditions are not fulfilled we might want to allow some overlaps
                 if(segment.dot(targetNormals[i]) > eps
                     && segment.dot(baseNormal) < -eps) {
-                        if (distance > 0.01) // TODO this value should be set problem dependent
+                        if (distance > 0.3) // 1e-2 TODO this value should be set problem dependent
                             continue;
                 } else if( segment.dot(targetNormals[i]) > eps
                     || segment.dot(baseNormal) < -eps)
@@ -198,6 +198,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     int ghost = 0;
     for (int i=0; i<psurface_->getNumVertices(); i++) {
 
+        //std::cout<<i<<". dom vertex "<<psurface_->vertices(i)<<std::endl;
         // Has the vertex been hit by the projection of a target vertex already?
         if (vertexHasBeenHandled[i])
             continue;
@@ -254,7 +255,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
     std::set<std::pair<int,int> > visitedEdges;
 
     for (int i=0; i<targetSurface->triangles.size(); i++) {
-
+        //std::cout<<"Target tri "<<i<<" has corners "<<targetSurface->triangles[i].points[0]<<","<<targetSurface->triangles[i].points[1]<<","<<targetSurface->triangles[i].points[2]<<std::endl;
         for (int j=0; j<3; j++) {
             
             int from = targetSurface->triangles[i].points[j];
@@ -1093,7 +1094,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                                     normals[p], normals[q], x)) {
             
             const ctype& newLambda = x[1];
-            
+
             if (newLambda < lambda) {
                 // Shouldn't this rather be a 'return false' here?
                 continue;
@@ -1117,7 +1118,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
 
                     currType = Node<ctype>::INTERSECTION_NODE;
                     edgePath.push_back(PathVertex<ctype>(cT,oppEdge, x[0],currType,NodeBundle(),
-                                        leavingEdge,newLambda));
+                                        newLambda, leavingEdge));
 
                     throw(EdgeLeavingImageException("In [testInsertEdgeFromCornerNode]: Edge leaving the image!\n"));
 
@@ -1128,10 +1129,9 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 
                 // better: using getEdge()
                 int e = psurface_->triangles(neighboringTri).getCorner(q);
-
                 currType = Node<ctype>::INTERSECTION_NODE;
                 edgePath.push_back(PathVertex<ctype>(cT,oppEdge, x[0],currType,NodeBundle(),
-                                    leavingEdge,newLambda));
+                                    newLambda, leavingEdge));
                 currTri  = neighboringTri;
                 lambda   = newLambda;
                 leavingEdge = e;
@@ -1150,7 +1150,7 @@ bool NormalProjector<ctype>::testInsertEdgeFromCornerNode(const std::vector<Stat
                 assert(currType == type(curr));
                 lambda = newLambda;
                 
-                edgePath.push_back(PathVertex<ctype>(cT,oppEdge,x[0],currType,curr, leavingEdge, newLambda, corner));
+                edgePath.push_back(PathVertex<ctype>(cT,oppEdge,x[0],currType,curr, newLambda, leavingEdge, corner));
                 return true;
                 
             }
@@ -1584,7 +1584,7 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<ctype,3>& 
         ctype nu = StaticMatrix<ctype,3>(b-a, c-a, p-a).det() / det;
        
         // only allow a certain overlaps 
-        if (nu>1e-2)
+        if (nu>0.3) //1e-2
             return false;
 
         ctype lambda = StaticMatrix<ctype,3>(p-a, c-a, direction).det() / det;
