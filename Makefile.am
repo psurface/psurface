@@ -1,6 +1,7 @@
 bin_PROGRAMS =  hdf5IO\
 		hdf5IOS\
-		VTKIO
+		VTKIO\
+		gmshIO
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
 	$(top_srcdir)/Box.h \
@@ -100,31 +101,33 @@ hdf5IOS_LDFLAGS = $(AM_LDFLAGS) \
 	-L/usr/local/lib/
 VTKIO_SOURCES = vtuIO.h	\
 		vtuIOtest.cpp \
-		/dune/b64enc.hh	\
-		/dune/common.hh	\
-		/dune/dataarraywriter.hh \
-		/dune/exceptions.hh \
-		/dune/indent.hh	\
-		/dune/streams.hh \
-		/dune/typetraits.hh \
-		/dune/vtuwriter.hh \
-		/dune/shared_ptr.hh \
-		/dune/nullptr.hh 
+		b64enc.hh	\
+		common.hh	\
+		dataarraywriter.hh \
+		indent.hh	\
+		streams.hh \
+		vtuwriter.hh 
 VTKIO_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(DUNEMPICPPFLAGS) \
 	$(AMIRAMESH_CPPFLAGS) \
-	-I/usr/local/hdf5/include/\
 	-I{top_srcdir}/psurface
 VTKIO_LDADD = \
 	$(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) \
-	/usr/local/hdf5/lib/libhdf5_cpp.a \
-	/usr/local/hdf5/lib/libhdf5_cpp.la \
-	/usr/local/hdf5/lib/libhdf5_hl_cpp.a \
-	/usr/local/hdf5/lib/libhdf5_hl_cpp.la \
-	/usr/local/hdf5/lib/libhdf5_cpp.so.8.0.0 \
-	/usr/local/hdf5/lib/libhdf5_hl_cpp.so.8.0.0 \
 	/usr/local/lib/libpsurface.la
 VTKIO_LDFLAGS = $(AM_LDFLAGS) \
+	$(AMIRAMESH_LDFLAGS) \
+	-L/usr/local/hdf5/lib \
+	-L/usr/local/lib/
+gmshIO_SOURCES = gmshIO.h	\
+		gm.cpp 
+gmshIO_CPPFLAGS = $(AM_CPPFLAGS) \
+	$(DUNEMPICPPFLAGS) \
+	$(AMIRAMESH_CPPFLAGS) \
+	-I{top_srcdir}/psurface
+gmshIO_LDADD = \
+	$(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) \
+	/usr/local/lib/libpsurface.la
+gmshIO_LDFLAGS = $(AM_LDFLAGS) \
 	$(AMIRAMESH_LDFLAGS) \
 	-L/usr/local/hdf5/lib \
 	-L/usr/local/lib/
