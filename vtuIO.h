@@ -7,9 +7,10 @@
 #include "Domains.h"
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
-#include "dune/vtuwriter.hh"
-#include "dune/shared_ptr.hh"
+#include "vtuwriter.hh"
 #include <fstream>
+#include <memory>
+#include <tr1/memory>
 using namespace psurface;
 enum NodeTypes{INTERIOR_NODE,
 INTERSECTION_NODE,
@@ -17,7 +18,7 @@ CORNER_NODE,
 TOUCHING_NODE,
 GHOST_NODE};
 
-Dune::VTK::OutputType outputtype = Dune::VTK::ascii;
+VTK::OutputType outputtype = VTK::ascii;
 template<class ctype,int dim>
 class VtkPWriter{
 /**
@@ -59,7 +60,7 @@ class VtkPWriter{
   ///total number of triangles and edges
   int nvertices;
   //output type(set as ascii)
-  const Dune::VTK::OutputType outputtype = Dune::VTK::ascii;
+  const VTK::OutputType outputtype = VTK::ascii;
   /**@brief compute the nodes index of inner nodes/intersection nodes/ghost node/touching node
    * @param a trianlge index
    * @param b nodes index on the triangle
@@ -104,16 +105,16 @@ class VtkPWriter{
   ///write data file to stream
   void writeDataFile(std::ostream& s)
   {
-    Dune::VTK::FileType fileType = Dune::VTK::unstructuredGrid;
+    VTK::FileType fileType = VTK::unstructuredGrid;
 
-    Dune::VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
+    VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
 
     writer.beginMain(numTriangles + numParamEdges, numVertices + numNodes);
     writeAllData(writer);
     writer.endMain();
   }
   ///write the data section in vtu
-  void writeAllData(Dune::VTK::VTUWriter& writer) {
+  void writeAllData(VTK::VTUWriter& writer) {
   //PointData
   writePointData(writer);
   // CellData
@@ -127,21 +128,21 @@ class VtkPWriter{
   typedef typename std::vector<StaticVector<int,3> >::iterator t_iterator;
   typedef typename std::vector<StaticVector<int,2> >::iterator e_iterator;
   //! write point data
-  virtual void writePointData(Dune::VTK::VTUWriter& writer)
+  virtual void writePointData(VTK::VTUWriter& writer)
   {
     std::string scalars = "nodetype";
     std::string vectors = "imageposition";
     std::vector<int>::iterator pt;
     writer.beginPointData(scalars, vectors);
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<ctype> > p
+      std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>(scalars, 1, nvertices));
       for (pt = nodeType.begin(); pt!= nodeType.end(); ++pt)
       p->write(*pt);
     }
     v_iterator pi;
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<ctype> > p
+      std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>(vectors, 3, nvertices));
       for (pi = imagePos.begin(); pi!= imagePos.end(); ++pi)
       {
@@ -151,7 +152,7 @@ class VtkPWriter{
     writer.endPointData();
   }
   //! write cell data
-  virtual void writeCellData(Dune::VTK::VTUWriter& writer)
+  virtual void writeCellData(VTK::VTUWriter& writer)
   {
     //std::vector<StaticVector<int,3> >::iterator pp;
     std::vector<int>::iterator pp;
@@ -159,7 +160,7 @@ class VtkPWriter{
     std::string vectors = "";
     writer.beginCellData(scalars, vectors);
     {
-        Dune::shared_ptr<Dune::VTK::DataArrayWriter<ctype> > p
+        std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>("patches", 1, ncells));
       for (pp = patches.begin(); pp!= patches.end(); ++pp)
       p->write(*pp);
@@ -167,13 +168,13 @@ class VtkPWriter{
     writer.endCellData();
   }
   //! write the positions of vertices
-  void writeGridPoints(Dune::VTK::VTUWriter& writer)
+  void writeGridPoints(VTK::VTUWriter& writer)
   {
     writer.beginPoints();
     v_iterator vp;
     v_iterator dp;
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<ctype> > p
+      std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>("Coordinates", 3, nvertices));
       if(!p->writeIsNoop()) {
       for(vp =  baseGridVertexCoordsArray.begin(); vp != baseGridVertexCoordsArray.end(); vp++)
@@ -186,14 +187,14 @@ class VtkPWriter{
     writer.endPoints();
   }
   //! write the connectivity array
-  virtual void writeGridCells(Dune::VTK::VTUWriter& writer)
+  virtual void writeGridCells(VTK::VTUWriter& writer)
   {
     t_iterator tp;
     e_iterator ep;
     writer.beginCells();
     // connectivity
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<int> > p1
+      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p1
       (writer.makeArrayWriter<int>("connectivity", 1, 3*numTriangles +2*numParamEdges));
       if(!p1->writeIsNoop())
       {
@@ -209,7 +210,7 @@ class VtkPWriter{
     }
     // offsets
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<int> > p2
+      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p2
       (writer.makeArrayWriter<int>("offsets", 1, ncells));
       if(!p2->writeIsNoop()) {
       int offset = 0;
@@ -229,7 +230,7 @@ class VtkPWriter{
     {
       int offset = 0;
       {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<unsigned char> > p3
+      std::tr1::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
       (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
       if(!p3->writeIsNoop())
       {
@@ -425,9 +426,9 @@ public:
   ///write domain data into the file
   void writeDomainData(std::ostream& s)
   {
-      Dune::VTK::FileType fileType = Dune::VTK::unstructuredGrid;
+      VTK::FileType fileType = VTK::unstructuredGrid;
 
-      Dune::VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
+      VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
 
     writer.beginMain(numEdges, numCornerNodes+ numInnerNodes);
     writeAllData1d(0,writer);
@@ -436,16 +437,16 @@ public:
   ///write image surface data into the file
   void writeTargetData(std::ostream& s)
   {
-      Dune::VTK::FileType fileType = Dune::VTK::unstructuredGrid;
+      VTK::FileType fileType = VTK::unstructuredGrid;
 
-      Dune::VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
+      VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
 
       writer.beginMain(numTargetSegments,numTargetNodes);
       writeAllData1d(1,writer);
       writer.endMain();
   }
   ///write the data section in vtu
-  void writeAllData1d(int i,Dune::VTK::VTUWriter& writer) {
+  void writeAllData1d(int i,VTK::VTUWriter& writer) {
   //PointData
   writePointData1d(i,writer);
   //Points
@@ -454,7 +455,7 @@ public:
   writeGridCells1d(i,writer);
   }
   //! write point data
-  virtual void writePointData1d(int otype, Dune::VTK::VTUWriter& writer)
+  virtual void writePointData1d(int otype, VTK::VTUWriter& writer)
   {
     int i;
     if(otype == 0)
@@ -465,7 +466,7 @@ public:
       int i;
       writer.beginPointData(scalars, vectors);
       {
-        Dune::shared_ptr<Dune::VTK::DataArrayWriter<ctype> > p
+        std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
         (writer.makeArrayWriter<ctype>(scalars, 1, numNodes));
         for (i = 0; i < cornerNodes.size();i++)
         p->write(0);
@@ -476,14 +477,14 @@ public:
     }
   }
   //! write the positions of vertices
-  void writeGridPoints1d(int otype,Dune::VTK::VTUWriter& writer)
+  void writeGridPoints1d(int otype,VTK::VTUWriter& writer)
   {
     int i;
     if(otype == 0)
     {
     writer.beginPoints();
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<ctype> > p
+      std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>("Coordinates", 3, numNodes));
       if(!p->writeIsNoop()) {
       for(i = 0; i < cornerNodes.size(); i++)
@@ -505,7 +506,7 @@ public:
     {
     writer.beginPoints();
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<ctype> > p
+      std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>("Coordinates", 3, numTargetNodes));
       if(!p->writeIsNoop()) {
       for(i = 0; i < targetNodes.size(); i++)
@@ -520,7 +521,7 @@ public:
     }
   }
   //! write the connectivity array
-  virtual void writeGridCells1d(int otype,Dune::VTK::VTUWriter& writer)
+  virtual void writeGridCells1d(int otype,VTK::VTUWriter& writer)
   {
     int i;
     writer.beginCells();
@@ -528,7 +529,7 @@ public:
     {
     // connectivity
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<int> > p1
+      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p1
       (writer.makeArrayWriter<int>("connectivity", 1, 2*numEdges));
       if(!p1->writeIsNoop())
       {
@@ -540,7 +541,7 @@ public:
     }
     // offsets
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<int> > p2
+      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p2
       (writer.makeArrayWriter<int>("offsets", 1, numEdges));
       if(!p2->writeIsNoop()) {
       int offset = 0;
@@ -555,7 +556,7 @@ public:
     {
       int offset = 0;
       {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<unsigned char> > p3
+      std::tr1::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
       (writer.makeArrayWriter<unsigned char>("types", 1, numEdges));
       for(i = 0; i < edges.size();i++)
       {
@@ -568,7 +569,7 @@ public:
     {
     // connectivity
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<int> > p1
+      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p1
       (writer.makeArrayWriter<int>("connectivity", 1, 2*numTargetSegments));
       if(!p1->writeIsNoop())
       {
@@ -582,7 +583,7 @@ public:
     }
     // offsets
     {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<int> > p2
+      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p2
       (writer.makeArrayWriter<int>("offsets", 1, numTargetSegments));
       if(!p2->writeIsNoop()) {
       int offset = 0;
@@ -597,7 +598,7 @@ public:
     {
       int offset = 0;
       {
-      Dune::shared_ptr<Dune::VTK::DataArrayWriter<unsigned char> > p3
+      std::tr1::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
       (writer.makeArrayWriter<unsigned char>("types", 1, numTargetSegments));
       for(i = 0; i < targetSegments.size();i++)
       {

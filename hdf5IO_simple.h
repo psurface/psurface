@@ -476,7 +476,7 @@ class Hdf5IO{
     int *num_Nodes_and_Edges_Array = (int *) malloc(11*numTriangles*sizeof(int));
     for(i = 0; i < 11*numTriangles;i++)
         num_Nodes_and_Edges_Array[i] = numNodesAndEdgesArray[i];
-    //nodeNodesAndEdgesArray
+    //numNodesAndEdgesArray
     dims[0] = numTriangles*11;
     dataspace_id = H5Screate_simple(1, dims, NULL);
     dataset_id = H5Dcreate(file_id, "/numNodesAndEdgesArray", H5T_NATIVE_INT,
