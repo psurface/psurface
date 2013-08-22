@@ -17,7 +17,7 @@
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
 #endif
-#include <psurface/AmiraMeshIO.h>
+#include "AmiraMeshIO.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
