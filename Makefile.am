@@ -1,7 +1,8 @@
 bin_PROGRAMS =  hdf5IO\
 		hdf5IOS\
 		VTKIO\
-		gmshIO
+		gmshIO\
+		psurface_convert
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
 	$(top_srcdir)/Box.h \
@@ -123,11 +124,39 @@ gmshIO_SOURCES = gmshIO.h	\
 gmshIO_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(DUNEMPICPPFLAGS) \
 	$(AMIRAMESH_CPPFLAGS) \
+	-I/usr/local/hdf5/include/\
 	-I{top_srcdir}/psurface
 gmshIO_LDADD = \
 	$(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) \
-	/usr/local/lib/libpsurface.la
+	/usr/local/hdf5/lib/libhdf5_cpp.a \
+	/usr/local/hdf5/lib/libhdf5_cpp.la \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.a \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.la \
+	/usr/local/hdf5/lib/libhdf5_cpp.so.8.0.0 \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.so.8.0.0 \
+	/usr/local/lib/libpsurface.la	
 gmshIO_LDFLAGS = $(AM_LDFLAGS) \
 	$(AMIRAMESH_LDFLAGS) \
 	-L/usr/local/hdf5/lib \
 	-L/usr/local/lib/
+psurface_convert_SOURCES = psurface_convert.cpp\
+			   psurface_convert.h
+psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) \
+	$(DUNEMPICPPFLAGS) \
+	$(AMIRAMESH_CPPFLAGS) \
+	-I/usr/local/hdf5/include/\
+	-I{top_srcdir}/psurface
+psurface_convert_LDADD = \
+	$(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) \
+	/usr/local/hdf5/lib/libhdf5_cpp.a \
+	/usr/local/hdf5/lib/libhdf5_cpp.la \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.a \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.la \
+	/usr/local/hdf5/lib/libhdf5_cpp.so.8.0.0 \
+	/usr/local/hdf5/lib/libhdf5_hl_cpp.so.8.0.0 \
+	/usr/local/lib/libpsurface.la	
+psurface_convert_LDFLAGS = $(AM_LDFLAGS) \
+	$(AMIRAMESH_LDFLAGS) \
+	-L/usr/local/hdf5/lib \
+	-L/usr/local/lib/
+
