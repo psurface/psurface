@@ -22,32 +22,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "gmshIO.h" 
+#include "gmshIO.h"
+#include "hdf5IO.h"
 using namespace psurface;
 
 int main(int argc, char *argv[])
 {
-//    char* amfile="fibula_proximal_15mm.par";
-//    char* amfile="femur_distal_15mm.par";
-    char* amfile = "tibia_proximal_15mm.par";
-//    char* amfile = "sphere.par.am";
+    //get psurface from msh file
+    char* mshfile = "curved2d.msh";
+    gmsh<float,2> gm;
+    PSurface<2,float>* par = new PSurface<2,float>;
+    Surface* surf = new Surface;
+    gm.initFromGmsh(par, surf, mshfile);
+
+    //write it to hdf and xdmf file
     char* hdffile = "psurface.h5";
-    char* outhdffile = "psurface2.h5";
-    if(argc>1)
-      amfile = argv[1];
-    PSURFACE_API AmiraMeshIO<float> amIO;
-    AmiraMesh* am = AmiraMesh::read(amfile);
-    PSurface<2,float>* par1 = new PSurface<2,float>;
-    Surface* surf1 = new Surface;
-    if (!amIO.initFromAmiraMesh(par1,am,amfile, surf1)) {
-    printf("error in getting psurface ");
-    }
-    else
-    {
-      gmsh<float,2> gm;
-      gm.par = par1;
-      gm.update();
-      gm.writeGmsh("test.msh");
-    }
+    Hdf5IO<float,2> hw;
+    hw.par = par;
+    hw.update();
+    hw.writeHdf5Data(hdffile);
+    hw.writeXdmf("t1.xmf",hdffile);
+
+    //write it to amiramesh
+    PSURFACE_API AmiraMeshIO<float> amIO2;
+    amIO2.writeAmiraMesh(par, "curved2d.am");
+
     return 0; 
   }
