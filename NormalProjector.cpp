@@ -153,7 +153,7 @@ void NormalProjector<ctype>::project(const Surface* targetSurface,
                 // if both conditions are not fulfilled we might want to allow some overlaps
                 if(segment.dot(targetNormals[i]) > eps
                     && segment.dot(baseNormal) < -eps) {
-                        if (distance > 0.3) // 1e-2 TODO this value should be set problem dependent
+                        if (distance > 1e-1) // TODO this value should be set problem dependent
                             continue;
                 } else if( segment.dot(targetNormals[i]) > eps
                     || segment.dot(baseNormal) < -eps)
@@ -1584,7 +1584,7 @@ bool NormalProjector<ctype>::rayIntersectsTriangle(const StaticVector<ctype,3>& 
         ctype nu = StaticMatrix<ctype,3>(b-a, c-a, p-a).det() / det;
        
         // only allow a certain overlaps 
-        if (nu>0.3) //1e-2
+        if (nu>1e-1) //1e-2
             return false;
 
         ctype lambda = StaticMatrix<ctype,3>(p-a, c-a, direction).det() / det;
