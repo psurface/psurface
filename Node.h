@@ -28,9 +28,9 @@ typedef int NodeIdx;
  * <li> <b> Intersection Nodes: </b> When an edge of a target triangle leaves a base triangle
  *      through an edge, then the intersection points are mapped onto target edge points.
  * <li> <b> Ghost Nodes: </b> Each base vertex that is not a Corner node, becomes a ghost node.
- * <li> <b> Boundary Nodes: </b> If an edge leaves the image of the projection, e.g. when the domain boundary end
- *          a boundary node is added at the leaving edge. These nodes store the target vertex index of the point
- *          the edge is pointing to in the member "boundary".
+ * <li> <b> Boundary Nodes: </b> If an edge leaves the image of the projection, e.g. when the domain boundary ends,
+ *          a boundary node is added at the leaving edge. These nodes store the target vertex index 
+ *          the edge is pointing to (which is not contained in PSurface) in the member "boundary".
  * </ul>
 
  \tparam ctype The type used for coordinates
