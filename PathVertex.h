@@ -6,6 +6,7 @@
 
 namespace psurface {
 
+/**  \brief This class represents a node that is to be created when an edge of the target surface can be inserted.*/
 template <class ctype>
 class PathVertex
 {
@@ -61,21 +62,21 @@ public:
         std::cout<<" enteringEdge "<<enteringEdge_<<std::endl;
     }
 
-    //! The triangle the vertex lives on
+    //! The triangle the vertex lives on, for INTERSECTION nodes the first triangle is stored
     int tri_;
     //! The edge the vertex lives on or -1
     int edge_;
     //! Barycentric coordinate on the edge
     ctype locEdge_;
-    //! If vertex is a corner, store the corner idx
+    //! If the vertex is a corner, store the corner idx
     int corner_; 
     //! The vertex type
     typename Node<ctype>::NodeType type_;
     //! The node bundle of the vertex
     NodeBundle bundle_;
-    //! Position on the path 0<=lambda<=1
+    //! Position on the path of the target surface edge 0<=lambda<=1
     ctype lambda_;
-    //! The edge from which the path entered the triangle
+    //! The edge from which the target edge entered the domain triangle tri_
     int enteringEdge_;
 };
 

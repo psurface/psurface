@@ -439,7 +439,7 @@ void NormalProjector<ctype>::insertEdge(PSurfaceFactory<2,ctype>& factory,
         for (int j=0; j<3; j++)
             image[j] = surf->points[from][j] + node.lambda_*(surf->points[to][j]-surf->points[from][j]);
 
-        // get neighboring triangle
+        // get the triangle
         int tri = node.tri_;
 
         // edge the node lives on
@@ -496,7 +496,7 @@ void NormalProjector<ctype>::insertEdgeSegment(PSurfaceFactory<2,ctype>& factory
         for (int j=0; j<3; j++)
             image[j] = surf->points[from][j] + node.lambda_*(surf->points[to][j]-surf->points[from][j]);
 
-        // get neighboring triangle
+        // get the triangle
         int tri = node.tri_;
 
         // edge goes through an intersection node
@@ -506,12 +506,6 @@ void NormalProjector<ctype>::insertEdgeSegment(PSurfaceFactory<2,ctype>& factory
             int edge = node.edge_;
             // neighboring triangle
             int neighboringTri = lastNode.tri_;
-
-            // if no neighboring triangle --> error
-            if (neighboringTri==-1) {
-                std::cout << "[FromInsertEdgeSegment] Warning: Normal images leaves domain surface!" << std::endl;
-                return;
-            }
 
             // add intersection nodes on both sides
 
