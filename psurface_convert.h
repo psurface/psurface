@@ -91,12 +91,15 @@ class PsurfaceConvert{
   public:
   bool creatHdfAndXdmf(const char* xdf_filename, const char* hdf_filename)
   {
-     return( writeHdf5Data(hdf_filename) &&  writeXdmf(xdf_filename, hdf_filename)); 
+     writeHdf5Data(hdf_filename);
+     writeXdmf(xdf_filename, hdf_filename);
+     return 0;
   }
 
   ///write the data array into hdf5 data structure
   bool writeHdf5Data(const char*filename)
   {
+    printf("in writeHdf5Date function: hdf_file = %s\n", filename); 
     hid_t     file_id;
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     int i;
@@ -409,6 +412,7 @@ class PsurfaceConvert{
   ///writhe the xdmf file which store the structure information of hdf5 file.
   bool writeXdmf(const char* xdf_filename, const char* hdf_filename)
   {
+    printf("in writeXdmd function: xdf_file = %s hdf_file = %s\n", xdf_filename,hdf_filename);
     FILE *xmf = 0;
     xmf = fopen(xdf_filename, "w");
     fprintf(xmf, "<?xml version=\"1.0\" ?>\n");
@@ -535,7 +539,9 @@ class PsurfaceConvert{
       for(int i = 0; i < baseGridVertexCoordsArray.size(); i++)
         for(int l = 0; l < 3; l++) p->write((baseGridVertexCoordsArray[i])[l]);
       for(int i = 0; i < domainPositions.size();i++)
-        for(int l = 0; l < 3; l++) p->write((domainPositions[i])[l]);
+      {
+        for(int l = 0; l < 3; l++) p->write((nodePositions[i])[l]);
+      }
       }
     }
     //	p.reset();
@@ -802,6 +808,29 @@ class PsurfaceConvert{
                 //////////////////////////////////////////////////////
                 parameterEdgeArray[edgeArrayIdx][0] = newIdx[cE.from()] + numVertices;
                 parameterEdgeArray[edgeArrayIdx][1] = newIdx[cE.to()] + numVertices;
+/*                float a[3], b[3];
+                if( parameterEdgeArray[edgeArrayIdx][0] < numVertices)
+                {
+                    for(int i = 0; i < 3; i++) a[i] = (baseGridTriArray[parameterEdgeArray[edgeArrayIdx][0]])[i];
+                }
+                else
+                {
+                    for(int i = 0; i < 3; i++) a[i] = (nodePositions[parameterEdgeArray[edgeArrayIdx][0] - numVertices])[i];
+                }
+
+                if( parameterEdgeArray[edgeArrayIdx][1] < numVertices)
+                {
+                    for(int i = 0; i < 3; i++) b[i] = (baseGridTriArray[parameterEdgeArray[edgeArrayIdx][1]])[i];
+                }
+                else
+                {
+                    for(int i = 0; i < 3; i++) b[i] = (nodePositions[parameterEdgeArray[edgeArrayIdx][1] - numVertices])[i];
+                }
+                if(parameterEdgeArray[edgeArrayIdx][0] < numVertices && parameterEdgeArray[edgeArrayIdx][1] < numVertices)
+                printf("triangle edges\n");
+                printf("edges[%d] = [%d %d] first point = [%f  %f  %f] second point = [%f  %f  %f]\n",edgeArrayIdx, parameterEdgeArray[edgeArrayIdx][0], parameterEdgeArray[edgeArrayIdx][1],a[0], a[1], a[2], b[0], b[1], b[2]);
+*/
+
                 //////////////////////////////////////////////////////
                 parameterEdgeArrayLocal[edgeArrayIdx][0] = newIdxlocal[cE.from()];
                 parameterEdgeArrayLocal[edgeArrayIdx][1] = newIdxlocal[cE.to()];

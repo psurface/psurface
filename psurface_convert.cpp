@@ -50,7 +50,7 @@ int main(int argc, char **argv)
             printf("the option need a value/n");  
             break;  
         case '?':  
-            printf("unknow option：%c/n",optopt);  
+            printf("unknow option%c/n",optopt);  
             break;  
         }  
     }  
@@ -95,15 +95,25 @@ int main(int argc, char **argv)
   {
     case HDF5:
       {
-      PsurfaceConvert<float,2>* pconvert = new PsurfaceConvert<float,2>(input, 0);
-      pconvert->initPsurface(par, surf, 0);
+        PsurfaceConvert<float,2>* pconvert = new PsurfaceConvert<float,2>(input, 1);
+        printf("after hdf5\n");
+        if(!pconvert->initPsurface(par, surf, 0))
+        {
+          printf("unable to initiate psurface from hdf5 file!\n");
+          return 0;
+        }
       }
       break;
 
     case GMSH:
       {
-      PsurfaceConvert<float,2>* pconvert = new PsurfaceConvert<float,2>(input, 1);      
-      pconvert->initPsurface(par, surf, 1);
+        PsurfaceConvert<float,2>* pconvert = new PsurfaceConvert<float,2>(input, 0);      
+        if( !pconvert->initPsurface(par, surf, 1))
+        {
+          printf("unable to initiate psurface from GMSH file!\n");
+          return 0;
+        }
+
       }
       break;
 
@@ -111,26 +121,34 @@ int main(int argc, char **argv)
       {
         AmiraMesh* am = AmiraMesh::read(input);
         PSURFACE_API AmiraMeshIO<float> amIO;    
-        amIO.initFromAmiraMesh(par,am,input, surf);
+        if( !amIO.initFromAmiraMesh(par,am,input, surf))
+        {
+          printf("unable to initiate psurface from amira mesh file!\n");
+          return 0;
+        }
       }
       break;
     default:
+    {
      throw(std::runtime_error("unkown input type\n"));
+     return 0;
+    }
   };
 
+  printf("@\n");
    switch(outputType)
    {
     case HDF5:
       {
-      char *xdmffile;
-      strcpy (xdmffile,output);
+      char xdmffile[100];
+      strcpy(xdmffile,output);
       strcat(xdmffile, ".xdmf");
       PsurfaceConvert<float,2>* pn = new PsurfaceConvert<float,2>(par);      
       pn->creatHdfAndXdmf(xdmffile, output);
       }
       break;
 
-    case GMSH:
+    case VTU:
       {
         PsurfaceConvert<float,2>* pn = new PsurfaceConvert<float,2>(par);
         pn->creatVTU(output);
@@ -139,8 +157,9 @@ int main(int argc, char **argv)
 
     case AMIRA:
       {
-      PSURFACE_API AmiraMeshIO<float> amIO;    
-      amIO.writeAmiraMesh(par, "output");
+      PSURFACE_API AmiraMeshIO<float> amIO;
+      printf("in amiramesh\n");
+      amIO.writeAmiraMesh(par, output);
       }
       break;
     default:

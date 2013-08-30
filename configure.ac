@@ -51,6 +51,50 @@ AS_IF([test "x$have_amiramesh" = "xyes"],
 ])
 # }}}
 
+
+# {{{ Check for hdf5 
+AC_ARG_WITH([hdf5],
+    AS_HELP_STRING([--without-hdf5], [Do not use libhdf5]))
+
+# $4: $with_hdf5
+# $5: action if found
+# $6: action if not found
+AC_DEFUN([CHECK_FOR_HDF5],[
+        AC_LANG_PUSH([C++])
+        ac_save_CPPFLAGS="$CPPFLAGS"
+        ac_save_LDFLAGS="$LDFLAGS"
+        ac_save_LIBS="$LIBS"
+        LIBS="$LIBS -lhdf5"
+        AS_IF([test "x$with_hdf5" != x],[CPPFLAGS="$CPPFLAGS -I$with_hdf5/include"; LDFLAGS="$LDFLAGS -L$with_hdf5/lib"])
+        AC_CHECK_HEADER([hdf5.h],
+                        [AC_LINK_IFELSE([
+                           AC_LANG_PROGRAM([[#include "hdf5.h"]],
+                                           [[" $with_hdf5 $3 $4"]] 
+                                          )],
+                           [[have_hdf5=yes]; HDF5_DIR=""$with_hdf5""],
+                           [have_hdf5=no] 
+                        )],
+                        [have_hdf5=no])
+        CPPFLAGS="$ac_save_CPPFLAGS"
+        LDFLAGS="$ac_save_LDFLAGS"
+        LIBS="$ac_save_LIBS"
+        AC_LANG_POP([C++])
+])
+
+AS_IF([test "x$with_hdf5" != "xno"],
+      [CHECK_FOR_HDF5(["$with_hdf5"], [have_hdf5=yes], [have_hdf5=no])],
+      [have_hdf5=no])
+
+AS_IF([test "x$have_hdf5" = "xyes"],
+      [CPPFLAGS="$CPPFLAGS -I${HDF5_DIR}/include";
+       LIBS="$LIBS -lhdf5";
+       LDFLAGS="$LDFLAGS -L${HDF5_DIR}/lib"],
+      [AS_IF([test "x$with_hdf5" = "xyes"],
+             [AC_MSG_ERROR([libhdf5 requested but not found])
+      ])
+])
+# }}}
+
 # {{{ Handle --enable-assertions
 AC_ARG_ENABLE([assertions],
     AS_HELP_STRING([--enable-assertions], [Enable run-time assertions]))
