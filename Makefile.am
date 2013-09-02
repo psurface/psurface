@@ -57,6 +57,9 @@ libpsurface_la_SOURCES= \
 	TargetSurface.cpp \
 	Triangulator.cpp
 AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
+libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) 
+libpsurface_la_LIBADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
+libpsurface_la_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
 psurface_convert_SOURCES =  AmiraMeshIO.h \
 	Iterators.cpp \
 	PlaneParam.cpp \
@@ -88,6 +91,6 @@ psurface_convert_SOURCES =  AmiraMeshIO.h \
 	SparseMatrix.h \
 	psurface_convert.cpp\
 	psurface_convert.h
-psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) 
-psurface_convert_LDADD = 
-psurface_convert_LDFLAGS = $(AM_LDFLAGS) 
+psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) 
+psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
+psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
