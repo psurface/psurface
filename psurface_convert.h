@@ -29,7 +29,6 @@ class PsurfaceConvert{
   typedef typename std::vector<StaticVector<ctype,3> >::iterator v_iterator;
   typedef typename std::vector<StaticVector<int,3> >::iterator t_iterator;
   typedef typename std::vector<StaticVector<int,2> >::iterator e_iterator;
-
   enum NodeTypes{INTERIOR_NODE,
   INTERSECTION_NODE,
   CORNER_NODE,
@@ -86,7 +85,7 @@ class PsurfaceConvert{
   int ncells;
   ///total number of triangles and edges
   int nvertices;
-  const VTK::OutputType outputtype = VTK::ascii;
+
 
   public:
   bool creatHdfAndXdmf(const char* xdf_filename, const char* hdf_filename)
@@ -481,6 +480,8 @@ class PsurfaceConvert{
   ///write data file to stream
   void writeDataFile(std::ostream& s)
   {
+    VTK::OutputType outputtype;
+    outputtype = VTK::ascii;
     VTK::FileType fileType = VTK::unstructuredGrid;
 
     VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
