@@ -23,18 +23,24 @@ namespace psurface{
 using namespace psurface;
 int main(int argc, char **argv)
 {
-    if (argc < 2) {
-	fprintf(stderr, "Usage: psurface_convert -i inputname -o outputname ...\n");
+    if (argc < 6) {
+	fprintf(stderr, "Usage: psurface_convert -i inputname -o outputname -t base \n");
 	fprintf(stderr, "Input file type could be amiramesh(*.am) , hdf5(*.h5) or gmsh(*.msh).\n");
 	fprintf(stderr, "Output file type could be amiramesh(*.am) , hdf5(*.h5) or vtu(*.vtu).\n");
+	fprintf(stderr, "base could be b(basegrid) , w(whole psurface) or u(unreadable hdf5 file).\n -t b: the output should only have base grid trianlge.\n -t w:output is the whole psurface \n -t r: this option is used only with hdf5 output. youwill get the hdf5 data file that only store necessrary information of psurface if r is not chosed. \n");
 	exit(0);
     }
+    
     //use get opt to deal with the argv
     char *input, *output;
+    char *type;
     int opt=0;  
-    int i=0;  
-    const char *optstring=":i:o:";  
-    const int num=2;  
+    int i=0;
+    const char *optstring=":i:o:t:";  
+    const int num=2;
+    bool basegrid = 0, readablehdf = 0;
+    basegrid = 0;
+    readablehdf = 0;
   
     while((opt=getopt(argc,argv,optstring)) != -1)  
     {  
@@ -46,6 +52,8 @@ int main(int argc, char **argv)
         case 'o':  
              output = optarg;
              break;
+        case 't':
+             type = optarg;
         case ':':  
             printf("the option need a value/n");  
             break;  
@@ -55,6 +63,16 @@ int main(int argc, char **argv)
         }  
     }  
   
+    if(*type == 'b')
+      basegrid = 1;
+    else if(*type == 'w')
+      basegrid = 0;
+    else if(*type == 'r')
+      readablehdf = 1;
+    else      
+      printf("unkown type, please choose between 'b', 'w' and 'u'.\n");
+    
+      
     for(i=0;optind<argc;i++,optind++)  
     {  
         if(i<num)  
@@ -63,8 +81,6 @@ int main(int argc, char **argv)
             printf("excess argument:%s/n",argv[optind]);  
     }  
     
-    printf("input = %s ouput = %s\n", input, output);
-
     FileTypes inputType, outputType;    
     if(strstr(input,".am") != NULL)
         inputType = AMIRA;
@@ -96,7 +112,6 @@ int main(int argc, char **argv)
     case HDF5:
       {
         PsurfaceConvert<float,2>* pconvert = new PsurfaceConvert<float,2>(input, 1);
-        printf("after hdf5\n");
         if(!pconvert->initPsurface(par, surf, 0))
         {
           printf("unable to initiate psurface from hdf5 file!\n");
@@ -135,7 +150,6 @@ int main(int argc, char **argv)
     }
   };
 
-  printf("@\n");
    switch(outputType)
    {
     case HDF5:
@@ -144,14 +158,14 @@ int main(int argc, char **argv)
       strcpy(xdmffile,output);
       strcat(xdmffile, ".xdmf");
       PsurfaceConvert<float,2>* pn = new PsurfaceConvert<float,2>(par);      
-      pn->creatHdfAndXdmf(xdmffile, output);
+      pn->creatHdfAndXdmf(xdmffile, output,readablehdf);
       }
       break;
 
     case VTU:
       {
         PsurfaceConvert<float,2>* pn = new PsurfaceConvert<float,2>(par);
-        pn->creatVTU(output);
+        pn->creatVTU(output,basegrid);
       }
       break;
 
