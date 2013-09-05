@@ -89,17 +89,50 @@ class PsurfaceConvert{
   const VTK::OutputType outputtype = VTK::ascii;
 
   public:
+  /**create hdf5 file and xdmf file. hdf5 file store the basic data in psurface. xdmf is used to read the hdf5 file by 
+  *paraview.
+  */
   bool creatHdfAndXdmf(const char* xdf_filename, const char* hdf_filename)
-  {
+  { 
      writeHdf5Data(hdf_filename);
      writeXdmf(xdf_filename, hdf_filename);
      return 0;
   }
 
+  
+  void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char* name, int* address)
+{
+    dims[0] = dimen;
+    *dataspace_id = H5Screate_simple(1, dims, NULL);
+    *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_INT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    *status = H5Dwrite(*dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
+    *status = H5Dclose(*dataset_id);
+    *status = H5Sclose(*dataspace_id);
+  }
+  
+  void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char* name, float* address)
+  {
+    dims[0] = dimen;
+    *dataspace_id = H5Screate_simple(1, dims, NULL);
+    *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_FLOAT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    *status = H5Dwrite(*dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
+    *status = H5Dclose(*dataset_id);
+    *status = H5Sclose(*dataspace_id);
+  }
+
+  void writeDoubleDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char* name, double* address)
+  {
+    dims[0] = dimen;
+    *dataspace_id = H5Screate_simple(1, dims, NULL);
+    *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_DOUBLE, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    *status = H5Dwrite(*dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
+    *status = H5Dclose(*dataset_id);
+    *status = H5Sclose(*dataspace_id);
+  }
+
   ///write the data array into hdf5 data structure
   bool writeHdf5Data(const char*filename)
   {
-    printf("in writeHdf5Date function: hdf_file = %s\n", filename); 
     hid_t     file_id;
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     int i;
@@ -111,14 +144,14 @@ class PsurfaceConvert{
     float *x = (float *) malloc(nvertices * sizeof(float));
     float *y = (float *) malloc(nvertices * sizeof(float));
     float *z = (float *) malloc(nvertices * sizeof(float));
-    //vertex
+    //triangle corner
     for(i = 0; i < numVertices; i++)
     {
       x[i] = (baseGridVertexCoordsArray[i])[0];
       y[i] = (baseGridVertexCoordsArray[i])[1];
       z[i] = (baseGridVertexCoordsArray[i])[2];
     }
-    //nodes
+    //nodes on plane surface of triangle
     for(i = 0; i < numNodes; i++)
     {
       x[i + numVertices] = (nodePositions[i])[0];
@@ -127,25 +160,9 @@ class PsurfaceConvert{
     }
     // Write separate coordinate arrays for the x y and z coordinates.
     //coordinate data array of vertices
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate2(file_id, "/X", H5T_NATIVE_FLOAT, dataspace_id,
-         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, x);
-    status = H5Sclose(dataspace_id);
-    status = H5Dclose(dataset_id);
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate2(file_id, "/Y", H5T_NATIVE_FLOAT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, y);
-    status = H5Sclose(dataspace_id);
-    status = H5Dclose(dataset_id);
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate2(file_id, "/Z", H5T_NATIVE_FLOAT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, z);
-    status = H5Sclose(dataspace_id);
-    status = H5Dclose(dataset_id);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, nvertices, "/X", x);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, nvertices, "/Y", y);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, nvertices, "/Z", z);
     free(x);
     free(y);
     free(z);
@@ -168,14 +185,8 @@ class PsurfaceConvert{
        topo_array[4*numTriangles + 4*i + 2] = (parameterEdgeArray[i])[0];
        topo_array[4*numTriangles + 4*i + 3] = (parameterEdgeArray[i])[1];
     }
-    dims[0] = numTriangles*4 + numParamEdges*4 ;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/Topo", H5T_NATIVE_INT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, topo_array);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numTriangles*4 + numParamEdges*4, "/Topo", topo_array);
     free(topo_array);
 
     ///local position on trianlge
@@ -188,23 +199,9 @@ class PsurfaceConvert{
         dp[2*i+1] = (domainPositions[i])[1];
     }
     //triangle index
-    dims[0] = numNodes;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/TriangleIndx", H5T_NATIVE_INT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, tri_n);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numNodes, "/TriangleIndx", tri_n);
     //local position of nodes on triangle
-    dims[0] = numNodes*2;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/LocalNodePosition", H5T_NATIVE_FLOAT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, dp);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numNodes*2, "/LocalNodePosition", dp);
     free(tri_n);
     free(dp);
 
@@ -216,14 +213,7 @@ class PsurfaceConvert{
        parameter_edge_local_array[2*i+1] = (parameterEdgeArrayLocal[i])[1];
     }
     //parameter edge on local array
-    dims[0] = numParamEdges*2;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/LocalParamEdge", H5T_NATIVE_INT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, parameter_edge_local_array);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numParamEdges*2, "/LocalParamEdge", parameter_edge_local_array);    
     free( parameter_edge_local_array);
 
     //PATCH
@@ -234,15 +224,9 @@ class PsurfaceConvert{
         patches_vec[3*i + 1] = (patches[i]).outerRegion;
         patches_vec[3*i + 2] = (patches[i]).boundaryId;
     }
+
     //patches
-    dims[0] = patches.size()*3;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/patches_vec", H5T_NATIVE_INT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, patches_vec);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, patches.size()*3, "/patches_vec", patches_vec);
     free(patches_vec);
 
     // create the scalar data on triangle
@@ -253,28 +237,14 @@ class PsurfaceConvert{
         patch[i + numTriangles] = 0;
 
     //patches
-    dims[0] = numTriangles + numParamEdges;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/patches", H5T_NATIVE_INT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, patch);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numTriangles + numParamEdges, "/patches", patch);
     free(patch);
 
     int *edgepointsarray = (int*)malloc(edgePointsArray.size()*sizeof(int));
     for(i = 0; i < edgePointsArray.size();i++)
       edgepointsarray[i] = edgePointsArray[i];
     //edgepointsarray
-    dims[0] = edgePointsArray.size();
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/EdgePoints", H5T_NATIVE_INT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT,edgepointsarray);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, edgePointsArray.size(), "/EdgePoints", edgepointsarray);
     free(edgepointsarray);
 
     //create the scalar data on nodes
@@ -286,14 +256,7 @@ class PsurfaceConvert{
     }
 
     // nodestype
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/NodeType", H5T_NATIVE_INT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, nodetype);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, nvertices, "/NodeType", nodetype);
     free(nodetype);
 
     //node number
@@ -302,14 +265,7 @@ class PsurfaceConvert{
         nodenumber[i] = nodeNumber[i];
 
     //nodenumber
-    dims[0] = numNodes;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/NodeNumber", H5T_NATIVE_INT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, nodenumber);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numNodes, "/NodeNumber", nodenumber);
     free(nodenumber);
 
     //image position
@@ -324,32 +280,11 @@ class PsurfaceConvert{
     }
     //images
     //x
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/imageX", H5T_NATIVE_FLOAT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, imageX);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, nvertices, "/imageX", imageX);
     //y
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/imageY", H5T_NATIVE_FLOAT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, imageY);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, nvertices, "/imageY", imageY);
     //z
-    dims[0] = nvertices;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/imageZ", H5T_NATIVE_FLOAT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, imageZ);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, nvertices, "/imageZ", imageZ);
     free(imageX);
     free(imageY);
     free(imageZ);
@@ -363,14 +298,7 @@ class PsurfaceConvert{
         ipos[3*i+2] = (iPos[i])[2];
     }
     //iPos
-    dims[0] = iPos.size()*3;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/iPos", H5T_NATIVE_FLOAT, dataspace_id,
-    H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, ipos);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, iPos.size()*3, "/iPos", ipos);
     free(ipos);
 
     //numNodesandEdges array
@@ -378,14 +306,7 @@ class PsurfaceConvert{
     for(i = 0; i < 11*numTriangles;i++)
         num_Nodes_and_Edges_Array[i] = numNodesAndEdgesArray[i];
     //nodeNodesAndEdgesArray
-    dims[0] = numTriangles*11;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/numNodesAndEdgesArray", H5T_NATIVE_INT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, num_Nodes_and_Edges_Array);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numTriangles*11, "/numNodesAndEdgesArray", num_Nodes_and_Edges_Array);
     free(num_Nodes_and_Edges_Array);
 
     //params
@@ -394,14 +315,7 @@ class PsurfaceConvert{
     psurfaceparams[1] = numNodes;
     psurfaceparams[2] = numTriangles;
     psurfaceparams[3] = numParamEdges;
-    dims[0] = 4;
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(file_id, "/Params", H5T_NATIVE_INT,
-    dataspace_id, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-    H5P_DEFAULT, psurfaceparams);
-    status = H5Dclose(dataset_id);
-    status = H5Sclose(dataspace_id);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, 4, "/Params", psurfaceparams);
     free(psurfaceparams);
 
     //close the file
@@ -513,7 +427,6 @@ class PsurfaceConvert{
       for( int i = 0; i < nodeType.size();i++)
       p->write(nodeType[i]);
     }
-    v_iterator pi;
     {
       std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>(vectors, 3, nvertices));
@@ -530,8 +443,6 @@ class PsurfaceConvert{
   void writeGridPoints(VTK::VTUWriter& writer)
   {
     writer.beginPoints();
-    v_iterator vp;
-    v_iterator dp;
     {
       std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
       (writer.makeArrayWriter<ctype>("Coordinates", 3, nvertices));
@@ -551,8 +462,6 @@ class PsurfaceConvert{
   //! write the connectivity array
   virtual void writeGridCells(VTK::VTUWriter& writer)
   {
-    t_iterator tp;
-    e_iterator ep;
     writer.beginCells();
     // connectivity
     {
@@ -609,7 +518,6 @@ class PsurfaceConvert{
     writer.endCells();
   }
 
-  ///initializers
   ///initialize PsurfaceConvert from the psurface object
   PsurfaceConvert(PSurface<dim,ctype>* psurface)
   {
@@ -656,7 +564,7 @@ class PsurfaceConvert{
       imagePos.push_back(imagearray[i]);
     }
 
-    ///nodes image positions(only for intersection points)
+    //nodes image positions(only for intersection points)
     for(i = 0; i < par->iPos.size();i++) iPos.push_back(par->iPos[i]);
 
     numNodes      = 0;
@@ -808,28 +716,6 @@ class PsurfaceConvert{
                 //////////////////////////////////////////////////////
                 parameterEdgeArray[edgeArrayIdx][0] = newIdx[cE.from()] + numVertices;
                 parameterEdgeArray[edgeArrayIdx][1] = newIdx[cE.to()] + numVertices;
-/*                float a[3], b[3];
-                if( parameterEdgeArray[edgeArrayIdx][0] < numVertices)
-                {
-                    for(int i = 0; i < 3; i++) a[i] = (baseGridTriArray[parameterEdgeArray[edgeArrayIdx][0]])[i];
-                }
-                else
-                {
-                    for(int i = 0; i < 3; i++) a[i] = (nodePositions[parameterEdgeArray[edgeArrayIdx][0] - numVertices])[i];
-                }
-
-                if( parameterEdgeArray[edgeArrayIdx][1] < numVertices)
-                {
-                    for(int i = 0; i < 3; i++) b[i] = (baseGridTriArray[parameterEdgeArray[edgeArrayIdx][1]])[i];
-                }
-                else
-                {
-                    for(int i = 0; i < 3; i++) b[i] = (nodePositions[parameterEdgeArray[edgeArrayIdx][1] - numVertices])[i];
-                }
-                if(parameterEdgeArray[edgeArrayIdx][0] < numVertices && parameterEdgeArray[edgeArrayIdx][1] < numVertices)
-                printf("triangle edges\n");
-                printf("edges[%d] = [%d %d] first point = [%f  %f  %f] second point = [%f  %f  %f]\n",edgeArrayIdx, parameterEdgeArray[edgeArrayIdx][0], parameterEdgeArray[edgeArrayIdx][1],a[0], a[1], a[2], b[0], b[1], b[2]);
-*/
 
                 //////////////////////////////////////////////////////
                 parameterEdgeArrayLocal[edgeArrayIdx][0] = newIdxlocal[cE.from()];
@@ -857,7 +743,56 @@ class PsurfaceConvert{
       else
           readGmsh(filename);
   }   
-  
+
+  void readIntDataFromFile(hid_t* file, hid_t* dataset, hid_t* filespace, hid_t* memspace,  hsize_t* dimz,const char* dataname, int* data)
+  {
+      int rank;
+      herr_t status,status_n;
+
+      *dataset = H5Dopen(*file, dataname, H5P_DEFAULT);
+      *filespace = H5Dget_space(*dataset);
+      rank = H5Sget_simple_extent_ndims(*filespace);
+      status_n  = H5Sget_simple_extent_dims(*filespace, dimz, NULL);
+      *memspace = H5Screate_simple(1,dimz,NULL);
+      
+      data = (int *) malloc(dimz[0]*sizeof(int));      
+      
+      status = H5Dread(*dataset, H5T_NATIVE_INT, *memspace, *filespace, H5P_DEFAULT, data);
+  }
+
+  void readFloatDataFromFile(hid_t* file, hid_t* dataset, hid_t* filespace, hid_t* memspace,  hsize_t* dimz,const char* dataname, float* data)
+  {
+      int rank;
+      herr_t status,status_n;
+      *dataset = H5Dopen(*file, dataname, H5P_DEFAULT);
+      *filespace = H5Dget_space(*dataset);
+      rank = H5Sget_simple_extent_ndims(*filespace);
+      status_n  = H5Sget_simple_extent_dims(*filespace, dimz, NULL);
+      *memspace = H5Screate_simple(1,dimz,NULL);
+      data = (float *) malloc(dimz[0]*sizeof(float));
+      status = H5Dread(*dataset, H5T_NATIVE_FLOAT, *memspace, *filespace, H5P_DEFAULT, data);
+  }
+
+  void readDoubleDataFromFile(hid_t* file, hid_t* dataset, hid_t* filespace, hid_t* memspace,  hsize_t* dimz,const char* dataname, double* data)
+  {
+      int rank;
+      herr_t status,status_n;
+      *dataset = H5Dopen(*file, dataname, H5P_DEFAULT);
+      *filespace = H5Dget_space(*dataset);
+      rank = H5Sget_simple_extent_ndims(*filespace);
+      status_n  = H5Sget_simple_extent_dims(*filespace, dimz, NULL);
+      *memspace = H5Screate_simple(1,dimz,NULL);
+      data = (double *) malloc(dimz[0]*sizeof(double));      
+      status = H5Dread(*dataset, H5T_NATIVE_DOUBLE, *memspace, *filespace, H5P_DEFAULT, data);
+  }
+
+  inline void hdf_close(hid_t dataset, hid_t filespace, hid_t memspace)
+  {
+      H5Dclose(dataset);
+      H5Sclose(filespace);
+      H5Sclose(memspace);
+  }
+
   bool readHdf5Data(const char* filename)
   {
       hid_t file;
@@ -872,59 +807,38 @@ class PsurfaceConvert{
       file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
 
       //read params
-      dataset = H5Dopen(file,"/Params", H5P_DEFAULT);
-      filespace = H5Dget_space(dataset);
-      rank = H5Sget_simple_extent_ndims(filespace);
-      status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-      memspace = H5Screate_simple(1,dimz,NULL);
       int psurfaceparams[dimz[0]];
-      status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-      H5P_DEFAULT, psurfaceparams);
+      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/Params", psurfaceparams);
       numVertices = psurfaceparams[0];
       numNodes = psurfaceparams[1];
       numTriangles = psurfaceparams[2];
       numParamEdges = psurfaceparams[3];
       nvertices = numVertices + numNodes;
       ncells = numTriangles + numParamEdges;
-      H5Dclose(dataset);
-      H5Sclose(filespace);
-      H5Sclose(memspace);
+      hdf_close(dataset, filespace, memspace);
+      
       //read xyz coordinate of vertices
       baseGridVertexCoordsArray.resize(numVertices);
       nodePositions.resize(numNodes);
       for(i = 0; i < 3; i++)
       {
-          if(i == 0)  dataset = H5Dopen(file,"/X", H5P_DEFAULT);
-          else if(i == 1) dataset = H5Dopen(file,"/Y", H5P_DEFAULT);
-          else dataset = H5Dopen(file,"/Z", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
-          ctype coords[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, filespace,
-              H5P_DEFAULT, coords);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          ctype coords[dimz[0]];          
+          if(i == 0)  
+            readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/X", coords);
+          else if(i == 1)
+            readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/Y", coords);
+          else 
+            readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/Z", coords);
+          hdf_close(dataset, filespace, memspace);
           for(j = 0; j < numVertices ;j++) (baseGridVertexCoordsArray[j])[i] = coords[j];
           for(j = 0; j < numNodes; j++) (nodePositions[j])[i] = coords[numVertices + j];
         }
 
         //triangle
-        dataset = H5Dopen(file,"/Topo", H5P_DEFAULT);
-        filespace = H5Dget_space(dataset);
-        rank = H5Sget_simple_extent_ndims(filespace);
-        status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-        memspace = H5Screate_simple(1,dimz,NULL);
         int tri[dimz[0]];
-        status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-        H5P_DEFAULT, tri);
-        H5Dclose(dataset);
-        H5Sclose(filespace);
-        H5Sclose(memspace);
+        readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/Topo", tri);
+        hdf_close(dataset, filespace, memspace);
+        
         baseGridTriArray.resize(numTriangles);
         for(j = 0; j < numTriangles;j++)
           for(i = 0; i < 3; i++)
@@ -936,66 +850,32 @@ class PsurfaceConvert{
             (parameterEdgeArray[j])[i] = tri[4*j + 2 + i + 4*numTriangles];
 
           //Parameter Edge
-          dataset = H5Dopen(file,"/LocalParamEdge", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-          memspace = H5Screate_simple(1,dimz,NULL);
           int lparam[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-          H5P_DEFAULT,lparam);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/LocalParamEdge", lparam);
+          hdf_close(dataset, filespace, memspace);
           parameterEdgeArrayLocal.resize(numParamEdges);
           for(j = 0; j < dimz[0]/2;j++)
               for(i = 0; i < 2; i++)
                   (parameterEdgeArrayLocal[j])[i] = lparam[2*j + i];
 
           //nodetype
-          dataset = H5Dopen(file,"/NodeType", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
           int nodetype[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-             H5P_DEFAULT,nodetype);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/NodeType", nodetype);
+          hdf_close(dataset, filespace, memspace);
           nodeType.resize(nvertices);
           for(i = 0; i < nvertices;i++) nodeType[i] = nodetype[i];
 
           //nodeNumber
-          dataset = H5Dopen(file,"/NodeNumber",H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-          memspace = H5Screate_simple(1,dimz,NULL);
           int nodenumber[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-             H5P_DEFAULT,nodenumber);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/NodeNumber", nodenumber);
+          hdf_close(dataset, filespace, memspace);
           nodeNumber.resize(numNodes);
           for(i = 0; i < numNodes;i++) nodeNumber[i] = nodenumber[i];
 
           //iPos
-          dataset = H5Dopen(file,"/iPos", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
           float coords[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, filespace,
-           H5P_DEFAULT, coords);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/iPos",coords);
+          hdf_close(dataset, filespace, memspace);
           iPos.resize(dimz[0]/3);
           for(j = 0; j < dimz[0]/3; j++)
           {
@@ -1005,86 +885,42 @@ class PsurfaceConvert{
           }
 
           //nodeNodesAndEdgesArray
-          dataset = H5Dopen(file,"/numNodesAndEdgesArray", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
           int nodearray[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-             H5P_DEFAULT,nodearray);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/numNodesAndEdgesArray",nodearray);
+          hdf_close(dataset, filespace, memspace);
           numNodesAndEdgesArray.resize(11*numTriangles);
           for(i = 0; i < 11*numTriangles;i++)
               numNodesAndEdgesArray[i] = nodearray[i];
 
           //triangle index
-          dataset = H5Dopen(file,"/TriangleIndx", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
           int tridx[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-               H5P_DEFAULT,tridx);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/TriangleIndx" ,tridx);
+          hdf_close(dataset, filespace, memspace);
           triId.resize(numNodes);
           for(i = 0; i < numNodes;i++)
               triId[i] = tridx[i];
 
           //local position of nodes on triangle
-          dataset = H5Dopen(file,"/LocalNodePosition", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-          memspace = H5Screate_simple(1,dimz,NULL);
           float localpos[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, filespace,
-                H5P_DEFAULT,localpos);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/LocalNodePosition",localpos);
+          hdf_close(dataset, filespace, memspace);
           domainPositions.resize(numNodes);
           for(i = 0; i < numNodes;i++)
             for(j = 0; j < 2;j++)
               (domainPositions[i])[j] = localpos[2*i + j];
 
           //edgepointsarray
-          dataset = H5Dopen(file,"/EdgePoints", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
           int edgep[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-             H5P_DEFAULT,edgep);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/EdgePoints", edgep);
+          hdf_close(dataset, filespace, memspace);
           edgePointsArray.resize(dimz[0]);
           for(i = 0; i < dimz[0];i++)
               edgePointsArray[i] = edgep[i];
 
           //patches
-          dataset = H5Dopen(file,"/patches_vec", H5P_DEFAULT);
-          filespace = H5Dget_space(dataset);
-          rank = H5Sget_simple_extent_ndims(filespace);
-          status_n  = H5Sget_simple_extent_dims(filespace, dimz, NULL);
-
-          memspace = H5Screate_simple(1,dimz,NULL);
           int patch[dimz[0]];
-          status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-             H5P_DEFAULT,patch);
-          H5Dclose(dataset);
-          H5Sclose(filespace);
-          H5Sclose(memspace);
+          readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/patches_vec", patch);
+          hdf_close(dataset, filespace, memspace);
           patches.resize(dimz[0]/3);
           for(i = 0; i < dimz[0]/3;i++)
           {
@@ -1096,11 +932,13 @@ class PsurfaceConvert{
           return 0;
   }
 
+  ///read psurface_convert from Gmsh file
   bool readGmsh(const char* filename)
   {
       FILE* file = fopen(filename,"r");
       int number_of_real_vertices = 0;
       int element_count = 0;
+      
       // process header
       double version_number;
       int file_type, data_size;
@@ -1136,7 +974,6 @@ class PsurfaceConvert{
           if( id != i ) 
               throw(std::runtime_error("id does not match in reading gmsh"));
             
-          // just store node position
           StaticVector<ctype,3> vertex;
           for(int j = 0 ; j < 3; j++)
               vertex[j] = x[j];
@@ -1175,15 +1012,13 @@ class PsurfaceConvert{
           formatString += " %d";
         formatString += "\n";
 
-        // '10' is the largest number of dofs we may encounter in a .msh file
         StaticVector<int, 3> elementDofs(3);
 
         readfile(file, 3, formatString.c_str(), &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]));
         triArray.push_back(elementDofs);
       }
 
-      //remove vetices in the code that is not the corner of triangle
-      
+      //remove vetices which is not the corner of triangle
       bool nodeInTri[number_of_nodes];
       int  newNodeIndex[number_of_nodes];
       for(int i = 0; i < number_of_nodes; i++) nodeInTri[i] = 0;
@@ -1221,7 +1056,9 @@ class PsurfaceConvert{
       numTriangles = baseGridTriArray.size();
       return 0;
   }
- 
+
+  ///creat surface from psurface_convert
+  ///baseTriangle == 1  we create the psurface subject which only have base grid triangles
   bool initPsurface(PSurface<2,ctype>* psurf, Surface* surf, bool baseTriangle)
   {
       if(baseTriangle)
