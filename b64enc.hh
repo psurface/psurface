@@ -1,8 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#ifndef DUNE_GRID_IO_FILE_VTK_B64ENC_HH
-#define DUNE_GRID_IO_FILE_VTK_B64ENC_HH
+#ifndef PSURFACE_B64ENC_HH
+#define PSURFACE_B64ENC_HH
 
 #include <assert.h>
 

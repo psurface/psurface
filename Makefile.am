@@ -33,8 +33,13 @@ include_psurface_HEADERS = \
         $(top_srcdir)/TargetSurface.h \
 	$(top_srcdir)/Triangulator.h \
 	$(top_srcdir)/VertexHeap.h \
-	$(top_srcdir)/hdf5IO.h \
-	$(top_srcdir)/hdf5IO_simple.h
+	$(top_srcdir)/psurface_convert.h \
+	$(top_srcdir)/pstreams.hh \
+	$(top_srcdir)/pindent.hh \
+	$(top_srcdir)/pcommon.hh \
+	$(top_srcdir)/pvtuwriter.hh \
+	$(top_srcdir)/pdataarraywriter.hh \
+	$(top_srcdir)/pb64enc.hh
 include_psurfacedir = $(includedir)/psurface
 
 lib_LTLIBRARIES= libpsurface.la
@@ -44,7 +49,7 @@ libpsurface_la_SOURCES= \
 	CircularPatch.cpp \
 	ContactMapping.cpp \
 	DomainPolygon.cpp \
-	Domains.cpp \libpsurface.lalibpsurface.la
+	Domains.cpp \
 	HxParamToolBox.cpp \
 	IntersectionPrimitiveCollector.cpp \
 	Iterators.cpp \
@@ -55,7 +60,8 @@ libpsurface_la_SOURCES= \
 	PSurfaceSmoother.cpp \
 	SurfaceBase.cpp \
 	TargetSurface.cpp \
-	Triangulator.cpp
+	Triangulator.cpp \
+	psurface_convert.cpp
 AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
 libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) 
 libpsurface_la_LIBADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
@@ -64,11 +70,11 @@ psurface_convert_SOURCES =  AmiraMeshIO.h \
 	Iterators.cpp \
 	PlaneParam.cpp \
 	PlaneParam.h \
-	streams.hh \
-	indent.hh \
-	common.hh \
-	vtuwriter.hh \
-	dataarraywriter.hh \
+	pstreams.hh \
+	pindent.hh \
+	pcommon.hh \
+	pvtuwriter.hh \
+	pdataarraywriter.hh \
 	PSurface.h \
 	SurfacePathSet.h \
 	Domains.h \
@@ -89,8 +95,9 @@ psurface_convert_SOURCES =  AmiraMeshIO.h \
 	Node.h \
 	StaticMatrix.h \
 	SparseMatrix.h \
-	psurface_convert.cpp\
-	psurface_convert.h
+	psurface_convert_test.cpp \
+	psurface_convert.cpp \
+	psurface_convert.h 
 psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) 
 psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
 psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)

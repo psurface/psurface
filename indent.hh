@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_COMMON_INDENT_HH
-#define DUNE_COMMON_INDENT_HH
+#ifndef PSURFACE_INDENT_HH
+#define PSURFACE_INDENT_HH
 
 #include <ostream>
 #include <string>
