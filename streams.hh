@@ -6,7 +6,7 @@
 
 #include <ostream>
 
-#include "pb64enc.hh"
+#include "b64enc.hh"
 
 namespace psurface {
 

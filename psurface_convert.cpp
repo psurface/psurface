@@ -12,7 +12,7 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "vtuwriter.hh"
-#include "ppsurface_convert.h"
+#include "psurface_convert.h"
 //#ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"
 //#else
@@ -21,7 +21,7 @@
 
 using namespace psurface;
 
-void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char*  name, int* address)
+void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char*  name, int address[])
 {
     *dataspace_id = H5Screate_simple(1, dims, NULL);
     *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_INT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
@@ -30,7 +30,7 @@ void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, 
     *status = H5Sclose(*dataspace_id);
 }
 
-void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char*  name, int** address)
+void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char*  name, int address[][2])
 {
     *dataspace_id = H5Screate_simple(2, dims, NULL);
     *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_INT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
@@ -39,7 +39,25 @@ void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, 
     *status = H5Sclose(*dataspace_id);
 }
 
-void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char* name, float* address)
+void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char*  name, int address[][4])
+{
+    *dataspace_id = H5Screate_simple(2, dims, NULL);
+    *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_INT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    *status = H5Dwrite(*dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
+    *status = H5Dclose(*dataset_id);
+    *status = H5Sclose(*dataspace_id);
+}
+
+void writeIntDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char*  name, int address[][11])
+{
+    *dataspace_id = H5Screate_simple(2, dims, NULL);
+    *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_INT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    *status = H5Dwrite(*dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
+    *status = H5Dclose(*dataset_id);
+    *status = H5Sclose(*dataspace_id);
+}
+
+void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char* name, float address[])
   {
     *dataspace_id = H5Screate_simple(1, dims, NULL);
     *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_FLOAT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
@@ -48,27 +66,46 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     *status = H5Sclose(*dataspace_id);
   }
 
-void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char* name, float** address)
+void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char* name, float address[][2])
   {
+    *dataspace_id = H5Screate_simple(2, dims, NULL);
     *dataspace_id = H5Screate_simple(2, dims, NULL);
     *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_FLOAT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     *status = H5Dwrite(*dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
     *status = H5Dclose(*dataset_id);
-    *status = H5Sclose(*dataspace_id);
   }
 
-  void writeDoubletDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char* name, double* address)
+void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char* name, float address[][3])
   {
-    *dataspace_id = H5Screate_simple(dimen, dims, NULL);
+    *dataspace_id = H5Screate_simple(2, dims, NULL);
+    *dataspace_id = H5Screate_simple(2, dims, NULL);
+    *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_FLOAT, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    *status = H5Dwrite(*dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
+    *status = H5Dclose(*dataset_id);
+  }
+
+
+  void writeDoubletDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char* name, double address[])
+  {
+    *dataspace_id = H5Screate_simple(1, dims, NULL);
     *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_DOUBLE, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     *status = H5Dwrite(*dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
     *status = H5Dclose(*dataset_id);
     *status = H5Sclose(*dataspace_id);
   }
 
-  void writeDoubleDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, int dimen, const char* name, double** address)
+  void writeDoubleDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char* name, double address[][2])
   {
-    *dataspace_id = H5Screate_simple(dimen, dims, NULL);
+    *dataspace_id = H5Screate_simple(2, dims, NULL);
+    *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_DOUBLE, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    *status = H5Dwrite(*dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
+    *status = H5Dclose(*dataset_id);
+    *status = H5Sclose(*dataspace_id);
+  }
+
+  void writeDoubleDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id, hid_t* datatype, hsize_t* dims, herr_t* status, const char* name, double address[][3])
+  {
+    *dataspace_id = H5Screate_simple(2, dims, NULL);
     *dataset_id = H5Dcreate(*file_id, name, H5T_NATIVE_DOUBLE, *dataspace_id,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     *status = H5Dwrite(*dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, address);
     *status = H5Dclose(*dataset_id);
@@ -79,7 +116,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   {
       int rank;
       herr_t status,status_n;
-
       *dataset = H5Dopen(*file, dataname, H5P_DEFAULT);
       *filespace = H5Dget_space(*dataset);
       rank = H5Sget_simple_extent_ndims(*filespace);
@@ -155,9 +191,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   *paraview.
   */
   template<class ctype,int dim>
-  bool psurface::PsurfaceConvert<ctype,dim>::creatHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool base)
+  bool psurface::PsurfaceConvert<ctype,dim>::creatHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool readablehdf)
   {
-    if(base)
+    if(readablehdf)
     {
       writeHdf5Data(hdf_filename);
       writeXdmf(xdf_filename, hdf_filename);
@@ -181,7 +217,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     herr_t    status;
 
     //1) 'Patches'
-    int *patches_vec = (int *) malloc(patches.size()*3*sizeof(int));
+    int patches_vec[patches.size()*3];
     for(i = 0; i < patches.size();i++)
     {
         patches_vec[3*i] = (patches[i]).innerRegion;
@@ -189,14 +225,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         patches_vec[3*i + 2] = (patches[i]).boundaryId;
     }
     dims[0] = patches.size()*3;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, 2, "/patches_vec", patches_vec);
-    free(patches_vec);    
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/patches_vec", patches_vec);
 
     //2) 'BaseGridVertexCoords'
-    ctype **basecoords;
-    basecoords = new float *[numVertices];
-    for(i = 0; i < numVertices; i++)
-      basecoords[i] = new float[3];
+    ctype basecoords[numVertices][3];
     for(i = 0; i < numVertices; i++)
     {
       basecoords[i][0] = (baseGridVertexCoordsArray[i])[0];
@@ -205,13 +237,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numVertices;
     dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/BaseCoords", basecoords);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseCoords", basecoords);
   
     //3) 'BaseGridTriangles'
-    int **base_tri;
-    base_tri = new int *[numTriangles];
-    for(i = 0; i < numTriangles;i++) 
-        base_tri[i] = new int[4];
+    int base_tri[numTriangles][4];
     for(i = 0; i < numTriangles;i++)
     {
       base_tri[i][0] = 4; //topology number of triangle in xdmf
@@ -221,14 +250,11 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numTriangles;
     dimz[1] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/BaseTri", base_tri);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseTri", base_tri);
   
     //4) NodePositions(x, y, and z-coordinates of the image position).
     //ipos
-    ctype **ipos;
-    ipos = new float *[iPos.size()];
-    for(i = 0; i < iPos.size();i++)
-        ipos[i] = new float[3];
+    ctype ipos[iPos.size()][3];
     for(i = 0; i < iPos.size(); i++)
     {
         ipos[i][0] = (iPos[i])[0];
@@ -237,30 +263,22 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = iPos.size();
     dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/iPos", ipos);
-    free(ipos);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/iPos", ipos);
 
     //5) 'NumNodesAndParameterEdgesPerTriangle'
-    int **num_nodes_and_edges_array;
-    num_nodes_and_edges_array = new int *[numTriangles];
-    for(i = 0; i < numTriangles; i++)
-        num_nodes_and_edges_array[i] = new int[11];
+    int num_nodes_and_edges_array[numTriangles][11];
     for(i = 0; i < numTriangles;i++)
         for(j = 0; j < 11; j++)
             num_nodes_and_edges_array[i][j] = numNodesAndEdgesArray[11*i + j];
     dimz[0] = numTriangles;
     dimz[1] = 11;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/numNodesAndEdgesArray", num_nodes_and_edges_array);
-    free(num_nodes_and_edges_array);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/numNodesAndEdgesArray", num_nodes_and_edges_array);
 
     //6) 'Nodes'
     // barycentric coordinates on the respective triangle and 
     // x, y, and z-coordinates of the image position.
     //nodes on plane surface of triangle
-    ctype **nodecoords;
-    nodecoords = new float *[numNodes];
-    for(i = 0; i< numNodes; i++)
-            nodecoords[i]= new float[3];
+    ctype nodecoords[numNodes][3];
     for(i = 0; i < numNodes; i++)
     {
       nodecoords[i][0] = (nodePositions[i])[0];
@@ -269,14 +287,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numNodes;
     dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/NodeCoords", nodecoords);
-    free(nodecoords);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/NodeCoords", nodecoords);
 
     //NodeData 
-    ctype **dp;
-    dp = new float *[numNodes];
-    for(i = 0; i < numNodes; i++)
-        dp[i] = new float[2];
+    ctype dp[numNodes][2];
     for(i = 0; i < numNodes; i++)
     {
         dp[i][0] = (domainPositions[i])[0];
@@ -284,14 +298,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numNodes;
     dimz[1] = 2;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/LocalNodePosition", dp);
-    free(dp);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalNodePosition", dp);
 
     //image position
-    ctype **imageposition;
-    imageposition = new float *[nvertices];
-    for(i = 0; i < nvertices; i++)
-        imageposition[i] = new float[3];
+    ctype imageposition[nvertices][3];
     for (i = 0; i< nvertices; i++)
     {
       imageposition[i][0] = (imagePos[i])[0];
@@ -300,22 +310,17 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = nvertices;
     dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2 , "/ImagePosition", imageposition);
-    free(imageposition);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/ImagePosition", imageposition);
 
     //7)NodeNumbers
-    int *nodenumber = (int*)malloc(numNodes*sizeof(int));
+    int nodenumber[numNodes];
     for(i = 0; i < numNodes; i++)
         nodenumber[i] = nodeNumber[i];
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numNodes, "/NodeNumber", nodenumber);
-    free(nodenumber);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/NodeNumber", nodenumber);
 
     //8) 'ParameterEdges'
     //connection array(in global index) of parameter edges
-    int **parameter_edge_local_array;
-    parameter_edge_local_array = new int *[numParamEdges];
-    for(i = 0; i < numParamEdges; i++)
-        parameter_edge_local_array[i] = new int[2];
+    int parameter_edge_local_array[numParamEdges][2];
     for(i = 0; i < numParamEdges; i++)
     {
        parameter_edge_local_array[i][0] =  (parameterEdgeArrayLocal[i])[0];
@@ -323,14 +328,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numParamEdges;
     dimz[1] = 2;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/LocalParamEdge", parameter_edge_local_array);    
-    free( parameter_edge_local_array);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalParamEdge", parameter_edge_local_array);    
 
     //param edge
-    int  **paramedge;
-    paramedge = new int *[numParamEdges];
-    for(i = 0; i < numParamEdges; i++)
-        paramedge[i] = new int[4];
+    int  paramedge[numParamEdges][4];
     for(i = 0; i < numParamEdges; i++)
     {
        paramedge[i][0] = 2;
@@ -340,15 +341,14 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numParamEdges;
     dimz[1] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/ParamEdge", paramedge);
-    free(paramedge);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/ParamEdge", paramedge);
 
     //9) 'EdgePoints'
     int edgepointsarray[edgePointsArray.size()];
     for(i = 0; i < edgePointsArray.size();i++)
       edgepointsarray[i] = edgePointsArray[i];
     dims[0] = edgePointsArray.size();
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, 1, "/EdgePoints", edgepointsarray);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/EdgePoints", edgepointsarray);
 
     //Supportive data
     //params
@@ -359,7 +359,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     psurfaceparams[3] = numParamEdges;
 
     dims[0] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, 1, "/Params", psurfaceparams);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/Params", psurfaceparams);
 
     //nodetype
     int nodetype[nvertices];
@@ -367,7 +367,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       nodetype[i] = nodeType[i];
 
     dims[0] = nvertices;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, 1, "/NodeType", nodetype);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/NodeType", nodetype);
     
     //close the file
     status = H5Fclose(file_id);
@@ -387,7 +387,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     herr_t    status;
     
     //1) 'Patches'
-    int *patches_vec = (int *) malloc(patches.size()*3*sizeof(int));
+    int patches_vec[patches.size()*3];
     for(i = 0; i < patches.size();i++)
     {
         patches_vec[3*i] = (patches[i]).innerRegion;
@@ -395,14 +395,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         patches_vec[3*i + 2] = (patches[i]).boundaryId;
     }
     dims[0] = patches.size()*3;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, 2, "/patches_vec", patches_vec);
-    free(patches_vec);    
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/patches_vec", patches_vec);
 
     //2) 'BaseGridVertexCoords'
-    ctype **basecoords;
-    basecoords = new float *[numVertices];
-    for(i = 0; i < numVertices; i++)
-      basecoords[i] = new float[3];
+    ctype basecoords[numVertices][3];
     for(i = 0; i < numVertices; i++)
     {
       basecoords[i][0] = (baseGridVertexCoordsArray[i])[0];
@@ -411,13 +407,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numVertices;
     dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/BaseCoords", basecoords);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseCoords", basecoords);
   
     //3) 'BaseGridTriangles'
-    int **base_tri;
-    base_tri = new int *[numTriangles];
-    for(i = 0; i < numTriangles;i++) 
-        base_tri[i] = new int[4];
+    int base_tri[numTriangles][4];
     for(i = 0; i < numTriangles;i++)
     {
       base_tri[i][0] = 4; //topology number of triangle in xdmf
@@ -427,14 +420,11 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numTriangles;
     dimz[1] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/BaseTri", base_tri);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseTri", base_tri);
   
     //4) NodePositions(x, y, and z-coordinates of the image position).
     //ipos
-    ctype **ipos;
-    ipos = new float *[iPos.size()];
-    for(i = 0; i < iPos.size();i++)
-        ipos[i] = new float[3];
+    ctype ipos[iPos.size()][3];
     for(i = 0; i < iPos.size(); i++)
     {
         ipos[i][0] = (iPos[i])[0];
@@ -443,28 +433,20 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = iPos.size();
     dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/iPos", ipos);
-    free(ipos);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/iPos", ipos);
 
     //5) 'NumNodesAndParameterEdgesPerTriangle'
-    int **num_nodes_and_edges_array;
-    num_nodes_and_edges_array = new int *[numTriangles];
-    for(i = 0; i < numTriangles; i++)
-        num_nodes_and_edges_array[i] = new int[11];
+    int num_nodes_and_edges_array[numTriangles][11];
     for(i = 0; i < numTriangles;i++)
         for(j = 0; j < 11; j++)
             num_nodes_and_edges_array[i][j] = numNodesAndEdgesArray[11*i + j];
     dimz[0] = numTriangles;
     dimz[1] = 11;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/numNodesAndEdgesArray", num_nodes_and_edges_array);
-    free(num_nodes_and_edges_array); 
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status,"/numNodesAndEdgesArray", num_nodes_and_edges_array);
 
     //6) 'Nodes'
     //NodeData 
-    ctype **dp;
-    dp = new float *[numNodes];
-    for(i = 0; i < numNodes; i++)
-        dp[i] = new float[2];
+    ctype dp[numNodes][2];
     for(i = 0; i < numNodes; i++)
     {
         dp[i][0] = (domainPositions[i])[0];
@@ -472,22 +454,18 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numNodes;
     dimz[1] = 2;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/LocalNodePosition", dp);
-    free(dp);
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalNodePosition", dp);
 
     //7)NodeNumbers
-    int *nodenumber = (int*)malloc(numNodes*sizeof(int));
+    int nodenumber[numNodes];
     for(i = 0; i < numNodes; i++)
         nodenumber[i] = nodeNumber[i];
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, numNodes, "/NodeNumber", nodenumber);
-    free(nodenumber);
+    dims[0] = numNodes;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status,"/NodeNumber", nodenumber);
     
     //8) 'ParameterEdges'
     //connection array(in global index) of parameter edges
-    int **parameter_edge_local_array;
-    parameter_edge_local_array = new int *[numParamEdges];
-    for(i = 0; i < numParamEdges; i++)
-        parameter_edge_local_array[i] = new int[2];
+    int parameter_edge_local_array[numParamEdges][2];
     for(i = 0; i < numParamEdges; i++)
     {
        parameter_edge_local_array[i][0] =  (parameterEdgeArrayLocal[i])[0];
@@ -495,15 +473,14 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     dimz[0] = numParamEdges;
     dimz[1] = 2;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, 2, "/LocalParamEdge", parameter_edge_local_array);    
-    free( parameter_edge_local_array);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status,"/LocalParamEdge", parameter_edge_local_array);    
 
     //9) 'EdgePoints'
-    int *edgepointsarray = (int*)malloc(edgePointsArray.size()*sizeof(int));
+    int edgepointsarray[edgePointsArray.size()];
     for(i = 0; i < edgePointsArray.size();i++)
       edgepointsarray[i] = edgePointsArray[i];
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, edgePointsArray.size(), "/EdgePoints", edgepointsarray);
-    free(edgepointsarray);
+    dims[0] = edgePointsArray.size();
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status,"/EdgePoints", edgepointsarray);
 
     //Supportive data
     //params
@@ -512,9 +489,8 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     psurfaceparams[1] = numNodes;
     psurfaceparams[2] = numTriangles;
     psurfaceparams[3] = numParamEdges;
-
     dims[0] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, 1, "/Params", psurfaceparams);
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status,"/Params", psurfaceparams);
 
     //close the file
     status = H5Fclose(file_id);
@@ -525,7 +501,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   ///writhe the xdmf file which store the structure information of hdf5 file.
   bool psurface::PsurfaceConvert<ctype,dim>::writeXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename)
   {
-    printf("in writeXdmd function: xdf_file = %s hdf_file = %s\n", xdf_filename.c_str(),hdf_filename.c_str());
     FILE *xmf = 0;
     xmf = fopen(xdf_filename.c_str(), "w");
     fprintf(xmf, "<?xml version=\"1.0\" ?>\n");
@@ -547,15 +522,15 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     fprintf(xmf, "</Geometry>\n");
 
     fprintf(xmf, "<Attribute Name=\"Patches\" AttributeType=\"Scalar\" Center=\"Cell\">\n");
-      fprintf(xmf, "<DataItem ItemType=\"HyperSlab\" Dimensions=\"%d\" Type=\"HyperSlab\">\n",numTriangles);
+      fprintf(xmf, "<DataItem ItemType=\"HyperSlab\" Dimensions=\"%d %d\" Type=\"HyperSlab\">\n",numTriangles,1);
 
-        fprintf(xmf, "<DataItem  Dimensions=\"3\" Format=\"XML\">\n");
-        fprintf(xmf, "%d\n", 4);
-        fprintf(xmf, "%d\n", 11);
-        fprintf(xmf, "%d\n", numTriangles);
+        fprintf(xmf, "<DataItem  Dimensions=\"3 2\" Format=\"XML\">\n");
+        fprintf(xmf, "%d %d\n",1, 4);
+        fprintf(xmf, "%d %d\n",1, 11);
+        fprintf(xmf, "%d %d\n", numTriangles,1);
         fprintf(xmf, "</DataItem>\n"); 
 
-        fprintf(xmf, " <DataItem Dimensions=\"%d\" NumberType=\"int\" Format=\"HDF\">\n", 11*numTriangles);
+        fprintf(xmf, " <DataItem Dimensions=\"%d %d\" NumberType=\"int\" Format=\"HDF\">\n", numTriangles, 11);
         fprintf(xmf, "%s:/numNodesAndEdgesArray\n", hdf_filename.c_str());
         fprintf(xmf, "</DataItem>\n");
 
@@ -567,7 +542,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
     fprintf(xmf, "<Grid Name=\"paramedge\" GridType=\"Uniform\">\n");
     fprintf(xmf, "<Topology TopologyType=\"Mixed\" NumberOfElements=\"%d\">\n", numParamEdges);
-          fprintf(xmf, "<DataItem Dimensions = \"%d\" NumberType=\"int\" Format=\"HDF\">\n",  4*numParamEdges);
+          fprintf(xmf, "<DataItem Dimensions = \"%d %d\" NumberType=\"int\" Format=\"HDF\">\n",  numParamEdges, 4);
             fprintf(xmf, "%s:/ParamEdge\n", hdf_filename.c_str());
           fprintf(xmf, "</DataItem>\n");
     fprintf(xmf, "</Topology>\n");
@@ -609,7 +584,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   {
     std::ofstream file;
     file.open(filename);
-    if (! file.is_open()) printf("%c does not exits!\n", filename);
+    if (! file.is_open()) printf("%s does not exits!\n", filename);
     writeDataFile(file, basegrid);
     file.close();
     return 0;
@@ -1031,9 +1006,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         // the edgePoints for this triangle
         for (j=0; j<3; j++){
             for (size_t k=1; k<cT.edgePoints[j].size()-1; k++)
-            {
                 edgePointsArray[edgePointsArrayIdx++] = newIdxlocal[cT.edgePoints[j][k]];
-            }
         }
     }
   };
@@ -1056,8 +1029,8 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       hid_t datatype, dataset;
       hid_t filespace;
       hid_t       memspace;
-      hsize_t dims[2];
-      hsize_t dimz[1];
+      hsize_t dims[1];
+      hsize_t dimz[2];
       herr_t status,status_n;
       int rank;
       int i,j,k;
@@ -1065,7 +1038,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
       //read params
       int *psurfaceparams;
-      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/Params", psurfaceparams);
+      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims,"/Params", psurfaceparams);
       numVertices = psurfaceparams[0];
       numNodes = psurfaceparams[1];
       numTriangles = psurfaceparams[2];
@@ -1073,51 +1046,47 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       nvertices = numVertices + numNodes;
       ncells = numTriangles + numParamEdges;
       hdf_close(dataset, filespace, memspace);
+
       //read xyz coordinate of vertices
-      {     baseGridVertexCoordsArray.resize(3*numVertices);
+      {   
       ctype *coords;  
       readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/BaseCoords", coords);
       hdf_close(dataset, filespace, memspace);
-      for(j = 0; j < numVertices ;j++) 
+
+      baseGridVertexCoordsArray.resize(3*numVertices);      
+      for(j = 0; j < numVertices ;j++){
           for(i = 0; i < 3; i++)
               (baseGridVertexCoordsArray[j])[i] = coords[3*j + i];
+          }
       }
-/*      {
-      hsize_t     dims_out[2];
-      dataset = H5Dopen(file, "/BaseCoords", H5P_DEFAULT);
-      datatype  = H5Dget_type(dataset);
-      filespace = H5Dget_space(dataset);
-      status_n  = H5Sget_simple_extent_dims(filespace, dims_out, NULL);      
-      memspace = H5Screate_simple(2,dims_out,NULL);
-      float coords[dims_out[0]][dims_out[1]];
-      status = H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, filespace, H5P_DEFAULT,coords);
-        for(j = 0; j < numVertices ;j++) 
-          for(i = 0; i < 3; i++)
-              (baseGridVertexCoordsArray[j])[i] = coords[j][i];
-      }
-*/
+      
       //triangle
       int *tri;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/BaseTri", tri);
       hdf_close(dataset, filespace, memspace);
-        
+      
       baseGridTriArray.resize(numTriangles);
       for(j = 0; j < numTriangles;j++)
+      {
         for(i = 0; i < 3; i++)
           (baseGridTriArray[j])[i] = tri[4*j+ 1 + i];
+      } 
       //Parameter Edge
       int *lparam;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/LocalParamEdge", lparam);
       hdf_close(dataset, filespace, memspace);
+     
       parameterEdgeArrayLocal.resize(numParamEdges);
-      for(j = 0; j < dimz[0]/2;j++)
+      for(j = 0; j < dimz[0];j++)
+      {
          for(i = 0; i < 2; i++)
              (parameterEdgeArrayLocal[j])[i] = lparam[2*j + i];
-
+      }
       //nodeNumber
       int *nodenumber;
-      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/NodeNumber", nodenumber);
+      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims,"/NodeNumber", nodenumber);
       hdf_close(dataset, filespace, memspace);
+      
       nodeNumber.resize(numNodes);
       for(i = 0; i < numNodes;i++) nodeNumber[i] = nodenumber[i];
 
@@ -1125,8 +1094,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       ctype *coords;
       readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/iPos",coords);
       hdf_close(dataset, filespace, memspace);
-      iPos.resize(dimz[0]/3);
-      for(j = 0; j < dimz[0]/3; j++)
+      
+      iPos.resize(dimz[0]);
+      for(j = 0; j < dimz[0]; j++)
       {
         (iPos[j])[0] = coords[3*j];
         (iPos[j])[1] = coords[3*j+1];
@@ -1137,33 +1107,40 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       int *nodearray;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/numNodesAndEdgesArray",nodearray);
       hdf_close(dataset, filespace, memspace);
+      
       numNodesAndEdgesArray.resize(11*numTriangles);
       for(i = 0; i < 11*numTriangles;i++)
-      numNodesAndEdgesArray[i] = nodearray[i];
+          numNodesAndEdgesArray[i] = nodearray[i];
 
       //local position of nodes on triangle
       ctype *localpos;
       readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/LocalNodePosition",localpos);
       hdf_close(dataset, filespace, memspace);
+      
       domainPositions.resize(numNodes);
       for(i = 0; i < numNodes;i++)
-      for(j = 0; j < 2;j++)
-          (domainPositions[i])[j] = localpos[2*i + j];
-
+      {
+          for(j = 0; j < 2;j++)
+              (domainPositions[i])[j] = localpos[2*i + j];
+      }
+      
       //edgepointsarray
       int *edgep;
-      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/EdgePoints", edgep);
+      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims, "/EdgePoints", edgep);
       hdf_close(dataset, filespace, memspace);
-      edgePointsArray.resize(dimz[0]);
-      for(i = 0; i < dimz[0];i++)
+      
+      edgePointsArray.resize(dims[0]);
+      for(i = 0; i < dims[0];i++)
+      {
          edgePointsArray[i] = edgep[i];
+      }
 
       //patches
       int *patch;
-      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/patches_vec", patch);
+      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims, "/patches_vec", patch);
       hdf_close(dataset, filespace, memspace);
-      patches.resize(dimz[0]/3);
-      for(i = 0; i < dimz[0]/3;i++)
+      patches.resize(dims[0]/3);
+      for(i = 0; i < dims[0]/3;i++)
       {
         (patches[i]).innerRegion = patch[3*i];
         (patches[i]).outerRegion = patch[3*i + 1];
@@ -1435,6 +1412,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
 
     ///insert trianlges and the plain graph onto it.
+
     int edgeCounter=0, edgePointCounter=0;
     int nodeArrayIdx = 0;
     for (int i=0; i<numTriangles; i++){

@@ -24,24 +24,21 @@ namespace psurface
 using namespace psurface;
 int main(int argc, char **argv)
 {
-    if (argc < 6) {
-	fprintf(stderr, "Usage: psurface_convert -i inputname -o outputname -t base \n");
+    if (argc < 4) {
+	fprintf(stderr, "Usage: psurface_convert -i inputname -o outputname (-t type) \n");
 	fprintf(stderr, "Input file type could be amiramesh(*.am) , hdf5(*.h5) or gmsh(*.msh).\n");
 	fprintf(stderr, "Output file type could be amiramesh(*.am) , hdf5(*.h5) or vtu(*.vtu).\n");
-	fprintf(stderr, "base could be b(basegrid) , w(whole psurface) or u(unreadable hdf5 file).\n -t b: the output should only have base grid trianlge.\n -t w:output is the whole psurface \n -t r: this option is used only with hdf5 output. youwill get the hdf5 data file that only store necessrary information of psurface if r is not chosed. \n");
+	fprintf(stderr, "type could be b(basegrid) or r(readable hdf5 file).\n -t b means that the output should only have base grid trianlge(This option is used when the output type is vtu type.\n -t r means that we get readable output hdf5 type data(This option is used when the output type is hdf5).\n");
 	exit(0);
     }
     
     //use get opt to deal with the argv
-    char *input, *output;
-    char *type;
+    char *input, *output, *type;
+    bool basegrid = 0, readablehdf = 0;
     int opt=0;  
     int i=0;
     const char *optstring=":i:o:t:";  
     const int num=3;
-    bool basegrid = 0, readablehdf = 0;
-    basegrid = 0;
-    readablehdf = 0;
   
     while((opt=getopt(argc,argv,optstring)) != -1)  
     {  
@@ -65,16 +62,6 @@ int main(int argc, char **argv)
         }  
     }  
   
-    if(*type == 'b')
-      basegrid = 1;
-    else if(*type == 'w')
-      basegrid = 0;
-    else if(*type == 'r')
-      readablehdf = 1;
-    else      
-      printf("unkown type, please choose between 'b', 'w' and 'u'.\n");
-    
-      
     for(i=0;optind<argc;i++,optind++)  
     {  
         if(i<num)  
@@ -98,14 +85,20 @@ int main(int argc, char **argv)
     if(strstr(output,".am") != NULL)
         outputType = AMIRA;
     else if(strstr(output,".h5") != NULL)
-        outputType = HDF5;
+    {
+        outputType = HDF5; 
+        if( type != NULL && *type == 'r')  readablehdf = 1;
+    }
     else if(strstr(output,".vtu") != NULL)
+    {
         outputType = VTU;
+        if( type != NULL && *type == 'b')  basegrid = 1;
+    }
     else if(strstr(output,".msh") != NULL)
         outputType = GMSH;
     else
       printf(" could not tell the output type by file extention\n");
-    
+  
   PSurface<2,float>* par = new PSurface<2,float>;
   Surface* surf = new Surface;
 
@@ -174,7 +167,6 @@ int main(int argc, char **argv)
     case AMIRA:
       {
       PSURFACE_API AmiraMeshIO<float> amIO;
-      printf("in amiramesh\n");
       amIO.writeAmiraMesh(par, output);
       }
       break;
@@ -183,64 +175,4 @@ int main(int argc, char **argv)
    };
 
   return 0;
-/*  //psurface_convert -i hdf5 -o amiramesh
-  {
-    PsurfaceConvert pconvert = new PsurfaceConvert<2,float>(inputfile, 0);
-    initPsurface(par, surf, 0);
-    PSURFACE_API AmiraMeshIO<float> amIO;    
-    amIO.writeAmiraMesh(par1, "outputfile");
-  }
-  //psurface_convert -i hdf5 -o vtu
-  {
-    PsurfaceConvert pconvert = new PsurfaceConvert<2,float>(inputfile, 0);
-    initPsurface(par, surf, 0);
-    PSurfaceConvert pn = new PSurfaceConvert<2,float>(par);
-    pn.creatVTU(outputfile);
-  }
-  //psurface_convert -i gmsh -o hdf5
-  {
-    PsurfaceConvert pconvert = new PsurfaceConvert<2,float>(inputfile, 1);
-    initPsurface(par, surf, 1);
-    PSurfaceConvert pn = new PSurfaceConvert<2,float>(par);
-    pn.creatHdfAndXdmf(xdf_filename, hdf_filename);
-  }
-  //psurface_convert -i gmsh -o amiramsh
-  {
-    PsurfaceConvert pconvert = new PsurfaceConvert<2,float>(inputfile, 1);
-    initPsurface(par, surf, 1);
-    PSURFACE_API AmiraMeshIO<float> amIO;    
-    amIO.writeAmiraMesh(par1, "outputfile");
-  }
-  //psurface_convert -i gmsh -o vtu
-  {
-    PsurfaceConvert pconvert = new PsurfaceConvert<2,float>(inputfile, 1);
-    initPsurface(par, surf, 1);
-    PSurfaceConvert pn = new PSurfaceConvert<2,float>(par);
-    pn.creatVTU(outputfile);
-  }
-
-  //psurface_convert -i amiramesh -o hdf5
-  {
-    AmiraMesh* am = AmiraMesh::read(inputfile);
-    if (!am.initFromAmiraMesh(par,am,inputfile, surf)) {
-      printf("error in getting psurface from sphere.par.am");
-    }
-    else
-    {
-      PSurfaceConvert pn = new PSurfaceConvert<2,float>(par);
-      pn.creatHdfAndXdmf(xdf_filename, hdf_filename);
-    }     
-  }
-  //psurface_convert -i amiramesh -o vtu
-  {
-    AmiraMesh* am = AmiraMesh::read(inputfile);
-    if (!am.initFromAmiraMesh(par,am,inputfile, surf)) {
-      printf("error in getting psurface from sphere.par.am");
-    }
-    else
-    {
-      PSurfaceConvert pn = new PSurfaceConvert<2,float>(par);
-      pn.creatVTU(outputfile);
-    } 
-  }*/
 }
