@@ -15,6 +15,8 @@
  *
  */
 /////////////////////////////////////////////////////////////////
+#include "config.h"
+
 #include <stdio.h>
 #include <ctype.h>
 
@@ -53,7 +55,7 @@ void Surface::computeTrianglesPerPoint()
 
     for (int k=0; k<nPoints; k++)
         trianglesPerPoint[k].resize(0);
-    
+
     for (int i=0; i<nTriangles; i++) {
         Surface::Triangle& tri = triangles[i];
         trianglesPerPoint[tri.points[0]].push_back(i);

@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "PSurface.h"
 #include "PSurfaceSmoother.h"
 #include "CircularPatch.h"
@@ -8,15 +10,15 @@
 using namespace psurface;
 
 template <class ctype>
-void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, int edge, 
+void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, int edge,
                                                   bool keepPatches, std::vector<unsigned int>& nodeStack)
 {
-        
+
     Edge& cE = psurface->edges(edge);
 
     if (cE.triangles.size()!=2)
         return;
-        
+
     StaticVector<float,2> quadCoords[4];
     DomainPolygon quadri(psurface);
     bool flipped;
@@ -24,20 +26,20 @@ void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, i
     psurface->triangles(cE.triangles[0]).checkConsistency("PreRelax0");
     psurface->triangles(cE.triangles[1]).checkConsistency("PreRelax1");
 
-    ParamToolBox::mergeTwoTrianglesIntoQuadrangle(cE.triangles[0], cE.triangles[1], 
+    ParamToolBox::mergeTwoTrianglesIntoQuadrangle(cE.triangles[0], cE.triangles[1],
                                                   quadri, flipped, quadCoords, nodeStack, psurface);
-        
+
     // apply the desired parametrization
 
-    if (psurface->triangles(cE.triangles[0]).patch != psurface->triangles(cE.triangles[1]).patch && 
+    if (psurface->triangles(cE.triangles[0]).patch != psurface->triangles(cE.triangles[1]).patch &&
         keepPatches) {
             applyHorizontalRelaxation(quadri, psurface);
         } else
             quadri.applyParametrization();
-        
+
     // undo the merge
     CircularPatch<float> cutter(2, psurface);
-        
+
     // all this true copying is rather inefficient...
     std::tr1::array<DomainTriangle<float>, 2> backupTriangles;
     backupTriangles[0] = psurface->triangles(cE.triangles[0]);
@@ -50,7 +52,7 @@ void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, i
     std::vector<unsigned int> tempNodeStack(nodeStack);
 
     if (!quadri.triangulate(cutter, tempNodeStack)){
-            
+
         std::cerr << "Couldn't cut quadrangle -- aborting" << std::endl;
 
         psurface->triangles(cE.triangles[0]) = backupTriangles[0];
@@ -64,7 +66,7 @@ void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, i
     if (flipped)
         psurface->triangles(cutter[1]).flip();
 
-    if (psurface->triangles(cE.triangles[0]).patch != psurface->triangles(cE.triangles[1]).patch && 
+    if (psurface->triangles(cE.triangles[0]).patch != psurface->triangles(cE.triangles[1]).patch &&
         keepPatches) {
         psurface->triangles(cE.triangles[0]).applyParametrization(psurface->iPos);
         psurface->triangles(cE.triangles[1]).applyParametrization(psurface->iPos);
@@ -86,7 +88,7 @@ void PSurfaceSmoother<ctype>::applyHorizontalRelaxation(DomainPolygon& quadri, P
 
     quadri.computeFloaterLambdas(lambda_ij, psurface->iPos);
 
-    // build matrix 
+    // build matrix
     lambda_ij *= -1;
 
     for (int i=0; i<lambda_ij.nRows(); i++)
@@ -136,16 +138,16 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
 
     DomainVertex* centerPoint;
     // loop over all regular vertices
-    for (centerPoint=par->vertices.first(); centerPoint; 
+    for (centerPoint=par->vertices.first(); centerPoint;
          centerPoint=par->vertices.succ(centerPoint), vCounter++) {
 
         theWorkArea->progressStep();
 
         if (!(vCounter%100) && theWorkArea->wasInterrupted())
             break;
-        
+
         int i, j, k;
-        
+
         for (DomainTriangle* cT=par->triangles.first(); cT; cT=par->triangles.succ(cT))
             cT->checkConsistency("Beginning of relaxation Loop\n");
 
@@ -164,7 +166,7 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
         // apply the requested parametrization
 
         if (portRadius.getValue() > 0.995) {
-            
+
             fullStar.applyParametrization();
 
         } else {
@@ -183,68 +185,68 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
             McDArray<int> interiorNodes(0);
             McDArray<int> boundaryNodes(0);
             int cN;
-            
+
             for (cN=0; cN<fullStar.nodes.size(); cN++)
-                if (fullStar.nodes[cN].domainPos.length() < freeRadius)         
+                if (fullStar.nodes[cN].domainPos.length() < freeRadius)
                     interiorNodes.append(cN);
                 else
                     boundaryNodes.append(cN);
-            
+
             assert(boundaryNodes.size()>=3);
-            
+
             // compute lambdas
             McSparseMatrix<float, false> lambda_ij(interiorNodes.size()+boundaryNodes.size());
-            
+
             fullStar.computeFloaterLambdas(lambda_ij, interiorNodes, boundaryNodes);
-            
-            
-            // build matrix 
+
+
+            // build matrix
             lambda_ij *= -1;
-            
+
             for (i=0; i<lambda_ij.nRows(); i++)
                 lambda_ij.setEntry(i, i, 1);
-            
-            
+
+
             // compute the right side, split in x and y coordinates
             // this doesn't really use the sparse matrix well
-            
+
             McDArray<float> b_x(interiorNodes.size()+boundaryNodes.size());
             McDArray<float> b_y(interiorNodes.size()+boundaryNodes.size());
-            
+
             b_x.fill(0);
             b_y.fill(0);
-            
+
             for (j=0; j<boundaryNodes.size(); j++)
                 b_x[interiorNodes.size()+j] = fullStar.nodes[boundaryNodes[j]].domainPos.x;
-            
+
             for (j=0; j<boundaryNodes.size(); j++)
                 b_y[interiorNodes.size()+j] = fullStar.nodes[boundaryNodes[j]].domainPos.y;
-            
+
             // solve the system
             int maxIter=3000;
             McDArray<float> residue;
             McDArray<float> result = b_x;
-            
+
             // xCoords
             for (i=0; i<interiorNodes.size(); i++)
                 result[i] = fullStar.nodes[interiorNodes[i]].domainPos.x;
-            
+
             lambda_ij.SOR(b_x, result, residue, &maxIter, 0.000001, 0.9);
-            
+
             for (i=0; i<interiorNodes.size(); i++)
                 fullStar.nodes[interiorNodes[i]].domainPos.x = result[i];
-            
+
             // yCoords
             maxIter = 3000;
             result = b_y;
             for (i=0; i<interiorNodes.size(); i++)
                 result[i] = fullStar.nodes[interiorNodes[i]].domainPos.y;
-            
+
             lambda_ij.SOR(b_y, result, residue, &maxIter, 0.000001, 0.9);
-            
+
             for (i=0; i<interiorNodes.size(); i++)
                 fullStar.nodes[interiorNodes[i]].domainPos.y = result[i];
-            
+
         }
 
 
@@ -255,9 +257,9 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
         if (!portKeepPatches.getValue(1)) {
             int cN;
             float minDist = FLT_MAX;
-            
+
             for (cN=0; cN<fullStar.nodes.size(); cN++){
-                
+
                 if (fullStar.nodes[cN].domainPos.length2() < minDist){
                     newCenterNode = cN;
                     minDist = fullStar.nodes[cN].domainPos.length2();
@@ -291,7 +293,7 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
                 fullStar.nodes[cN].location = PlaneParam::Node::IN_POLYGON;
 
             DomainTriangle* cT = fullStarTris[i];
-            
+
             int offset=0;
             if (cT->points[0]==centerPoint)
                 offset = 0;
@@ -299,7 +301,7 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
                 offset = 1;
             else
                 offset = 2;
-        
+
 
             // copy edgePoint arrays
             for (j=0; j<3; j++){
@@ -317,8 +319,8 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
             // make a copy of the centerNode
             fullStar.nodes.appendSpace(1);
             int localCenterNode = fullStar.nodes.size()-1;
-            fullStar.nodes[localCenterNode].setValue(fullStar.nodes[newCenterNode].domainPos, 
-                                                     fullStar.nodes[newCenterNode].imagePos, 
+            fullStar.nodes[localCenterNode].setValue(fullStar.nodes[newCenterNode].domainPos,
+                                                     fullStar.nodes[newCenterNode].imagePos,
                                                      PlaneParam::Node::CORNER_NODE);
 
             fullStar.nodes[localCenterNode].location = PlaneParam::Node::IN_TRIANGLE;
@@ -338,14 +340,14 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
             int numTriNodes = 0;
             int triNode;
 
-            for (triNode=0; triNode<fullStar.nodes.size(); triNode++) 
+            for (triNode=0; triNode<fullStar.nodes.size(); triNode++)
                 if (fullStar.nodes[triNode].location == PlaneParam::Node::IN_TRIANGLE)
                     numTriNodes++;
-            
+
             int triCount = 0;
             cT->nodes.resize(numTriNodes);
             McDArray<int> offArr(fullStar.nodes.size());
-            
+
             for (triNode=0; triNode<fullStar.nodes.size(); triNode++)
                 if (fullStar.nodes[triNode].location == PlaneParam::Node::IN_TRIANGLE) {
                     cT->nodes[triCount] = fullStar.nodes[triNode];
@@ -353,11 +355,11 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
                     offArr[triNode] = triCount;
                     triCount++;
                 }
-            
+
             for (j=0; j<numTriNodes; j++)
                 for (k=0; k<cT->nodes[j].neighbors.size(); k++)
                     cT->nodes[j].neighbors[k] = offArr[cT->nodes[j].neighbors[k]];
-            
+
             for (j=0; j<3; j++)
                 for (k=0; k<cT->edgePoints[j].size(); k++)
                     cT->edgePoints[j][k] = offArr[cT->edgePoints[j][k]];
@@ -384,8 +386,8 @@ void PSurfaceSmoother<ctype>::applyVertexRelaxation()
     }
 
     theWorkArea->stopWorking();
- 
-#endif   
+
+#endif
 }
 
 template <class ctype>

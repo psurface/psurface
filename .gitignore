@@ -9,11 +9,14 @@ Makefile.in
 aclocal.m4
 autom4te.cache/
 build-aux/
+config.h
+config.h.in
 config.log
 config.status
 configure
 libpsurface.la
 libtool
+stamp-h1
 
 libpsurface-?.?.?
 libpsurface*.tar.gz

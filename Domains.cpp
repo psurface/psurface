@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "Domains.h"
 
 using namespace psurface;
@@ -6,19 +8,19 @@ template <class ctype>
 void DomainTriangle<ctype>::insertExtraEdges()
 {
     int i,j;
-    
+
     // add the missing paramEdges on the base grid triangle edges
     for (i=0; i<3; i++){
-        
+
         for (j=1; j<edgePoints[i].size(); j++){
-            
+
             if ((this->nodes[edgePoints[i][j]].isINTERSECTION_NODE() ||
                  this->nodes[edgePoints[i][j]].isGHOST_NODE() ||
                  this->nodes[edgePoints[i][j-1]].isINTERSECTION_NODE() ||
                  this->nodes[edgePoints[i][j-1]].isGHOST_NODE()) &&
                 !this->nodes[edgePoints[i][j]].isConnectedTo(edgePoints[i][j-1])){
 
-                
+
                 this->addEdge(edgePoints[i][j-1], edgePoints[i][j], true);
             }
         }
@@ -27,9 +29,9 @@ void DomainTriangle<ctype>::insertExtraEdges()
 
     // turn quadrangles into two triangles
     for (i=0; i<3; i++){
-    
+
         for (j=1; j<edgePoints[i].size(); j++)
-            
+
             if (this->nodes[edgePoints[i][j]].isINTERSECTION_NODE()){
 
                 //int interiorPoint = nodes[edgePoints[i][j]].neighbors(0);
@@ -39,7 +41,7 @@ void DomainTriangle<ctype>::insertExtraEdges()
                 if (!this->nodes[interiorPoint].isConnectedTo(edgePoints[i][j-1]))
                     this->addEdge(edgePoints[i][j-1], interiorPoint, true);
 
-            }  
+            }
 
     }
 
@@ -61,7 +63,7 @@ void DomainTriangle<ctype>::flip()
 
     for (int i=0; i<3; i++)
         std::reverse(edgePoints[i].begin(), edgePoints[i].end());
-    
+
     // Change the pointers of intersection nodes to their respective positions
     // in the edgePoints arrays.  This is just in case that the pointLocationStructure
     // is intact.
@@ -86,7 +88,7 @@ void DomainTriangle<ctype>::rotate()
     std::rotate(vertices.begin(),   vertices.end()-1,   vertices.end());
     std::rotate(edges.begin(),      edges.end()-1,      edges.end());
     std::rotate(edgePoints.begin(), edgePoints.end()-1, edgePoints.end());
-    
+
     // turn the parametrization
     /// \todo This is slow and should be replaced!
     this->installWorldCoordinates(StaticVector<ctype,2>(0,0), StaticVector<ctype,2>(1,0), StaticVector<ctype,2>(0,1));
@@ -117,7 +119,7 @@ void DomainTriangle<ctype>::adjustTouchingNodes()
     int i;
 
     for (i=1; i<edgePoints[0].size()-1; i++)
-        if (this->nodes[edgePoints[0][i]].isTOUCHING_NODE() 
+        if (this->nodes[edgePoints[0][i]].isTOUCHING_NODE()
             || this->nodes[edgePoints[0][i]].isINTERSECTION_NODE()){
             StaticVector<ctype,2> tmp = this->nodes[edgePoints[0][i]].domainPos();
             ctype diff = (1.0f - tmp[0] - tmp[1]);
@@ -129,15 +131,15 @@ void DomainTriangle<ctype>::adjustTouchingNodes()
     for (i=1; i<edgePoints[1].size()-1; i++)
         if (this->nodes[edgePoints[1][i]].isTOUCHING_NODE() || this->nodes[edgePoints[1][i]].isINTERSECTION_NODE())
             this->nodes[edgePoints[1][i]].setDomainPos(StaticVector<ctype,2>(0, this->nodes[edgePoints[1][i]].domainPos()[1]));
-    
+
     for (i=1; i<edgePoints[2].size()-1; i++)
         if (this->nodes[edgePoints[2][i]].isTOUCHING_NODE() || this->nodes[edgePoints[2][i]].isINTERSECTION_NODE())
             this->nodes[edgePoints[2][i]].setDomainPos(StaticVector<ctype,2>(this->nodes[edgePoints[2][i]].domainPos()[0], 0));
 }
-        
+
 
 template <class ctype>
-void DomainTriangle<ctype>::createPointLocationStructure() 
+void DomainTriangle<ctype>::createPointLocationStructure()
 {
     //print(true, true, true);
     checkConsistency("BeforeCreate");
@@ -149,9 +151,9 @@ void DomainTriangle<ctype>::createPointLocationStructure()
     checkConsistency("AfterInterior");
 
     for (int i=0; i<3; i++) {
-        
-        this->makeCyclicBoundaryNode(this->nodes[edgePoints[i][0]], 
-                               edgePoints[i][1], 
+
+        this->makeCyclicBoundaryNode(this->nodes[edgePoints[i][0]],
+                               edgePoints[i][1],
                                edgePoints[(i+2)%3][edgePoints[(i+2)%3].size()-2]);
 
         // should be setCorner()
@@ -185,7 +187,7 @@ void DomainTriangle<ctype>::print(bool showEdgePoints, bool showParamEdges, bool
 
 
     if (showEdgePoints){
-        
+
         for (i=0; i<3; i++){
             printf("edgePoints %d:\n", i);
             for (j=0; j<edgePoints[i].size(); j++){
@@ -193,7 +195,7 @@ void DomainTriangle<ctype>::print(bool showEdgePoints, bool showParamEdges, bool
                 this->nodes[edgePoints[i][j]].print();
             }
         }
-        
+
         printf("\n");
     }
 
@@ -201,7 +203,7 @@ void DomainTriangle<ctype>::print(bool showEdgePoints, bool showParamEdges, bool
         for (int cN=0; cN<this->nodes.size(); cN++){
             printf("%d  ", cN);
             this->nodes[cN].print(showParamEdges);
-//             if (showParamEdges) 
+//             if (showParamEdges)
 //                 for (i=0; i<nodes[cN].degree(); i++)
 //                     printf("    %d\n", (int)nodes[cN].neighbors(i));
         }
@@ -230,7 +232,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
             printf("***** triangle contains invalid node *****\n");
             assert(false);
         }
-        
+
     PlaneParam<ctype>::checkConsistency(where);
 
     // check whether all corner nodes are of type CORNER_NODE
@@ -245,7 +247,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
                 print();
                 assert(false);
             }
-        
+
         if (!this->nodes[edgePoints[i][0]].isCORNER_NODE()){
             printf(where);
             printf("***** corner node is not CORNER_NODE *****\n");
@@ -261,7 +263,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
             if (this->nodes[edgePoints[i][j]].isINTERIOR_NODE()){
                 printf(where);
                 std::cout << "******* interior node found in edgePoint array ********" << std::endl;
-                std::cout << "***     The node has the node number " 
+                std::cout << "***     The node has the node number "
                           << this->nodes[edgePoints[i][j]].getNodeNumber() << "      ***" << std::endl;
                 assert(false);
             }
@@ -274,7 +276,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
                 !nA.isConnectedTo(edgePoints[i][j+1])){
-                
+
                 printf(where);
                 printf("***** two adjacent TOUCHING NODES are not connected! *****\n");
                 assert(false);
@@ -299,7 +301,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
         }
     }
 
-    // check whether all intersection nodes are pointed to from an edgePoint array    
+    // check whether all intersection nodes are pointed to from an edgePoint array
 
     for (int k=0; k<this->nodes.size(); k++) {
 
@@ -308,12 +310,12 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
         if (cN.isINTERSECTION_NODE()){
 
             bool isIn = false;
-            
+
             for (i=0; i<3; i++)
                 for (j=0; j<edgePoints[i].size(); j++)
                     if (edgePoints[i][j]==k)
                         isIn = true;
-            
+
             if (!isIn){
                 printf(where);
                 printf("***** INTERSECTION NODE not in edgePoints array *****\n");
@@ -324,7 +326,7 @@ void DomainTriangle<ctype>::checkConsistency(const char* where) const
     }
 
 #endif
-}    
+}
 
 // ///////////////////////////////////////////////////////
 //   explicit template instantiations

@@ -60,8 +60,8 @@ AS_IF([test "x$enable_assertions" = "xyes"],
       [CPPFLAGS="$CPPFLAGS -DNDEBUG"])
 # }}}
 
-# FIXME: Settings are currently passed via CPPFLAGS
-#AC_CONFIG_HEADERS([config.h])
+# Write config.h file containing settings as preprocessor macros
+AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_FILES([
   Makefile

@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "Triangulator.h"
 #include "PSurface.h"
 #include "QualityRequest.h"
@@ -23,11 +25,11 @@ signed char Triangulator::orientation(const StaticVector<float,2>& a, const Stat
         return -1;
 
     return 0;
-    
+
 }
 
-void Triangulator::triangulateStar(const std::vector<int> &border, int center, 
-                                   CircularPatch<float>& resultPatch, 
+void Triangulator::triangulateStar(const std::vector<int> &border, int center,
+                                   CircularPatch<float>& resultPatch,
                                    std::vector<StaticVector<float,2> >& flatBorder,
                                    PSurface<2,float>* par)
 {
@@ -44,37 +46,37 @@ void Triangulator::triangulateStar(const std::vector<int> &border, int center,
 
 }
 
-void Triangulator::estimateStarError(const std::vector<int> &border, int center, 
-                                     const QualityRequest &quality, const std::vector<int> &fullStar, 
+void Triangulator::estimateStarError(const std::vector<int> &border, int center,
+                                     const QualityRequest &quality, const std::vector<int> &fullStar,
                                      VertexHeap::ErrorValue& qualityValue,
-                                     MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
+                                     MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>& edgeOctree,
                                      PSurface<2,float>* par)
 {
     /////////////////////////////////////
     // computes the flattened coordinates
     std::vector<StaticVector<float,2> > flatBorder;
-    
+
     ParamToolBox::flattenStar(center, border, flatBorder, par);
-    
+
     for (size_t j=0; j<flatBorder.size(); j++)
         assert(!isnan(flatBorder[j][0]) &&!isnan(flatBorder[j][1]));
-    
+
     ///////////////////////////////////////////
     // do a constrained Delaunay triangulation
     CircularPatch<float> resultPatch(border.size()-2, par);
-    
+
     planeCDT(flatBorder, border, resultPatch, par);
-    
+
     //////////////////////////////////////////
-    // evaluate triangulation, 
+    // evaluate triangulation,
     evaluate(&resultPatch, center, quality, qualityValue, fullStar, edgeOctree, par);
-    
+
     resultPatch.killAll();
-    
+
 }
 
 // same thing for a half star
-void Triangulator::triangulateHalfStar(const std::vector<int> &border, int center, 
+void Triangulator::triangulateHalfStar(const std::vector<int> &border, int center,
                                        CircularPatch<float>& resultPatch, std::vector<StaticVector<float,2> >& flatBorder,
                                        PSurface<2,float>* par)
 {
@@ -91,10 +93,10 @@ void Triangulator::triangulateHalfStar(const std::vector<int> &border, int cente
 
 
 // same thing for a half star
-void Triangulator::estimateHalfStarError(const std::vector<int> &border, int center, 
-                                         const QualityRequest &quality, const std::vector<int> &fullStar, 
+void Triangulator::estimateHalfStarError(const std::vector<int> &border, int center,
+                                         const QualityRequest &quality, const std::vector<int> &fullStar,
                                          VertexHeap::ErrorValue& qualityValue,
-                                         MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
+                                         MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>& edgeOctree,
                                          PSurface<2,float>* par)
 {
     /////////////////////////////////////
@@ -116,7 +118,7 @@ void Triangulator::estimateHalfStarError(const std::vector<int> &border, int cen
     evaluate(&resultPatch, center, quality, qualityValue, fullStar, edgeOctree, par);
 
     resultPatch.killAll();
-                
+
 }
 
 
@@ -157,8 +159,8 @@ void Triangulator::planeCDT(const std::vector<StaticVector<float,2> >& flatBorde
 
             if (orientation(tmpCoords[k%K], tmpCoords[(k+1)%K], tmpCoords[(k+2)%K])==counterclockwise) {
 
-                const float aspectRatio = computeAspectRatio(par->vertices(tmpVertices[k%K]), 
-                                                             par->vertices(tmpVertices[(k+1)%K]), 
+                const float aspectRatio = computeAspectRatio(par->vertices(tmpVertices[k%K]),
+                                                             par->vertices(tmpVertices[(k+1)%K]),
                                                              par->vertices(tmpVertices[(k+2)%K]));
 
                 if (aspectRatio<bestAspectRatio) {
@@ -173,24 +175,24 @@ void Triangulator::planeCDT(const std::vector<StaticVector<float,2> >& flatBorde
                 }
             }
         }
-        
+
         assert(bestEdge!=-1);
-   
+
 
         // /////////////////////////////////////
         // cut off that edge
-        
+
         const int chosenEdge = (bestDelaunayEdge!=-1) ? bestDelaunayEdge : bestEdge;
-        
+
         result[idx++] = par->createSpaceForTriangle(tmpVertices[chosenEdge%K],
-                                                    tmpVertices[(chosenEdge+1)%K], 
+                                                    tmpVertices[(chosenEdge+1)%K],
                                                     tmpVertices[(chosenEdge+2)%K]);
-        
+
         result.innerEdges[edgeIdx][0] = tmpVertices[chosenEdge%K];
         result.innerEdges[edgeIdx][1] = tmpVertices[(chosenEdge+2)%K];
         edgeIdx++;
         tmpVertices.erase(tmpVertices.begin()+((chosenEdge+1)%K));
-        tmpCoords.erase(tmpCoords.begin()+((chosenEdge+1)%K)); 
+        tmpCoords.erase(tmpCoords.begin()+((chosenEdge+1)%K));
         K--;
 
     }
@@ -198,18 +200,18 @@ void Triangulator::planeCDT(const std::vector<StaticVector<float,2> >& flatBorde
     // /////////////////////////////////////
     // the case K=4
     // choose the triangulation which yields the lowest max aspect ratio
-    const float aRa1 = computeAspectRatio(par->vertices(tmpVertices[0]), 
-                                          par->vertices(tmpVertices[1]), 
+    const float aRa1 = computeAspectRatio(par->vertices(tmpVertices[0]),
+                                          par->vertices(tmpVertices[1]),
                                           par->vertices(tmpVertices[2]));
-    const float aRa2 = computeAspectRatio(par->vertices(tmpVertices[2]), 
-                                          par->vertices(tmpVertices[3]), 
+    const float aRa2 = computeAspectRatio(par->vertices(tmpVertices[2]),
+                                          par->vertices(tmpVertices[3]),
                                           par->vertices(tmpVertices[0]));
 
-    const float aRb1 = computeAspectRatio(par->vertices(tmpVertices[1]), 
-                                          par->vertices(tmpVertices[2]), 
+    const float aRb1 = computeAspectRatio(par->vertices(tmpVertices[1]),
+                                          par->vertices(tmpVertices[2]),
                                           par->vertices(tmpVertices[3]));
-    const float aRb2 = computeAspectRatio(par->vertices(tmpVertices[3]), 
-                                          par->vertices(tmpVertices[0]), 
+    const float aRb2 = computeAspectRatio(par->vertices(tmpVertices[3]),
+                                          par->vertices(tmpVertices[0]),
                                           par->vertices(tmpVertices[1]));
 
     const float maxA = (aRa1>aRa2) ? aRa1 : aRa2;
@@ -256,19 +258,19 @@ bool Triangulator::isLegalEdge(const StaticVector<float,2>& a, const StaticVecto
         if (polygon[i]!=a && polygon[i]!=b && polygon[i]!=c &&
             (polygon[i]-center).length()<radius)
             return false;
- 
+
     return true;
 }
 
 
-void Triangulator::evaluate(const CircularPatch<float>* cP, int removedVertex, 
+void Triangulator::evaluate(const CircularPatch<float>* cP, int removedVertex,
                             const QualityRequest &quality, VertexHeap::ErrorValue& error,
-                            const std::vector<int> &fullStar, 
-                            MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>& edgeOctree, 
+                            const std::vector<int> &fullStar,
+                            MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>& edgeOctree,
                             const PSurface<2,float>* par)
 {
     error.unblock();
-    
+
     for (int i=0; i<cP->size(); i++)
         for (int j=0; j<3; j++)
             assert( par->triangles((*cP)[i]).vertices[j] != -1);
@@ -312,39 +314,39 @@ void Triangulator::evaluate(const CircularPatch<float>* cP, int removedVertex,
             }
 
     }
-    
+
     if (cP->inducesTopologyChange()){
         //printf("Induces TopChange\n");
         error.block();
         return;
     }
-    
+
     // compute the Hausdorff distance
     float HausdorffDistance=0;
     if (quality.hausdorffDistance > 0.01) {
         //printf("ev 13\n");
         int nNodes = 0;
-        
+
         for (size_t i=0; i<fullStar.size(); i++){
 
             const DomainTriangle<float>& cT = par->triangles(fullStar[i]);
-            
+
             for (size_t cN=0; cN<cT.nodes.size(); cN++) {
                 //printf("ev 13.3\n");
-                if (cT.nodes[cN].isINTERIOR_NODE() || 
+                if (cT.nodes[cN].isINTERIOR_NODE() ||
                     cT.nodes[cN].isTOUCHING_NODE()){
                     //printf("ev 13.4\n");
                     nNodes++;
-                    
+
                     HausdorffDistance += cP->distanceTo(par->imagePos(fullStar[i], cN));
                     //printf("ev 13.5\n");
                 }
             }
         }
-        
+
         HausdorffDistance += cP->distanceTo(par->vertices(removedVertex));
         HausdorffDistance /= nNodes+1;
-    } 
+    }
     //printf("ev 14\n");
     float aspectRatioImprovement =  0;
 
@@ -357,17 +359,17 @@ void Triangulator::evaluate(const CircularPatch<float>* cP, int removedVertex,
             if (thisAspectRatio>oldMaxAspectRatio)
                 oldMaxAspectRatio = thisAspectRatio;
         }
-            
+
         // compute max aspect ratio of retriangulation
         const float newMaxAspectRatio = cP->maxAspectRatio();
         aspectRatioImprovement = newMaxAspectRatio - oldMaxAspectRatio;
     }
-    
+
     error.unblock();
     error.value   = HausdorffDistance*quality.hausdorffDistance + (aspectRatioImprovement)*quality.aspectRatio;
     //printf("ev 16\n");
     return;
 }
 
-       
+
 

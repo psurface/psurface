@@ -1,3 +1,5 @@
+#include "config.h"
+
 #ifdef _MSC_VER
     // Required to make cmath define M_PI etc.
     #define _USE_MATH_DEFINES
@@ -98,7 +100,7 @@ typename PlaneParam<ctype>::DirectedEdgeIterator PlaneParam<ctype>::BFLocate(con
                     // handle degenerate triangles
                     isEligibleOnext)
                     whichop += 1;
-                
+
                 if (orientation(Dprev, p) != -1 &&
                     // handle degenerate triangles
                     isEligibleDprev)
@@ -106,18 +108,18 @@ typename PlaneParam<ctype>::DirectedEdgeIterator PlaneParam<ctype>::BFLocate(con
 
                 //printf("whichop: %d\n", whichop);
                 switch (whichop){
-                    
-                case 0: 
+
+                case 0:
                     return cE;
-                    
+
                 case 1:
                     cE = Onext;
                     break;
-                    
+
                 case 2:
                     cE = Dprev;
                     break;
-                    
+
                 case 3:
                     cE = (random() < RAND_MAX/2) ? Onext : Dprev;
                     break;
@@ -141,7 +143,7 @@ void PlaneParam<ctype>::makeCyclicGeometrically(Node<ctype>& center)
         return;
 
     int i, j;
-   
+
     std::vector<ctype> angles(center.degree());
 
     // compute angles
@@ -184,8 +186,8 @@ void PlaneParam<ctype>::makeCyclicGeometrically(Node<ctype>& center)
 // in a cyclic order.  This is done by performing a depth-first search on the graph of these
 // neighbors and looking for a longest path.  See me for details
 template <class ctype>
-bool PlaneParam<ctype>::DFSVisit(const std::vector<typename Node<ctype>::NeighborReference> &star, 
-                                 const typename Node<ctype>::NeighborReference& u, 
+bool PlaneParam<ctype>::DFSVisit(const std::vector<typename Node<ctype>::NeighborReference> &star,
+                                 const typename Node<ctype>::NeighborReference& u,
                                  std::vector<typename Node<ctype>::NeighborReference> &outStar)
 {
     for (size_t i=0; i<star.size(); i++){
@@ -202,9 +204,9 @@ bool PlaneParam<ctype>::DFSVisit(const std::vector<typename Node<ctype>::Neighbo
 
         if (isNew){
             outStar.push_back(v);
-            if (outStar.size()==star.size() && nodes[outStar.back()].isConnectedTo(outStar[0])) 
+            if (outStar.size()==star.size() && nodes[outStar.back()].isConnectedTo(outStar[0]))
                 return true;
-            if (DFSVisit(star, v, outStar)) 
+            if (DFSVisit(star, v, outStar))
                 return true;
             outStar.pop_back();
         }
@@ -222,7 +224,7 @@ bool PlaneParam<ctype>::DFSVisit(const std::vector<typename Node<ctype>::Neighbo
 // u = outStar[0].  However the outStar.push_back in this method may lead to a relocation
 // of the outStar content, and the reference to outStar[0] (in u) will dangle.
 template <class ctype>
-bool PlaneParam<ctype>::DFSBoundaryVisit(const std::vector<typename Node<ctype>::NeighborReference> &star, 
+bool PlaneParam<ctype>::DFSBoundaryVisit(const std::vector<typename Node<ctype>::NeighborReference> &star,
                                          typename Node<ctype>::NeighborReference u, int endNode,
                                          std::vector<typename Node<ctype>::NeighborReference> &outStar)
 {
@@ -235,9 +237,9 @@ bool PlaneParam<ctype>::DFSBoundaryVisit(const std::vector<typename Node<ctype>:
         if (std::find(outStar.begin(), outStar.end(), v) == outStar.end()) {
 
             outStar.push_back(v);
-            if (outStar.size()==star.size() && outStar.back()==endNode) 
+            if (outStar.size()==star.size() && outStar.back()==endNode)
                 return true;
-            if (DFSBoundaryVisit(star, v, endNode, outStar)) 
+            if (DFSBoundaryVisit(star, v, endNode, outStar))
                 return true;
             outStar.pop_back();
 
@@ -301,16 +303,16 @@ template <class ctype>
 StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVector<ctype,2> &p, const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c)
 {
     StaticVector<ctype,2> result;
-    
+
     StaticMatrix<ctype,3> area0(p[0], b[0], c[0],  p[1], b[1], c[1], 1, 1, 1);
     StaticMatrix<ctype,3> area1(a[0], p[0], c[0],  a[1], p[1], c[1], 1, 1, 1);
-    
+
     StaticMatrix<ctype,3> areaTotal(a[0], b[0], c[0], a[1], b[1], c[1], 1, 1, 1);
     ctype areaTotalDet = areaTotal.det();
-    
+
     result[0] = area0.det()/areaTotalDet;
     result[1] = area1.det()/areaTotalDet;
-    
+
     return result;
 }
 
@@ -320,17 +322,17 @@ template <class ctype>
 StaticVector<ctype,2> PlaneParam<ctype>::computeBarycentricCoords(const StaticVector<ctype,3> &p, const StaticVector<ctype,3> &a, const StaticVector<ctype,3> &b, const StaticVector<ctype,3> &c)
 {
     StaticVector<ctype,2> result;
-    
+
     ctype area0 = (p-b).cross(p-c).length();
     ctype area1 = (p-a).cross(p-c).length();
-    
+
     ctype areaTotal = (b-a).cross(c-a).length();
-    
+
     result[0] = area0/areaTotal;
     result[1] = area1/areaTotal;
-    
+
     if (std::isnan(result[1])) {
-        printf("area0 %f   area1 %f    areaTotal %f   res  (%f %f)\n", area0, area1, areaTotal, 
+        printf("area0 %f   area1 %f    areaTotal %f   res  (%f %f)\n", area0, area1, areaTotal,
                result[0], result[1]);
         assert(false);
     }
@@ -361,13 +363,13 @@ int PlaneParam<ctype>::map(const StaticVector<ctype,2> &domainCoord, std::tr1::a
     tri[0] = e.from();
     tri[1] = e.to();
     tri[2] = oNext.to();
-    
 
-    localBarycentricCoords = computeBarycentricCoords(domainCoord, 
+
+    localBarycentricCoords = computeBarycentricCoords(domainCoord,
                                                       nodes[tri[0]].domainPos(),
                                                       nodes[tri[1]].domainPos(),
                                                       nodes[tri[2]].domainPos());
-    
+
     if (localBarycentricCoords[0]<-0.05 || localBarycentricCoords[1] < -0.05 ||
         (localBarycentricCoords[0]+localBarycentricCoords[1] > 1.05)) {
         printf("There seems to be a self-intersection in your parametrization.\n");
@@ -389,19 +391,19 @@ void PlaneParam<ctype>::unflipTriangles(const std::vector<StaticVector<ctype,3> 
     // a plane triangulation contains flipped triangles if at least one
     // of its vertices is not a convex combination of its neighbors
 //     Node* cN;
-    
+
 //     for (cN=nodes.first(); cN; cN=nodes.succ(cN))
 //      if (cN->type==Node::INTERIOR_NODE && !cN->isConvexCombination()){
 //          //printf("unflipping!\n");
 //          applyParametrization(0);
 //          return;
 //      }
-            
+
     //printf("NOT unflipping!\n");
 }
 
 ////////////////////////////////////////////////////////////////
-// this routine installs the shape-preserving parametrization 
+// this routine installs the shape-preserving parametrization
 // only INTERIOR_NODEs get moved
 ////////////////////////////////////////////////////////////////
 template <class ctype>
@@ -411,21 +413,21 @@ void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctyp
     SparseMatrix<ctype> lambda_ij(nodes.size());
 
     computeFloaterLambdas(lambda_ij, nodePositions);
-    
-    // build matrix 
+
+    // build matrix
     lambda_ij *= -1;
 
     for (size_t i=0; i<lambda_ij.nRows(); i++)
         lambda_ij.setEntry(i, i, 1);
-    
+
     // Compute the right side. We use complex numbers for solving the systems
     // for both x- and y-components in one pass.  This leads to a considerable
     // speedup.
     std::vector<std::complex<ctype> > b(nodes.size());
-    
+
     std::fill(b.begin(), b.end(), 0);
-    
-    for (size_t i=0; i<nodes.size(); i++) 
+
+    for (size_t i=0; i<nodes.size(); i++)
         if (!nodes[i].isINTERIOR_NODE()) {
             // not elegant
             b[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
@@ -435,12 +437,12 @@ void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctyp
     int maxIter=3000;
     std::vector<std::complex<ctype> > residue;
     std::vector<std::complex<ctype> > result(nodes.size());
-    
+
     for (size_t i=0; i<nodes.size(); i++)
         result[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
-    
+
     lambda_ij.BiCGSTABC(b, result, residue, &maxIter, 1e-6);
-    
+
     for (size_t i=0; i<nodes.size(); i++)
         if (nodes[i].isINTERIOR_NODE())
             nodes[i].setDomainPos(StaticVector<ctype,2>(real(result[i]), imag(result[i])));
@@ -448,13 +450,13 @@ void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctyp
 }
 
 
-            
-            
+
+
 ////////////////////////////////////////////////////////
 // computes lambda_ij for the Floater-Parametrization
 ////////////////////////////////////////////////////////
 template <class ctype>
-void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij, 
+void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij,
                                        const std::vector<StaticVector<ctype,3> >& nodePositions)
 {
     int k, l;
@@ -466,15 +468,15 @@ void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij,
     // for all interiorPoints do
     for (size_t i=0; i<nodes.size(); i++) {
         if (nodes[i].isINTERIOR_NODE()) {
-            
+
             Node<ctype>& p = nodes[i];
             makeCyclicGeometrically(p);
-            
+
             std::vector<int>    p_k(p.degree());
             std::vector<StaticVector<ctype,3> >  p_k_3DCoords(p.degree());
             std::vector<StaticVector<ctype,2> >  p_k_2DCoords(p.degree());
             std::vector<ctype>    angle;
-            
+
             for (k=0; k<p.degree(); k++){
                 p_k[k]          = (int)p.neighbors(k);
                 //p_k_3DCoords[k] = nodes[p_k[k]].getImagePos(nodePositions);
@@ -487,7 +489,7 @@ void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij,
                 assert(!std::isnan(p_k_3DCoords[k][1]));
                 assert(!std::isnan(p_k_3DCoords[k][2]));
             }
-            
+
             if (!polarMap(nodePositions[p.getNodeNumber()], p_k_3DCoords, p_k_2DCoords, angle )) {
 
                 for (k=0; k<p.degree(); k++)
@@ -495,54 +497,54 @@ void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij,
 
                 continue;
             }
-            
+
             if (p.degree()==3){
-                
+
                 StaticVector<ctype,2> lambdas = computeBarycentricCoords(StaticVector<ctype,2>(0,0), p_k_2DCoords[0], p_k_2DCoords[1], p_k_2DCoords[2]);
-                
+
                 StaticVector<ctype,3> l_ij;
                 l_ij[0] = lambdas[0];
                 l_ij[1] = lambdas[1];
                 l_ij[2] = 1-lambdas[0]-lambdas[1];
-                
+
                 for (k=0; k<3; k++)
                     lambda_ij.setEntry(i, p_k[k], l_ij[k]);
-                
+
             } else {
-                
+
                 std::vector<int> index(p.degree());
-                for (l=0; l<p.degree(); l++) 
+                for (l=0; l<p.degree(); l++)
                     index[l] = p_k[l];
-                
+
                 for (l=0; l<p.degree(); l++) {
-                    
+
                     int rlPlus1=0;
-                    
+
                     ctype oppositeAngle = (angle[l]<M_PI) ? angle[l]+M_PI : angle[l]-M_PI;
-                    
+
                     while (rlPlus1<angle.size() && angle[rlPlus1] < oppositeAngle) rlPlus1++;
-                    
+
                     int rl = (rlPlus1 + p.degree()-1)%p.degree();
                     rlPlus1 = rlPlus1%p.degree();
-                    
+
                     StaticVector<ctype,2> bCoords = computeBarycentricCoords(StaticVector<ctype,2>(0,0), p_k_2DCoords[l], p_k_2DCoords[rl], p_k_2DCoords[rlPlus1]);
-                    
+
                     StaticVector<ctype,3> delta(bCoords[0], bCoords[1], 1-bCoords[0]-bCoords[1]);
-                    
+
                     lambda_ij.addToEntry(i, index[l],       delta[0] / p.degree());
                     lambda_ij.addToEntry(i, index[rl],      delta[1] / p.degree());
                     lambda_ij.addToEntry(i, index[rlPlus1], delta[2] / p.degree());
                 }
-                
+
             }
-            
+
         }
     }
 }
-            
+
 
 template <class ctype>
-bool PlaneParam<ctype>::polarMap(const StaticVector<ctype,3>& center, const std::vector<StaticVector<ctype,3> > &threeDStarVertices, 
+bool PlaneParam<ctype>::polarMap(const StaticVector<ctype,3>& center, const std::vector<StaticVector<ctype,3> > &threeDStarVertices,
                           std::vector<StaticVector<ctype,2> >& flattenedCoords, std::vector<ctype >& theta)
 {
     /////////////////////////////////////
@@ -570,16 +572,16 @@ bool PlaneParam<ctype>::polarMap(const StaticVector<ctype,3>& center, const std:
         theta[k] = theta[k-1] + (pLeft - center).angle(pRight - center);
         if (std::isnan(theta[k])){
             printf("center (%f %f %f)\n", center[0], center[1], center[2]);
-            printf("pLeft - center (%f %f %f) pRight - center (%f %f %f)\n", 
-                   pLeft[0] - center[0], pLeft[1] - center[1], pLeft[2] - center[2], 
+            printf("pLeft - center (%f %f %f) pRight - center (%f %f %f)\n",
+                   pLeft[0] - center[0], pLeft[1] - center[1], pLeft[2] - center[2],
                    pRight[0] - center[0], pRight[1] - center[1], pRight[2] - center[2]);
-            printf("pLeft (%f %f %f)   pRight(%f %f %f)\n", pLeft[0], pLeft[1], pLeft[2], 
+            printf("pLeft (%f %f %f)   pRight(%f %f %f)\n", pLeft[0], pLeft[1], pLeft[2],
                    pRight[0], pRight[1], pRight[2]);
 
             printf("angle %f\n", (pLeft - center).angle(pRight - center));
             return false;
         }
-        
+
     }
 
     ctype a = 2*M_PI/theta[K];
@@ -591,7 +593,7 @@ bool PlaneParam<ctype>::polarMap(const StaticVector<ctype,3>& center, const std:
         ctype r = (threeDStarVertices[k] - center).length();
         ctype rPowA = powf(r, a);
 
-        flattenedCoords[k] = StaticVector<ctype,2>(rPowA*cos(theta[k]), rPowA*sin(theta[k])); 
+        flattenedCoords[k] = StaticVector<ctype,2>(rPowA*cos(theta[k]), rPowA*sin(theta[k]));
     }
 
     theta.pop_back();
@@ -641,10 +643,10 @@ void PlaneParam<ctype>::makeCyclicBoundaryNode(Node<ctype>& center, int next, in
             printf("### number %d\n", (int)center.neighbors(i));
             nodes[center.neighbors(i)].print();
         }
-        
+
         //assert(false);
     }
-    
+
     center.nbs = outStar;
 }
 
@@ -652,7 +654,7 @@ template <class ctype>
 void PlaneParam<ctype>::installWorldCoordinates(const StaticVector<ctype,2> &a, const StaticVector<ctype,2> &b, const StaticVector<ctype,2> &c)
 {
     for (int i=0; i<nodes.size(); i++)
-        nodes[i].setDomainPos(a*nodes[i].domainPos()[0] + b*nodes[i].domainPos()[1] + 
+        nodes[i].setDomainPos(a*nodes[i].domainPos()[0] + b*nodes[i].domainPos()[1] +
                               c*(1-nodes[i].domainPos()[0]-nodes[i].domainPos()[1]));
 }
 
@@ -668,18 +670,18 @@ void PlaneParam<ctype>::installBarycentricCoordinates(const StaticVector<ctype,2
 }
 
 template <class ctype>
-void PlaneParam<ctype>::print(bool showNodes, bool showParamEdges, bool showExtraEdges) const 
+void PlaneParam<ctype>::print(bool showNodes, bool showParamEdges, bool showExtraEdges) const
 {
     std::cout << "---------------------------------------------------------" << std::endl;
     std::cout << "parametrization contains " << nodes.size() << " nodes" << std::endl;
-    
+
     if (showNodes){
         for (size_t i=0; i<nodes.size(); i++)
             nodes[i].print();
     }
 
     std::cout << "---------------------------------------------------------" << std::endl;
-}   
+}
 
 
 template <class ctype>
@@ -708,7 +710,7 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
                 nodes[cN.neighbors(j)].print();
                 assert(false);
             }
-        
+
         // make sure that no neighbor is invalid
         for (size_t j=0; j<cN.degree(); j++)
             if (nodes[cN.neighbors(j)].isInvalid()) {

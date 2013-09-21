@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <vector>
 
 #ifdef PSURFACE_STANDALONE
@@ -57,15 +59,15 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     am.parameters.set("ContentType", "Parametrization");
 
     par->savePaths(am.parameters);
-    
+
 
     ////////////////////////////////////////////
     // the patches array
     AmiraMesh::Location* patchesLoc = new AmiraMesh::Location("Patches", par->numPatches());
     am.insert(patchesLoc);
 
-    AmiraMesh::Data* patchesData = new AmiraMesh::Data("Patches", patchesLoc, 
-                                                       McPrimType::mc_int32, 3, 
+    AmiraMesh::Data* patchesData = new AmiraMesh::Data("Patches", patchesLoc,
+                                                       McPrimType::mc_int32, 3,
                                                        (void*)&par->patches[0]);
     am.insert(patchesData);
 
@@ -78,8 +80,8 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     for (size_t i=0; i<par->getNumVertices(); i++)
         baseGridVertexCoordsArray[i] = par->vertices(i);
 
-    AmiraMesh::Data* vertexCoords = new AmiraMesh::Data("BaseGridVertexCoords", vertices, 
-                                                        McPrimType::mc_float, 3, 
+    AmiraMesh::Data* vertexCoords = new AmiraMesh::Data("BaseGridVertexCoords", vertices,
+                                                        McPrimType::mc_float, 3,
                                                         (void*)&baseGridVertexCoordsArray[0]);
     am.insert(vertexCoords);
 
@@ -93,10 +95,10 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     for (size_t i=0; i<par->getNumTriangles(); i++)
         for (int j=0; j<3; j++)
             baseGridTriArray[i][j] = par->triangles(i).vertices[j];
-    
+
 
     AmiraMesh::Data* triangleCoords = new AmiraMesh::Data("BaseGridTriangles", triangles,
-                                                          McPrimType::mc_int32, 3, 
+                                                          McPrimType::mc_int32, 3,
                                                           (void*)&baseGridTriArray[0]);
     am.insert(triangleCoords);
 
@@ -106,7 +108,7 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     am.insert(nodePosLoc);
 
     AmiraMesh::Data* nodePosData = new AmiraMesh::Data("NodePositions", nodePosLoc,
-                                                       McPrimType::mc_float, 3, 
+                                                       McPrimType::mc_float, 3,
                                                        (void*)&par->iPos[0]);
     am.insert(nodePosData);
 
@@ -122,7 +124,7 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     int numEdgePoints = 0;
 
     std::vector<int> numNodesAndEdgesArray(11*numTriangles);
-    
+
     for (i=0; i<numTriangles; i++) {
 
         const DomainTriangle<ctype>& cT = par->triangles(i);
@@ -158,12 +160,12 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
 
     }
 
-    AmiraMesh::Data*  numNodesAndEdgesData = new AmiraMesh::Data("NumNodesAndParameterEdgesPerTriangle", 
+    AmiraMesh::Data*  numNodesAndEdgesData = new AmiraMesh::Data("NumNodesAndParameterEdgesPerTriangle",
                                                                  numNodesAndEdges,
-                                                                 McPrimType::mc_int32, 11, 
+                                                                 McPrimType::mc_int32, 11,
                                                                  (void*)&numNodesAndEdgesArray[0]);
     am.insert(numNodesAndEdgesData);
-    
+
     /////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
@@ -197,7 +199,7 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
                 nodeNumbers[arrayIdx]     = cT.nodes[cN].getNodeNumber();
 
                 newIdx[cN] = localArrayIdx;
-                
+
                 arrayIdx++;
                 localArrayIdx++;
             }
@@ -225,12 +227,12 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
                 nodeNumbers[arrayIdx]     = cT.nodes[cN].getNodeNumber();
 
                 newIdx[cN] = localArrayIdx;
-                
+
                 arrayIdx++;
                 localArrayIdx++;
             }
         }
-        
+
         // ///////////////////////////////////////
         // the parameterEdges for this triangle
         // ///////////////////////////////////////
@@ -270,7 +272,7 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
                                                      McPrimType::mc_int32, 1, (void*)&nodeNumbers[0]);
     am.insert(nNData);
 
-    
+
     AmiraMesh::Location* parameterEdges = new AmiraMesh::Location("ParameterEdges", numParamEdges);
     am.insert(parameterEdges);
 
@@ -285,7 +287,7 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     am.insert(edgePoints);
 
     AmiraMesh::Data* edgePointsData = new AmiraMesh::Data("EdgePoints", edgePoints,
-                                                          McPrimType::mc_int32, 1, 
+                                                          McPrimType::mc_int32, 1,
                                                           (void*)&edgePointsArray[0]);
     am.insert(edgePointsData);
 
@@ -326,10 +328,10 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
     // //////////////////////////////////
 
     PSurfaceFactory<2,ctype> factory(psurf);
-    
+
     // Target surface already exists
     factory.setTargetSurface(surf);
-    
+
     psurf->getPaths(am->parameters);
 
     ///////////////////////////////////////////////
@@ -351,12 +353,12 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
         printf("AmiraMesh: Field 'Patches' not found!\n");
         return false;
     }
-    
+
     psurf->patches.resize(AMpatches->location()->dims()[0]);
 
     for (size_t i=0; i<psurf->patches.size(); i++)
         psurf->patches[i] = ((typename PSurface<2,ctype>::Patch*)AMpatches->dataPtr())[i];
-    
+
     //////////////////////////////////
     // load the base grid vertices
     //////////////////////////////////
@@ -365,7 +367,7 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
         printf("AmiraMesh: Field 'BaseGridVertexCoords' not found!\n");
         return false;
     }
-    
+
     int numPoints = AMvertices->location()->dims()[0];
 
     // copy points
@@ -380,7 +382,7 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
     //  copy node positions
     // /////////////////////////////////////////////////////
     psurf->iPos.resize(AMnodePos->location()->dims()[0]);
-    
+
     for (size_t i=0; i<psurf->iPos.size(); i++)
         for (int j=0; j<3; j++)
             psurf->iPos[i][j] = ((float(*)[3])AMnodePos->dataPtr())[i][j];
@@ -393,10 +395,10 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
         printf("AmiraMesh: Field 'BaseGridTriangles' not found!\n");
         return false;
     }
-    
+
     const int numTriangles = AMtriangles->location()->dims()[0];
 
-    AmiraMesh::Data* numNodesAndEdges = am->findData("NumNodesAndParameterEdgesPerTriangle", HxINT32, 11, 
+    AmiraMesh::Data* numNodesAndEdges = am->findData("NumNodesAndParameterEdgesPerTriangle", HxINT32, 11,
                                                      "NumNodesAndParameterEdgesPerTriangle");
     if (!numNodesAndEdges){
         printf("AmiraMesh: Field 'NumNodesAndParameterEdgesPerTriangle' not found!\n");
@@ -407,13 +409,13 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
         printf("AmiraMesh: Field 'Nodes' not found!\n");
         return false;
     }
-    
+
     AmiraMesh::Data* AMnodeNumbers    = am->findData("NodeNumbers", HxINT32, 1, "NodeNumbers");
     if (!AMnodeNumbers){
         printf("AmiraMesh: Field 'NodeNumbers' not found!\n");
         return false;
     }
-    
+
     AmiraMesh::Data* AMedges            = am->findData("ParameterEdges", HxINT32, 2, "ParameterEdges");
     if (!AMedges){
         printf("AmiraMesh: Field 'ParameterEdges' not found!\n");
@@ -434,12 +436,12 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
 
     int edgeCounter=0, edgePointCounter=0;
     int nodeArrayIdx = 0;
-    
+
     for (int i=0; i<numTriangles; i++){
-        
+
         //int newTriIdx = psurface->createSpaceForTriangle(triIdx[i][0], triIdx[i][1], triIdx[i][2]);
-        std::tr1::array<unsigned int, 3> triangleVertices = {((int*)AMtriangles->dataPtr())[3*i+0], 
-                                                             ((int*)AMtriangles->dataPtr())[3*i+1], 
+        std::tr1::array<unsigned int, 3> triangleVertices = {((int*)AMtriangles->dataPtr())[3*i+0],
+                                                             ((int*)AMtriangles->dataPtr())[3*i+1],
                                                              ((int*)AMtriangles->dataPtr())[3*i+2]};
         int newTriIdx = factory.insertSimplex(triangleVertices);
 
@@ -481,12 +483,12 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
 
         // the intersection nodes
         for (int j=0; j<numIntersectionNodes; j++, nodeCounter++, nodeArrayIdx++){
-            
+
             // float --> double
             StaticVector<ctype,2> domainPos;
             domainPos[0] = nodeData[nodeArrayIdx][0];
             domainPos[1] = nodeData[nodeArrayIdx][1];
-            
+
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
 
             psurf->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::INTERSECTION_NODE);
@@ -501,7 +503,7 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
             domainPos[1] = nodeData[nodeArrayIdx][1];
 
             int nodeNumber    = nodeNumbers[nodeArrayIdx];
-            
+
             psurf->triangles(newTriIdx).nodes[nodeCounter].setValue(domainPos, nodeNumber, Node<ctype>::TOUCHING_NODE);
         }
 

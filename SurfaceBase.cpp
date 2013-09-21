@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <vector>
 #include <set>
 
@@ -33,21 +35,21 @@ template <class VertexType, class EdgeType, class TriangleType>
 void SurfaceBase<VertexType,EdgeType,TriangleType>::removeTriangle(int tri)
 {
     int i;
-	
+
     // update all three neighboring edges
     for (i=0; i<3; i++){
 
 	int thisEdge = triangles(tri).edges[i];
 	if (thisEdge==-1)
 	    continue;
-            
+
         if (edges(thisEdge).triangles.size() == 1){
 	    // remove this edge
             removeEdge(thisEdge);
         }else {
-            edges(thisEdge).removeReferenceTo(tri);           
+            edges(thisEdge).removeReferenceTo(tri);
         }
-            
+
         triangles(tri).edges[i] = -1;
     }
 
@@ -57,7 +59,7 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::removeTriangle(int tri)
 
 
 template <class VertexType, class EdgeType, class TriangleType>
-int SurfaceBase<VertexType,EdgeType,TriangleType>::newVertex(const StaticVector<ctype,3>& p) 
+int SurfaceBase<VertexType,EdgeType,TriangleType>::newVertex(const StaticVector<ctype,3>& p)
 {
 
     if (freeVertexStack.size()){
@@ -65,7 +67,7 @@ int SurfaceBase<VertexType,EdgeType,TriangleType>::newVertex(const StaticVector<
         freeVertexStack.pop_back();
         vertices(newVertexIdx) = p;
         return newVertexIdx;
-    } 
+    }
 
     vertexArray.push_back(p);
     return vertexArray.size()-1;
@@ -89,7 +91,7 @@ int SurfaceBase<VertexType,EdgeType,TriangleType>::newEdge(int a, int b)
     newEdge.to   = b;
 
     newEdge.triangles.resize(0);
-        
+
     return newEdgeIdx;
 }
 
@@ -114,23 +116,23 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::integrateTriangle(int triIdx
 {
 
     TriangleType& tri = triangles(triIdx);
-        
+
     // look for and possible create the new edges
     for (int i=0; i<3; i++){
-            
+
         int pointA = tri.vertices[i];
         int pointB = tri.vertices[(i+1)%3];
-            
+
         int thisEdge = findEdge(pointA, pointB);
-            
+
         if (thisEdge == -1){
-                
+
             // this edge doesn't exist yet
             int newEdgeIdx = newEdge(pointA, pointB);
-                
+
             vertices(pointA).edges.push_back(newEdgeIdx);
             vertices(pointB).edges.push_back(newEdgeIdx);
-                
+
             edges(newEdgeIdx).triangles.push_back(triIdx);
             tri.edges[i] = newEdgeIdx;
         }
@@ -153,7 +155,7 @@ int SurfaceBase<VertexType,EdgeType,TriangleType>::findEdge(unsigned int a, unsi
         if (edges(vertices(a).edges[i]).from == b ||
             edges(vertices(a).edges[i]).to   == b)
             return vertices(a).edges[i];
-        
+
     return -1;
 }
 
@@ -167,7 +169,7 @@ int SurfaceBase<VertexType,EdgeType,TriangleType>::findTriangle(int a, int b, in
     assert(c>=0 && c<getNumVertices());
 
     int oneEdge = findEdge(a, b);
-        
+
     if (oneEdge==-1)
         return -1;
     for (int i=0; i<edges(oneEdge).triangles.size(); i++)
@@ -190,11 +192,11 @@ int SurfaceBase<VertexType,EdgeType,TriangleType>::findCommonTriangle(int a, int
         for (int j=0; j<edges(b).triangles.size(); j++)
             if (edges(a).triangles[i] == edges(b).triangles[j])
                 return edges(a).triangles[i];
-        
+
     return -1;
 }
 
-    /// 
+    ///
 template <class VertexType, class EdgeType, class TriangleType>
 std::vector<int> SurfaceBase<VertexType,EdgeType,TriangleType>::getTrianglesPerVertex(int v) const
 {
@@ -224,9 +226,9 @@ std::vector<int> SurfaceBase<VertexType,EdgeType,TriangleType>::getNeighbors(int
 
     const VertexType& cV = vertices(v);
     std::vector<int> result;
-        
+
     for (int i=0; i<cV.edges.size(); i++) {
-            
+
         const EdgeType& cE = edges(cV.edges[i]);
         result.push_back(cE.theOtherVertex(v));
 
@@ -241,15 +243,15 @@ int SurfaceBase<VertexType,EdgeType,TriangleType>::getNeighboringTriangle(int tr
     assert(side>=0 && side<3);
     int neighboringTri = -1;
     int cE = triangles(tri).edges[side];
-                
+
     if (edges(cE).triangles.size()==2) {
-        neighboringTri = (edges(cE).triangles[0]==tri) 
+        neighboringTri = (edges(cE).triangles[0]==tri)
             ? edges(cE).triangles[1]
             : edges(cE).triangles[0];
     }
     return neighboringTri;
 }
-    
+
     /// gives the smallest interior angle of a triangle
 template <class VertexType, class EdgeType, class TriangleType>
 typename SurfaceBase<VertexType,EdgeType,TriangleType>::ctype SurfaceBase<VertexType,EdgeType,TriangleType>::minInteriorAngle(int n) const
@@ -306,7 +308,7 @@ typename SurfaceBase<VertexType,EdgeType,TriangleType>::ctype SurfaceBase<Vertex
     }
 
     /// gives the surface area
-    ctype area(int tri) const { 
+    ctype area(int tri) const {
         StaticVector<ctype,3> a = vertices(triangles(tri).vertices[1]) - vertices(triangles(tri).vertices[0]);
         StaticVector<ctype,3> b = vertices(triangles(tri).vertices[2]) - vertices(triangles(tri).vertices[0]);
 
@@ -345,9 +347,9 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>:: intersectionTriangleEdge(in
     /** Tests whether this triangle intersects the given edge, and returns the intersection
         point if there is one. If not, the variable @c where is untouched. */
 template <class VertexType, class EdgeType, class TriangleType>
-bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int tri, 
-									    const Edge *edge, 
-									    StaticVector<ctype,3>& where, 
+bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int tri,
+									    const Edge *edge,
+									    StaticVector<ctype,3>& where,
                                                                             bool& parallel, ctype eps) const
 {
 
@@ -362,7 +364,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int
     // Cramer's rule
     ctype det = StaticMatrix<ctype,3>(b-a, c-a, p-q).det();
     if (det<-eps || det>eps){
-            
+
         // triangle and edge are not parallel
         parallel = false;
 
@@ -375,7 +377,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int
         ctype mu = StaticMatrix<ctype,3>(b-a, p-a, p-q).det() / det;
         if (mu<-eps) return false;
 
-        if (lambda+mu > 1+eps) 
+        if (lambda+mu > 1+eps)
             return false;
         else {
             where = p + nu*(q-p);
@@ -386,7 +388,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int
 
         // triangle and edge are parallel
         parallel = true;
-            
+
         ctype alpha = StaticMatrix<ctype,3>(b-a, c-a, p-a).det();
         if (alpha<-eps || alpha>eps)
             return false;
@@ -401,7 +403,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int
 
             StaticVector<ctype,2> a2D, b2D, c2D, p2D, q2D;
 
-            for (i=0; i<3; i++) 
+            for (i=0; i<3; i++)
                 if (normal[i]<0)
                     normal[i] = -normal[i];
 
@@ -425,21 +427,21 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int
                         lineIntersection2D(p2D, q2D, a2D, c2D, eps));
 
         }
-                
+
     }
 
 }
-        
+
     /// Tests whether the point is inside the triangle given by the three argument points.
 template <class VertexType, class EdgeType, class TriangleType>
 bool SurfaceBase<VertexType,EdgeType,TriangleType>::pointInTriangle(const StaticVector<ctype,2>& p,
-                                                                const StaticVector<ctype,2>& a, 
-                                                                const StaticVector<ctype,2>& b, 
+                                                                const StaticVector<ctype,2>& a,
+                                                                const StaticVector<ctype,2>& b,
                                                                 const StaticVector<ctype,2>& c, ctype eps)
 {
     StaticVector<ctype,3> localBarycentricCoords;
 
-    
+
     // McMat3f(this->x, b.x, c.x,  this->y, b[1], c[1],  1, 1, 1).det();
     ctype area0 = p[0] * (b[1]-c[1]) - b[0] * (p[1] - c[1]) + c[0] * (p[1] - b[1]);
 
@@ -463,7 +465,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::lineIntersection2D(const Sta
     const StaticVector<ctype,2> A = p2 - p1;
     const StaticVector<ctype,2> B = p3 - p4;
     const StaticVector<ctype,2> C = p1 - p3;
-        
+
     ctype det = A[1]*B[0] - A[0]*B[1];
 
     // 1D intersection
@@ -472,7 +474,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::lineIntersection2D(const Sta
                   ((p4-p1).length() + (p4-p2).length()) / (p1-p2).length() < 1+eps ||
                   ((p2-p3).length() + (p2-p4).length()) / (p3-p4).length() < 1+eps ||
                   ((p1-p3).length() + (p1-p4).length()) / (p3-p4).length() < 1+eps   );
-        
+
     ctype mu     = (A[0]*C[1] - A[1]*C[0]) / det;
     ctype lambda = (B[1]*C[0] - B[0]*C[1]) / det;
 
@@ -495,7 +497,7 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 
     // clean up vertices
     if (freeVertexStack.size()) {
-            
+
         int offset = 0;
 
         std::vector<int> vertexOffsets(vertexArray.size());
@@ -509,35 +511,35 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 
         for (size_t i=0; i<vertexArray.size(); i++){
             vertexOffsets[i] = offset;
-                
-            if (isInvalid[i]) 
+
+            if (isInvalid[i])
                 offset++;
         }
 
         ////////////////////
         for (size_t i=0; i<vertexOffsets.size(); i++)
             vertexArray[i-vertexOffsets[i]] = vertexArray[i];
-            
+
         vertexArray.resize(vertexArray.size()-offset);
-            
-            
+
+
         // Adjust edges
         for (size_t i=0; i<edgeArray.size(); i++) {
             edgeArray[i].from -= vertexOffsets[edgeArray[i].from];
             edgeArray[i].to   -= vertexOffsets[edgeArray[i].to];
-        }                
+        }
 
         // Adjust triangles
-        for (size_t i=0; i<triangleArray.size(); i++) 
-            for (size_t j=0; j<3; j++) 
+        for (size_t i=0; i<triangleArray.size(); i++)
+            for (size_t j=0; j<3; j++)
                 triangleArray[i].vertices[j] -= vertexOffsets[triangleArray[i].vertices[j]];
 
-        freeVertexStack.resize(0);                
+        freeVertexStack.resize(0);
     }
 
     // clean up edges
     if (freeEdgeStack.size()) {
-            
+
         int offset = 0;
 
         std::vector<int> edgeOffsets(edgeArray.size());
@@ -545,31 +547,31 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 
         for (size_t i=0; i<isInvalid.size(); i++)
             isInvalid[i] = false;
-            
+
         for (size_t i=0; i<freeEdgeStack.size(); i++)
             isInvalid[freeEdgeStack[i]] = true;
-            
+
         for (size_t i=0; i<edgeArray.size(); i++){
             edgeOffsets[i] = offset;
-                
-            if (isInvalid[i]) 
+
+            if (isInvalid[i])
                 offset++;
         }
 
         ////////////////////
         for (size_t i=0; i<edgeOffsets.size(); i++)
             edgeArray[i-edgeOffsets[i]] = edgeArray[i];
-            
+
         edgeArray.resize(edgeArray.size()-offset);
-            
+
         // Adjust vertices
-        for (size_t i=0; i<vertexArray.size(); i++) 
+        for (size_t i=0; i<vertexArray.size(); i++)
             for (size_t j=0; j<vertexArray[i].degree(); j++)
                 vertexArray[i].edges[j] -= edgeOffsets[vertexArray[i].edges[j]];
-            
+
         // Adjust triangles
-        for (size_t i=0; i<triangleArray.size(); i++) 
-            for (size_t j=0; j<3; j++) 
+        for (size_t i=0; i<triangleArray.size(); i++)
+            for (size_t j=0; j<3; j++)
                 if (triangleArray[i].edges[j]>=0)
                     triangleArray[i].edges[j] -= edgeOffsets[triangleArray[i].edges[j]];
 
@@ -578,7 +580,7 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 
     // clean up triangles
     if (freeTriangleStack.size()) {
-           
+
         int offset = 0;
 
         std::vector<int> triangleOffsets(triangleArray.size());
@@ -592,23 +594,23 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::garbageCollection()
 
         for (size_t i=0; i<triangleArray.size(); i++){
             triangleOffsets[i] = offset;
-                
-            if (isInvalid[i]) 
+
+            if (isInvalid[i])
                 offset++;
         }
 
         ////////////////////
         for (size_t i=0; i<triangleOffsets.size(); i++)
             triangleArray[i-triangleOffsets[i]] = triangleArray[i];
-            
+
         triangleArray.resize(triangleArray.size()-offset);
-            
-            
+
+
         // Adjust edges
-        for (size_t i=0; i<edgeArray.size(); i++) 
-            for (size_t j=0; j<edgeArray[i].triangles.size(); j++) 
+        for (size_t i=0; i<edgeArray.size(); i++)
+            for (size_t j=0; j<edgeArray[i].triangles.size(); j++)
                 edgeArray[i].triangles[j] -= triangleOffsets[edgeArray[i].triangles[j]];
-                
+
         freeTriangleStack.resize(0);
     }
 

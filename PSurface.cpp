@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <vector>
 
 // Check for VC9 / VS2008 with installed feature pack.
@@ -45,7 +47,7 @@
 using namespace psurface;
 
 template <int dim, class ctype>
-PSurface<dim,ctype>::~PSurface() 
+PSurface<dim,ctype>::~PSurface()
 {}
 
 template <int dim, class ctype>
@@ -74,19 +76,19 @@ void PSurface<dim,ctype>::getBoundingBox(Box<ctype,3>& bbox) const
 template <int dim, class ctype>
 void PSurface<dim,ctype>::init(const PSurface* other)
 {
-    // copy domain surface.  
+    // copy domain surface.
     *this = *other;
 
     surface = new Surface();
     *surface = *other->surface;
-    
+
 }
 
 template <int dim, class ctype>
 StaticVector<ctype,2> PSurface<dim,ctype>::getLocalTargetCoords(const GlobalNodeIdx& n, int targetTri) const
 {
     const Node<ctype>& cN = this->triangles(n.tri).nodes[n.idx];
-    
+
     switch (cN.type) {
     case Node<ctype>::GHOST_NODE:
     case Node<ctype>::INTERSECTION_NODE: {
@@ -130,11 +132,11 @@ GlobalNodeIdx PSurface<dim,ctype>::getOtherEndNode(int triIdx, NodeIdx cN) const
     while (this->triangles(triIdx).nodes[cN].isINTERSECTION_NODE()) {
 
         const DomainTriangle<ctype>& cT = this->triangles(triIdx);
-        
+
         // get the edge the node is on and its position in the edgePoints array
         int edge  = cT.nodes[cN].getDomainEdge();
         int edgePos = cT.nodes[cN].getDomainEdgePosition();
-        
+
         // get adjacent triangle
         const int cE = cT.getOppositeEdge(cT.vertices[(edge+2)%3]);
 
@@ -147,24 +149,24 @@ GlobalNodeIdx PSurface<dim,ctype>::getOtherEndNode(int triIdx, NodeIdx cN) const
 #endif
 
         assert(this->edges(cE).numTriangles()==2);
-        
-        const int oppT = (this->edges(cE).triangles[0]==triIdx) 
-            ? this->edges(cE).triangles[1] 
+
+        const int oppT = (this->edges(cE).triangles[0]==triIdx)
+            ? this->edges(cE).triangles[1]
             : this->edges(cE).triangles[0];
-        
+
         // get the opposite edgePoint array
         int oppEdge = -1;
         bool reverse = false;
         for (i=0; i<3; i++) {
-            if (this->triangles(oppT).vertices[i] == cT.vertices[edge] && 
+            if (this->triangles(oppT).vertices[i] == cT.vertices[edge] &&
                 this->triangles(oppT).vertices[(i+1)%3]==cT.vertices[(edge+1)%3]) {
-                
+
                 oppEdge = i;
                 reverse = false;
                 break;
-            } else if (this->triangles(oppT).vertices[i] == cT.vertices[(edge+1)%3] && 
+            } else if (this->triangles(oppT).vertices[i] == cT.vertices[(edge+1)%3] &&
                        this->triangles(oppT).vertices[(i+1)%3] == cT.vertices[edge]) {
-                
+
                 oppEdge = i;
                 reverse = true;
                 break;
@@ -172,29 +174,29 @@ GlobalNodeIdx PSurface<dim,ctype>::getOtherEndNode(int triIdx, NodeIdx cN) const
         }
 
         assert(oppEdge!=-1);
-        
+
         int oppEdgePos = (reverse) ? cT.edgePoints[edge].size()-edgePos-1 : edgePos;
 
         if (this->triangles(oppT).nodes[this->triangles(oppT).edgePoints[oppEdge][oppEdgePos]].getNodeNumber()
             != cT.nodes[cT.edgePoints[edge][edgePos]].getNodeNumber()) {
 
             printf("Condition triangles(oppT).nodes[triangles(oppT).edgePoints[oppEdge][oppEdgePos]].getNodeNumber() != cT.nodes[cT.edgePoints[edge][edgePos]].getNodeNumber()  failed!\n");
-            
+
             throw ParamError();
 
         }
-        
+
         int newPoint = this->triangles(oppT).nodes[this->triangles(oppT).edgePoints[oppEdge][oppEdgePos]].theInteriorNode();
-        
+
         // get the new triangle and node
         triIdx = oppT;
         cN = newPoint;
-        
+
         // boundary nodes already store the target vertex index the edge is pointing to
         if (this->triangles(triIdx).nodes[cN].isBoundary())
             break;
     }
-    
+
     return GlobalNodeIdx(triIdx, cN);
 }
 
@@ -208,7 +210,7 @@ int PSurface<dim,ctype>::getNumNodes() const
 }
 
 template <int dim, class ctype>
-int PSurface<dim,ctype>::getNumTrueNodes() 
+int PSurface<dim,ctype>::getNumTrueNodes()
 {
     int highestTrueNodeNumber = -1;
 
@@ -223,7 +225,7 @@ int PSurface<dim,ctype>::getNumTrueNodes()
             }
         }
     }
-    
+
     return highestTrueNodeNumber+1;
 }
 
@@ -239,18 +241,18 @@ void PSurface<dim,ctype>::removeExtraEdges()
 }
 
 template <int dim, class ctype>
-StaticVector<ctype,3> PSurface<dim,ctype>::imagePos(int tri, NodeIdx node) const 
+StaticVector<ctype,3> PSurface<dim,ctype>::imagePos(int tri, NodeIdx node) const
 {
     const Node<ctype>& cN = this->triangles(tri).nodes[node];
-    
+
     switch (cN.type) {
     case Node<ctype>::GHOST_NODE: {
         const Surface::Triangle& cT = surface->triangles[cN.getNodeNumber()];
-        
+
         StaticVector<ctype,3> p0(surface->points[cT.points[0]][0],surface->points[cT.points[0]][1],surface->points[cT.points[0]][2]);
         StaticVector<ctype,3> p1(surface->points[cT.points[1]][0],surface->points[cT.points[1]][1],surface->points[cT.points[1]][2]);
         StaticVector<ctype,3> p2(surface->points[cT.points[2]][0],surface->points[cT.points[2]][1],surface->points[cT.points[2]][2]);
-        
+
         return PlaneParam<ctype>::linearInterpol(cN.dP, p0, p1, p2);
     }
     case Node<ctype>::INTERSECTION_NODE:
@@ -263,7 +265,7 @@ StaticVector<ctype,3> PSurface<dim,ctype>::imagePos(int tri, NodeIdx node) const
                                      surface->points[cN.getNodeNumber()][1],
                                      surface->points[cN.getNodeNumber()][2]);
     }
-    
+
 }
 
 
@@ -290,75 +292,75 @@ void PSurface<dim,ctype>::garbageCollection()
               << this->freeEdgeStack.size()   << " edges, "
               << this->freeTriangleStack.size() << " triangles removed" << std::endl;
 #endif
-    
+
     std::vector<bool> isInvalid;
-    
+
     // clean up vertices
     if (this->freeVertexStack.size()) {
-        
+
         int offset = 0;
-        
+
         std::vector<int> vertexOffsets(this->vertexArray.size());
         isInvalid.resize(this->vertexArray.size());
         for (i=0; i<isInvalid.size(); i++)
             isInvalid[i] = false;
-        
+
         for (i=0; i<this->freeVertexStack.size(); i++)
             isInvalid[this->freeVertexStack[i]] = true;
-        
+
         for (i=0; i<this->vertexArray.size(); i++){
             vertexOffsets[i] = offset;
-            
-            if (isInvalid[i]) 
+
+            if (isInvalid[i])
                 offset++;
         }
-        
+
         ////////////////////
         for (i=0; i<vertexOffsets.size(); i++)
             this->vertexArray[i-vertexOffsets[i]] = this->vertexArray[i];
-        
+
         this->vertexArray.resize(this->vertexArray.size()-offset);
-        
+
         // Adjust edges
         for (i=0; i<this->edgeArray.size(); i++) {
             this->edgeArray[i].from -= vertexOffsets[this->edgeArray[i].from];
             this->edgeArray[i].to   -= vertexOffsets[this->edgeArray[i].to];
-        }                
-        
+        }
+
         // Adjust triangles
-        for (i=0; i<this->triangleArray.size(); i++) 
-            for (j=0; j<3; j++) 
+        for (i=0; i<this->triangleArray.size(); i++)
+            for (j=0; j<3; j++)
                 this->triangleArray[i].vertices[j] -= vertexOffsets[this->triangleArray[i].vertices[j]];
-        
+
         // Adjust paths
         for (i=0; i<paths.size(); i++)
             for (j=0; j<paths[i].points.size(); j++)
                 paths[i].points[j] -= vertexOffsets[paths[i].points[j]];
 
-        this->freeVertexStack.clear();                
+        this->freeVertexStack.clear();
 
     }
 
     SurfaceBase<Vertex<ctype>, Edge, DomainTriangle<ctype> >::garbageCollection();
-    
+
 #ifndef NDEBUG
         printf("   ...Garbage collection finished!\n");
 #endif
 }
-    
+
 
 
 template <int dim, class ctype>
 void PSurface<dim,ctype>::setupOriginalSurface()
 {
     int i, j, k;
-    
+
     if (!hasUpToDatePointLocationStructure)
         createPointLocationStructure();
-    
+
     // transfer materials
 
-    
+
 
 #ifndef PSURFACE_STANDALONE
     // create patches.  Only the Amira Surface class needs this
@@ -401,22 +403,22 @@ void PSurface<dim,ctype>::setupOriginalSurface()
                 continue;
 
             case Node<ctype>::INTERIOR_NODE:
-                
+
                 for (j=0; j<cN.degree(); j++) {
-                    
+
                     if (!cN.neighbors(j).isRegular())
                         continue;
-                    
+
 //                     printf("A\n");
 //                     nodes(GlobalNodeIdx(k, cN.neighbors(j))).print();
                     //v[1] = getOtherEndNodeNumber(k, cN.neighbors(j));
                     v[1] = nodes(getOtherEndNode(k, cN.neighbors(j))).getNodeNumber();
 
                     int nN = (j+1)%cN.degree();
-                    
+
                     if (!cN.neighbors(nN).isRegular())
                         nN = (nN+1)%cN.degree();
-                    
+
 //                     printf("B\n");
 //                     nodes(GlobalNodeIdx(k, cN.neighbors(nN))).print();
                     //v[2] = getOtherEndNodeNumber(k, cN.neighbors(nN));
@@ -427,12 +429,12 @@ void PSurface<dim,ctype>::setupOriginalSurface()
                         appendTriangleToOriginalSurface(v, cT.patch);
                     }
                 }
-                
+
                 break;
 
             case Node<ctype>::TOUCHING_NODE:
             case Node<ctype>::CORNER_NODE:
-                
+
 
                 int firstRegNeighbor = -1;
 
@@ -464,13 +466,13 @@ void PSurface<dim,ctype>::setupOriginalSurface()
                 // /////////////////////////////////////////
                 int nextRegNeighbor;
                 do {
-                    for (nextRegNeighbor=firstRegNeighbor+1; 
+                    for (nextRegNeighbor=firstRegNeighbor+1;
                          nextRegNeighbor<cN.degree(); nextRegNeighbor++)
-                        if (cN.neighbors(nextRegNeighbor).isRegular()) 
+                        if (cN.neighbors(nextRegNeighbor).isRegular())
                             break;
-                                        
+
                     if (nextRegNeighbor <cN.degree()) {
-                    
+
                         v[1] = nodes(getOtherEndNode(k, cN.neighbors(firstRegNeighbor))).getNodeNumber();
                         v[2] = nodes(getOtherEndNode(k, cN.neighbors(nextRegNeighbor))).getNodeNumber();
 
@@ -491,10 +493,10 @@ void PSurface<dim,ctype>::setupOriginalSurface()
                     int otherTri;
                     v[1] = v[2];
                     v[2] = getOtherEndNodeNumber(k, cN.neighbors(cN.degree()-1), &otherTri);
-                    
+
                     // insert triangle
                     if (v[0] < v[1] && v[0] < v[2] && k<otherTri) {
-                        
+
                         appendTriangleToOriginalSurface(v, cT.patch);
                     }
 #endif
@@ -503,7 +505,7 @@ void PSurface<dim,ctype>::setupOriginalSurface()
                 break;
             }
         }
-        
+
     }
 }
 
@@ -511,12 +513,12 @@ template <int dim, class ctype>
 void PSurface<dim,ctype>::appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch)
 {
     surface->triangles.push_back(Surface::Triangle());
-                        
+
     surface->triangles.back().points[0] = v[0];
     surface->triangles.back().points[1] = v[1];
     surface->triangles.back().points[2] = v[2];
 
-#ifndef PSURFACE_STANDALONE    
+#ifndef PSURFACE_STANDALONE
     // The Amira Surface class needs a consistent 'patch' structure
     surface->triangles.back().patch = patch;
     surface->patches[patch]->triangles.push_back(surface->triangles.size()-1);
@@ -550,7 +552,7 @@ void PSurface<dim,ctype>::savePaths(HxParamBundle& parameters)
 {
     int i;
 
-    for (i=0 ; i<parameters.size() ; i++) 
+    for (i=0 ; i<parameters.size() ; i++)
         if (strncmp("SurfacePath", parameters[i]->name(), 11)==0)
             parameters.remove(parameters[i--]);
 
@@ -571,7 +573,7 @@ void PSurface<dim,ctype>::savePaths(HxParamBundle& parameters)
 
 
 template <int dim, class ctype>
-bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::tr1::array<int,3>& vertices, 
+bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::tr1::array<int,3>& vertices,
                          StaticVector<ctype,2>& coords, int seed) const
 {
     int i;
@@ -594,7 +596,7 @@ bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::t
                 vertices[2] = nodes(targetNodes[2]).getNodeNumber();
                 return true;
             }
-            
+
         }
 
     }else if (p[1] < 0.001){
@@ -690,7 +692,7 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
             int int2 = cT.nodes[nds[2]].theInteriorNode();
             assert(int1!=int2);
             assert(int1==nds[0] || int2==nds[0]);
-            
+
             if (int1 == nds[0])
                 vertices[2] = getOtherEndNode(tri, int2);
             else
@@ -709,7 +711,7 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
             int int2 = cT.nodes[nds[2]].theInteriorNode();
             assert(int0!=int2);
             assert(int0==nds[1] || int2==nds[1]);
-            
+
             if (int0 == nds[1])
                 vertices[2] = getOtherEndNode(tri, int2);
             else
@@ -728,7 +730,7 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
 
             assert(int1!=int0);
             assert(int1==nds[2] || int0==nds[2]);
-            
+
             if (int1 == nds[2])
                 vertices[0] = getOtherEndNode(tri, int0);
             else
@@ -749,7 +751,7 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
             NodeIdx int0 = cT.nodes[nds[0]].theInteriorNode();
             assert(int1!=int0);
             assert(int1==nds[2] || int0==nds[2]);
-            
+
             if (int1 == nds[2])
                 vertices[0] = getOtherEndNode(tri, int0);
             else
@@ -765,7 +767,7 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
             int int2 = cT.nodes[nds[2]].theInteriorNode();
             assert(int1!=int2);
             assert(int1==nds[0] || int2==nds[0]);
-            
+
             if (int1 == nds[0])
                 vertices[2] = getOtherEndNode(tri, int2);
             else
@@ -781,7 +783,7 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
             int int2 = cT.nodes[nds[2]].theInteriorNode();
             assert(int0!=int2);
             assert(int0==nds[1] || int2==nds[1]);
-            
+
             if (int0 == nds[1])
                 vertices[2] = getOtherEndNode(tri, int2);
             else
@@ -798,22 +800,22 @@ int PSurface<dim,ctype>::getImageSurfaceTriangle(int tri,
                                              ) const
 {
     int i;
-    
+
     std::tr1::array<GlobalNodeIdx, 3> actualVertices;
     std::tr1::array<std::vector<int>, 3> trianglesPerNode;
 
     getActualVertices(tri, nds, actualVertices);
-    
+
     assert(surface->trianglesPerPoint.size());
-    
+
     for (i=0; i<3; i++)
         trianglesPerNode[i] = getTargetTrianglesPerNode(actualVertices[i]);
-    
+
     for (i=0; i<trianglesPerNode[0].size(); i++) {
 
 #ifdef PSURFACE_STANDALONE
-        if (std::find(trianglesPerNode[1].begin(), 
-                      trianglesPerNode[1].end(), 
+        if (std::find(trianglesPerNode[1].begin(),
+                      trianglesPerNode[1].end(),
                       trianglesPerNode[0][i]) != trianglesPerNode[1].end() &&
             std::find(trianglesPerNode[2].begin(),
                       trianglesPerNode[2].end(),
@@ -826,7 +828,7 @@ int PSurface<dim,ctype>::getImageSurfaceTriangle(int tri,
 #endif
 
     }
-            
+
     return -1;
 }
 
@@ -839,7 +841,7 @@ std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNode
 
     switch (cN.type) {
     case Node<ctype>::GHOST_NODE: {
-        
+
         std::vector<int> result(1);
         result[0] = cN.getNodeNumber();
         if (cN.dP[0] + cN.dP[1] > 1-eps) {
@@ -862,12 +864,12 @@ std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNode
             int q = surface->triangles[result[0]].points[0];
 
             getTrianglesPerEdge(p, q, result, result[0]);
-            
+
         }
-        
+
         return result;
-        
-        
+
+
     }
     case Node<ctype>::INTERSECTION_NODE:
         //this case should only occur for boundary nodes
@@ -888,7 +890,7 @@ std::vector<int> PSurface<dim,ctype>::getTargetTrianglesPerNode(const GlobalNode
         result[i] = surface->trianglesPerPoint[cN.getNodeNumber()][i];
 
     return result;
-    
+
 }
 
 /// This is a service routine only for getTargetTrianglesPerNode
@@ -920,7 +922,7 @@ void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<ctype,2
     const DomainTriangle<ctype>& tri = this->triangles(triIdx);
     ctype lambda = (p-a).length() / (a-b).length();
 
-    StaticVector<ctype,3> targetPos = PlaneParam<ctype>::template linearInterpol<StaticVector<ctype,3> >(lambda, 
+    StaticVector<ctype,3> targetPos = PlaneParam<ctype>::template linearInterpol<StaticVector<ctype,3> >(lambda,
                                                                                                 imagePos(triIdx, tri.edgePoints[edge][edgePos]),
                                                                                                 imagePos(triIdx, tri.edgePoints[edge][edgePos+1]));
 
@@ -932,18 +934,18 @@ void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<ctype,2
 
     ///////////////////////////////////////////////
     if (tri.nodes[n1].isINTERSECTION_NODE() && tri.nodes[n2].isINTERSECTION_NODE()) {
-        
+
         int intNode1 = tri.nodes[n1].theInteriorNode();
         int intNode2 = tri.nodes[n2].theInteriorNode();
-        
+
         int intNodeNumber1 = nodes(getOtherEndNode(triIdx, intNode1)).getNodeNumber();
         int intNodeNumber2 = nodes(getOtherEndNode(triIdx, intNode2)).getNodeNumber();
 
-        assert(nodes(vertices[0]).getNodeNumber() != nodes(vertices[1]).getNodeNumber() || 
+        assert(nodes(vertices[0]).getNodeNumber() != nodes(vertices[1]).getNodeNumber() ||
                intNodeNumber1!=intNodeNumber2);
-        assert(nodes(vertices[0]).getNodeNumber() == nodes(vertices[1]).getNodeNumber() || 
+        assert(nodes(vertices[0]).getNodeNumber() == nodes(vertices[1]).getNodeNumber() ||
                intNodeNumber1==intNodeNumber2);
-        
+
         if (intNodeNumber1==intNodeNumber2){
             vertices[2] = getOtherEndNode(triIdx, intNode1);
         } else {
@@ -952,26 +954,26 @@ void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<ctype,2
         }
 
     } else if (!tri.nodes[n1].isINTERSECTION_NODE() && tri.nodes[n2].isINTERSECTION_NODE()) {
-        
+
         vertices[2] = getOtherEndNode(triIdx, tri.nodes[n2].theInteriorNode());
 
     } else if  (tri.nodes[n1].isINTERSECTION_NODE() && !tri.nodes[n2].isINTERSECTION_NODE()) {
-        
+
         vertices[2] = getOtherEndNode(triIdx, tri.nodes[n1].theInteriorNode());
 
     } else {
-        
+
         typename PlaneParam<ctype>::DirectedEdgeIterator edge = tri.getDirectedEdgeIterator(n1, n2);
         vertices[2] = getOtherEndNode(triIdx, edge.getONext().to());
 
     }
 
-    assert(nodes(vertices[0]).getNodeNumber() != nodes(vertices[1]).getNodeNumber() && 
-           nodes(vertices[1]).getNodeNumber() != nodes(vertices[2]).getNodeNumber() && 
+    assert(nodes(vertices[0]).getNodeNumber() != nodes(vertices[1]).getNodeNumber() &&
+           nodes(vertices[1]).getNodeNumber() != nodes(vertices[2]).getNodeNumber() &&
            nodes(vertices[2]).getNodeNumber() != nodes(vertices[0]).getNodeNumber());
-    
-    coords = tri.computeBarycentricCoords(targetPos, imagePos(vertices[0]), 
-                                          imagePos(vertices[1]), 
+
+    coords = tri.computeBarycentricCoords(targetPos, imagePos(vertices[0]),
+                                          imagePos(vertices[1]),
                                           imagePos(vertices[2]));
 
 }
@@ -984,7 +986,7 @@ bool PSurface<dim,ctype>::positionMap(int triIdx, const StaticVector<ctype,2>& p
     std::tr1::array<int,3> tri;
 
     int status = map(triIdx, p, tri, localCoords);
-    
+
     if (!status) {
         printf("p: (%f %f)\n", p[0], p[1]);
         this->triangles(triIdx).print(true, true, false);
@@ -1006,7 +1008,7 @@ bool PSurface<dim,ctype>::directNormalMap(int triIdx, const StaticVector<ctype,2
     std::tr1::array<int,3> tri;
 
     int status = map(triIdx, p, tri, localCoords);
-    
+
     if (!status)
         return false;
 
@@ -1023,24 +1025,24 @@ bool PSurface<dim,ctype>::directNormalMap(int triIdx, const StaticVector<ctype,2
 template <int dim, class ctype>
 int PSurface<dim,ctype>::invertTriangles(int patch)
 {
-    
+
     int i;
     int count=0;
-    
-    for (i=int(0); i<int(this->getNumTriangles()); i++) 
+
+    for (i=int(0); i<int(this->getNumTriangles()); i++)
         if (patch==-1 || this->triangles(i).patch==patch){
-            
+
             this->triangles(i).flip();
             count++;
-            
+
             if (hasUpToDatePointLocationStructure) {
-                
+
                 for (int j=0; j<this->triangles(i).nodes.size(); j++)
                     this->triangles(i).nodes[j].reverseNeighbors();
             }
-            
+
         }
-    
+
     return count;
 }
 

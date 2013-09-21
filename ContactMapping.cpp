@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <limits>
 #include <stdexcept>
 
@@ -45,7 +47,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
     // //////////////////////////////////////////////////
 
     psurface_.domainVertices.resize(numVertices1);
-    for (int i=0; i<numVertices1; i++) 
+    for (int i=0; i<numVertices1; i++)
         for (int j=0; j<2; j++)
             psurface_.domainVertices[i][j] = coords1[i][j];
 
@@ -71,7 +73,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
 
     // first mark the vertices that are actually used
     psurface_.targetVertices.resize(numVertices2);
-    for (int i=0; i<numVertices2; i++) 
+    for (int i=0; i<numVertices2; i++)
         for (int j=0; j<2; j++)
             psurface_.targetVertices[i][j] = coords2[i][j];
 
@@ -112,7 +114,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
         //printf("Segment %d neighbors:  %d  %d\n", i, other0, other1);
     }
 
-    
+
 
     // Build the segments-per-vertex arrays for the target vertices
     std::vector<std::tr1::array<int, 2> > segPerVertex2(psurface_.targetVertices.size());
@@ -146,7 +148,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
         ctype bestLocalPos = std::numeric_limits<ctype>::max();  // init to something
         int bestSegment = -1;
         ctype bestDist = std::numeric_limits<ctype>::max();
-        
+
         for (int j=0; j<psurface_.domainSegments.size(); j++) {
 
             const StaticVector<ctype,2>& p0 = psurface_.domainVertices[psurface_.domainSegments[j].points[0]];
@@ -157,7 +159,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
 
             ctype local; // the unknown...
 
-            if (NormalProjector<ctype>::computeInverseNormalProjection(p0, p1, n0, n1, 
+            if (NormalProjector<ctype>::computeInverseNormalProjection(p0, p1, n0, n1,
                                                                         psurface_.targetVertices[i], local)) {
 
                 // We want that the line from the domain surface to its projection
@@ -196,7 +198,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                     bestSegment  = j;
 
                 }
-                
+
             }
 
         }
@@ -216,13 +218,13 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                 // Look for left neighbor segment
                 if (psurface_.domainSegments[bestSegment].neighbor[0] != -1) {
 
-                    psurface_.domainSegments[psurface_.domainSegments[bestSegment].neighbor[0]].nodes.push_back( typename PSurface<1,ctype>::Node(1, 0, true, true, 
+                    psurface_.domainSegments[psurface_.domainSegments[bestSegment].neighbor[0]].nodes.push_back( typename PSurface<1,ctype>::Node(1, 0, true, true,
                                                                                                   segPerVertex2[i][0], segPerVertex2[i][1]) );
-                    
+
                 }
 
             } else if (bestLocalPos > 1-eps) {
-                    
+
                 typename PSurface<1,ctype>::Node newNode(1, 0, true, true, segPerVertex2[i][0], segPerVertex2[i][1]);
                 bS.nodes.push_back(newNode);
 
@@ -230,13 +232,13 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                 if (psurface_.domainSegments[bestSegment].neighbor[1] != -1) {
 
                     typename PSurface<1,ctype>::DomainSegment& rightNeighborSegment = psurface_.domainSegments[psurface_.domainSegments[bestSegment].neighbor[1]];
-                    rightNeighborSegment.nodes.insert(rightNeighborSegment.nodes.begin(), 
+                    rightNeighborSegment.nodes.insert(rightNeighborSegment.nodes.begin(),
                                                       typename PSurface<1,ctype>::Node(0, 1, true, true, segPerVertex2[i][0], segPerVertex2[i][1]));
 
                 }
             } else {
                 int nNodes = bS.nodes.size();
-                
+
                 bS.nodes.resize(nNodes+1);
                 int j=nNodes-1;
                 for (; j>=0; j--) {
@@ -244,12 +246,12 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                         bS.nodes[j+1] = bS.nodes[j];
                     else
                         break;
-                }             
-                
+                }
+
                 bS.nodes[j+1] = typename PSurface<1,ctype>::Node(bestLocalPos, 0, false, true, segPerVertex2[i][0], segPerVertex2[i][1]);
-                
+
             }
-            
+
         }
 
     }
@@ -275,7 +277,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                                                           tri2, coords2)) {
 
                 typename PSurface<1,ctype>::Node newNode(0, rangeLocalPosition, true, false, rangeSegment, rangeSegment);
-                
+
                 cS.nodes.insert(cS.nodes.begin(), newNode);
 
             }
@@ -295,7 +297,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                                                           tri2, coords2)) {
 
                 typename PSurface<1,ctype>::Node newNode(1, rangeLocalPosition, true, false, rangeSegment, rangeSegment);
-       
+
                 cS.nodes.push_back(newNode);
             }
 
@@ -305,14 +307,14 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
 
 #if 0
     for (int i=0; i<psurface_.domainSegments.size(); i++) {
-        printf(" --- segment %d ---   (%d  -->  %d)\n", i, 
+        printf(" --- segment %d ---   (%d  -->  %d)\n", i,
                psurface_.domainSegments[i].points[0],psurface_.domainSegments[i].points[1]);
         for (int j=0; j<psurface_.domainSegments[i].nodes.size(); j++)
             std::cout << psurface_.domainSegments[i].nodes[j];
 
         std::cout << std::endl;
     }
-#endif    
+#endif
 
     // /////////////////////////////////////////////////////
     //   Insert edges
@@ -336,7 +338,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
                 nodes[j].rightRangeSegment = nodes[j].rangeSegments[1];
             else
                 throw(std::runtime_error("Segment of the PSurface<1> data structure is inconsistent!"));
-            
+
             if (nodes[j].rightRangeSegment == -1)
                 throw(std::runtime_error("Segment of the PSurface<1> data structure is inconsistent!"));
 
@@ -358,7 +360,7 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
         //  The contact directions are given as the vertex normals
         // //////////////////////////////////////////////////////////
         normals.resize(psurface_.domainVertices.size());
-        for (size_t i=0; i<psurface_.domainVertices.size(); i++) 
+        for (size_t i=0; i<psurface_.domainVertices.size(); i++)
             normals[i] = StaticVector<ctype,2>(0);
 
         for (size_t i=0; i<nElements; i++) {
@@ -384,7 +386,7 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
 
         for (size_t i=0; i<normals.size(); i++)
             normals[i] /= normals[i].length();
-        
+
     } else {
 
         // Sample the provided analytical contact direction field
@@ -397,7 +399,7 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
                 normals[i] = (*dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(direction))(i);
             else
                 throw(std::runtime_error("Domain direction function not properly set!"));
-                
+
         }
 
     }
@@ -411,49 +413,49 @@ void ContactMapping<2,ctype>::computeDiscreteTargetDirections(const std::vector<
 {
     // Build the normal field
     normals.resize(psurface_.targetVertices.size());
-    for (size_t i=0; i<psurface_.targetVertices.size(); i++) 
+    for (size_t i=0; i<psurface_.targetVertices.size(); i++)
         normals[i] = StaticVector<ctype,2>(0);
-    
+
     if (!direction) {
-        
+
         for (int i=0; i<elements.size(); i++) {
-            
+
             // Compute segment normal
             int v0 = elements[i][0];
             int v1 = elements[i][1];
             StaticVector<ctype,2> segment;
             segment[0] = psurface_.targetVertices[v1][0] - psurface_.targetVertices[v0][0];
             segment[1] = psurface_.targetVertices[v1][1] - psurface_.targetVertices[v0][1];
-            
+
             StaticVector<ctype,2> segmentNormal;
             segmentNormal[0] =  segment[1];
             segmentNormal[1] = -segment[0];
-            
+
             segmentNormal /= segmentNormal.length();
-            
+
             normals[elements[i][0]] += segmentNormal;
             normals[elements[i][1]] += segmentNormal;
-            
+
         }
-        
+
         for (size_t i=0; i<normals.size(); i++)
             normals[i] /= normals[i].length();
-        
+
     } else {
-        
+
         // Sample the provided analytical contact direction field
         normals.resize(psurface_.targetVertices.size());
         for (size_t i=0; i<psurface_.targetVertices.size(); i++) {
-            
+
             if (dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(direction))
                 normals[i] = (*dynamic_cast<const AnalyticDirectionFunction<2,ctype>*>(direction))(psurface_.targetVertices[i]);
             else if (dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(direction))
                 normals[i] = (*dynamic_cast<const DiscreteDirectionFunction<2,ctype>*>(direction))(i);
             else
                 throw(std::runtime_error("Target direction function not properly set!"));
-            
+
         }
-        
+
     }
 
 }
@@ -473,7 +475,7 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
 
     // Create target Surface object
     Surface* surface2_ = new Surface;
-    
+
 #ifndef PSURFACE_STANDALONE
     surface2_->patches.resize(1);
     surface2_->patches[0] = new Surface::Patch;
@@ -509,11 +511,11 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
     psurface_.patches[0].innerRegion = 0;
     psurface_.patches[0].outerRegion = 1;
     psurface_.patches[0].boundaryId  = 0;
-            
+
     // ///////
     std::cout << nVert1 << " resp. " << nVert2 << " contact nodes found!" << std::endl;
     std::cout << "Contact patches contain " << nTri1 << " (resp. " << nTri2 << ") triangles." << std::endl;
-    
+
     // the nonmortar side becomes the base grid of the parametrization
     for (size_t i=0; i<nVert1; i++) {
         StaticVector<ctype,3> newVertex;
@@ -521,18 +523,18 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
             newVertex[j] = coords1[i][j];
         psurface_.newVertex(newVertex);
     }
-    
+
     for (size_t i=0; i<nTri1; i++) {
-        
+
         int newTri = psurface_.createSpaceForTriangle(tri1[i][0],tri1[i][1],tri1[i][2]);
         psurface_.integrateTriangle(newTri);
         psurface_.triangles(newTri).patch = 0;
-        
+
     }
-    
+
     // compute projection
     NormalProjector<ctype> projector(&psurface_);
-    
+
     projector.project(surface2_, domainDirection, targetDirection);
 
 }

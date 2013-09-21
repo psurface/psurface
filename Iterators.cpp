@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "PlaneParam.h"
 
 using namespace psurface;
@@ -13,21 +15,21 @@ typename PlaneParam<ctype>::DirectedEdgeIterator& PlaneParam<ctype>::DirectedEdg
             if (!isValid())
                 return *this;
         }while (!(*nodes)[fromNode].degree());
-        
+
         neighborIdx = 0;
     }
-    
+
     return *this;
 }
 
 template <class ctype>
-void PlaneParam<ctype>::DirectedEdgeIterator::invert() 
+void PlaneParam<ctype>::DirectedEdgeIterator::invert()
 {
     int other = to();
     for (int i=0; i<(*nodes)[other].degree(); i++)
         if ((*nodes)[other].neighbors(i)==fromNode)
             neighborIdx = i;
-    
+
     fromNode = other;
 }
 
@@ -35,7 +37,7 @@ void PlaneParam<ctype>::DirectedEdgeIterator::invert()
 template <class ctype>
 typename PlaneParam<ctype>::UndirectedEdgeIterator& PlaneParam<ctype>::UndirectedEdgeIterator::operator++()
 {
-    
+
     do{
         //nextPseudoEdge(edge);
         if (neighborIdx < (*nodes)[from()].degree()-1)
@@ -46,14 +48,14 @@ typename PlaneParam<ctype>::UndirectedEdgeIterator& PlaneParam<ctype>::Undirecte
                 if (!isValid())
                     return *this;
             }while (!(*nodes)[fromNode].degree());
-            
+
             neighborIdx = 0;
         }
-        
+
         if (!isValid())
             return *this;
     }while (!isCorrectlyOriented());
-    
+
             return *this;
 }
 
@@ -90,8 +92,8 @@ bool PlaneParam<ctype>::TriangleIterator::isCorrectlyOriented() const
     DirectedEdgeIterator cEInv = cE;
     cEInv.invert();
 
-    return (PlaneParam::orientation((*cE.nodes)[vertices(0)].domainPos(), 
-                                 (*cE.nodes)[vertices(1)].domainPos(), 
+    return (PlaneParam::orientation((*cE.nodes)[vertices(0)].domainPos(),
+                                 (*cE.nodes)[vertices(1)].domainPos(),
                                  (*cE.nodes)[vertices(2)].domainPos()) == 1);
 
     // This is a topological test and not well thought out

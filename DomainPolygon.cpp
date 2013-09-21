@@ -1,3 +1,5 @@
+#include "config.h"
+
 #ifdef _MSC_VER
     // Required to make cmath define M_PI etc.
     #define _USE_MATH_DEFINES
@@ -24,21 +26,21 @@ static int counter = 0;
 
 void DomainPolygon::init(const DomainTriangle<float>& tri, const StaticVector<float,2> coords[3]){
 
-    nodes = tri.nodes;     
-    
+    nodes = tri.nodes;
+
     boundaryPoints.resize(3);
     boundaryPoints[0] = tri.vertices[0];
     boundaryPoints[1] = tri.vertices[1];
     boundaryPoints[2] = tri.vertices[2];
-    
+
     edgePoints.resize(3);
     edgePoints[0] = tri.edgePoints[0];
     edgePoints[1] = tri.edgePoints[1];
     edgePoints[2] = tri.edgePoints[2];
-    
+
     // turns the coordinates into world coordinates
     PlaneParam<float>::installWorldCoordinates(coords[0], coords[1], coords[2]);
-    
+
     removeExtraEdges();
     par->hasUpToDatePointLocationStructure = false;
 
@@ -59,32 +61,32 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
     int theTriangleEdge[2];
 
     cT.checkConsistency("Tri merge AAAA");
-    
+
 
     bool reverse;
 
     thePolygonEdge[0] = -1;
     theTriangleEdge[0] = -1;
-    
+
     // find corresponding edge
     int numMatchingEdges = 0;
     for (size_t i=0; i<boundaryPoints.size(); i++){
         for (int j=0; j<3; j++){
 
-            if ((cT.vertices[j]==boundaryPoints[i] && 
+            if ((cT.vertices[j]==boundaryPoints[i] &&
                  cT.vertices[(j+1)%3]==boundaryPoints[(i+1)%boundaryPoints.size()])){
 
                 // a common edge is found and the edgePoint arrays match
                 thePolygonEdge[numMatchingEdges]    = i;
                 theTriangleEdge[numMatchingEdges] = j;
-                
+
                 reverse = false;
 
                 numMatchingEdges++;
             }
 
 
-            if (cT.vertices[(j+1)%3]==boundaryPoints[i] && 
+            if (cT.vertices[(j+1)%3]==boundaryPoints[i] &&
                 cT.vertices[j]==boundaryPoints[(i+1)%boundaryPoints.size()]){
 
                 // a common edge is found and the edgePoint arrays are reversed
@@ -99,7 +101,7 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
     }
 
     assert(numMatchingEdges<3);
-    
+
     cT.checkConsistency("Tri merge A");
 
     int newNodeIdx = nodes.size();
@@ -118,14 +120,14 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
     checkConsistency("Poly merge A");
 
     assert(tmpEdgePoints[theTriangleEdge[0]].size() == edgePoints[thePolygonEdge[0]].size());
-    
+
     // handle all edges that cross the unifying edges
     for (int k=0; k<numMatchingEdges; k++){
 
         for (int i=1; i<edgePoints[thePolygonEdge[k]].size()-1; i++){
-            
+
             if (nodes[edgePoints[thePolygonEdge[k]][i]].isINTERSECTION_NODE()){
-                
+
                 // it's an intersection point
                 int intersectPointPoly = edgePoints[thePolygonEdge[k]][i];
                 int intersectPointTri;
@@ -145,18 +147,18 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
 
                 int innerPointPoly     = nodes[intersectPointPoly].neighbors(0);
                 int innerPointTri      = nodes[intersectPointTri].neighbors(0);
-                
+
                 nodes[innerPointTri].replaceReferenceTo(intersectPointTri, innerPointPoly);
                 nodes[innerPointPoly].replaceReferenceTo(intersectPointPoly, innerPointTri);
 
-                // remove the two intersection points 
+                // remove the two intersection points
                 nodeStack.push_back(nodes[intersectPointPoly].getNodeNumber());
 
                 invalidate(intersectPointPoly);
                 invalidate(intersectPointTri);
 
             }else{
-                
+
                 // it is a touching point
                 int touchingPointPoly = edgePoints[thePolygonEdge[k]][i];
                 int touchingPointTri  = -1;
@@ -173,8 +175,8 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
                 mergeNodes(touchingPointPoly, touchingPointTri);
 
                 nodes[touchingPointPoly].makeInteriorNode();
-                    
-            }     
+
+            }
         }
     }
 
@@ -189,8 +191,8 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
         // one corner
         int cornerNodePoly = edgePoints[thePolygonEdge[0]][0];
 
-        int cornerNodeTri  = (reverse) 
-            ? tmpEdgePoints[theTriangleEdge[0]].back() 
+        int cornerNodeTri  = (reverse)
+            ? tmpEdgePoints[theTriangleEdge[0]].back()
             : tmpEdgePoints[theTriangleEdge[0]][0];
 
         assert(nodes[cornerNodePoly].isCORNER_NODE());
@@ -204,8 +206,8 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
         // the other corner
         cornerNodePoly = edgePoints[thePolygonEdge[0]].back();
 
-        cornerNodeTri  = (reverse) 
-            ? tmpEdgePoints[theTriangleEdge[0]][0] 
+        cornerNodeTri  = (reverse)
+            ? tmpEdgePoints[theTriangleEdge[0]][0]
             : tmpEdgePoints[theTriangleEdge[0]].back();
 
         assert(nodes[cornerNodePoly].isCORNER_NODE());
@@ -253,12 +255,12 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
 
         if (edgePoints[thePolygonEdge[0]][0]!=centerNodePoly)
             cornerNodePoly = edgePoints[thePolygonEdge[0]][0];
-        else 
+        else
             cornerNodePoly = edgePoints[thePolygonEdge[0]].back();
 
         if (tmpEdgePoints[theTriangleEdge[0]][0]!=centerNodePoly)
             cornerNodeTri = tmpEdgePoints[theTriangleEdge[0]][0];
-        else 
+        else
             cornerNodeTri = tmpEdgePoints[theTriangleEdge[0]].back();
 
         mergeNodes(cornerNodePoly, cornerNodeTri);
@@ -268,12 +270,12 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
         // the second cornerNode
         if (edgePoints[thePolygonEdge[1]][0]!=centerNodePoly)
             cornerNodePoly = edgePoints[thePolygonEdge[1]][0];
-        else 
+        else
             cornerNodePoly = edgePoints[thePolygonEdge[1]].back();
 
         if (tmpEdgePoints[theTriangleEdge[1]][0]!=centerNodePoly)
             cornerNodeTri = tmpEdgePoints[theTriangleEdge[1]][0];
-        else 
+        else
             cornerNodeTri = tmpEdgePoints[theTriangleEdge[1]].back();
 
         mergeNodes(cornerNodePoly, cornerNodeTri);
@@ -282,14 +284,14 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
 
     }
 
-    
+
 
     checkConsistency("Poly merge D\n");
-        
+
     if (numMatchingEdges == 1){
 
         boundaryPoints.insert(boundaryPoints.begin() + thePolygonEdge[0]+1, cT.vertices[(theTriangleEdge[0]+2)%3]);
-        
+
         edgePoints.erase(edgePoints.begin() + thePolygonEdge[0]);
 
         if (reverse){
@@ -302,9 +304,9 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
             std::reverse(edgePoints.back().begin(), edgePoints.back().end());
             std::reverse(edgePoints[edgePoints.size()-2].begin(), edgePoints[edgePoints.size()-2].end());
         }
-        
+
     }else{
-        
+
         boundaryPoints.erase(boundaryPoints.begin() + thePolygonEdge[0]);
 
         if (thePolygonEdge[0] < thePolygonEdge[1]){
@@ -318,7 +320,7 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
         int thirdEdge = (theTriangleEdge[0]+1)%3;
         if (thirdEdge == theTriangleEdge[1])
             thirdEdge = (thirdEdge+1)%3;
-        
+
         edgePoints.push_back(tmpEdgePoints[thirdEdge]);
         if (!reverse)
             std::reverse(edgePoints.back().begin(),edgePoints.back().end());
@@ -327,7 +329,7 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
     for (size_t i=0; i<edgePoints.size(); i++)
         for (int j=0; j<edgePoints[i].size(); j++)
             assert(edgePoints[i][j]>=0);
-    
+
     garbageCollection();
 
     checkConsistency("Poly merge after garbage collection\n");
@@ -350,7 +352,7 @@ float DomainPolygon::computeIntersection(float &mu, const StaticVector<float,2> 
 
     // if the determinant is zero we end up with a nan which is caught later
     //assert(det!=0);
-    
+
     mu = (A[0]*C[1] - A[1]*C[0]) / det;
     return (B[1]*C[0] - B[0]*C[1]) / det;
 }
@@ -394,7 +396,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
         for (j=0; j<boundaryPoints.size(); j++)
             if (boundaryPoints[j] == par->triangles(fillIn[i]).vertices[0])
                 boundaryIdx = j;
-        
+
         for (j=0; j<3; j++)
             for (k=0; k<boundaryPoints.size(); k++)
                 if (par->triangles(fillIn[i]).vertices[j] == boundaryPoints[k]){
@@ -421,14 +423,14 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
         // edge nodes on triangle
         for (j=0; j<edgePoints[boundaryIdx].size(); j++)
             nodeLocs[edgePoints[boundaryIdx][j]] = IN_TRIANGLE;
-        
+
         for (j=0; j<edgePoints[(boundaryIdx+1)%boundaryPoints.size()].size(); j++)
             nodeLocs[edgePoints[(boundaryIdx+1)%boundaryPoints.size()][j]] = IN_TRIANGLE;
 
         // two segment nodes
         nodeLocs[cornerNode(boundaryIdx)] = ON_SEGMENT;
         nodeLocs[edgePoints[(boundaryIdx+1)%boundaryPoints.size()].back()] = ON_SEGMENT;
-        
+
         /////////////////////////////////////////////////////////////////
         // interior nodes.  here we have to make a geometric decision
         /////////////////////////////////////////////////////////////////
@@ -451,7 +453,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
 
             }
         }
-        
+
         // prepare the two new edgePoint lists
         std::vector<int> triNewEdgePoints;
         std::vector<int> polyNewEdgePoints;
@@ -463,40 +465,40 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
                           edgePoints[(boundaryIdx+1)%boundaryPoints.size()].back(),
                           nodeLocs,
                           cT, newTriangleCoords, triNewEdgePoints, polyNewEdgePoints, nodeStack);
-        
+
         // update boundaryPoints and edgePoints
         edgePoints[boundaryIdx] = polyNewEdgePoints;
         edgePoints.erase(edgePoints.begin() + (boundaryIdx+1)%edgePoints.size());
-        
+
         boundaryPoints.erase(boundaryPoints.begin() + (boundaryIdx+1)%boundaryPoints.size());
-        
+
         cT.edgePoints[2] = triNewEdgePoints;
-        
+
         // sort out the nodes that belong onto the triangle
         int numTriNodes = 0;
         NodeIdx triNode;
         for (triNode=0; triNode<nodes.size(); triNode++) {
             if (nodeLocs[triNode] == IN_TRIANGLE)
                 numTriNodes++;
-            else if (nodeLocs[triNode] == ON_SEGMENT && 
+            else if (nodeLocs[triNode] == ON_SEGMENT &&
                      nodeLocs[nodes[triNode].neighbors(0)] == IN_TRIANGLE) {
                     nodeLocs[triNode] = IN_TRIANGLE;
                     numTriNodes++;
             }
         }
-        
+
         // debug
         assert(nodes.size()==nodeLocs.size());
-        for (triNode=0; triNode<nodes.size(); triNode++) 
+        for (triNode=0; triNode<nodes.size(); triNode++)
             if (nodeLocs[triNode] == IN_TRIANGLE)
                 for (int triNode2=0; triNode2<nodes[triNode].degree(); triNode2++)
                     assert(nodeLocs[nodes[triNode].neighbors(triNode2)]==IN_TRIANGLE);
-            
-        
+
+
         int triCount = 0;
         cT.nodes.resize(numTriNodes);
         std::vector<int> offArr(nodes.size());
-        
+
         for (triNode=0; triNode<nodes.size(); triNode++)
             if (nodeLocs[triNode] == IN_TRIANGLE) {
                 cT.nodes[triCount] = nodes[triNode];
@@ -505,11 +507,11 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
                 triCount++;
             } else
                 offArr[triNode] = -1;
-        
+
         for (j=0; j<numTriNodes; j++)
             for (k=0; k<cT.nodes[j].degree(); k++)
                 cT.nodes[j].neighbors(k) = offArr[cT.nodes[j].neighbors(k)];
-        
+
         for (j=0; j<3; j++)
             for (k=0; k<cT.edgePoints[j].size(); k++){
                 cT.edgePoints[j][k] = offArr[cT.edgePoints[j][k]];
@@ -527,7 +529,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
             const Node<float>& nB = cT.nodes[cT.edgePoints[2][j+2]];
 
             if (!nA.isInvalid() && !nB.isInvalid() &&
-                (nA.isConnectedTo(cT.edgePoints[2][j+2]) || 
+                (nA.isConnectedTo(cT.edgePoints[2][j+2]) ||
                  nB.isConnectedTo(cT.edgePoints[2][j]))) {
 
                 // This case may happen when smoothing horizontally.
@@ -561,16 +563,16 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
         cT.checkConsistency("recently cut\n");
         checkConsistency("poly recentlycut\n");
     }
-    
+
     // there's only on triangle left
     DomainTriangle<float>& cT = par->triangles(fillIn.last());
-    
+
     cT.nodes = nodes;
 
     cT.vertices[0] = boundaryPoints[0];
     cT.vertices[1] = boundaryPoints[1];
     cT.vertices[2] = boundaryPoints[2];
-    
+
     cT.edgePoints[0] = edgePoints[0];
     cT.edgePoints[1] = edgePoints[1];
     cT.edgePoints[2] = edgePoints[2];
@@ -591,7 +593,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
         }
 
     cT.adjustTouchingNodes();
-    
+
     counter++;
     return true;
 }
@@ -616,7 +618,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
 
     NodeIdx preNextPolyNode = -1;
     NodeIdx preNextTriNode  = -1;
-    
+
     triNewEdgePoints.clear();
     polyNewEdgePoints.clear();
 
@@ -672,7 +674,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                 break;
             }
 
-            
+
             // preNextTriNode
             switch (nodes[currentTriNode].type) {
             case Node<float>::INTERIOR_NODE: {
@@ -686,7 +688,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
             case Node<float>::TOUCHING_NODE:
             case Node<float>::CORNER_NODE:
                 if (nodes[currentTriNode].isFirstNeighbor(currentPolyNode)) {
-                    
+
                     preNextTriNode = getNextEdgeNode(currentTriNode);
                 } else {
                     DirectedEdgeIterator cPE = getDirectedEdgeIterator(currentPolyNode, currentTriNode);
@@ -737,7 +739,7 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                     if (nodes[preNextPolyNode].neighbors(0) == nodes[preNextTriNode].neighbors(0)) {
 
                         NodeIdx prePreNode = nodes[preNextPolyNode].neighbors(0);
-                        
+
                         switch (nodeLocs[prePreNode]) {
                         case IN_POLYGON:
                             nextPolyNode = prePreNode;
@@ -777,11 +779,11 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                             assert(false);
                         }
                     }
-                    
+
 
                 }
 
-                
+
 
             } else {
 
@@ -793,14 +795,14 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
             // cut that edge and place the parts where they are supposed to be
             // /////////////////////////////////////////////////////////////////////
             float mu=0;
-                    
+
             float lambda = computeIntersection(mu, nodes[currentTriNode].domainPos(),
                                          nodes[currentPolyNode].domainPos(),
                                          newTriangleCoords[2], newTriangleCoords[0]);
-                    
-            StaticVector<float,2> newDomainPos = linearInterpol(lambda, 
+
+            StaticVector<float,2> newDomainPos = linearInterpol(lambda,
                                                   nodes[currentTriNode].domainPos(),
-                                                  nodes[currentPolyNode].domainPos());  
+                                                  nodes[currentPolyNode].domainPos());
 
             StaticVector<float,3> newImagePos  = linearInterpol(lambda,
                                                   par->iPos[nodes[currentTriNode].getNodeNumber()],
@@ -811,28 +813,28 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
             int newPolyNode = nodes.size()-1;
 
             nodeLocs.resize(nodeLocs.size()+2);
-            
+
             int newNodeNumber = createNodePosition(par->iPos, nodeStack, newImagePos);
-            
+
             nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
             nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
-            
+
             nodeLocs[newTriNode]  = IN_TRIANGLE;
             nodeLocs[newPolyNode] = IN_POLYGON;
-            
-            // split edge           
+
+            // split edge
             nodes[currentTriNode].replaceReferenceTo(currentPolyNode, newTriNode);
             nodes[currentPolyNode].replaceReferenceTo(currentTriNode, newPolyNode);
-            
+
             nodes[newPolyNode].setNeighbor(currentPolyNode);
             nodes[newTriNode].setNeighbor(currentTriNode);
-            
+
             // insert this node-pair into the edgepoints arrays
             polyNewEdgePoints.push_back(newPolyNode);
             triNewEdgePoints.push_back(newTriNode);
 
 
-            
+
         } else {
 
 
@@ -892,32 +894,32 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
                 if (nodes[nextTriNode].isINTERSECTION_NODE()) {
                     nextTriNode = getNextEdgeNode(nextTriNode);
                 }
-                
+
                 if (nodes[nextPolyNode].isINTERSECTION_NODE()) {
                     nextPolyNode = getPreviousEdgeNode(nextPolyNode);
                 }
 
             }
-                
+
             // ////////////////////////////////////////
             // split this node
             // ////////////////////////////////////////
-        
+
             currentTriNode = splitNode(currentPolyNode, nodeLocs);
-                
+
             /** \todo The second 'if' should be useless */
             if (cT.edgePoints[0][0] == currentPolyNode){
                 cT.edgePoints[0][0] = currentTriNode;
             }else if (cT.edgePoints[1].back() == currentPolyNode){
                 cT.edgePoints[1].back() = currentTriNode;
             }
-            
-            
+
+
             polyNewEdgePoints.push_back(currentPolyNode);
             triNewEdgePoints.push_back(currentTriNode);
         }
-        
-        
+
+
         currentPolyNode = nextPolyNode;
         currentTriNode  = nextTriNode;
 
@@ -927,13 +929,13 @@ void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeId
     // ////////////////////////////////////////
     // split the last corner node
     // ////////////////////////////////////////
-    
+
     currentTriNode = splitNode(currentPolyNode, nodeLocs);
-    
+
     /** \todo The first if should be useless */
     if (cT.edgePoints[0][0] == currentPolyNode){
         cT.edgePoints[0][0] = currentTriNode;
-    }else if (cT.edgePoints[1].back() == currentPolyNode){ 
+    }else if (cT.edgePoints[1].back() == currentPolyNode){
         cT.edgePoints[1].back() = currentTriNode;
     }
 
@@ -958,7 +960,7 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
     NodeIdx newNode = nodes.size()-1;
 
     nodeLocs.resize(nodeLocs.size()+1);
-          
+
     if (nodes[cN].isCORNER_NODE()){
         nodes[newNode].setValue(nodes[cN].domainPos(),
                                 nodes[cN].getNodeNumber(), Node<float>::CORNER_NODE);
@@ -970,7 +972,7 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
 
     nodeLocs[newNode] = IN_TRIANGLE;
     nodeLocs[cN]      = IN_POLYGON;
-            
+
     // ///////////////////////////////////////////////////////////
     // Readjust the neighborhood relations of the split nodes
     // ///////////////////////////////////////////////////////////
@@ -984,50 +986,50 @@ NodeIdx DomainPolygon::splitNode(NodeIdx cN, std::vector<int>& nodeLocs)
     if (lastNonePolygonNeighbor==-1)
         return newNode;
 
-    
+
     DomainTriangle<float>::rotate(nodes[cN].nbs, -(lastNonePolygonNeighbor+1));
 
-    
+
     for (i=nodes[cN].degree()-1; i>=0; i--){
-        
+
         switch (nodeLocs[nodes[cN].neighbors(i)]){
         case  IN_POLYGON:
             // do nothing
-            
+
             break;
-            
+
         case  ON_SEGMENT: {
             // add edge from newNode to nodes[cN].neighbors(i)
             // The new edge has to appear topologically 'next to' the old one
-            
+
             nodes[newNode].appendNeighbor(Node<float>::NeighborReference(nodes[cN].neighbors(i)));
 
             Node<float>& thisNeighbor = nodes[nodes[cN].neighbors(i)];
             for (int j=0; j<thisNeighbor.degree(); j++)
                 if (thisNeighbor.neighbors(j)==cN){
-                    thisNeighbor.nbs.insert(thisNeighbor.nbs.begin() + (j+1)%thisNeighbor.degree(), 
+                    thisNeighbor.nbs.insert(thisNeighbor.nbs.begin() + (j+1)%thisNeighbor.degree(),
                                             Node<float>::NeighborReference(newNode));
                     break;
                 }
-            
-            
+
+
             break;
         }
         case  IN_TRIANGLE:
-            
+
             nodes[nodes[cN].neighbors(i)].replaceReferenceTo(cN, newNode);
             nodes[newNode].appendNeighbor(nodes[cN].neighbors(i));
             nodes[cN].removeNeighbor(i);
-            
+
             break;
         }
-        
+
     }
-    
+
     return newNode;
 }
 
-unsigned int DomainPolygon::createNodePosition(std::vector<StaticVector<float,3> >& nodePositions, 
+unsigned int DomainPolygon::createNodePosition(std::vector<StaticVector<float,3> >& nodePositions,
                                                std::vector<unsigned int>& nodeStack,
                                                const StaticVector<float,3>& newImagePos)
 {
@@ -1076,7 +1078,7 @@ void DomainPolygon::removeVertex(int point)
 }
 
 void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
-{             
+{
     std::vector<unsigned char> nodeLocs(nodes.size());
 
     nodes[centerNode].makeCornerNode();
@@ -1087,7 +1089,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
     StaticVector<float,2> segmentFrom = nodes[centerNode].domainPos();
     StaticVector<float,2> segmentTo   = nodes[boundaryCutNode].domainPos();
-        
+
 
     boundaryPoints.insert(boundaryPoints.begin() + bVertex, centerVertex);
 
@@ -1104,33 +1106,33 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
     newEdgePoints1.resize(2);
     newEdgePoints2.resize(2);
-    
+
     std::vector<float> lambda1(2);
-    
+
     newEdgePoints1[0] = boundaryCutNode;
     newEdgePoints1[1] = centerNode;
-    
+
     lambda1[0] = 0;
     lambda1[1] = 1;
-    
+
     newEdgePoints2[0] = centerNode;
     newEdgePoints2[1] = boundaryCutNode;
-    
-    
+
+
     // split nodes that lie on the cutting segment
     int newNode;
 
     // classify nodes
     for (size_t cN=0; cN<nodes.size(); cN++) {
         if (nodes[cN].isOnSegment(segmentFrom, segmentTo, 0.000001))
-            
+
             if (nodes[cN].isINTERSECTION_NODE() || nodes[cN].isTOUCHING_NODE()){
                 // rare type of numerical inconsistency
                 printf("intersection node on segment!\n");
                 assert(false);
             } else
                 nodeLocs[cN] = ON_SEGMENT;
-        else 
+        else
             switch(PlaneParam<float>::orientation(segmentFrom, segmentTo, nodes[cN].domainPos())){
             case  1:
             case  0:
@@ -1166,56 +1168,56 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
             }
             nodeLocs[cN]      = IN_POLYGON;
             nodeLocs[newNode] = IN_TRIANGLE;
-            
+
             for (i=nodes[cN].degree()-1; i>=0; i--){
-                
+
                 switch(nodeLocs[nodes[cN].neighbors(i)]) {
 
                 case  IN_POLYGON:
                     // do nothing
-                    
+
                     break;
-                    
-                case ON_SEGMENT:                   
+
+                case ON_SEGMENT:
 
                     addEdge(newNode, nodes[cN].neighbors(i));
 
                     break;
-                    
+
                 case IN_TRIANGLE:
 
-                    nodes[nodes[cN].neighbors(i)].replaceReferenceTo(cN, newNode);                  
+                    nodes[nodes[cN].neighbors(i)].replaceReferenceTo(cN, newNode);
                     nodes[newNode].appendNeighbor(nodes[cN].neighbors(i));
                     nodes[cN].removeNeighbor(i);
-                    
+
                     break;
                 }
-                
+
             }
-            
+
             // enter the split nodes in the edgePoints arrays
-            
+
             if (cN == boundaryCutNode) {
-                
+
                 edgePoints[(bVertex+edgePoints.size()-1)%edgePoints.size()].back() = newNode;
                 newEdgePoints1[0] = newNode;
-                
+
             }else{
                 float lambda = (nodes[newNode].domainPos() - segmentTo).length() /
                     (segmentFrom - segmentTo).length();
 
                 int j=0;
                 while (lambda1[j]<lambda) j++;
-                
+
                 lambda1.insert(lambda1.begin() + j, lambda);
                 newEdgePoints1.insert(newEdgePoints1.begin()+j, newNode);
-                
+
                 newEdgePoints2.insert(newEdgePoints2.begin()+newEdgePoints2.size()-j, cN);
-                
+
             }
-            
+
         }
-        
+
     }
 
     for (i=0; i<newEdgePoints1.size(); i++){
@@ -1224,7 +1226,7 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
     }
 
     // bisect edges that cross the cut
-    
+
     int polyNode;
 
     for (size_t triNode=0; triNode<nodes.size(); triNode++) {
@@ -1235,24 +1237,24 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
         for (i=0; i<nodes[triNode].degree(); i++) {
 
             if (nodeLocs[nodes[triNode].neighbors(i)] == IN_POLYGON) {
-                    
+
                 polyNode = nodes[triNode].neighbors(i);
-    
+
                 float mu=0;
                 float lambda;
 
-        
-                lambda = computeIntersection(mu, nodes[triNode].domainPos(), nodes[polyNode].domainPos(), 
+
+                lambda = computeIntersection(mu, nodes[triNode].domainPos(), nodes[polyNode].domainPos(),
                                              segmentTo, segmentFrom);
-        
+
                 if (lambda<=0.0f || lambda>=1.0f || mu<=0.0f || mu>=1.0f)
                     continue;
-            
 
-                StaticVector<float,2> newDomainPos = nodes[triNode].domainPos() + 
+
+                StaticVector<float,2> newDomainPos = nodes[triNode].domainPos() +
                     lambda*(nodes[polyNode].domainPos() - nodes[triNode].domainPos());
-                StaticVector<float,3> newImagePos  = par->iPos[nodes[triNode].getNodeNumber()]  + 
-                    lambda*(par->iPos[nodes[polyNode].getNodeNumber()]  - 
+                StaticVector<float,3> newImagePos  = par->iPos[nodes[triNode].getNodeNumber()]  +
+                    lambda*(par->iPos[nodes[polyNode].getNodeNumber()]  -
                              par->iPos[nodes[triNode].getNodeNumber()]);
 
                 nodes.resize(nodes.size()+2);
@@ -1266,26 +1268,26 @@ void DomainPolygon::slice(int centerNode, int centerVertex, int bVertex)
 
                 nodes[newTriNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
                 nodes[newPolyNode].setValue(newDomainPos, newNodeNumber, Node<float>::INTERSECTION_NODE);
-                
+
                 nodeLocs[newTriNode]  = ON_SEGMENT;
                 nodeLocs[newPolyNode] = ON_SEGMENT;
-        
+
                 nodes[triNode].replaceReferenceTo(polyNode, newTriNode);
                 nodes[polyNode].replaceReferenceTo(triNode, newPolyNode);
-        
+
                 nodes[newTriNode].appendNeighbor(triNode);
                 nodes[newPolyNode].appendNeighbor(polyNode);
 
                 // insert new nodes in edgePoint arrays
                 int j=0;
                 while (lambda1[j]<mu) j++;
-        
+
                 lambda1.insert(lambda1.begin() + j, mu);
                 newEdgePoints1.insert(newEdgePoints1.begin()+j, newTriNode);
-        
+
                 newEdgePoints2.insert(newEdgePoints2.begin()+newEdgePoints2.size()-j, newPolyNode);
-        
-        
+
+
             }
 
         }
@@ -1304,7 +1306,7 @@ void DomainPolygon::garbageCollection(std::vector<int>& offArr)
     for (size_t i=0; i<nodes.size(); i++){
         offArr[i] = offset;
 
-        if (nodes[i].isInvalid()) 
+        if (nodes[i].isInvalid())
             offset++;
     }
 
@@ -1327,12 +1329,12 @@ void DomainPolygon::garbageCollection(std::vector<int>& offArr)
 }
 
 
-void DomainPolygon::createPointLocationStructure() 
+void DomainPolygon::createPointLocationStructure()
 {
     checkConsistency("BeforeCreate");
 
     for (size_t i=0; i<nodes.size(); i++){
-        
+
         if (nodes[i].isINTERIOR_NODE()){
             makeCyclicInteriorNode(nodes[i]);
         }
@@ -1343,11 +1345,11 @@ void DomainPolygon::createPointLocationStructure()
     const int N = boundaryPoints.size();
 
     for (int i=0; i<N; i++) {
-        
+
         checkConsistency("Edge");
 
-        makeCyclicBoundaryNode(nodes[edgePoints[i][0]], 
-                               edgePoints[i][1], 
+        makeCyclicBoundaryNode(nodes[edgePoints[i][0]],
+                               edgePoints[i][1],
                                edgePoints[(i+N-1)%N][edgePoints[(i+N-1)%N].size()-2]);
 
         checkConsistency("AfterCorners");
@@ -1375,13 +1377,13 @@ void DomainPolygon::insertExtraEdges()
     const int N = boundaryPoints.size();
 
     for (i=0; i<N; i++){
-        
+
         for (j=1; j<edgePoints[i].size(); j++){
-            
+
             if (nodes[edgePoints[i][j]].isINTERSECTION_NODE() ||
                 nodes[edgePoints[i][j-1]].isINTERSECTION_NODE()){
 
-                
+
                 addEdge(edgePoints[i][j-1], edgePoints[i][j], true);
             }
         }
@@ -1389,9 +1391,9 @@ void DomainPolygon::insertExtraEdges()
     }
 
     for (i=0; i<N; i++){
-    
+
         for (j=1; j<edgePoints[i].size()-1; j++)
-            
+
             if (nodes[edgePoints[i][j]].isINTERSECTION_NODE()){
 
                 int interiorPoint = nodes[edgePoints[i][j]].neighbors(0);
@@ -1401,12 +1403,12 @@ void DomainPolygon::insertExtraEdges()
 
                     addEdge(edgePoints[i][j-1], interiorPoint, true);
                 }
-            }   
+            }
     }
 }
 
 
-void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const 
+void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNodes) const
 {
     printf("--------------------------------------------------------\n");
     printf("--  Print Polygon  -------------------------------------\n");
@@ -1419,7 +1421,7 @@ void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNod
 
 
     if (showEdgePoints){
-        
+
         for (size_t i=0; i<edgePoints.size(); i++){
             printf("edgePoints %d:\n", i);
             for (size_t j=0; j<edgePoints[i].size(); j++){
@@ -1427,7 +1429,7 @@ void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNod
                 nodes[edgePoints[i][j]].print();
             }
         }
-        
+
         printf("\n");
     }
 
@@ -1447,13 +1449,13 @@ void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNod
 void DomainPolygon::checkConsistency(const char* where)
 {
 #ifndef NDEBUG
-    
+
     int i, j;
     PlaneParam<float>::checkConsistency(where);
 
     // check whether all corner nodes are of type CORNER_NODE
     for (i=0; i<edgePoints.size(); i++){
-//      if (edgePoints[i][0]->type != Node::CORNER_NODE || 
+//      if (edgePoints[i][0]->type != Node::CORNER_NODE ||
 //          edgePoints[i].last()->type != Node::CORNER_NODE){
 //          printf(where);
 //          printf("***** corner node is not CORNER_NODE *****\n");
@@ -1473,7 +1475,7 @@ void DomainPolygon::checkConsistency(const char* where)
             Node<float>& nA = nodes[edgePoints[i][j]];
             Node<float>& nB = nodes[edgePoints[i][j+1]];
 
-            if (!nA.isInvalid() && !nB.isInvalid() && 
+            if (!nA.isInvalid() && !nB.isInvalid() &&
                 nA.isTOUCHING_NODE() && nB.isTOUCHING_NODE() &&
                 !nA.isConnectedTo(edgePoints[i][j+1])){
                 printf(where);
@@ -1489,7 +1491,7 @@ void DomainPolygon::checkConsistency(const char* where)
 
             const Node<float>& nA = nodes[edgePoints[i][j]];
             const Node<float>& nB = nodes[edgePoints[i][j+2]];
-            
+
             if (!nA.isInvalid() && !nB.isInvalid() &&
                 (nA.isConnectedTo(edgePoints[i][j+2]) || nB.isConnectedTo(edgePoints[i][j]))) {
 
@@ -1498,7 +1500,7 @@ void DomainPolygon::checkConsistency(const char* where)
                 printf("****** two nonadjacent nodes are connected!! *******\n");
                 assert(false);
             }
-            
+
         }
     }
 #endif
