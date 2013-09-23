@@ -9,7 +9,7 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "VtkIO.h"
-#include "psurface_convert_new.h"
+#include "psurface_convert.h"
 
 
 using namespace psurface;
