@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     
     //use get opt to deal with the argv
     char *input, *output, *type;
-    bool basegrid = 0, readablehdf = 0;
+    bool basegrid = 0, basehdf5 = 1;
     int opt=0;  
     int i=0;
     const char* optstring=":i:o:t:";  
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     else if(strstr(output,".h5") != NULL)
     {
         outputType = HDF5; 
-        if( type != NULL && *type == 'r')  readablehdf = 1;
+        if( type != NULL && *type == 'r')  basehdf5 = 0;
     }
     else if(strstr(output,".vtu") != NULL)
     {
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
         xdmffile.erase (xdmffile.end() - 3, xdmffile.end());
         xdmffile.append(".xdmf");
         Hdf5IO<float,2>* pn = new Hdf5IO<float,2>(par); 
-        pn->creatHdfAndXdmf(xdmffile, output,readablehdf);
+        pn->creatHdfAndXdmf(xdmffile, output,basehdf5);
       }
       break;
 

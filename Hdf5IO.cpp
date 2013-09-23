@@ -307,7 +307,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     ctype imagePos[nvertices][3];
 
     int   nodeNumber[numNodes];
-    int   nodeType[numNodes];
+    int   nodeType[nvertices];
     int   parameterEdgeArrayLocal[numParamEdges][2];
     int   parameterEdgeArray[numParamEdges][4];
     int   edgePointsArray[nvertices];
@@ -343,7 +343,8 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isINTERSECTION_NODE()){
-
+                for(k = 0; k < 2; k++)
+                    domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
                 for(k = 0; k < 3; k++)
                     nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
@@ -364,7 +365,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isTOUCHING_NODE()){
-                for(k = 0; i < 2; k++)
+                for(k = 0; k < 2; k++)
                     domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
                 for(k = 0; k < 3; k++)
                     nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
