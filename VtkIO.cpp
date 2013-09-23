@@ -9,7 +9,7 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "VtkIO.h"
-#include "psurface_convert.h"
+#include "psurface_convert_new.h"
 
 
 using namespace psurface;
@@ -18,7 +18,7 @@ using namespace psurface;
   psurface::VTKIO<ctype,dim>::VTKIO(PSurface<dim,ctype>* psurface)
   {
     par = psurface;
-    ///interate over element
+    //interate over element
     int i,j,k;
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
@@ -36,7 +36,6 @@ using namespace psurface;
         int numInteriorNodes;
 
         cT.countNodes(numIntersectionNodes, numTouchingNodes, numInteriorNodes);
-        //        int numEdges = cT.getNumRegularEdges() - 3;
         int numEdges = cT.getNumRegularEdges();
         numNodesAndEdgesArray[11*i+0] = numIntersectionNodes;
         numNodesAndEdgesArray[11*i+1] = numTouchingNodes;
@@ -143,7 +142,7 @@ using namespace psurface;
     }
   };
 
-  ///write the psurface into vtu file
+  //write the psurface into vtu file
   template<class ctype,int dim>
   void psurface::VTKIO<ctype,dim>::creatVTU(const char* filename, bool basegrid)
   {
@@ -155,7 +154,7 @@ using namespace psurface;
     return;
   }    
 
-  ///write data file to stream
+  //write data file to stream
   template<class ctype,int dim>
   void psurface::VTKIO<ctype,dim>::writeDataFile(std::ostream& s, bool basegrid)
   {
@@ -172,7 +171,7 @@ using namespace psurface;
     writer.endMain();
   }
  
-  ///write the data section in vtu
+  //write the data section in vtu
   template<class ctype,int dim>
   void psurface::VTKIO<ctype,dim>::writeAllData(VTK::VTUWriter& writer, bool basegrid) {
     //PointData
@@ -183,7 +182,7 @@ using namespace psurface;
     writeGridCells(writer,basegrid);
   }
   
-  //! write point data
+  // write point data
   template<class ctype,int dim>
   void psurface::VTKIO<ctype,dim>::writePointData(VTK::VTUWriter& writer, bool basegrid)
   {
@@ -207,7 +206,7 @@ using namespace psurface;
       writer.endPointData();
   }
 
-  //! write the positions of vertices
+  // write the positions of vertices
   template<class ctype,int dim>
   void psurface::VTKIO<ctype,dim>::writeGridPoints(VTK::VTUWriter& writer, bool basegrid)
   {
@@ -237,7 +236,7 @@ using namespace psurface;
       writer.endPoints();
   }
 
-  //! write the connectivity array
+  // write the connectivity array
   template<class ctype,int dim>
   void psurface::VTKIO<ctype,dim>::writeGridCells(VTK::VTUWriter& writer, bool basegrid)
   {
@@ -314,5 +313,6 @@ using namespace psurface;
       writer.endCells();
   }
 
+//   Explicit template instantiations.
 template class VTKIO<float,2>;
 

@@ -9,19 +9,20 @@ namespace psurface{
 
 template<class ctype,int dim>
 class GmshIO{
-    public:
+    /// Psurface object we read from gmsh file formate. 
     PSurface<dim,ctype>* par;
-    public:
-    GmshIO(PSurface<dim,ctype>* psurface);
-    ///read psurface_convert from Gmsh file
-    void readGmsh(Surface* surf, const std::string&  filename);
-
-    private:
+    
     void    readfile(FILE * file, int cnt, const char* format,
                   void* t1, void* t2, void* t3, void* t4,
                   void* t5 , void* t6, void* , void* t8,
                   void* t9 , void* t10 );
     void    skipline(FILE * file);
+    
+    public:
+    GmshIO(PSurface<dim,ctype>* psurface);
+
+    /// Reads the parametrization of psurface from Gmsh object
+    void readGmsh(Surface* surf, const std::string&  filename);
 };
-}
+} // namespace psurface
 #endif

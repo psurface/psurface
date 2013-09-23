@@ -6,11 +6,11 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "GmshIO.h"
-#include "psurface_convert.h"
+#include "psurface_convert_new.h"
 
 
 using namespace psurface;
-  ///initialize PsurfaceConvert from the psurface object
+  //initialize PsurfaceConvert from the psurface object
   template<class ctype,int dim>
   psurface::GmshIO<ctype,dim>::GmshIO(PSurface<dim,ctype>* psurface)
   {
@@ -18,7 +18,7 @@ using namespace psurface;
   }
 
 
-  ///read psurface_convert from Gmsh file
+  //read psurface_convert from Gmsh file
   template<class ctype,int dim>
   void psurface::GmshIO<ctype,dim>::readGmsh(Surface* surf, const std::string&  filename)
   {
@@ -231,5 +231,6 @@ using namespace psurface;
           throw(std::runtime_error("error in readfile\n"));
   }
 
+//   Explicit template instantiations.
 template class GmshIO<float,2>;
 
