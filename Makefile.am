@@ -75,5 +75,5 @@ libpsurface_la_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
 
 psurface_convert_SOURCES =  psurface_convert.cpp
 psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
-psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
+psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS) libpsurface.la
 psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
