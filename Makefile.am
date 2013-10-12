@@ -1,4 +1,5 @@
 noinst_PROGRAMS =  psurface_convert
+
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
 	$(top_srcdir)/Box.h \
@@ -64,9 +65,12 @@ libpsurface_la_SOURCES= \
 	SurfaceBase.cpp \
 	TargetSurface.cpp \
 	Triangulator.cpp \
-	Hdf5IO.cpp \
 	VtkIO.cpp \
 	GmshIO.cpp
+
+if HAVE_HDF5
+libpsurface_la_SOURCES += Hdf5IO.cpp
+endif
 
 AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
 libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)

@@ -111,8 +111,14 @@ int main(int argc, char **argv)
   {
     case HDF5:
       {
+#if HAVE_HDF5
         Hdf5IO<float,2>* pconvert = new Hdf5IO<float,2>(par);
         pconvert->initCompletePSurface(surf, input);
+#else
+        std::cerr << "You have given an hdf5 input file, but psurface-convert" << std::endl;
+        std::cerr << "has been compiled without hdf5 support!" << std::endl;
+        exit(1);
+#endif
       }
       break;
 
@@ -146,11 +152,17 @@ int main(int argc, char **argv)
    {
     case HDF5:
       {
+#if HAVE_HDF5
         std::string xdmffile(output);
         xdmffile.erase (xdmffile.end() - 3, xdmffile.end());
         xdmffile.append(".xdmf");
         Hdf5IO<float,2>* pn = new Hdf5IO<float,2>(par);
         pn->creatHdfAndXdmf(xdmffile, output,basehdf5);
+#else
+        std::cerr << "You have given an hdf5 input file, but psurface-convert" << std::endl;
+        std::cerr << "has been compiled without hdf5 support!" << std::endl;
+        exit(1);
+#endif
       }
       break;
 

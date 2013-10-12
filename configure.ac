@@ -148,6 +148,8 @@ AS_IF([test "x$have_amiramesh" = "xyes"],
    HDF5_PARALLEL=0
  fi
 
+ AM_CONDITIONAL(HAVE_HDF5, test x$HAVE_HDF5 = x1)
+
  AC_SUBST([HDF5_CPPFLAGS])
  AC_SUBST([HDF5_LDFLAGS])
  AC_SUBST([HDF5_LIBS])
