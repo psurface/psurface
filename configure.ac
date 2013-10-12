@@ -105,10 +105,10 @@ AS_IF([test "x$have_amiramesh" = "xyes"],
 	HDF5_PARALLEL=1],[],[#include"H5pubconf.h"])
 
  # test for an arbitrary header
- AC_CHECK_HEADER([hdf5.h], 
+ AC_CHECK_HEADER([hdf5.h],
    [HAVE_HDF5=1],
    [HAVE_HDF5=0])
-	
+
  # Just for the configure check.  In the end, -L has to go into LIBS.
  LDFLAGS="$LDFLAGS $_dune_hdf5_libpath"
  # test for lib
@@ -152,7 +152,7 @@ AS_IF([test "x$have_amiramesh" = "xyes"],
  AC_SUBST([HDF5_LDFLAGS])
  AC_SUBST([HDF5_LIBS])
 
- # reset values					    
+ # reset values
  LIBS="$ac_save_LIBS"
  LDFLAGS="$ac_save_LDFLAGS"
  CPPFLAGS="$ac_save_CPPFLAGS"
