@@ -17,7 +17,6 @@
 #include "AmiraMeshIO.h"
 #include "psurfaceAPI.h"
 #include "PSurface.h"
-#include "psurface_convert.h"
 #include "Hdf5IO.h"
 #include "GmshIO.h"
 #include "VtkIO.h"
@@ -25,6 +24,16 @@
 #if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
 #include <amiramesh/AmiraMesh.h>
 #endif
+
+/** \brief List of the file types that we support */
+enum FileTypes
+{
+  AMIRA,
+  HDF5,
+  VTU,
+  GMSH
+};
+
 
 using namespace psurface;
 int main(int argc, char **argv)

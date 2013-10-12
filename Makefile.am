@@ -34,7 +34,6 @@ include_psurface_HEADERS = \
         $(top_srcdir)/TargetSurface.h \
 	$(top_srcdir)/Triangulator.h \
 	$(top_srcdir)/VertexHeap.h \
-	$(top_srcdir)/psurface_convert.h \
 	$(top_srcdir)/Hdf5IO.h \
 	$(top_srcdir)/VtkIO.h \
 	$(top_srcdir)/GmshIO.h \
