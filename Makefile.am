@@ -1,4 +1,4 @@
-noinst_PROGRAMS =  psurface_convert
+noinst_PROGRAMS =  psurface-convert
 
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
@@ -76,7 +76,7 @@ libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 libpsurface_la_LIBADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
 libpsurface_la_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
 
-psurface_convert_SOURCES =  psurface_convert.cpp
+psurface_convert_SOURCES =  psurface-convert.cpp
 psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS) libpsurface.la
 psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
