@@ -25,7 +25,7 @@ using namespace psurface;
       FILE* file = fopen(filename.c_str(),"r");
       int number_of_real_vertices = 0;
       int element_count = 0;
-      
+
       // process header
       double version_number;
       int file_type, data_size;
@@ -51,22 +51,22 @@ using namespace psurface;
 
       std::vector<StaticVector<int, 3> > triArray;
       std::vector<StaticVector<ctype,3> > coordsArray;
-       
+
       // read nodes
       int id;
       double x[3];
       for( int i = 1; i <= number_of_nodes; ++i )
       {
           readfile(file,4, "%d %lg %lg %lg\n", &id, &x[0], &x[1], &x[2] );
-          if( id != i ) 
+          if( id != i )
               throw(std::runtime_error("id does not match in reading gmsh"));
-            
+
           StaticVector<ctype,3> vertex;
           for(int j = 0 ; j < 3; j++)
               vertex[j] = x[j];
           coordsArray.push_back(vertex);
       }
-      
+
 
       readfile(file,1,"%s\n",buf);
       if (strcmp(buf,"$EndNodes")!=0)
@@ -88,8 +88,8 @@ using namespace psurface;
           int blub;
           readfile(file,1,"%d ",&blub);
         }
-      
-        if(elm_type != 2) 
+
+        if(elm_type != 2)
         {
             skipline(file);
             continue;
@@ -109,7 +109,7 @@ using namespace psurface;
       bool nodeInTri[number_of_nodes];
       int  newNodeIndex[number_of_nodes];
       for(int i = 0; i < number_of_nodes; i++) nodeInTri[i] = 0;
-      for(int i = 0; i < triArray.size(); i++) 
+      for(int i = 0; i < triArray.size(); i++)
       {
           nodeInTri[(triArray[i])[0] - 1] = 1;
           nodeInTri[(triArray[i])[1] - 1] = 1;
@@ -118,7 +118,7 @@ using namespace psurface;
       int newIndx = 0;
       for(int i = 0; i < number_of_nodes; i++)
       {
-          if(!nodeInTri[i]) 
+          if(!nodeInTri[i])
               newNodeIndex[i] = -1;
           else
           {
@@ -126,7 +126,7 @@ using namespace psurface;
               newIndx++;
           }
       }
-     
+
       //creat parace based on the base triangles
       PSurfaceFactory<2,ctype> factory(par);
       factory.setTargetSurface(surf);
@@ -136,7 +136,7 @@ using namespace psurface;
       am.parameters.set("ContentType", "Parametrization");
       am.parameters.remove(am.parameters[0]);
       par->getPaths(am.parameters);
-      
+
       //patches
       PSurface<2,float>::Patch Patch; //= new PSurface<2, ctype>::Patch;
       Patch.innerRegion = 0;
@@ -172,7 +172,7 @@ using namespace psurface;
           std::tr1::array<unsigned int, 3> triangleVertices = {newNodeIndex[(triArray[i])[0] - 1], newNodeIndex[(triArray[i])[1] - 1], newNodeIndex[(triArray[i])[2] - 1]};
           int newTriIdx = factory.insertSimplex(triangleVertices);
           par->triangles(newTriIdx).patch = 0;
-      
+
           /// get the parametrization on this triangle
           ///nodes
           par->triangles(newTriIdx).nodes.resize(3);
@@ -196,7 +196,7 @@ using namespace psurface;
           /// the parameterEdges
           for(int j = 0; j < 3; j++)
               par->triangles(newTriIdx).addEdge(j, (j+1)%3);
-    
+
           /// the edgePoints arrays on each triangular edge
           for (int j=0; j<3; j++){
               par->triangles(newTriIdx).edgePoints[j].resize(2);
@@ -204,12 +204,12 @@ using namespace psurface;
               par->triangles(newTriIdx).edgePoints[j].back() = (j+1)%3;
           }
       }
-      
+
       par->hasUpToDatePointLocationStructure = false;
       par->setupOriginalSurface();
       return;
   }
-  
+
   template<class ctype,int dim>
   void psurface::GmshIO<ctype,dim>::skipline(FILE * file)
   {
