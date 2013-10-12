@@ -1,3 +1,5 @@
+noinst_PROGRAMS =  psurface-convert
+
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
 	$(top_srcdir)/Box.h \
@@ -32,8 +34,16 @@ include_psurface_HEADERS = \
 	$(top_srcdir)/SurfacePathSet.h \
         $(top_srcdir)/TargetSurface.h \
 	$(top_srcdir)/Triangulator.h \
-	$(top_srcdir)/VertexHeap.h
-
+	$(top_srcdir)/VertexHeap.h \
+	$(top_srcdir)/Hdf5IO.h \
+	$(top_srcdir)/VtkIO.h \
+	$(top_srcdir)/GmshIO.h \
+	$(top_srcdir)/streams.hh \
+	$(top_srcdir)/indent.hh \
+	$(top_srcdir)/common.hh \
+	$(top_srcdir)/vtuwriter.hh \
+	$(top_srcdir)/dataarraywriter.hh \
+	$(top_srcdir)/b64enc.hh
 include_psurfacedir = $(includedir)/psurface
 
 lib_LTLIBRARIES= libpsurface.la
@@ -54,6 +64,20 @@ libpsurface_la_SOURCES= \
 	PSurfaceSmoother.cpp \
 	SurfaceBase.cpp \
 	TargetSurface.cpp \
-	Triangulator.cpp
+	Triangulator.cpp \
+	VtkIO.cpp \
+	GmshIO.cpp
+
+if HAVE_HDF5
+libpsurface_la_SOURCES += Hdf5IO.cpp
+endif
 
 AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
+libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
+libpsurface_la_LIBADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
+libpsurface_la_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
+
+psurface_convert_SOURCES =  psurface-convert.cpp
+psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
+psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS) libpsurface.la
+psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
