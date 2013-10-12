@@ -3,13 +3,13 @@
 #include <string.h>
 #include <memory>
 #include <tr1/memory>
+#include <fstream>
 
 #include "StaticVector.h"
 #include "Domains.h"
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "VtkIO.h"
-#include "psurface_convert.h"
 
 
 using namespace psurface;
@@ -74,7 +74,7 @@ using namespace psurface;
     nodeType.resize(numVertices + numNodes);
     nodePositions.resize(numNodes);
     parameterEdgeArray.resize(numParamEdges);
-    for(i = 0; i < numVertices; i++) nodeType[i] = CORNER_NODE;
+    for(i = 0; i < numVertices; i++) nodeType[i] = Node<ctype>::CORNER_NODE;
 
     for (i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
@@ -100,7 +100,7 @@ using namespace psurface;
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
-                nodeType[arrayIdx+ numVertices] = INTERSECTION_NODE;
+                nodeType[arrayIdx+ numVertices] = Node<ctype>::INTERSECTION_NODE;
                 newIdx[cN] = arrayIdx;
                 arrayIdx++;
             }
@@ -112,7 +112,7 @@ using namespace psurface;
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
-                nodeType[arrayIdx+ numVertices] = TOUCHING_NODE;
+                nodeType[arrayIdx+ numVertices] = Node<ctype>::TOUCHING_NODE;
                 newIdx[cN] = arrayIdx;
                 arrayIdx++;
             }
@@ -124,7 +124,7 @@ using namespace psurface;
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
-                nodeType[arrayIdx+ numVertices] = INTERIOR_NODE;
+                nodeType[arrayIdx+ numVertices] = Node<ctype>::INTERIOR_NODE;
                 newIdx[cN] = arrayIdx;
                 arrayIdx++;
             }
