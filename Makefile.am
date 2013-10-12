@@ -66,49 +66,14 @@ libpsurface_la_SOURCES= \
 	Triangulator.cpp \
 	Hdf5IO.cpp \
 	VtkIO.cpp \
-	GmshIO.cpp \
-	psurface_convert.cpp
+	GmshIO.cpp
+
 AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
-libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) 
+libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 libpsurface_la_LIBADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
 libpsurface_la_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
-psurface_convert_SOURCES =  AmiraMeshIO.h \
-	Iterators.cpp \
-	PlaneParam.cpp \
-	PlaneParam.h \
-	streams.hh \
-	indent.hh \
-	common.hh \
-	vtuwriter.hh \
-	dataarraywriter.hh \
-	PSurface.h \
-	SurfacePathSet.h \
-	Domains.h \
-	SurfaceBase.h \
-	psurfaceAPI.h \
-	TargetSurface.h \
-	AmiraMeshIO.h \
-	SurfaceParts.h \
-	psurface_convert.h \
-	PSurfaceFactory.h \
-	StaticVector.h \
-	Domains.cpp \
-	AmiraMeshIO.cpp \
-	SurfaceBase.cpp \
-	TargetSurface.cpp \
-	PSurface.cpp \
-	PSurfaceFactory.cpp \
-	Node.h \
-	StaticMatrix.h \
-	SparseMatrix.h \
-	psurface_convert.cpp \
-	psurface_convert.h \
-	Hdf5IO.cpp \
-	Hdf5IO.h \
-	VtkIO.cpp \
-	VtkIO.h \
-	GmshIO.cpp \
-	GmshIO.h
-psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) 
+
+psurface_convert_SOURCES =  psurface_convert.cpp
+psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
 psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
