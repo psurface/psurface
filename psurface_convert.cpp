@@ -36,46 +36,46 @@ int main(int argc, char **argv)
 	fprintf(stderr, "type could be b(basegrid) or r(readable hdf5 file).\n -t b means that the output should only have base grid trianlge(This option is used when the output type is vtu type.\n -t r means that we get readable output hdf5 type data(This option is used when the output type is hdf5).\n");
 	exit(0);
     }
-    
+
     //use get opt to deal with the argv
     char *input, *output, *type;
     bool basegrid = 0, basehdf5 = 1;
-    int opt=0;  
+    int opt=0;
     int i=0;
-    const char* optstring=":i:o:t:";  
+    const char* optstring=":i:o:t:";
     const int num=3;
-  
-    while((opt=getopt(argc,argv,optstring)) != -1)  
-    {  
-        switch(opt)  
-        {  
+
+    while((opt=getopt(argc,argv,optstring)) != -1)
+    {
+        switch(opt)
+        {
         case 'i':
              input = optarg;
              break;
-        case 'o':  
+        case 'o':
              output = optarg;
              break;
         case 't':
              type = optarg;
              break;
-        case ':':  
-            printf("the option need a value\n");  
-            break;  
-        case '?':  
-            printf("unknow option%c\n",optopt);  
-            break;  
-        }  
-    }  
-  
-    for(i=0;optind<argc;i++,optind++)  
-    {  
-        if(i<num)  
-            printf("argument:%s/n",argv[optind]);  
-        else  
-            printf("excess argument:%s/n",argv[optind]);  
-    }  
-    
-    FileTypes inputType, outputType;    
+        case ':':
+            printf("the option need a value\n");
+            break;
+        case '?':
+            printf("unknow option%c\n",optopt);
+            break;
+        }
+    }
+
+    for(i=0;optind<argc;i++,optind++)
+    {
+        if(i<num)
+            printf("argument:%s/n",argv[optind]);
+        else
+            printf("excess argument:%s/n",argv[optind]);
+    }
+
+    FileTypes inputType, outputType;
     if(strstr(input,".am") != NULL || strstr(input,".par") != NULL )
         inputType = AMIRA;
     else if(strstr(input,".h5") != NULL)
@@ -86,12 +86,12 @@ int main(int argc, char **argv)
         inputType = GMSH;
     else
       printf(" could not tell the input type by file extention\n");
-      
+
     if(strstr(output,".am") != NULL)
         outputType = AMIRA;
     else if(strstr(output,".h5") != NULL)
     {
-        outputType = HDF5; 
+        outputType = HDF5;
         if( type != NULL && *type == 'r')  basehdf5 = 0;
     }
     else if(strstr(output,".vtu") != NULL)
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
         outputType = GMSH;
     else
       printf(" could not tell the output type by file extention\n");
-  
+
   PSurface<2,float>* par = new PSurface<2,float>;
   Surface* surf = new Surface;
 
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
     case GMSH:
       {
-        GmshIO<float,2>* pconvert = new GmshIO<float,2>(par);      
+        GmshIO<float,2>* pconvert = new GmshIO<float,2>(par);
         pconvert->readGmsh(surf, input);
       }
       break;
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
     case AMIRA:
       {
         AmiraMesh* am = AmiraMesh::read(input);
-        PSURFACE_API AmiraMeshIO<float> amIO;    
+        PSURFACE_API AmiraMeshIO<float> amIO;
         if( !amIO.initFromAmiraMesh(par,am,input, surf))
         {
           printf("unable to initiate psurface from amira mesh file!\n");
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
         std::string xdmffile(output);
         xdmffile.erase (xdmffile.end() - 3, xdmffile.end());
         xdmffile.append(".xdmf");
-        Hdf5IO<float,2>* pn = new Hdf5IO<float,2>(par); 
+        Hdf5IO<float,2>* pn = new Hdf5IO<float,2>(par);
         pn->creatHdfAndXdmf(xdmffile, output,basehdf5);
       }
       break;
