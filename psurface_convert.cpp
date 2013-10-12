@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     else if(strstr(input,".msh") != NULL)
         inputType = GMSH;
     else
-      printf(" could not tell the input type by file extention\n");
+      printf(" could not tell the input type by file extension\n");
 
     if(strstr(output,".am") != NULL)
         outputType = AMIRA;
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
     else if(strstr(output,".msh") != NULL)
         outputType = GMSH;
     else
-      printf(" could not tell the output type by file extention\n");
+      printf(" could not tell the output type by file extension\n");
 
   PSurface<2,float>* par = new PSurface<2,float>;
   Surface* surf = new Surface;
