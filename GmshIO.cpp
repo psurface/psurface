@@ -6,7 +6,10 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "GmshIO.h"
-#include "psurface_convert.h"
+
+#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
+#include <amiramesh/AmiraMesh.h>
+#endif
 
 
 using namespace psurface;
