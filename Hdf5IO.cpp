@@ -123,9 +123,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       status_n  = H5Sget_simple_extent_dims(*filespace, dimz, NULL);
       *memspace = H5Screate_simple(rank,dimz,NULL);
       if(rank == 1)
-          data = (int *) malloc(dimz[0]*sizeof(int));      
+          data = (int *) malloc(dimz[0]*sizeof(int));
       else
-          data = (int *) malloc(dimz[0]*dimz[1]*sizeof(int)); 
+          data = (int *) malloc(dimz[0]*dimz[1]*sizeof(int));
 
       status = H5Dread(*dataset, H5T_NATIVE_INT, *memspace, *filespace, H5P_DEFAULT, data);
   }
@@ -141,10 +141,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       status_n  = H5Sget_simple_extent_dims(*filespace, dimz, NULL);
       *memspace = H5Screate_simple(rank,dimz,NULL);
       if(rank == 1)
-          data = (float *) malloc(dimz[0]*sizeof(float));        
+          data = (float *) malloc(dimz[0]*sizeof(float));
       else
-          data = (float *) malloc(dimz[0]*dimz[1]*sizeof(float));      
-      
+          data = (float *) malloc(dimz[0]*dimz[1]*sizeof(float));
+
       status = H5Dread(*dataset, H5T_NATIVE_FLOAT, *memspace, *filespace, H5P_DEFAULT, data);
   }
 
@@ -159,7 +159,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       status_n  = H5Sget_simple_extent_dims(*filespace, dimz, NULL);
       *memspace = H5Screate_simple(rank,dimz,NULL);
       if(rank == 1)
-          data = (double *) malloc(dimz[0]*sizeof(double));      
+          data = (double *) malloc(dimz[0]*sizeof(double));
       else
           data = (double *) malloc(dimz[0]*dimz[1]*sizeof(double));
       status = H5Dread(*dataset, H5T_NATIVE_DOUBLE, *memspace, *filespace, H5P_DEFAULT, data);
@@ -176,14 +176,14 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   template<class ctype,int dim>
   void psurface::Hdf5IO<ctype,dim>::creatHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool base)
   {
-    if(!base) 
-    //Creates hdf5 file that contain all data needed to display it in paraview. 
+    if(!base)
+    //Creates hdf5 file that contain all data needed to display it in paraview.
     {
       writeHdf5Data(hdf_filename);
       writeXdmf(xdf_filename, hdf_filename);
     }
-    else 
-    // create hdf5 file that only contain necessary data of the psurface. 
+    else
+    // create hdf5 file that only contain necessary data of the psurface.
       writeBaseHdf5Data(hdf_filename);
 
      return;
@@ -199,7 +199,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     hsize_t   dims[] ={numVertices};
     hsize_t   dimz[2];
     herr_t    status;
-    
+
     int i, j, k;
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
@@ -226,7 +226,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     dimz[0] = numVertices;
     dimz[1] = 3;
     writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseCoords", basecoords);
-  
+
     //3) 'BaseGridTriangles'
     int base_tri[numTriangles][4];
     for(i = 0; i < numTriangles;i++)
@@ -239,7 +239,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     dimz[0] = numTriangles;
     dimz[1] = 4;
     writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseTri", base_tri);
-  
+
     //4) NodePositions(x, y, and z-coordinates of the image position).
     //ipos
     ctype ipos[par->iPos.size()][3];
@@ -300,9 +300,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
     ncells = numTriangles + numParamEdges;
     nvertices = numVertices + numNodes;
-    
-    
-    ctype nodePositions[numNodes][3];    
+
+
+    ctype nodePositions[numNodes][3];
     ctype domainPositions[numNodes][2];
     ctype imagePos[nvertices][3];
 
@@ -318,7 +318,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     int edgeArrayIdx       = 0;
     int edgePointsArrayIdx = 0;
     ctype cCoords[3][3];
-    
+
     for (i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
@@ -333,13 +333,13 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
             if(!cT.nodes[cN].isCORNER_NODE())printf("error in the corner node indx!\n");
             newIdx[cN] = par->triangles(i).vertices[cN] - numVertices;
         }
-        
+
         newIdxlocal[cT.cornerNode(0)] = 0;
         newIdxlocal[cT.cornerNode(1)] = 1;
         newIdxlocal[cT.cornerNode(2)] = 2;
         int localArrayIdx = 3;
 
-        //Intersection Node        
+        //Intersection Node
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isINTERSECTION_NODE()){
@@ -349,7 +349,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
                     nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
-                
+
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
                 nodeType[arrayIdx + numVertices] = INTERSECTION_NODE;
                 for(k = 0; k < 3; k++)
@@ -360,7 +360,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
                 localArrayIdx++;
             }
         }
-        
+
         //Touching Node
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
@@ -412,7 +412,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
             {
                 //Store ParameterEdge in global index of end points
                 parameterEdgeArray[edgeArrayIdx][0] = 2;
-                parameterEdgeArray[edgeArrayIdx][1] = 2; 
+                parameterEdgeArray[edgeArrayIdx][1] = 2;
                 parameterEdgeArray[edgeArrayIdx][2] = newIdx[cE.from()] + numVertices;
                 parameterEdgeArray[edgeArrayIdx][3] = newIdx[cE.to()] + numVertices;
 
@@ -428,17 +428,17 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
             for (size_t k=1; k<cT.edgePoints[j].size()-1; k++)
                 edgePointsArray[edgePointsArrayIdx++] = newIdxlocal[cT.edgePoints[j][k]];
         }
-    }              
-    
+    }
+
     //6) 'Nodes'
-    // barycentric coordinates on the respective triangle and 
+    // barycentric coordinates on the respective triangle and
     // x, y, and z-coordinates of the image position.
     //nodes on plane surface of triangle
     dimz[0] = numNodes;
     dimz[1] = 3;
     writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/NodeCoords", nodePositions);
-                
-    //NodeData                 
+
+    //NodeData
     dimz[0] = numNodes;
     dimz[1] = 2;
     writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalNodePosition", domainPositions);
@@ -456,7 +456,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     //connection array(in global index) of parameter edges
     dimz[0] = numParamEdges;
     dimz[1] = 2;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalParamEdge", parameterEdgeArrayLocal);    
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalParamEdge", parameterEdgeArrayLocal);
 
     //param edge
     dimz[0] = numParamEdges;
@@ -481,14 +481,14 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     //nodetype
     dims[0] = nvertices;
     writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/NodeType", nodeType);
-    
+
     //close the file
     status = H5Fclose(file_id);
-    return; 
+    return;
   };
 
   template<class ctype,int dim>
-  ///write the data array into hdf5 data structure(This function store exactly the same data as amiramesh does) 
+  ///write the data array into hdf5 data structure(This function store exactly the same data as amiramesh does)
   void psurface::Hdf5IO<ctype,dim>::writeBaseHdf5Data(const std::string& filename)
   {
     hid_t     file_id;
@@ -497,7 +497,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     hsize_t   dims[] ={numVertices};
     hsize_t   dimz[2];
     herr_t    status;
-    
+
     int i, j, k;
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
@@ -524,7 +524,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     dimz[0] = numVertices;
     dimz[1] = 3;
     writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseCoords", basecoords);
-  
+
     //3) 'BaseGridTriangles'
     int base_tri[numTriangles][4];
     for(i = 0; i < numTriangles;i++)
@@ -537,7 +537,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     dimz[0] = numTriangles;
     dimz[1] = 4;
     writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseTri", base_tri);
-  
+
     //4) NodePositions(x, y, and z-coordinates of the image position).
     //ipos
     ctype ipos[par->iPos.size()][3];
@@ -593,11 +593,11 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     dimz[1] = 11;
     writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/numNodesAndEdgesArray", num_nodes_and_edges_array);
 
-    /////////////////////////////////////////////////////////////////////    
+    /////////////////////////////////////////////////////////////////////
     ncells = numTriangles + numParamEdges;
     nvertices = numVertices + numNodes;
-    
-    
+
+
     ctype domainPositions[numNodes][2];
     int   nodeNumber[numNodes];
     int   parameterEdgeArrayLocal[numParamEdges][2];
@@ -608,12 +608,12 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     int edgeArrayIdx       = 0;
     int edgePointsArrayIdx = 0;
     ctype cCoords[3][3];
-    
+
     for (i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
         std::vector<int> newIdxlocal(cT.nodes.size());
-        
+
         newIdxlocal[cT.cornerNode(0)] = 0;
         newIdxlocal[cT.cornerNode(1)] = 1;
         newIdxlocal[cT.cornerNode(2)] = 2;
@@ -635,7 +635,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
             if (cT.nodes[cN].isTOUCHING_NODE()){
                 for(k = 0; k < 2; k++)
                     domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-                
+
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
                 newIdxlocal[cN] = localArrayIdx;
                 arrayIdx++;
@@ -648,7 +648,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
             if (cT.nodes[cN].isINTERIOR_NODE()){
                for(k = 0; k < 2; k++)
                     domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-                
+
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
                 newIdxlocal[cN] = localArrayIdx;
                 arrayIdx++;
@@ -672,12 +672,12 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
             for (size_t k=1; k<cT.edgePoints[j].size()-1; k++)
                 edgePointsArray[edgePointsArrayIdx++] = newIdxlocal[cT.edgePoints[j][k]];
         }
-    }              
-    
+    }
+
     //6) 'Nodes'
-    // barycentric coordinates on the respective triangle and 
+    // barycentric coordinates on the respective triangle and
     // x, y, and z-coordinates of the image position.
-    //NodeData                 
+    //NodeData
     dimz[0] = numNodes;
     dimz[1] = 2;
     writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalNodePosition", domainPositions);
@@ -690,7 +690,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     //connection array(in global index) of parameter edges
     dimz[0] = numParamEdges;
     dimz[1] = 2;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalParamEdge", parameterEdgeArrayLocal);    
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalParamEdge", parameterEdgeArrayLocal);
 
     //9) 'EdgePoints'
     dims[0] = edgePointsArrayIdx;
@@ -709,7 +709,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
     //close the file
     status = H5Fclose(file_id);
-    return; 
+    return;
   };
 
   template<class ctype,int dim>
@@ -743,14 +743,14 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         fprintf(xmf, "%d %d\n",1, 4);
         fprintf(xmf, "%d %d\n",1, 11);
         fprintf(xmf, "%d %d\n", numTriangles,1);
-        fprintf(xmf, "</DataItem>\n"); 
+        fprintf(xmf, "</DataItem>\n");
 
         fprintf(xmf, " <DataItem Dimensions=\"%d %d\" NumberType=\"int\" Format=\"HDF\">\n", numTriangles, 11);
         fprintf(xmf, "%s:/numNodesAndEdgesArray\n", hdf_filename.c_str());
         fprintf(xmf, "</DataItem>\n");
 
       fprintf(xmf, "</DataItem>\n");
-    
+
     fprintf(xmf, "</Attribute>\n");
 
     fprintf(xmf, "</Grid>\n");
@@ -821,21 +821,21 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       hdf_close(dataset, filespace, memspace);
 
       //read xyz coordinate of vertices and insert vertex into psurface
-        
-      ctype *tricoords;  
+
+      ctype *tricoords;
       readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/BaseCoords", tricoords);
       hdf_close(dataset, filespace, memspace);
-      
+
       //triangle
       int *baseGridTriArray;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/BaseTri", baseGridTriArray);
-      hdf_close(dataset, filespace, memspace);      
-      
+      hdf_close(dataset, filespace, memspace);
+
       //Parameter Edge
       int *parameterEdgeArrayLocal;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz,"/LocalParamEdge", parameterEdgeArrayLocal);
       hdf_close(dataset, filespace, memspace);
-      
+
       //nodeNumber
       int *nodeNumber;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims,"/NodeNumber", nodeNumber);
@@ -850,24 +850,24 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       //nodeNodesAndEdgesArray
       int *numNodesAndEdgesArray;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/numNodesAndEdgesArray", numNodesAndEdgesArray);
-      hdf_close(dataset, filespace, memspace);      
+      hdf_close(dataset, filespace, memspace);
 
       //local position of nodes on triangle
       ctype *domainPositions;
       readFloatDataFromFile(&file, &dataset, &filespace, &memspace, dimz, "/LocalNodePosition",domainPositions);
-      hdf_close(dataset, filespace, memspace);      
-      
+      hdf_close(dataset, filespace, memspace);
+
       //edgepointsarray
       int *edgePointsArray;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims, "/EdgePoints", edgePointsArray);
-      hdf_close(dataset, filespace, memspace);      
+      hdf_close(dataset, filespace, memspace);
 
       //patches
       int *patch;
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims, "/patches_vec", patch);
       hdf_close(dataset, filespace, memspace);
       int patch_size = dims[0]/3;
-      
+
       H5Fclose(file);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -888,7 +888,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       for (i=0; i< patch_size; i++)
       {
           Patch.innerRegion = patch[3*i];
-          Patch.outerRegion = patch[3*i + 1];  
+          Patch.outerRegion = patch[3*i + 1];
           Patch.boundaryId = patch[3*i + 2];
           par->patches.push_back(Patch);
       }
@@ -897,7 +897,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       StaticVector<ctype,3> newVertex;
       for(i = 0; i < numVertices; i++)
       {
-          for(int j = 0; j < 3; j++) newVertex[j] = tricoords[3*i + j]; 
+          for(int j = 0; j < 3; j++) newVertex[j] = tricoords[3*i + j];
           factory.insertVertex(newVertex);
       }
 
@@ -941,7 +941,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
           par->triangles(newTriIdx).nodes[2].makeCornerNode(2, nodenumber);
 
           int nodeCounter = 3;
-          
+
           //the intersection nodes
           for (j=0; j<numIntersectionNodes; j++, nodeCounter++, nodeArrayIdx++){
             domainPos = StaticVector<ctype,2>(domainPositions[2*nodeArrayIdx], domainPositions[2*nodeArrayIdx + 1]);
