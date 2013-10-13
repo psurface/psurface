@@ -21,3 +21,5 @@ stamp-h1
 libpsurface-?.?.?
 libpsurface*.tar.gz
 
+# Executable files
+psurface-convert
