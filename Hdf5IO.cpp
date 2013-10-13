@@ -9,7 +9,11 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "Hdf5IO.h"
-#include "psurface_convert.h"
+
+#if defined HAVE_AMIRAMESH
+#include <amiramesh/AmiraMesh.h>
+#endif
+
 using namespace psurface;
 
 //Writes one dimensional int type data array to hdf5 file
@@ -312,7 +316,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     int   parameterEdgeArray[numParamEdges][4];
     int   edgePointsArray[nvertices];
 
-    for(i = 0; i < numVertices; i++) nodeType[i] = CORNER_NODE;
+    for(i = 0; i < numVertices; i++) nodeType[i] = Node<ctype>::CORNER_NODE;
 
     int arrayIdx           = 0;
     int edgeArrayIdx       = 0;
@@ -351,7 +355,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
 
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx + numVertices] = INTERSECTION_NODE;
+                nodeType[arrayIdx + numVertices] = Node<ctype>::INTERSECTION_NODE;
                 for(k = 0; k < 3; k++)
                     imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
                 newIdx[cN] = arrayIdx;
@@ -372,7 +376,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx+ numVertices] = TOUCHING_NODE;
+                nodeType[arrayIdx+ numVertices] = Node<ctype>::TOUCHING_NODE;
                 for(k = 0; k < 3; k++)
                     imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
                 newIdx[cN] = arrayIdx;
@@ -394,7 +398,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx+ numVertices] = INTERIOR_NODE;
+                nodeType[arrayIdx+ numVertices] = Node<ctype>::INTERIOR_NODE;
                 for(k = 0; k < 3; k++)
                     imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
 
