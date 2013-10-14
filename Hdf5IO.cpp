@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <vector>
 #include <string.h>
 #include <hdf5.h>
