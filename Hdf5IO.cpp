@@ -12,10 +12,6 @@
 #include "PSurfaceFactory.h"
 #include "Hdf5IO.h"
 
-#if defined HAVE_AMIRAMESH
-#include <amiramesh/AmiraMesh.h>
-#endif
-
 using namespace psurface;
 
 //Writes one dimensional int type data array to hdf5 file
@@ -882,12 +878,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       PSurfaceFactory<2,ctype> factory(par);
       //(Assume) Target surface already exists
       factory.setTargetSurface(surf);
-
-      //set param for psurface
-      AmiraMesh am;
-      am.parameters.set("ContentType", "Parametrization");
-      am.parameters.remove(am.parameters[0]);
-      par->getPaths(am.parameters);
 
       //patches
       PSurface<2,float>::Patch Patch; //= new PSurface<2, ctype>::Patch;

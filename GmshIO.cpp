@@ -7,10 +7,6 @@
 #include "PSurfaceFactory.h"
 #include "GmshIO.h"
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-#include <amiramesh/AmiraMesh.h>
-#endif
-
 
 using namespace psurface;
   //initialize PsurfaceConvert from the psurface object
@@ -133,12 +129,6 @@ using namespace psurface;
       //creat parace based on the base triangles
       PSurfaceFactory<2,ctype> factory(par);
       factory.setTargetSurface(surf);
-
-      //set param for psurface
-      AmiraMesh am;
-      am.parameters.set("ContentType", "Parametrization");
-      am.parameters.remove(am.parameters[0]);
-      par->getPaths(am.parameters);
 
       //patches
       PSurface<2,float>::Patch Patch; //= new PSurface<2, ctype>::Patch;

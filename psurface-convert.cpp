@@ -142,6 +142,7 @@ int main(int argc, char **argv)
 
     case AMIRA:
       {
+#if HAVE_AMIRAMESH
         AmiraMesh* am = AmiraMesh::read(input);
         PSURFACE_API AmiraMeshIO<float> amIO;
         if( !amIO.initFromAmiraMesh(par,am,input, surf))
@@ -149,6 +150,11 @@ int main(int argc, char **argv)
           printf("unable to initiate psurface from amira mesh file!\n");
           return 0;
         }
+#else
+        std::cerr << "You have given an AmiraMesh input file, but psurface-convert" << std::endl;
+        std::cerr << "has been compiled without AmiraMesh support!" << std::endl;
+        exit(1);
+#endif
       }
       break;
     default:
@@ -186,8 +192,14 @@ int main(int argc, char **argv)
 
     case AMIRA:
       {
+#if HAVE_AMIRAMESH
           PSURFACE_API AmiraMeshIO<float> amIO;
           amIO.writeAmiraMesh(par, output);
+#else
+        std::cerr << "You have given an AmiraMesh output file, but psurface-convert" << std::endl;
+        std::cerr << "has been compiled without AmiraMesh support!" << std::endl;
+        exit(1);
+#endif
       }
       break;
     default:
