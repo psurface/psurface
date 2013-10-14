@@ -954,14 +954,6 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
         return false;
     }
 
-    // stores whether the detected feature edges are on a path
-    int featurePathStatusA, featurePathStatusB;
-    if (quality.paths && featureEdges) {
-        featurePathStatusA = (*featureEdges)[featureEdgeA];
-        featurePathStatusB = (*featureEdges)[featureEdgeB];
-        assert(featurePathStatusA == featurePathStatusB);
-    }
-
     int newFeatureEdgeFrom = par->edges(featureEdgeA).theOtherVertex(centerPoint);
     int newFeatureEdgeTo   = par->edges(featureEdgeB).theOtherVertex(centerPoint);
 
@@ -1288,26 +1280,6 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
         assert(newFeatureEdge>=0);
 
         edgeOctree->insert(&par->edges(newFeatureEdge));
-
-    }
-
-    // update path info if necessary
-    if (quality.paths && featureEdges) {
-
-        int newFeatureEdge = par->findEdge(newFeatureEdgeFrom, newFeatureEdgeTo);
-        assert(newFeatureEdge>=0);
-
-        (*featureEdges)[newFeatureEdge] = featurePathStatusA;
-        switch (featurePathStatusA) {
-        case -2:
-            par->paths.removePoint(centerPoint);
-            break;
-        case -1:
-            break;
-        default:
-            par->paths[featurePathStatusA].removePoint(centerPoint);
-            break;
-        }
 
     }
 

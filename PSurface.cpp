@@ -57,7 +57,6 @@ void PSurface<dim,ctype>::clear()
     patches.clear();
 
     iPos.clear();
-    paths.clear();
     SurfaceBase<Vertex<ctype>, Edge, DomainTriangle<ctype> >::clear();
 }
 
@@ -332,11 +331,6 @@ void PSurface<dim,ctype>::garbageCollection()
             for (j=0; j<3; j++)
                 this->triangleArray[i].vertices[j] -= vertexOffsets[this->triangleArray[i].vertices[j]];
 
-        // Adjust paths
-        for (i=0; i<paths.size(); i++)
-            for (j=0; j<paths[i].points.size(); j++)
-                paths[i].points[j] -= vertexOffsets[paths[i].points[j]];
-
         this->freeVertexStack.clear();
 
     }
@@ -524,52 +518,6 @@ void PSurface<dim,ctype>::appendTriangleToOriginalSurface(const std::tr1::array<
     surface->patches[patch]->triangles.push_back(surface->triangles.size()-1);
 #endif
 }
-
-
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
-template <int dim, class ctype>
-void PSurface<dim,ctype>::getPaths(const HxParamBundle& parameters)
-{
-    int i;
-    paths.resize(0);
-
-    for (i=0 ; i<parameters.size() ; i++) {
-        if (strncmp("SurfacePath", parameters[i]->name(),11)==0) {
-            HxParameter* p = (HxParameter*) parameters[i];
-            if (!p->isBundle() && p->primType()== McPrimType::mc_int32) {
-                paths.resize(paths.size()+1);
-                for (int j=0 ; j<p->dim() ; j+=2) {
-                    paths.back().points.push_back(p->getNum(j));
-                    paths.back().isFix.push_back(p->getNum(j+1));
-                }
-            }
-        }
-    }
-}
-
-template <int dim, class ctype>
-void PSurface<dim,ctype>::savePaths(HxParamBundle& parameters)
-{
-    int i;
-
-    for (i=0 ; i<parameters.size() ; i++)
-        if (strncmp("SurfacePath", parameters[i]->name(), 11)==0)
-            parameters.remove(parameters[i--]);
-
-    for ( i=0 ; i<paths.size() ; i++) {
-        char buf[64];
-        sprintf(buf,"SurfacePath%03d",i);
-        parameters.remove(buf);
-        std::vector<int> tmp;
-        for (int j=0 ; j<paths[i].points.size() ; j++) {
-            tmp.push_back(paths[i].points[j]);
-            tmp.push_back(paths[i].isFix[j]);
-        }
-        HxParameter* p = new HxParameter(buf, tmp.size(), &tmp[0]);
-        parameters.insert(p);
-    }
-}
-#endif
 
 
 template <int dim, class ctype>

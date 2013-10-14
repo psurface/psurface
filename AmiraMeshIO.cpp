@@ -58,8 +58,6 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
 
     am.parameters.set("ContentType", "Parametrization");
 
-    par->savePaths(am.parameters);
-
 
     ////////////////////////////////////////////
     // the patches array
@@ -331,8 +329,6 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
 
     // Target surface already exists
     factory.setTargetSurface(surf);
-
-    psurf->getPaths(am->parameters);
 
     ///////////////////////////////////////////////
     // test for file format

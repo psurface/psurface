@@ -32,8 +32,6 @@ include_psurface_HEADERS = \
 	$(top_srcdir)/StaticVector.h \
 	$(top_srcdir)/SurfaceBase.h \
 	$(top_srcdir)/SurfaceParts.h \
-	$(top_srcdir)/SurfacePath.h \
-	$(top_srcdir)/SurfacePathSet.h \
         $(top_srcdir)/TargetSurface.h \
 	$(top_srcdir)/Triangulator.h \
 	$(top_srcdir)/VertexHeap.h \

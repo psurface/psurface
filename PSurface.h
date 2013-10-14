@@ -4,7 +4,6 @@
 #include "StaticVector.h"
 #include "SurfaceBase.h"
 #include "Domains.h"
-#include "SurfacePathSet.h"
 #include "GlobalNodeIdx.h"
 #include "NodeBundle.h"
 
@@ -109,20 +108,6 @@ public:
      * given by the parametrization.
      */
     void setupOriginalSurface();
-
-    /** \brief Copies the path information from the SurfacePathSet to the
-     * parameters.
-     *
-     * Copies the path information from the SurfacePathSet to the
-     * parameters.  This routine is   called before writing a PSurface
-     * to disk, because on disk paths are stored together with the parameters.
-     */
-    void savePaths(HxParamBundle& parameters);
-
-    /** \brief Reads paths from the parameters HxParamBundle into the
-     * PSurface's own SurfacePathSet.
-     */
-    void getPaths(const HxParamBundle& parameters);
 
     /** \brief Adds the triangular closure on each triangle.
      *
@@ -326,9 +311,6 @@ public:
 
     /// The corresponding image surface
     Surface* surface;
-
-    /// Surface paths on the base grid
-    SurfacePathSet paths;
 
 };
 

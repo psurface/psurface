@@ -24,9 +24,6 @@ struct QualityRequest {
     /// Importance of the Hausdorff distance in the new triangulation
     float hausdorffDistance;
 
-    /// Should surface paths be kept?
-    bool paths;
-
 
     // //////////////////////
     // Member functions
@@ -41,7 +38,6 @@ struct QualityRequest {
         dihedralAngleThreshold = 0;
         aspectRatio = 0.5;
         hausdorffDistance = 0.5;
-        paths = true;
     }
 
     void normalize() {
