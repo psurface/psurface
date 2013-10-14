@@ -25,7 +25,7 @@ namespace psurface {
 template <class type, int dim> class Box;
 
 
-/** The parametrization of an arbitrary surface over a simple base grid 
+/** The parametrization of an arbitrary surface over a simple base grid
     \tparam dim Dimension of the surface
     \tparam ctype The type used for coordinates
 */
@@ -38,7 +38,7 @@ public:
     /** \brief An exception being thrown by code in this class */
     class ParamError {};
 
-    /** This little class encapsulates all data about surface patches 
+    /** This little class encapsulates all data about surface patches
      */
     class Patch {
     public:
@@ -70,7 +70,7 @@ public:
     virtual void getBoundingBox(Box<ctype,3>& bbox) const;
 
     /** \brief Sets up the internal data structures needed by the map() method.
-     * 
+     *
      * The map() method uses the Brown/Faigle algorithm for quick point location
      * in plane triangulations.  This algorithm requires the data structure for
      * the plane triangulation to comply with certain requirements.  In particular,
@@ -97,7 +97,7 @@ public:
     /// computes the number of true nodes
     int getNumTrueNodes();
 
-    /** \brief Cleans up the internal data structure.  
+    /** \brief Cleans up the internal data structure.
      *
      * It does the same as McSurfaceBase::garbageCollection() but it also
      * updates the paths.
@@ -170,7 +170,7 @@ public:
      * The routine evaluates the parametrization function embodied by the
      * PSurface class.  It takes a point \f$x\f$ on the domain grid (specified
      * by giving a triangle number and barycentric coordinates on that triangle)
-     * and returns the corresponding image point \f$\phi(x)\f$.  That image point is 
+     * and returns the corresponding image point \f$\phi(x)\f$.  That image point is
      * given via the three vertices of the triangle \f$t\f$ it's on and its position
      * on \f$t\f$ in barycentric coordinates.  This general way of returning \f$\phi(x)\f$
      * allows to correctly interpolate data given on the target surface.
@@ -179,23 +179,23 @@ public:
      *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      *
-     * \todo Make this routine GHOST_NODE-proof 
+     * \todo Make this routine GHOST_NODE-proof
      * \todo Document seed!
-     * 
+     *
      */
     bool map(int tri,                ///< The triangle of the input point \f$x\f$
             const StaticVector<ctype,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
             std::tr1::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
             StaticVector<ctype,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
-            int seed=-1                      
+            int seed=-1
             ) const;
 
 
     /** \brief Convenience function for accessing the position of points on the target surface.
      *
      * Given a point \f$x\f$ on the base grid, this routine returns the position
-     * of \f$\phi(x)\f$. 
-     * 
+     * of \f$\phi(x)\f$.
+     *
      * Internally, this routine calls map().  Thus, it is not faster than calling
      * map() and computing the position oneself.
      *
@@ -208,7 +208,7 @@ public:
      * Given a point \f$x\f$ on the base grid, this routine returns the normal
      * of the target surface at \f$\phi(x)\f$.  It returns the direct triangle
      * normal, i.e., the normals are constant on each target triangle.
-     * 
+     *
      * Internally, this routine calls map().  Thus, it is not faster than calling
      * map() and computing the normal oneself.
      *
@@ -224,7 +224,7 @@ public:
      * this routine returns the preimage nodes of the target triangle \f$T\f$ that
      * \f$t\f$ is part of.
      */
-    void getActualVertices(int tri,                     
+    void getActualVertices(int tri,
                            const std::tr1::array<NodeIdx, 3>& nds,
                            std::tr1::array<GlobalNodeIdx, 3>& vertices   ///< The result nodes are returned here
                            ) const;
@@ -298,7 +298,7 @@ protected:
     /// This is a service routine only for getTargetTrianglesPerNode
     void getTrianglesPerEdge(int from, int to, std::vector<int>& tris, int exception) const;
 
-    /** \brief Internal routine used by map() 
+    /** \brief Internal routine used by map()
      */
     void handleMapOnEdge(int tri, const StaticVector<ctype,2>& p, const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b,
                          int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const;
@@ -361,7 +361,7 @@ public:
             s << node.domainLocalPosition << ",   " << node.rangeLocalPosition << ",   "
               << ((node.isNodeOnVertex) ? "true" : "false") << "  "
               << ((node.isNodeOnTargetVertex) ? "true" : "false") << "  --  "
-              << "rangeSegments: " << node.rangeSegments[0] << "  " << node.rangeSegments[1] 
+              << "rangeSegments: " << node.rangeSegments[0] << "  " << node.rangeSegments[1]
               << " -- " << node.rightRangeSegment << std::endl;
             return s;
         }
@@ -371,7 +371,7 @@ public:
         ctype rangeLocalPosition;
 
         bool isNodeOnVertex;
-        
+
         bool isNodeOnTargetVertex;
 
         int rangeSegments[2];
@@ -391,11 +391,11 @@ public:
     /** \brief Convenience function for accessing the position of points on the target surface.
      *
      * Given a point \f$x\f$ on the base grid, this routine returns the position
-     * of \f$\phi(x)\f$. 
-     * 
+     * of \f$\phi(x)\f$.
+     *
      * \bug This method is a stub, and not actually implemented yet.  It will print an
      *    error message and abort.
-     * 
+     *
      * @return <tt>true</tt> if everything went correctly, <tt> false</tt> if not.
      */
     bool positionMap(int tri, StaticVector<ctype,1>& p, StaticVector<ctype,2>& result) const
@@ -405,7 +405,7 @@ public:
     }
 
 
-    
+
     std::vector<StaticVector<ctype, 2> > domainVertices;
 
     std::vector<DomainSegment> domainSegments;
