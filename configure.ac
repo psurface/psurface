@@ -7,47 +7,10 @@ AM_PROG_AR   # needed for some non-standard archivers
 LT_INIT
 AC_PROG_CXX
 
-# {{{ Check for amiramesh
-AC_ARG_WITH([amiramesh],
-    AS_HELP_STRING([--without-amiramesh], [Do not use libamiramesh]))
+AC_CONFIG_MACRO_DIR([m4])
 
-# $1: $with_amiramesh
-# $2: action if found
-# $3: action if not found
-AC_DEFUN([CHECK_FOR_AMIRAMESH],[
-        AC_LANG_PUSH([C++])
-        ac_save_CPPFLAGS="$CPPFLAGS"
-        ac_save_LDFLAGS="$LDFLAGS"
-        ac_save_LIBS="$LIBS"
-        LIBS="$LIBS -lamiramesh"
-        AS_IF([test "x$1" != x],[CPPFLAGS="$CPPFLAGS -DHX_HAS_STDIOSTREAM -I$1/include"; LDFLAGS="$LDFLAGS -L$1/lib"])
-        AC_CHECK_HEADER([amiramesh/AmiraMesh.h],
-                        [AC_LINK_IFELSE([
-                           AC_LANG_PROGRAM([[#include "amiramesh/AmiraMesh.h"]],
-                                           [[AmiraMesh* am = AmiraMesh::read("test");]]
-                                          )],
-                           [$2; AMIRA_DIR="$1"],
-                           $3
-                        )],
-                        $3)
-        CPPFLAGS="$ac_save_CPPFLAGS"
-        LDFLAGS="$ac_save_LDFLAGS"
-        LIBS="$ac_save_LIBS"
-        AC_LANG_POP([C++])
-])
+CHECK_FOR_AMIRAMESH
 
-AS_IF([test "x$with_amiramesh" != "xno"],
-      [CHECK_FOR_AMIRAMESH(["$with_amiramesh"], [have_amiramesh=yes], [have_amiramesh=no])],
-      [have_amiramesh=no])
-
-AS_IF([test "x$have_amiramesh" = "xyes"],
-      [CPPFLAGS="$CPPFLAGS -DHAVE_AMIRAMESH -DHX_HAS_STDIOSTREAM -I${AMIRA_DIR}/include";
-       LIBS="$LIBS -lamiramesh";
-       LDFLAGS="$LDFLAGS -L${AMIRA_DIR}/lib"],
-      [AS_IF([test "x$with_amiramesh" = "xyes"],
-             [AC_MSG_ERROR([libamiramesh requested but not found])
-      ])
-])
 # }}}
   AC_ARG_WITH(hdf5,
     [AC_HELP_STRING([--with-hdf5=PATH],[directory with HDF5 inside])],

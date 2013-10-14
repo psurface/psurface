@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 noinst_PROGRAMS =  psurface-convert
 
 include_psurface_HEADERS = \
@@ -73,11 +75,11 @@ libpsurface_la_SOURCES += Hdf5IO.cpp
 endif
 
 AM_CPPFLAGS= -I$(top_srcdir)/include/psurface -DPSURFACE_STANDALONE
-libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
-libpsurface_la_LIBADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)
-libpsurface_la_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
+libpsurface_la_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
+libpsurface_la_LIBADD = $(HDF5_LIBS) $(HDF5_LDFLAGS) $(AMIRAMESH_LIBS)
+libpsurface_la_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS) $(AMIRAMESH_LDFLAGS)
 
 psurface_convert_SOURCES =  psurface-convert.cpp
-psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
-psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS) libpsurface.la
-psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)
+psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
+psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LIBS) libpsurface.la
+psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LDFLAGS)
