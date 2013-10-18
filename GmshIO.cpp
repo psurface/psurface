@@ -151,43 +151,20 @@ using namespace psurface;
               par->iPos.push_back(coordsArray[i]);
       }
       ///insert triangles and the plane graph on them
-      int edgeCounter=0, edgePointCounter=0;
-      int nodeArrayIdx = 0;
-      for (int i=0; i< triArray.size(); i++){
-          std::tr1::array<unsigned int, 3> triangleVertices = {newNodeIndex[(triArray[i])[0] - 1], newNodeIndex[(triArray[i])[1] - 1], newNodeIndex[(triArray[i])[2] - 1]};
-          int newTriIdx = factory.insertSimplex(triangleVertices);
-          par->triangles(newTriIdx).patch = 0;
+      for (int i=0; i<triArray.size(); i++){
 
-          /// get the parametrization on this triangle
-          ///nodes
-          par->triangles(newTriIdx).nodes.resize(3);
-          int nodenumber;
-          // three corner nodes
-          StaticVector<ctype,2> domainPos(1, 0);
-          nodenumber =  0;
-          par->triangles(newTriIdx).nodes[0].setValue(domainPos, nodenumber, Node<ctype>::CORNER_NODE);
-          par->triangles(newTriIdx).nodes[0].makeCornerNode(0, nodenumber);
+          std::tr1::array<int, 3> vertexIdx;
 
-          domainPos = StaticVector<ctype,2>(0, 1);
-          nodenumber = 1;
-          par->triangles(newTriIdx).nodes[1].setValue(domainPos, nodenumber, Node<ctype>::CORNER_NODE);
-          par->triangles(newTriIdx).nodes[1].makeCornerNode(1, nodenumber);
+          for (int j=0; j<3; j++)
+              vertexIdx[j] = newNodeIndex[triArray[i][j]-1];
 
-          domainPos = StaticVector<ctype,2>(0, 0);
-          nodenumber = 2;
-          par->triangles(newTriIdx).nodes[2].setValue(domainPos, nodenumber, Node<ctype>::CORNER_NODE);
-          par->triangles(newTriIdx).nodes[2].makeCornerNode(2, nodenumber);
+          int newTriangle = par->createSpaceForTriangle(vertexIdx[0], vertexIdx[1], vertexIdx[2]);
 
-          /// the parameterEdges
-          for(int j = 0; j < 3; j++)
-              par->triangles(newTriIdx).addEdge(j, (j+1)%3);
+          par->triangles(newTriangle).makeOneTriangle(vertexIdx[0], vertexIdx[1], vertexIdx[2]);
 
-          /// the edgePoints arrays on each triangular edge
-          for (int j=0; j<3; j++){
-              par->triangles(newTriIdx).edgePoints[j].resize(2);
-              par->triangles(newTriIdx).edgePoints[j][0]     = j;
-              par->triangles(newTriIdx).edgePoints[j].back() = (j+1)%3;
-          }
+          par->triangles(newTriangle).patch = 0;
+
+          par->integrateTriangle(newTriangle);
       }
 
       par->hasUpToDatePointLocationStructure = false;
