@@ -104,7 +104,7 @@ using namespace psurface;
         triArray.push_back(elementDofs);
       }
 
-      //remove vetices which is not the corner of triangle
+      //remove vertices that are not corners of a triangle
       bool nodeInTri[number_of_nodes];
       int  newNodeIndex[number_of_nodes];
       for(int i = 0; i < number_of_nodes; i++) nodeInTri[i] = 0;
@@ -158,7 +158,7 @@ using namespace psurface;
           if(nodeInTri[i])
               par->iPos.push_back(coordsArray[i]);
       }
-      ///insert trianlges and the plain graph onto it.
+      ///insert triangles and the plane graph on them
       int edgeCounter=0, edgePointCounter=0;
       int nodeArrayIdx = 0;
       for (int i=0; i< triArray.size(); i++){
