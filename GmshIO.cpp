@@ -105,26 +105,20 @@ using namespace psurface;
       }
 
       //remove vertices that are not corners of a triangle
-      bool nodeInTri[number_of_nodes];
-      int  newNodeIndex[number_of_nodes];
-      for(int i = 0; i < number_of_nodes; i++) nodeInTri[i] = 0;
+      std::vector<bool> nodeInTri(number_of_nodes);
+      std::vector<int>  newNodeIndex(number_of_nodes);
+
+      std::fill(nodeInTri.begin(), nodeInTri.end(), false);
+
       for(int i = 0; i < triArray.size(); i++)
       {
-          nodeInTri[(triArray[i])[0] - 1] = 1;
-          nodeInTri[(triArray[i])[1] - 1] = 1;
-          nodeInTri[(triArray[i])[2] - 1] = 1;
+          nodeInTri[(triArray[i])[0] - 1] = true;
+          nodeInTri[(triArray[i])[1] - 1] = true;
+          nodeInTri[(triArray[i])[2] - 1] = true;
       }
       int newIndx = 0;
       for(int i = 0; i < number_of_nodes; i++)
-      {
-          if(!nodeInTri[i])
-              newNodeIndex[i] = -1;
-          else
-          {
-              newNodeIndex[i] = newIndx;
-              newIndx++;
-          }
-      }
+          newNodeIndex[i] = (nodeInTri[i]) ? newIndx++ : -1;
 
       //creat parace based on the base triangles
       PSurfaceFactory<2,ctype> factory(par);
