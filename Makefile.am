@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-noinst_PROGRAMS =  psurface-convert
+bin_PROGRAMS =  psurface-convert
 
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
