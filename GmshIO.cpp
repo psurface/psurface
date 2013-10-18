@@ -123,15 +123,10 @@ using namespace psurface;
       factory.setTargetSurface(surf);
 
       //patches
-      PSurface<2,float>::Patch Patch; //= new PSurface<2, ctype>::Patch;
-      Patch.innerRegion = 0;
-      Patch.outerRegion = 1;
-      Patch.boundaryId =  2;
-      par->patches.push_back(Patch);
-      Patch.innerRegion = 0;
-      Patch.outerRegion = 1;
-      Patch.boundaryId =  1;
-      par->patches.push_back(Patch);
+      PSurface<2,float>::Patch patch;
+      patch.innerRegion = 0;
+      patch.outerRegion = 1;
+      patch.boundaryId =  0;
 
       ///insert vertex
       int numVertices = 0;
