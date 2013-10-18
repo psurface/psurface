@@ -303,8 +303,10 @@ void PSurfaceFactory<dim,ctype>::addParTriangle(int tri, const std::tr1::array<i
 //   Explicitly instantiate 'float' and 'double' versions of this code
 // ///////////////////////////////////////////////////////////////////////
 
+namespace psurface {
 //template class PSurfaceFactory<1,float>;
 //template class PSurfaceFactory<1,double>;
 
-template class PSurfaceFactory<2,float>;
-template class PSurfaceFactory<2,double>;
+  template class PSurfaceFactory<2,float>;
+  template class PSurfaceFactory<2,double>;
+}

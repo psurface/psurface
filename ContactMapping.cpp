@@ -544,9 +544,10 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
 //   Explicitly instantiate 'float' and 'double' versions of this code
 // ///////////////////////////////////////////////////////////////////////
 
-template class ContactMapping<2,float>;
-template class ContactMapping<2,double>;
+namespace psurface {
+  template class ContactMapping<2,float>;
+  template class ContactMapping<2,double>;
 
-template class ContactMapping<3,float>;
-template class ContactMapping<3,double>;
-
+  template class ContactMapping<3,float>;
+  template class ContactMapping<3,double>;
+}

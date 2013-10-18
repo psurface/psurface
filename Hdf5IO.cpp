@@ -990,5 +990,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   }
 
 //   Explicit template instantiations.
-template class Hdf5IO<float,2>;
-
+namespace psurface {
+  template class Hdf5IO<float,2>;
+}

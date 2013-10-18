@@ -188,5 +188,6 @@ using namespace psurface;
   }
 
 //   Explicit template instantiations.
-template class GmshIO<float,2>;
-
+namespace psurface {
+  template class GmshIO<float,2>;
+}

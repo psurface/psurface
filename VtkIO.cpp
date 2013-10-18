@@ -314,5 +314,6 @@ using namespace psurface;
   }
 
 //   Explicit template instantiations.
-template class VTKIO<float,2>;
-
+namespace psurface {
+  template class VTKIO<float,2>;
+}

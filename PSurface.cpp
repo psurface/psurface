@@ -1084,5 +1084,7 @@ void PSurface<dim,ctype>::checkConsistency(const char* where) const
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PSURFACE_EXPORT PSurface<2,float>;
-template class PSURFACE_EXPORT PSurface<2,double>;
+namespace psurface {
+  template class PSURFACE_EXPORT PSurface<2,float>;
+  template class PSURFACE_EXPORT PSurface<2,double>;
+}

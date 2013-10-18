@@ -124,13 +124,15 @@ bool PlaneParam<ctype>::TriangleIterator::isCorrectlyOriented() const
 //   Explicit template instantiations.
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
+namespace psurface {
+  template class PSURFACE_EXPORT PlaneParam<float>::DirectedEdgeIterator;
+  template class PSURFACE_EXPORT PlaneParam<double>::DirectedEdgeIterator;
 
-template class PSURFACE_EXPORT PlaneParam<float>::DirectedEdgeIterator;
-template class PSURFACE_EXPORT PlaneParam<double>::DirectedEdgeIterator;
+  template class PSURFACE_EXPORT PlaneParam<float>::UndirectedEdgeIterator;
+  template class PSURFACE_EXPORT PlaneParam<double>::UndirectedEdgeIterator;
 
-template class PSURFACE_EXPORT PlaneParam<float>::UndirectedEdgeIterator;
-template class PSURFACE_EXPORT PlaneParam<double>::UndirectedEdgeIterator;
+  template class PSURFACE_EXPORT PlaneParam<float>::TriangleIterator;
+  template class PSURFACE_EXPORT PlaneParam<double>::TriangleIterator;
+}
 
-template class PSURFACE_EXPORT PlaneParam<float>::TriangleIterator;
-template class PSURFACE_EXPORT PlaneParam<double>::TriangleIterator;
 #endif

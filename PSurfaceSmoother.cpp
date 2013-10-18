@@ -405,4 +405,6 @@ void PSurfaceSmoother<ctype>::moveSubGraph(int startingNode, DomainPolygon& from
 #endif
 }
 
-template class PSurfaceSmoother<float>;
+namespace psurface {
+  template class PSurfaceSmoother<float>;
+}

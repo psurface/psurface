@@ -246,5 +246,7 @@ bool CircularPatch<ctype>::hasSelfintersections() const
 //   If you need more, you can add them here.
 // ////////////////////////////////////////////////////////
 
-template class PSURFACE_EXPORT CircularPatch<float>;
-template class PSURFACE_EXPORT CircularPatch<double>;
+namespace psurface {
+  template class PSURFACE_EXPORT CircularPatch<float>;
+  template class PSURFACE_EXPORT CircularPatch<double>;
+}
