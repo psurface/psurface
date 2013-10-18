@@ -200,7 +200,6 @@ using namespace psurface;
 
       par->hasUpToDatePointLocationStructure = false;
       par->setupOriginalSurface();
-      return;
   }
 
   template<class ctype,int dim>
