@@ -93,14 +93,12 @@ using namespace psurface;
             skipline(file);
             continue;
         }
-        std::string formatString = "%d";
-        for (int i= 1; i< 3; i++)
-          formatString += " %d";
-        formatString += "\n";
 
         StaticVector<int, 3> elementDofs(3);
 
-        readfile(file, 3, formatString.c_str(), &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]));
+        readfile(file, 3, "%d %d %d", &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]));
+        skipline(file);
+
         triArray.push_back(elementDofs);
       }
 
