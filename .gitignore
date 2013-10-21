@@ -29,6 +29,7 @@ libpsurface*.tar.gz
 
 # Executable files
 psurface-convert
+psurface-simplify
 
 # Tests
 test/gmshiotest

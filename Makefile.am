@@ -2,7 +2,7 @@ SUBDIRS = test
 
 ACLOCAL_AMFLAGS = -I m4
 
-bin_PROGRAMS =  psurface-convert
+bin_PROGRAMS = psurface-convert psurface-simplify
 
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
@@ -83,3 +83,8 @@ psurface_convert_SOURCES =  psurface-convert.cpp
 psurface_convert_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
 psurface_convert_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LIBS) libpsurface.la
 psurface_convert_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LDFLAGS)
+
+psurface_simplify_SOURCES =  psurface-simplify.cpp
+psurface_simplify_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
+psurface_simplify_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LIBS) libpsurface.la
+psurface_simplify_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LDFLAGS)
