@@ -73,13 +73,13 @@ public:
     }
 
     /** \brief Test whether box contains a given point */
-	bool contains(const std::tr1::array<C,dim>& c) const
-	{
-		for (int i = 0; i < dim; ++i)
-			if (c[i] < this->_lower[i] || c[i] >= this->_upper[i])
-				return false;
-		return true;
-	}
+    bool contains(const std::tr1::array<C,dim>& c) const
+    {
+        for (int i = 0; i < dim; ++i)
+            if (c[i] < this->_lower[i] || c[i] >= this->_upper[i])
+                return false;
+        return true;
+    }
 
 #ifndef PSURFACE_STANDALONE
     /** \brief Test whether box contains a given point */
@@ -92,13 +92,13 @@ public:
     }
 #endif
 
-	bool intersects(const Box& b)
-	{
-		for (int i = 0; i < dim; ++i)
-			if (this->_lower[i] >= b._upper[i] || b._lower[i] >= this->_upper[i])
-				return false;
-		return true;
-	}
+    bool intersects(const Box& b)
+    {
+        for (int i = 0; i < dim; ++i)
+            if (this->_lower[i] >= b._upper[i] || b._lower[i] >= this->_upper[i])
+                return false;
+        return true;
+    }
 
     /// Returns intersection of two boxes.
     Box<C,dim> intersectWith(const Box<C,dim> &other) const {
@@ -120,39 +120,39 @@ public:
         return innerBox;
     }
 
-	std::tr1::array<C,dim> center() const
-	{
+    std::tr1::array<C,dim> center() const
+    {
             std::tr1::array<C,dim> center;
             for (int i = 0; i < dim; ++i)
                 center[i] = 0.5*(_upper[i]+_lower[i]);
             return center;
-	}
+    }
 
 
-	double size(int i)
-	{
-		return _upper[i]-_lower[i];
-	}
+    double size(int i)
+    {
+        return _upper[i]-_lower[i];
+    }
 
         std::tr1::array<C,dim>& lower()
-	{
-		return _lower;
-	}
+    {
+        return _lower;
+    }
 
-	std::tr1::array<C,dim>& upper()
-	{
-		return _upper;
-	}
+    std::tr1::array<C,dim>& upper()
+    {
+        return _upper;
+    }
 
-	const std::tr1::array<C,dim>& lower() const
-	{
-		return _lower;
-	}
+    const std::tr1::array<C,dim>& lower() const
+    {
+        return _lower;
+    }
 
-	const std::tr1::array<C,dim>& upper() const
-	{
-		return _upper;
-	}
+    const std::tr1::array<C,dim>& upper() const
+    {
+        return _upper;
+    }
 
         /// Extends the box to contain given point.
     void extendBy(const std::tr1::array<C,dim>& point){
@@ -182,8 +182,8 @@ public:
 
 private:
 
-	std::tr1::array<C,dim> _lower;
-	std::tr1::array<C,dim> _upper;
+    std::tr1::array<C,dim> _lower;
+    std::tr1::array<C,dim> _upper;
 };
 
 } // namespace psurface

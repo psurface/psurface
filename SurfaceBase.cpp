@@ -39,12 +39,12 @@ void SurfaceBase<VertexType,EdgeType,TriangleType>::removeTriangle(int tri)
     // update all three neighboring edges
     for (i=0; i<3; i++){
 
-	int thisEdge = triangles(tri).edges[i];
-	if (thisEdge==-1)
-	    continue;
+    int thisEdge = triangles(tri).edges[i];
+    if (thisEdge==-1)
+        continue;
 
         if (edges(thisEdge).triangles.size() == 1){
-	    // remove this edge
+        // remove this edge
             removeEdge(thisEdge);
         }else {
             edges(thisEdge).removeReferenceTo(tri);
@@ -348,8 +348,8 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>:: intersectionTriangleEdge(in
         point if there is one. If not, the variable @c where is untouched. */
 template <class VertexType, class EdgeType, class TriangleType>
 bool SurfaceBase<VertexType,EdgeType,TriangleType>::intersectionTriangleEdge(int tri,
-									    const Edge *edge,
-									    StaticVector<ctype,3>& where,
+                                        const Edge *edge,
+                                        StaticVector<ctype,3>& where,
                                                                             bool& parallel, ctype eps) const
 {
 
@@ -460,7 +460,7 @@ bool SurfaceBase<VertexType,EdgeType,TriangleType>::pointInTriangle(const Static
 
 template <class VertexType, class EdgeType, class TriangleType>
 bool SurfaceBase<VertexType,EdgeType,TriangleType>::lineIntersection2D(const StaticVector<ctype,2> &p1, const StaticVector<ctype,2> &p2,
-								       const StaticVector<ctype,2> &p3, const StaticVector<ctype,2> &p4, ctype eps)
+                                       const StaticVector<ctype,2> &p3, const StaticVector<ctype,2> &p4, ctype eps)
 {
     const StaticVector<ctype,2> A = p2 - p1;
     const StaticVector<ctype,2> B = p3 - p4;

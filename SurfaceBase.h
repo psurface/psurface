@@ -216,9 +216,9 @@ public:
                                 const StaticVector<ctype,2>& a, 
                                 const StaticVector<ctype,2>& b, 
                                 const StaticVector<ctype,2>& c, ctype eps=0);
-				
+                
     static bool lineIntersection2D(const StaticVector<ctype,2> &p1, const StaticVector<ctype,2> &p2, const StaticVector<ctype,2> &p3, 
-				   const StaticVector<ctype,2> &p4, ctype eps=0);
+                   const StaticVector<ctype,2> &p4, ctype eps=0);
     //@}
 
 public:

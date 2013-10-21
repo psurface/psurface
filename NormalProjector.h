@@ -49,7 +49,7 @@ protected:
     void computeDiscreteTargetDirections(const Surface* targetSurface,
                                          const DirectionFunction<3,ctype>* direction,
                                          std::vector<StaticVector<ctype,3> >& normals);
-					 
+                     
     void setupEdgePointArrays();
 
     /** \brief Insert a target edge using the vertices stored the edgePath vector. */

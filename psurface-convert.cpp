@@ -41,11 +41,11 @@ using namespace psurface;
 int main(int argc, char **argv)
 {
     if (argc < 4) {
-	fprintf(stderr, "Usage: psurface_convert -i inputname -o outputname (-t type) \n");
-	fprintf(stderr, "Input file type could be amiramesh(*.am) , hdf5(*.h5) or gmsh(*.msh).\n");
-	fprintf(stderr, "Output file type could be amiramesh(*.am) , hdf5(*.h5) or vtu(*.vtu).\n");
-	fprintf(stderr, "type could be b(basegrid) or r(readable hdf5 file).\n -t b means that the output should only have base grid trianlge(This option is used when the output type is vtu type.\n -t r means that we get readable output hdf5 type data(This option is used when the output type is hdf5).\n");
-	exit(0);
+      fprintf(stderr, "Usage: psurface_convert -i inputname -o outputname (-t type) \n");
+      fprintf(stderr, "Input file type could be amiramesh(*.am) , hdf5(*.h5) or gmsh(*.msh).\n");
+      fprintf(stderr, "Output file type could be amiramesh(*.am) , hdf5(*.h5) or vtu(*.vtu).\n");
+      fprintf(stderr, "type could be b(basegrid) or r(readable hdf5 file).\n -t b means that the output should only have base grid trianlge(This option is used when the output type is vtu type.\n -t r means that we get readable output hdf5 type data(This option is used when the output type is hdf5).\n");
+      exit(0);
     }
 
     //use get opt to deal with the argv
