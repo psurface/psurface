@@ -142,13 +142,13 @@ template <class ctype>
 void DomainTriangle<ctype>::createPointLocationStructure()
 {
     //print(true, true, true);
-    checkConsistency("BeforeCreate");
+    checkConsistency("BeforeCreate (DomainTriangle)");
 
     for (int i=0; i<this->nodes.size(); i++)
         if (this->nodes[i].isINTERIOR_NODE())
             this->makeCyclicInteriorNode(this->nodes[i]);
 
-    checkConsistency("AfterInterior");
+    checkConsistency("AfterInterior (DomainTriangle)");
 
     for (int i=0; i<3; i++) {
 
@@ -168,7 +168,7 @@ void DomainTriangle<ctype>::createPointLocationStructure()
             }
         }
 
-        checkConsistency("AfterEdges");
+        checkConsistency("AfterEdges (DomainTriangle)");
 
     }
 

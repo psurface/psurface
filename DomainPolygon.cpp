@@ -1331,7 +1331,7 @@ void DomainPolygon::garbageCollection(std::vector<int>& offArr)
 
 void DomainPolygon::createPointLocationStructure()
 {
-    checkConsistency("BeforeCreate");
+    checkConsistency("BeforeCreate (DomainPolygon)");
 
     for (size_t i=0; i<nodes.size(); i++){
 
@@ -1340,19 +1340,19 @@ void DomainPolygon::createPointLocationStructure()
         }
     }
 
-    checkConsistency("AfterInterior");
+    checkConsistency("AfterInterior (DomainPolygon)");
 
     const int N = boundaryPoints.size();
 
     for (int i=0; i<N; i++) {
 
-        checkConsistency("Edge");
+        checkConsistency("Edge (DomainPolygon)");
 
         makeCyclicBoundaryNode(nodes[edgePoints[i][0]],
                                edgePoints[i][1],
                                edgePoints[(i+N-1)%N][edgePoints[(i+N-1)%N].size()-2]);
 
-        checkConsistency("AfterCorners");
+        checkConsistency("AfterCorners (DomainPolygon)");
 
         for (int j=1; j<edgePoints[i].size()-1; j++){
             makeCyclicBoundaryNode(nodes[edgePoints[i][j]], edgePoints[i][j+1], edgePoints[i][j-1]);
@@ -1363,7 +1363,7 @@ void DomainPolygon::createPointLocationStructure()
             }
         }
 
-        checkConsistency("AfterEdges");
+        checkConsistency("AfterEdges (DomainPolygon)");
 
     }
 

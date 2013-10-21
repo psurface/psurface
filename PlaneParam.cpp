@@ -696,7 +696,7 @@ void PlaneParam<ctype>::checkConsistency(const char* where) const
 
         if (std::isnan(cN.domainPos()[0]) || std::isnan(cN.domainPos()[1])) {
             printf(where);
-            printf("\n****** A node mit NaN domainPos found! ******\n");
+            printf("\n****** A node with NaN domainPos found! ******\n");
             cN.print();
             assert(false);
         }
