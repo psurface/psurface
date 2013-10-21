@@ -908,7 +908,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       int nodeArrayIdx = 0;
 
       for (i = 0; i< numTriangles; i++){
-          std::tr1::array<unsigned int, 3> triangleVertices = {baseGridTriArray[4*i + 1],baseGridTriArray[4*i + 2],baseGridTriArray[4*i + 3]};
+          std::tr1::array<unsigned int, 3> triangleVertices = {static_cast<unsigned int>(baseGridTriArray[4*i + 1]),
+                                                               static_cast<unsigned int>(baseGridTriArray[4*i + 2]),
+                                                               static_cast<unsigned int>(baseGridTriArray[4*i + 3])};
+
           int newTriIdx = factory.insertSimplex(triangleVertices);
           par->triangles(newTriIdx).patch = numNodesAndEdgesArray[11*i+4];
           /// get the parametrization on this triangle
