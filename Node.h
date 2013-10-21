@@ -12,11 +12,11 @@ namespace psurface {
 typedef int NodeIdx;
 
 
-/** \brief The parametrization of a single point from the plane into space 
+/** \brief The parametrization of a single point from the plane into space
  *
  * There are five different types of nodes:
  * <ul>
- * <li> <b> Interior Nodes: </b> This is the mapping from a point on the interior of a base 
+ * <li> <b> Interior Nodes: </b> This is the mapping from a point on the interior of a base
  *      grid triangle
  *      onto a vertex of the target surface.  Thus it exists once on the base grid, having
  *      unique barycentric coordinates on its triangle.  The target is specified using
@@ -29,7 +29,7 @@ typedef int NodeIdx;
  *      through an edge, then the intersection points are mapped onto target edge points.
  * <li> <b> Ghost Nodes: </b> Each base vertex that is not a Corner node, becomes a ghost node.
  * <li> <b> Boundary Nodes: </b> If an edge leaves the image of the projection, e.g. when the domain boundary ends,
- *          a boundary node is added at the leaving edge. These nodes store the target vertex index 
+ *          a boundary node is added at the leaving edge. These nodes store the target vertex index
  *          the edge is pointing to (which is not contained in PSurface) in the member "boundary".
  * </ul>
 
@@ -55,7 +55,7 @@ public:
          */
         NeighborReference() : idx(-1), closure(false) {}
 
-        
+
         NeighborReference(int _idx, bool _closure=false) {
             idx = _idx;
             closure = _closure;
@@ -94,27 +94,27 @@ public:
         int idx:31;
         bool closure:1;
     };
-        
-    enum NodeType {INTERIOR_NODE=0, 
-                   INTERSECTION_NODE=1, 
-                   CORNER_NODE=2, 
+
+    enum NodeType {INTERIOR_NODE=0,
+                   INTERSECTION_NODE=1,
+                   CORNER_NODE=2,
                    TOUCHING_NODE=3,
                    GHOST_NODE=4};
 
     ///
     Node() : valid(true), boundary(-1) {}
-        
+
     /** \brief  Construct node from the local coords, the index and the node type. */
     Node(const StaticVector<ctype,2> &domain, int number, NodeType nodeType) : valid(true), boundary(-1) {
         setDomainPos(domain);
         nodeNumber = number;
 
         type = nodeType;
-            
+
         clearNeighbors();
     }
 
-        
+
     /** \brief Destructor. */
     ~Node() {}
 
@@ -122,7 +122,7 @@ public:
     void setValue(const StaticVector<ctype,2> &domain, int nN, NodeType nodeType, int targetIndex = -1) {
         setDomainPos(domain);
         nodeNumber = nN;
-            
+
         type = nodeType;
         boundary = targetIndex;
     }
@@ -187,13 +187,13 @@ public:
         for (int i=0; i<degree(); i++)
             if (neighbors(i) == other)
                 return true;
-            
+
         return false;
     }
 
     /** \brief The number of neighbors */
     int degree() const {
-        return nbs.size(); 
+        return nbs.size();
     }
 
     /** \brief Remove all neighbors */
@@ -210,7 +210,7 @@ public:
     void appendNeighbor(const NeighborReference& newNeighbor){
         nbs.push_back(newNeighbor);
     }
-        
+
     /** \brief Remove the reference to the neighbor which has the index 'other' */
     void removeReferenceTo(int other){
         for (int i=0; i<degree(); i++)
@@ -219,7 +219,7 @@ public:
                 return;
             }
     }
-        
+
     /** \brief Replaces a reference (faster than remove + append). */
     bool replaceReferenceTo(int oldNeighbor, int newNeighbor){
         for (int i=0; i<degree(); i++)
@@ -255,7 +255,7 @@ public:
      */
     const NeighborReference& theInteriorNode() const {
         assert(isINTERSECTION_NODE());
-            
+
         for (int i=0; i<degree(); i++)
             if (!nbs[i].closure)
                 return nbs[i];
@@ -317,7 +317,7 @@ public:
         case 1: return 1-domainPos()[1];
         case 2: return domainPos()[0];
         }
-        
+
         assert(false);
     }
 
@@ -371,7 +371,7 @@ public:
     bool isGHOST_NODE()        const {return type==GHOST_NODE;}
 
     /** \brief Checks whether node is on a DomainTriangle edge.
-     * 
+     *
      * This method returns true if the node is of a type that is by
      * definition located on the edge of the supporting base grid
      * triangle.  <b> Warning: </b> It returns false for nodes
@@ -386,7 +386,7 @@ public:
      * belongs to the correct edge.
      */
     bool isOnEdge(unsigned int edge) const {
-        if (isOnCorner()) 
+        if (isOnCorner())
             return (getCorner()==edge || getCorner()==((edge+1)%3));
         else if (isOnEdge())
             return getDomainEdge()==edge;
@@ -401,7 +401,7 @@ public:
     void print(bool showNeighbors=true) const {
 
         printf("dom (%f %f) ", domainPos()[0], domainPos()[1]);
-        
+
         switch(type){
         case INTERIOR_NODE:
             printf("INTERIOR_NODE");
@@ -419,21 +419,21 @@ public:
             printf("GHOST_NODE");
             break;
         }
-        
+
         printf(" number %d", nodeNumber);
         printf(" is Boundary %d", boundary);
-        
+
         if (isOnEdge())
             std::cout << "  edge: " << getDomainEdge() << "  edgePos " << getDomainEdgePosition() << std::endl;
         else if (isOnCorner())
             printf("  corner: %d\n", getCorner());
         else
         printf("\n");
-        
+
         if (showNeighbors)
             for (int i=0; i<degree(); i++)
                 printf("   %d %s\n", (int)nbs[i], nbs[i].isRegular() ? " " : "c");
-        
+
     }
 
     /** \brief Get the barycentric coordinates of the node. */
@@ -455,7 +455,7 @@ public:
     //! Local barycentric coordinates of the node within the triangle.
     StaticVector<ctype,2> dP;
 
-public:    
+public:
     //!
     int valid:1;
 
@@ -471,16 +471,16 @@ public:
 public:
     //! Vector containing all nodes that are connected to this one.
     std::vector<NeighborReference> nbs;
-                
+
     ///////////////////////////////////////
     // This is only for nodes on the boundary of a base grid triangle
-                
+
 protected:
     //! If the node is on an edge, the index of the edge is stored
     unsigned int edge:8;
     //! Ordered position on that edge.(0 = 1.Corner, nEdgeNodes-1 = 2.Corner)
     unsigned int edgePosition:24;
-                
+
 };
 
 } // namespace psurface
