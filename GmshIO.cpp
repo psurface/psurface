@@ -177,9 +177,9 @@ using namespace psurface;
 
   template<class ctype,int dim>
   void psurface::GmshIO<ctype,dim>::readfile(FILE * file, int cnt, const char* format,
-                  void* t1, void* t2 = 0, void* t3 = 0, void* t4 = 0,
-                  void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,
-                  void* t9 = 0, void* t10 = 0)
+                                             void* t1, void* t2, void* t3, void* t4,
+                                             void* t5 , void* t6, void* t7, void* t8,
+                                             void* t9 , void* t10 )
   {
       off_t pos = ftello(file);
       int c = fscanf(file, format, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);

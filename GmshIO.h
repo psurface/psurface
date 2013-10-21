@@ -13,9 +13,9 @@ class GmshIO{
     PSurface<dim,ctype>* par;
     
     void    readfile(FILE * file, int cnt, const char* format,
-                  void* t1, void* t2, void* t3, void* t4,
-                  void* t5 , void* t6, void* , void* t8,
-                  void* t9 , void* t10 );
+		     void* t1, void* t2 = 0, void* t3 = 0, void* t4 = 0,
+		     void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,
+		     void* t9 = 0, void* t10 = 0);
     void    skipline(FILE * file);
     
     public:
