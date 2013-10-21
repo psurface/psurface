@@ -2,7 +2,8 @@
 # $Id$
 
 # Magic variable: all programs in TESTS are run when 'make check' is called.
-TESTS = gmshiotest
+TESTS = gmshiotest \
+        simplifytest
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -10,3 +11,4 @@ check_PROGRAMS = $(TESTS)
 # define the programs (in alphabetical order)
 gmshiotest_SOURCES = gmshiotest.cpp
 
+simplifytest_SOURCES = simplifytest.cpp

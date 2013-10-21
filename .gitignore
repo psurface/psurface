@@ -32,4 +32,5 @@ psurface-convert
 
 # Tests
 test/gmshiotest
+test/simplifytest
 
