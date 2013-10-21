@@ -462,7 +462,14 @@ public:
     //! Type of the node
     NodeType type:3;
 
-    //! Index of target vertex
+    /** \brief Index of target vertex or triangle
+     *
+     * This number has one of two meanings, depending on what type the node is.
+     * If it is a GHOST_NODE, then the number is the index of the triangle the node
+     * maps to.  In all other case, the is a unique vertex on the target surface
+     * corresponding to this node, and the nodeNumber field gives the index
+     * of that vertex.
+     */
     unsigned int nodeNumber:28;
 
     //! This value is set to the target vertex index for boundary nodes and -1 else
