@@ -280,69 +280,6 @@ void PSurface<dim,ctype>::createPointLocationStructure()
     hasUpToDatePointLocationStructure = true;
 }
 
-    /// \todo The copying could be sped up considerably...
-template <int dim, class ctype>
-void PSurface<dim,ctype>::garbageCollection()
-{
-    int i, j;
-#ifndef NDEBUG
-    printf("This is the Parametrization garbage collection...\n");
-    std::cout << this->freeVertexStack.size() << " vertices, "
-              << this->freeEdgeStack.size()   << " edges, "
-              << this->freeTriangleStack.size() << " triangles removed" << std::endl;
-#endif
-
-    std::vector<bool> isInvalid;
-
-    // clean up vertices
-    if (this->freeVertexStack.size()) {
-
-        int offset = 0;
-
-        std::vector<int> vertexOffsets(this->vertexArray.size());
-        isInvalid.resize(this->vertexArray.size());
-        for (i=0; i<isInvalid.size(); i++)
-            isInvalid[i] = false;
-
-        for (i=0; i<this->freeVertexStack.size(); i++)
-            isInvalid[this->freeVertexStack[i]] = true;
-
-        for (i=0; i<this->vertexArray.size(); i++){
-            vertexOffsets[i] = offset;
-
-            if (isInvalid[i])
-                offset++;
-        }
-
-        ////////////////////
-        for (i=0; i<vertexOffsets.size(); i++)
-            this->vertexArray[i-vertexOffsets[i]] = this->vertexArray[i];
-
-        this->vertexArray.resize(this->vertexArray.size()-offset);
-
-        // Adjust edges
-        for (i=0; i<this->edgeArray.size(); i++) {
-            this->edgeArray[i].from -= vertexOffsets[this->edgeArray[i].from];
-            this->edgeArray[i].to   -= vertexOffsets[this->edgeArray[i].to];
-        }
-
-        // Adjust triangles
-        for (i=0; i<this->triangleArray.size(); i++)
-            for (j=0; j<3; j++)
-                this->triangleArray[i].vertices[j] -= vertexOffsets[this->triangleArray[i].vertices[j]];
-
-        this->freeVertexStack.clear();
-
-    }
-
-    SurfaceBase<Vertex<ctype>, Edge, DomainTriangle<ctype> >::garbageCollection();
-
-#ifndef NDEBUG
-        printf("   ...Garbage collection finished!\n");
-#endif
-}
-
-
 
 template <int dim, class ctype>
 void PSurface<dim,ctype>::setupOriginalSurface()

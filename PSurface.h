@@ -96,14 +96,6 @@ public:
     /// computes the number of true nodes
     int getNumTrueNodes();
 
-    /** \brief Cleans up the internal data structure.
-     *
-     * It does the same as McSurfaceBase::garbageCollection() but it also
-     * updates the paths.
-     */
-    void garbageCollection();
-
-
     /** \brief Creates an explicit Surface object from the information implicitly
      * given by the parametrization.
      */
