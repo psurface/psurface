@@ -161,6 +161,8 @@
   {
     VTK::FileType fileType = VTK::unstructuredGrid;
 
+    ///output vtu type
+    VTK::OutputType outputtype = VTK::ascii;
     VTK::VTUWriter writer(s, outputtype,fileType);//Most inportant structure used here
 
     if(basegrid)

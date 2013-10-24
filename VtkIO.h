@@ -38,8 +38,6 @@ class VTKIO{
     int ncells;
     /// Total number of points
     int nvertices;
-    ///output vtu type
-    const VTK::OutputType outputtype = VTK::ascii;
 
     public:
     VTKIO(PSurface<dim,ctype>* psurface);
