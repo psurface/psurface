@@ -10,7 +10,7 @@
 #include "PSurface.h"
 #include "PSurfaceFactory.h"
 #include "VtkIO.h"
-
+#include "vtuwriter.hh"
 
 
   template<class ctype,int dim>

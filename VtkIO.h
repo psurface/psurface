@@ -4,9 +4,13 @@
 #include <vector>
 #include <string>
 
-#include "vtuwriter.hh"
-
 namespace psurface{
+
+// Forward declaration
+namespace VTK {
+  class VTUWriter;
+}
+
 template<class ctype,int dim>
 class VTKIO{
     private:
