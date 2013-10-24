@@ -12,7 +12,6 @@
 #include "VtkIO.h"
 
 
-using namespace psurface;
 
   template<class ctype,int dim>
   psurface::VTKIO<ctype,dim>::VTKIO(PSurface<dim,ctype>* psurface)
