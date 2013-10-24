@@ -47,6 +47,7 @@ class VTKIO{
     ///write the parametrization into vtu file
     void createVTU(std::string filename, bool basegrid);
 
+private:
     ///write data file to stream
     void writeDataFile(std::ostream& s, bool basegrid);
 
