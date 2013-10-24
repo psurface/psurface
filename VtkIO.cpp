@@ -105,8 +105,9 @@
     else
       writer.beginMain(numTriangles + numParamEdges, numVertices + numNodes);
 
-    //PointData
-    writeNodeTypes(writer,basegrid);
+    // Write nodes types, if we are including the mapping graph
+    if (!basegrid)
+        writeNodeTypes(writer);
     // Points
     writeGridPoints(writer,basegrid);
     // Cells
@@ -116,24 +117,20 @@
   }
 
   template<class ctype,int dim>
-  void psurface::VTKIO<ctype,dim>::writeNodeTypes(VTK::VTUWriter& writer, bool basegrid)
+  void psurface::VTKIO<ctype,dim>::writeNodeTypes(VTK::VTUWriter& writer)
   {
       std::string scalars = "nodetype";
       std::string vectors= "";
-      int numpoints;
-      if(basegrid)
-          numpoints = numVertices;
-      else
-          numpoints = nvertices;
+      int numpoints = nvertices;
 
       writer.beginPointData(scalars, vectors);
 
       {
             std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
             (writer.makeArrayWriter<ctype>(scalars, 1, numpoints));
-            for( int i = 0; i < numpoints;i++)
+            for (int i = 0; i < numpoints;i++)
                 p->write(nodeType[i]);
-      }
+      } // p needs to go out of scope before we call endPointData()
 
       writer.endPointData();
   }
