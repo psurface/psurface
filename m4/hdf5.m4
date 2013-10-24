@@ -35,6 +35,7 @@
 AC_DEFUN([CHECK_FOR_HDF5],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([AC_PATH_XTRA])
+  AC_REQUIRE([DUNE_MPI])
 
   AC_ARG_WITH(hdf5,
     [AC_HELP_STRING([--with-hdf5=PATH],[directory with HDF5 inside])],
