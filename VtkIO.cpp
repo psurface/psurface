@@ -62,7 +62,6 @@
     ncells = numTriangles + numParamEdges;
     nvertices = numVertices + numNodes;
     /////////////////////////////////////////////////////////////////////
-    StaticVector<ctype,3> imagepos;
 
     //plane graph on each base grid triangle, saved as a list of nodes and a list of edges.
     int arrayIdx           = 0;
