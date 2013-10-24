@@ -67,7 +67,6 @@
     int arrayIdx           = 0;
     int edgeArrayIdx       = 0;
     int edgePointsArrayIdx = 0;
-    ctype cCoords[3][3];
 
     nodeType.resize(numVertices + numNodes);
     nodePositions.resize(numNodes);
@@ -79,9 +78,11 @@
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
         std::vector<int> newIdx(cT.nodes.size());
+
+        // Copy triangle vertex coordinates, for easier-to-write access
+        StaticVector<ctype,3> cCoords[3];
         for(j = 0; j < 3; j++)
-          for(k = 0; k < 3; k++)
-            cCoords[j][k] = par->vertices(par->triangles(i).vertices[j])[k];
+            cCoords[j] = par->vertices(par->triangles(i).vertices[j]);
 
         // the cornerNode are not saved, because everything about them
         // can be deduced from the base grid
