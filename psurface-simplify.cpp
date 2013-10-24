@@ -191,7 +191,7 @@ int main(int argc, char **argv) try {
   case VTU:
     {
       auto_ptr<VTKIO<float,2> > pn(new VTKIO<float,2>(par.get()));
-      pn->creatVTU(output.c_str(), base);
+      pn->createVTU(output.c_str(), base);
     }
     break;
 

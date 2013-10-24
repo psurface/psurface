@@ -144,14 +144,14 @@ using namespace psurface;
 
   //write the psurface into vtu file
   template<class ctype,int dim>
-  void psurface::VTKIO<ctype,dim>::creatVTU(const char* filename, bool basegrid)
+  void psurface::VTKIO<ctype,dim>::createVTU(std::string filename, bool basegrid)
   {
     std::ofstream file;
-    file.open(filename);
-    if (! file.is_open()) printf("%s does not exits!\n", filename);
+    file.open(filename.c_str());
+    if (! file.is_open())
+      std::cout << filename << "does not exists!" << std::endl;
     writeDataFile(file, basegrid);
     file.close();
-    return;
   }
 
   //write data file to stream

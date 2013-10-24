@@ -186,7 +186,7 @@ int main(int argc, char **argv)
     case VTU:
       {
         VTKIO<float,2>* pn = new VTKIO<float,2>(par);
-        pn->creatVTU(output,basegrid);
+        pn->createVTU(output,basegrid);
       }
       break;
 
