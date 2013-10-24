@@ -18,7 +18,7 @@
   {
     par = psurface;
     //interate over element
-    int i,j,k;
+
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
 
@@ -27,7 +27,7 @@
     numEdgePoints = 0;
 
     numNodesAndEdgesArray.resize(11*numTriangles);
-    for (i=0; i<numTriangles; i++) {
+    for (int i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
         int numIntersectionNodes;
@@ -72,22 +72,22 @@
     nodeType.resize(numVertices + numNodes);
     nodePositions.resize(numNodes);
     parameterEdgeArray.resize(numParamEdges);
-    for(i = 0; i < numVertices; i++)
+    for (int i = 0; i < numVertices; i++)
         nodeType[i] = Node<ctype>::CORNER_NODE;
 
-    for (i=0; i<numTriangles; i++) {
+    for (int i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
         std::vector<int> newIdx(cT.nodes.size());
 
         // Copy triangle vertex coordinates, for easier-to-write access
         StaticVector<ctype,3> cCoords[3];
-        for(j = 0; j < 3; j++)
+        for(int j = 0; j < 3; j++)
             cCoords[j] = par->vertices(par->triangles(i).vertices[j]);
 
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
             if (cT.nodes[cN].isCORNER_NODE()){
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
@@ -99,7 +99,7 @@
 
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
             if (cT.nodes[cN].isINTERSECTION_NODE()){
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
@@ -111,7 +111,7 @@
 
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
             if (cT.nodes[cN].isTOUCHING_NODE()){
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
@@ -123,7 +123,7 @@
 
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
             if (cT.nodes[cN].isINTERIOR_NODE()){
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
