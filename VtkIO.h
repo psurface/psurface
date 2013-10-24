@@ -22,8 +22,6 @@ class VTKIO{
     /// Parameter Edge endpoints in global index
     std::vector<StaticVector<int,2> > parameterEdgeArray;
 
-    ///Node and Edge information on each triangle
-    std::vector<int>  numNodesAndEdgesArray;
     ///Node type
     std::vector<typename Node<ctype>::NodeType>  nodeType;
 

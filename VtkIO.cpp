@@ -26,7 +26,6 @@
     numParamEdges = 0;
     numEdgePoints = 0;
 
-    numNodesAndEdgesArray.resize(11*numTriangles);
     for (int i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
@@ -36,19 +35,6 @@
 
         cT.countNodes(numIntersectionNodes, numTouchingNodes, numInteriorNodes);
         int numEdges = cT.getNumRegularEdges();
-        numNodesAndEdgesArray[11*i+0] = numIntersectionNodes;
-        numNodesAndEdgesArray[11*i+1] = numTouchingNodes;
-        numNodesAndEdgesArray[11*i+2] = numInteriorNodes;
-        numNodesAndEdgesArray[11*i+3] = numEdges;
-        numNodesAndEdgesArray[11*i+4] = cT.patch;
-
-        numNodesAndEdgesArray[11*i+5] = cT.edgePoints[0].size()-2;
-        numNodesAndEdgesArray[11*i+6] = cT.edgePoints[1].size()-2;
-        numNodesAndEdgesArray[11*i+7] = cT.edgePoints[2].size()-2;
-
-        numNodesAndEdgesArray[11*i+8] = cT.nodes[cT.cornerNode(0)].getNodeNumber();
-        numNodesAndEdgesArray[11*i+9] = cT.nodes[cT.cornerNode(1)].getNodeNumber();
-        numNodesAndEdgesArray[11*i+10] = cT.nodes[cT.cornerNode(2)].getNodeNumber();
 
         numNodes += numIntersectionNodes;
         numNodes += numTouchingNodes;
