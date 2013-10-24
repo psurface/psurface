@@ -33,8 +33,6 @@ class VTKIO{
     int numNodes;
     /// Number of ParamEdge
     int numParamEdges;
-    /// Number of total Edge Points
-    int numEdgePoints;
 
     /// Total number of cells
     int ncells;
