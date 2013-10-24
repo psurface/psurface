@@ -72,7 +72,8 @@
     nodeType.resize(numVertices + numNodes);
     nodePositions.resize(numNodes);
     parameterEdgeArray.resize(numParamEdges);
-    for(i = 0; i < numVertices; i++) nodeType[i] = Node<ctype>::CORNER_NODE;
+    for(i = 0; i < numVertices; i++)
+        nodeType[i] = Node<ctype>::CORNER_NODE;
 
     for (i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
@@ -88,7 +89,8 @@
         // explicitly saving the type for each node.
         for(size_t cN = 0; cN < 3; cN++)
         {
-            if(!cT.nodes[cN].isCORNER_NODE())printf("error in the corner node indx!\n");
+            if(!cT.nodes[cN].isCORNER_NODE())
+                printf("error in the corner node index!\n");
             newIdx[cN] = par->triangles(i).vertices[cN] - numVertices;
         }
         int localArrayIdx = 3;
