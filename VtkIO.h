@@ -21,7 +21,7 @@ class VTKIO{
     ///Node and Edge information on each triangle
     std::vector<int>  numNodesAndEdgesArray;
     ///Node type
-    std::vector<int>  nodeType;
+    std::vector<typename Node<ctype>::NodeType>  nodeType;
 
     /// Number of triangle vertices
     int numVertices;
