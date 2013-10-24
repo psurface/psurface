@@ -22,6 +22,8 @@ using namespace psurface;
   void psurface::GmshIO<ctype,dim>::readGmsh(Surface* surf, const std::string&  filename)
   {
       FILE* file = fopen(filename.c_str(),"r");
+      if (not file)
+          throw(std::runtime_error("Could open file '" + filename + "' for reading!"));
       int number_of_real_vertices = 0;
       int element_count = 0;
 
