@@ -53,6 +53,7 @@
         numNodes += numIntersectionNodes;
         numNodes += numTouchingNodes;
         numNodes += numInteriorNodes;
+        numNodes += 3;  // we assume that there are three corner nodes
 
         numEdgePoints += cT.edgePoints[0].size() + cT.edgePoints[1].size() + cT.edgePoints[2].size() - 6;
 
@@ -84,17 +85,18 @@
         for(j = 0; j < 3; j++)
             cCoords[j] = par->vertices(par->triangles(i).vertices[j]);
 
-        // the cornerNode are not saved, because everything about them
-        // can be deduced from the base grid
-        // the three remaining types are saved separately, in order to avoid
-        // explicitly saving the type for each node.
-        for(size_t cN = 0; cN < 3; cN++)
-        {
-            if(!cT.nodes[cN].isCORNER_NODE())
-                printf("error in the corner node index!\n");
-            newIdx[cN] = par->triangles(i).vertices[cN] - numVertices;
+        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
+            if (cT.nodes[cN].isCORNER_NODE()){
+                for(k = 0; k < 3; k++)
+                (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
+                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
+                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
+                nodeType[arrayIdx+ numVertices] = Node<ctype>::CORNER_NODE;
+                newIdx[cN] = arrayIdx;
+                arrayIdx++;
+            }
         }
-        int localArrayIdx = 3;
+
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
             if (cT.nodes[cN].isINTERSECTION_NODE()){
                 for(k = 0; k < 3; k++)
