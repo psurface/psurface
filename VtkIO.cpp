@@ -105,19 +105,14 @@
     else
       writer.beginMain(numTriangles + numParamEdges, numVertices + numNodes);
 
-    writeAllData(writer, basegrid);
-    writer.endMain();
-  }
-
-  //write the data section in vtu
-  template<class ctype,int dim>
-  void psurface::VTKIO<ctype,dim>::writeAllData(VTK::VTUWriter& writer, bool basegrid) {
     //PointData
     writePointData(writer,basegrid);
     // Points
     writeGridPoints(writer,basegrid);
     // Cells
     writeGridCells(writer,basegrid);
+
+    writer.endMain();
   }
 
   // write point data

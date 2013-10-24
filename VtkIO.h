@@ -49,9 +49,6 @@ private:
     ///write data file to stream
     void writeDataFile(std::ostream& s, bool basegrid);
 
-    ///write the data section in vtu
-    void writeAllData(VTK::VTUWriter& writer, bool basegrid);
-
     /// write point data
     void writePointData(VTK::VTUWriter& writer, bool basegrid);
 
