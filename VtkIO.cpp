@@ -106,7 +106,7 @@
       writer.beginMain(numTriangles + numParamEdges, numVertices + numNodes);
 
     //PointData
-    writePointData(writer,basegrid);
+    writeNodeTypes(writer,basegrid);
     // Points
     writeGridPoints(writer,basegrid);
     // Cells
@@ -115,9 +115,8 @@
     writer.endMain();
   }
 
-  // write point data
   template<class ctype,int dim>
-  void psurface::VTKIO<ctype,dim>::writePointData(VTK::VTUWriter& writer, bool basegrid)
+  void psurface::VTKIO<ctype,dim>::writeNodeTypes(VTK::VTUWriter& writer, bool basegrid)
   {
       std::string scalars = "nodetype";
       std::string vectors= "";

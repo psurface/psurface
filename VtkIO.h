@@ -50,7 +50,7 @@ private:
     void writeDataFile(std::ostream& s, bool basegrid);
 
     /// write point data
-    void writePointData(VTK::VTUWriter& writer, bool basegrid);
+    void writeNodeTypes(VTK::VTUWriter& writer, bool basegrid);
 
     /// write the positions of vertices
     void writeGridPoints(VTK::VTUWriter& writer, bool basegrid);
