@@ -150,7 +150,7 @@
     std::ofstream file;
     file.open(filename.c_str());
     if (! file.is_open())
-      std::cout << filename << "does not exists!" << std::endl;
+      std::cout << filename << "does not exist!" << std::endl;
     writeDataFile(file, basegrid);
     file.close();
   }
