@@ -24,7 +24,6 @@
 
     numNodes      = 0;
     numParamEdges = 0;
-    numEdgePoints = 0;
 
     for (int i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
@@ -41,8 +40,6 @@
         numNodes += numInteriorNodes;
         numNodes += 3;  // we assume that there are three corner nodes
 
-        numEdgePoints += cT.edgePoints[0].size() + cT.edgePoints[1].size() + cT.edgePoints[2].size() - 6;
-
         numParamEdges += numEdges;
     }
 
@@ -53,7 +50,6 @@
     //plane graph on each base grid triangle, saved as a list of nodes and a list of edges.
     int arrayIdx           = 0;
     int edgeArrayIdx       = 0;
-    int edgePointsArrayIdx = 0;
 
     nodeType.resize(numVertices + numNodes);
     nodePositions.resize(numNodes);
@@ -196,17 +192,7 @@
   template<class ctype,int dim>
   void psurface::VTKIO<ctype,dim>::writeGridCells(VTK::VTUWriter& writer, bool basegrid)
   {
-      int numconn, num_cell;
-      if(basegrid)
-      {
-          num_cell = numTriangles;
-          numconn =  3*numTriangles;
-      }
-      else
-      {
-          num_cell = ncells;
-          numconn =  3*numTriangles +2*numParamEdges;
-      }
+      int num_cell = (basegrid) ? numTriangles : ncells;
 
       writer.beginCells();
       // connectivity
@@ -221,7 +207,7 @@
 
               if(!basegrid)
               {
-                  for( int i = 0; i <  parameterEdgeArray.size(); i++)
+                  for (size_t i = 0; i <  parameterEdgeArray.size(); i++)
                       for(int l = 0; l < 2; l++)
                           p1->write((parameterEdgeArray[i])[l]);
               }
@@ -241,7 +227,7 @@
               }
               if(!basegrid)
               {
-                  for(int i = 0; i < parameterEdgeArray.size(); i++)
+                  for (size_t i = 0; i < parameterEdgeArray.size(); i++)
                   {
                       offset += 2;
                       p2->write(offset);
@@ -260,7 +246,7 @@
               p3->write(5); //vtktype of triangle
               if(!basegrid)
               {
-                  for(int i = 0; i < parameterEdgeArray.size(); i++)
+                  for (size_t i = 0; i < parameterEdgeArray.size(); i++)
                       p3->write(3);//vtktype of edges
               }
           }
