@@ -167,6 +167,7 @@ int main(int argc, char **argv) try {
   //req.paths = false;
 
   ParamToolBox::removeRegularPoint(par.get(), index, req, NULL); //&edgebox);
+  par->garbageCollection();
 
   cout << "Node removed." << endl;
 
