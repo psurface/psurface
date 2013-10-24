@@ -17,7 +17,6 @@
 #endif
 
 #include "AmiraMeshIO.h"
-#include "psurfaceAPI.h"
 #include "PSurface.h"
 #include "Hdf5IO.h"
 #include "GmshIO.h"
@@ -144,7 +143,7 @@ int main(int argc, char **argv)
       {
 #if HAVE_AMIRAMESH
         AmiraMesh* am = AmiraMesh::read(input);
-        PSURFACE_API AmiraMeshIO<float> amIO;
+        AmiraMeshIO<float> amIO;
         if( !amIO.initFromAmiraMesh(par,am,input, surf))
         {
           printf("unable to initiate psurface from amira mesh file!\n");
