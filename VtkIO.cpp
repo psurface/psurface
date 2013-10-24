@@ -17,7 +17,6 @@
   psurface::VTKIO<ctype,dim>::VTKIO(PSurface<dim,ctype>* psurface)
   {
     par = psurface;
-    //interate over element
 
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
@@ -26,21 +25,8 @@
     numParamEdges = 0;
 
     for (int i=0; i<numTriangles; i++) {
-        const DomainTriangle<ctype>& cT = par->triangles(i);
-
-        int numIntersectionNodes;
-        int numTouchingNodes;
-        int numInteriorNodes;
-
-        cT.countNodes(numIntersectionNodes, numTouchingNodes, numInteriorNodes);
-        int numEdges = cT.getNumRegularEdges();
-
-        numNodes += numIntersectionNodes;
-        numNodes += numTouchingNodes;
-        numNodes += numInteriorNodes;
-        numNodes += 3;  // we assume that there are three corner nodes
-
-        numParamEdges += numEdges;
+        numNodes      += par->triangles(i).nodes.size();
+        numParamEdges += par->triangles(i).getNumRegularEdges();
     }
 
     ncells = numTriangles + numParamEdges;
