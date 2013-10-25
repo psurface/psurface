@@ -1,6 +1,6 @@
 #ifndef GMSHIO_H
 #define GMSHIO_H
-#include <vector>
+
 #include <string>
 
 namespace psurface{
