@@ -12,7 +12,7 @@ class GmshIO{
              void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,
              void* t9 = 0, void* t10 = 0);
     static void    skipline(FILE * file);
-    
+
     public:
     /// Reads the parametrization of psurface from Gmsh object
     static PSurface<dim, ctype>* readGmsh(const std::string& filename);
