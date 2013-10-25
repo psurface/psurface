@@ -3,8 +3,6 @@
 #include <vector>
 #include <string>
 
-#include "psurfaceAPI.h"
-
 namespace psurface{
 
 template<class ctype,int dim>
