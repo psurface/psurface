@@ -14,11 +14,9 @@
 #include "hxsurface/Surface.h"
 #endif
 
-using namespace psurface;
-
   //read psurface_convert from Gmsh file
   template<class ctype,int dim>
-  PSurface<dim, ctype>* psurface::GmshIO<ctype,dim>::readGmsh(const std::string& filename)
+  psurface::PSurface<dim, ctype>* psurface::GmshIO<ctype,dim>::readGmsh(const std::string& filename)
   {
       PSurface<dim, ctype>* par = new PSurface<dim, ctype>;
       par->surface = new Surface;
