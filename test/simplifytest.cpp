@@ -36,10 +36,6 @@ int main(int argc, char* argv[])
   input[0] = "tricube-anticlockwise.msh";
   input[1] = "tricube-clockwise.msh";
 
-  // Create new PSurface.
-  auto_ptr<PSurface<2,float> > par(new PSurface<2,float>);
-  par->surface = new Surface;
-
   // Read in a mesh, remove a node and check for consistency.
   try {
     for (StringVector::const_iterator it = input.begin(); it != input.end(); ++it) {
@@ -50,8 +46,7 @@ int main(int argc, char* argv[])
       // Remove the first eight nodes individually.
       for (size_t index = 0; index < 8; ++index) {
         // Read mesh.
-        auto_ptr<GmshIO<float,2> > pIn(new GmshIO<float,2>(par.get()));
-        pIn->readGmsh(par->surface, filename);
+        auto_ptr<PSurface<2,float> > par(GmshIO<float,2>::readGmsh(filename));
 
         // Remove node.
         cout << "   Removing node " << index << "." << endl;

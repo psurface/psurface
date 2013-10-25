@@ -8,19 +8,21 @@
 #include "GmshIO.h"
 
 
-using namespace psurface;
-  //initialize PsurfaceConvert from the psurface object
-  template<class ctype,int dim>
-  psurface::GmshIO<ctype,dim>::GmshIO(PSurface<dim,ctype>* psurface)
-  {
-    par = psurface;
-  }
+#ifdef PSURFACE_STANDALONE
+#include "TargetSurface.h"
+#else
+#include "hxsurface/Surface.h"
+#endif
 
+using namespace psurface;
 
   //read psurface_convert from Gmsh file
   template<class ctype,int dim>
-  void psurface::GmshIO<ctype,dim>::readGmsh(Surface* surf, const std::string&  filename)
+  PSurface<dim, ctype>* psurface::GmshIO<ctype,dim>::readGmsh(const std::string& filename)
   {
+      PSurface<dim, ctype>* par = new PSurface<dim, ctype>;
+      par->surface = new Surface;
+
       FILE* file = fopen(filename.c_str(),"r");
       if (not file)
           throw(std::runtime_error("Could open file '" + filename + "' for reading!"));
@@ -122,7 +124,7 @@ using namespace psurface;
 
       //creat parace based on the base triangles
       PSurfaceFactory<2,ctype> factory(par);
-      factory.setTargetSurface(surf);
+      factory.setTargetSurface(par->surface);
 
       //patches
       PSurface<2,float>::Patch patch;
@@ -166,6 +168,8 @@ using namespace psurface;
 
       par->hasUpToDatePointLocationStructure = false;
       par->setupOriginalSurface();
+
+      return par;
   }
 
   template<class ctype,int dim>

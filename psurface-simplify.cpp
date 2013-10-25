@@ -134,8 +134,7 @@ int main(int argc, char **argv) try {
 
   case GMSH:
     {
-      auto_ptr<GmshIO<float,2> > pconvert(new GmshIO<float,2>(par.get()));
-      pconvert->readGmsh(surf.get(), input);
+      par = auto_ptr<PSurface<2, float> >(GmshIO<float,2>::readGmsh(input));
     }
     break;
 

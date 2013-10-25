@@ -134,8 +134,7 @@ int main(int argc, char **argv)
 
     case GMSH:
       {
-        GmshIO<float,2>* pconvert = new GmshIO<float,2>(par);
-        pconvert->readGmsh(surf, input);
+        par = GmshIO<float,2>::readGmsh(input);
       }
       break;
 

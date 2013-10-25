@@ -31,22 +31,18 @@ int main(int argc, char* argv[])
   input[0] = "tricube-anticlockwise.msh";
   input[1] = "tricube-clockwise.msh";
 
-  // Create new PSurface.
-  auto_ptr<PSurface<2,float> > par(new PSurface<2,float>);
-  par->surface = new Surface;
-
   // Read in meshes and check for consistency.
   try {
     for (StringVector::const_iterator it = input.begin(); it != input.end(); ++it) {
       // Read mesh.
       const string filename = basepath + *it;
+
       cout << "Testing using " << filename << endl;
 
-      auto_ptr<GmshIO<float,2> > pIn(new GmshIO<float,2>(par.get()));
-      pIn->readGmsh(par->surface, basepath + *it);
+      auto_ptr<PSurface<2,float> > par(GmshIO<float,2>::readGmsh(filename));
 
       // Check for consistency.
-      par->checkConsistency((basepath + *it).c_str());
+      par->checkConsistency(filename.c_str());
     }
   } catch (const exception& e) {
     cout << e.what() << endl;
