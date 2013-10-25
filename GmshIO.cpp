@@ -24,8 +24,6 @@
       FILE* file = fopen(filename.c_str(),"r");
       if (not file)
           throw(std::runtime_error("Could open file '" + filename + "' for reading!"));
-      int number_of_real_vertices = 0;
-      int element_count = 0;
 
       // process header
       double version_number;
@@ -110,7 +108,7 @@
 
       std::fill(nodeInTri.begin(), nodeInTri.end(), false);
 
-      for(int i = 0; i < triArray.size(); i++)
+      for(size_t i = 0; i < triArray.size(); i++)
       {
           nodeInTri[(triArray[i])[0] - 1] = true;
           nodeInTri[(triArray[i])[1] - 1] = true;
@@ -148,7 +146,7 @@
               par->iPos.push_back(coordsArray[i]);
       }
       ///insert triangles and the plane graph on them
-      for (int i=0; i<triArray.size(); i++){
+      for (size_t i=0; i<triArray.size(); i++){
 
           std::tr1::array<int, 3> vertexIdx;
 
@@ -185,7 +183,6 @@
                                              void* t5 , void* t6, void* t7, void* t8,
                                              void* t9 , void* t10 )
   {
-      off_t pos = ftello(file);
       int c = fscanf(file, format, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
       if (c != cnt)
           throw(std::runtime_error("error in readfile\n"));
