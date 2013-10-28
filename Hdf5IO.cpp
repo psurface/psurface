@@ -202,13 +202,12 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     hsize_t   dimz[2];
     herr_t    status;
 
-    int i, j, k;
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
 
     //1) 'Patches'
     int patches_vec[par->patches.size()];
-    for(i = 0; i < par->patches.size();i++)
+    for (size_t i = 0; i < par->patches.size();i++)
     {
         patches_vec[3*i] = (par->patches[i]).innerRegion;
         patches_vec[3*i + 1] = (par->patches[i]).outerRegion;
@@ -219,7 +218,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
     //2) 'BaseGridVertexCoords'
     ctype basecoords[numVertices][3];
-    for(i = 0; i < numVertices; i++)
+    for (int i = 0; i < numVertices; i++)
     {
       basecoords[i][0] = (par->vertices(i))[0];
       basecoords[i][1] = (par->vertices(i))[1];
@@ -231,7 +230,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
     //3) 'BaseGridTriangles'
     int base_tri[numTriangles][4];
-    for(i = 0; i < numTriangles;i++)
+    for (int i = 0; i < numTriangles;i++)
     {
       base_tri[i][0] = 4; //topology number of triangle in xdmf
       base_tri[i][1] = par->triangles(i).vertices[0];
@@ -245,7 +244,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     //4) NodePositions(x, y, and z-coordinates of the image position).
     //ipos
     ctype ipos[par->iPos.size()][3];
-    for(i = 0; i < par->iPos.size(); i++)
+    for (size_t i = 0; i < par->iPos.size(); i++)
     {
         ipos[i][0] = (par->iPos[i])[0];
         ipos[i][1] = (par->iPos[i])[1];
@@ -261,7 +260,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     numParamEdges = 0;
     numEdgePoints = 0;
 
-    for(i = 0; i < numTriangles;i++)
+    for (int i = 0; i < numTriangles;i++)
     {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
@@ -314,20 +313,21 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     int   parameterEdgeArray[numParamEdges][4];
     int   edgePointsArray[nvertices];
 
-    for(i = 0; i < numVertices; i++) nodeType[i] = Node<ctype>::CORNER_NODE;
+    for (int i = 0; i < numVertices; i++)
+        nodeType[i] = Node<ctype>::CORNER_NODE;
 
     int arrayIdx           = 0;
     int edgeArrayIdx       = 0;
     int edgePointsArrayIdx = 0;
     ctype cCoords[3][3];
 
-    for (i=0; i<numTriangles; i++) {
+    for (int i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
         std::vector<int> newIdx(cT.nodes.size());
         std::vector<int> newIdxlocal(cT.nodes.size());
-        for(j = 0; j < 3; j++)
-          for(k = 0; k < 3; k++)
+        for (int j = 0; j < 3; j++)
+          for (int k = 0; k < 3; k++)
             cCoords[j][k] = par->vertices(par->triangles(i).vertices[j])[k];
 
         for(size_t cN = 0; cN < 3; cN++)
@@ -345,16 +345,16 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isINTERSECTION_NODE()){
-                for(k = 0; k < 2; k++)
+                for (int k = 0; k < 2; k++)
                     domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                     nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
 
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
                 nodeType[arrayIdx + numVertices] = Node<ctype>::INTERSECTION_NODE;
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                     imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
                 newIdx[cN] = arrayIdx;
                 newIdxlocal[cN] = localArrayIdx;
@@ -367,15 +367,15 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isTOUCHING_NODE()){
-                for(k = 0; k < 2; k++)
+                for (int k = 0; k < 2; k++)
                     domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                     nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
                 nodeType[arrayIdx+ numVertices] = Node<ctype>::TOUCHING_NODE;
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                     imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
                 newIdx[cN] = arrayIdx;
                 newIdxlocal[cN] = localArrayIdx;
@@ -388,16 +388,16 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
             if (cT.nodes[cN].isINTERIOR_NODE()){
-               for(k = 0; k < 2; k++)
+               for (int k = 0; k < 2; k++)
                     domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
 
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                 (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
                 nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
                 nodeType[arrayIdx+ numVertices] = Node<ctype>::INTERIOR_NODE;
-                for(k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                     imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
 
                 newIdx[cN] = arrayIdx;
@@ -426,7 +426,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         }
 
         // the edgePoints for this triangle
-        for (j=0; j<3; j++){
+        for (int j=0; j<3; j++){
             for (size_t k=1; k<cT.edgePoints[j].size()-1; k++)
                 edgePointsArray[edgePointsArrayIdx++] = newIdxlocal[cT.edgePoints[j][k]];
         }
