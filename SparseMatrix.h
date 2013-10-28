@@ -268,8 +268,6 @@ startAgain:
 
 };
 
-/// @endif
-
 } // namespace psurface
 
 #endif
