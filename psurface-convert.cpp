@@ -172,7 +172,7 @@ int main(int argc, char **argv)
         xdmffile.erase (xdmffile.end() - 3, xdmffile.end());
         xdmffile.append(".xdmf");
         Hdf5IO<float,2>* pn = new Hdf5IO<float,2>(par);
-        pn->creatHdfAndXdmf(xdmffile, output,basehdf5);
+        pn->createHdfAndXdmf(xdmffile, output,basehdf5);
 #else
         std::cerr << "You have given an hdf5 output file, but psurface-convert" << std::endl;
         std::cerr << "has been compiled without hdf5 support!" << std::endl;

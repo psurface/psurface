@@ -44,7 +44,7 @@ class Hdf5IO{
      *  of the psurface. If false, we create hdf5 file that contains all data
      *  needed to display the psurface object in paraview.
      */
-    void creatHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool base);
+    void createHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool base);
 
     /// Writes xdmf file so we can read hdf5 throught paraview
     void writeXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename);

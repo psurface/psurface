@@ -176,7 +176,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   }
 
   template<class ctype,int dim>
-  void psurface::Hdf5IO<ctype,dim>::creatHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool base)
+  void psurface::Hdf5IO<ctype,dim>::createHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool base)
   {
     if(!base)
     //Creates hdf5 file that contain all data needed to display it in paraview.
