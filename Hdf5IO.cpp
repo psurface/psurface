@@ -319,16 +319,15 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     int arrayIdx           = 0;
     int edgeArrayIdx       = 0;
     int edgePointsArrayIdx = 0;
-    ctype cCoords[3][3];
 
     for (int i=0; i<numTriangles; i++) {
         const DomainTriangle<ctype>& cT = par->triangles(i);
 
         std::vector<int> newIdx(cT.nodes.size());
         std::vector<int> newIdxlocal(cT.nodes.size());
+        StaticVector<ctype,3> cCoords[3];
         for (int j = 0; j < 3; j++)
-          for (int k = 0; k < 3; k++)
-            cCoords[j][k] = par->vertices(par->triangles(i).vertices[j])[k];
+            cCoords[j] = par->vertices(par->triangles(i).vertices[j]);
 
         for(size_t cN = 0; cN < 3; cN++)
         {
