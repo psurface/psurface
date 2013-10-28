@@ -288,6 +288,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         numNodes += numIntersectionNodes;
         numNodes += numTouchingNodes;
         numNodes += numInteriorNodes;
+        numNodes += 3;  // corner nodes
 
         numEdgePoints += cT.edgePoints[0].size() + cT.edgePoints[1].size() + cT.edgePoints[2].size() - 6;
 
@@ -329,16 +330,29 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         for (int j = 0; j < 3; j++)
             cCoords[j] = par->vertices(par->triangles(i).vertices[j]);
 
-        for(size_t cN = 0; cN < 3; cN++)
-        {
-            if(!cT.nodes[cN].isCORNER_NODE())printf("error in the corner node indx!\n");
-            newIdx[cN] = par->triangles(i).vertices[cN] - numVertices;
-        }
+        int localArrayIdx = 0;
 
-        newIdxlocal[cT.cornerNode(0)] = 0;
-        newIdxlocal[cT.cornerNode(1)] = 1;
-        newIdxlocal[cT.cornerNode(2)] = 2;
-        int localArrayIdx = 3;
+        //Corner Node
+        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
+
+            if (cT.nodes[cN].isCORNER_NODE()){
+                for (int k = 0; k < 2; k++)
+                    domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
+                for (int k = 0; k < 3; k++)
+                    nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
+                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
+                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
+
+                nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
+                nodeType[arrayIdx + numVertices] = Node<ctype>::CORNER_NODE;
+                for (int k = 0; k < 3; k++)
+                    imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
+                newIdx[cN] = arrayIdx;
+                newIdxlocal[cN] = localArrayIdx;
+                arrayIdx++;
+                localArrayIdx++;
+            }
+        }
 
         //Intersection Node
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
