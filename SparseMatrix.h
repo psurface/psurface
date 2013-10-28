@@ -101,7 +101,7 @@ public:
 
     /// another iterative solver for nonsymmetric matrices: BI-CGSTAB
     void BiCGSTABC(const std::vector<std::complex<T> >& rhs, std::vector<std::complex<T> >& result,
-          std::vector<std::complex<T> >& residuum,
+          std::vector<std::complex<T> >& residual,
           int* maxIter, const double tolerance) const {
 
     int i, j;
@@ -124,7 +124,7 @@ public:
     double normRhs = sqrt(std::real(dotProductC(rhs, rhs)));
 
     if (normRes <= tolerance * normRhs) {
-        residuum = ri;
+        residual = ri;
         *maxIter = 0;
         return;
     }
@@ -236,7 +236,7 @@ startAgain:
 
     *maxIter = countIter;
 
-    residuum = ri;
+    residual = ri;
 
     result = xi;
 
