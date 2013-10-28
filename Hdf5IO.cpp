@@ -198,8 +198,8 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     hid_t     file_id;
     file_id = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     hid_t     dataset_id, dataspace_id,datatype;
-    hsize_t   dims[] ={numVertices};
-    hsize_t   dimz[2];
+    hsize_t   dims1d[1];
+    hsize_t   dims2d[2];
     herr_t    status;
 
     numVertices  = par->getNumVertices();
@@ -213,8 +213,8 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         patches_vec[3*i + 1] = (par->patches[i]).outerRegion;
         patches_vec[3*i + 2] = (par->patches[i]).boundaryId;
     }
-    dims[0] = par->patches.size()*3;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/patches_vec", patches_vec);
+    dims1d[0] = par->patches.size()*3;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims1d, &status, "/patches_vec", patches_vec);
 
     //2) 'BaseGridVertexCoords'
     ctype basecoords[numVertices][3];
@@ -224,9 +224,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       basecoords[i][1] = (par->vertices(i))[1];
       basecoords[i][2] = (par->vertices(i))[2];
     }
-    dimz[0] = numVertices;
-    dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseCoords", basecoords);
+    dims2d[0] = numVertices;
+    dims2d[1] = 3;
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/BaseCoords", basecoords);
 
     //3) 'BaseGridTriangles'
     int base_tri[numTriangles][4];
@@ -237,9 +237,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       base_tri[i][2] = par->triangles(i).vertices[1];
       base_tri[i][3] = par->triangles(i).vertices[2];
     }
-    dimz[0] = numTriangles;
-    dimz[1] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/BaseTri", base_tri);
+    dims2d[0] = numTriangles;
+    dims2d[1] = 4;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/BaseTri", base_tri);
 
     //4) NodePositions(x, y, and z-coordinates of the image position).
     //ipos
@@ -250,9 +250,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         ipos[i][1] = (par->iPos[i])[1];
         ipos[i][2] = (par->iPos[i])[2];
     }
-    dimz[0] = par->iPos.size();
-    dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/iPos", ipos);
+    dims2d[0] = par->iPos.size();
+    dims2d[1] = 3;
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/iPos", ipos);
 
     //5) 'NumNodesAndParameterEdgesPerTriangle'
     int num_nodes_and_edges_array[numTriangles][11];
@@ -296,9 +296,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
 
     //Write numNodesAndEdgesArray into hdf5
-    dimz[0] = numTriangles;
-    dimz[1] = 11;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/numNodesAndEdgesArray", num_nodes_and_edges_array);
+    dims2d[0] = numTriangles;
+    dims2d[1] = 11;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/numNodesAndEdgesArray", num_nodes_and_edges_array);
 
     ncells = numTriangles + numParamEdges;
     nvertices = numVertices + numNodes;
@@ -382,38 +382,38 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     // barycentric coordinates on the respective triangle and
     // x, y, and z-coordinates of the image position.
     //nodes on plane surface of triangle
-    dimz[0] = numNodes;
-    dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/NodeCoords", nodePositions);
+    dims2d[0] = numNodes;
+    dims2d[1] = 3;
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/NodeCoords", nodePositions);
 
     //NodeData
-    dimz[0] = numNodes;
-    dimz[1] = 2;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalNodePosition", domainPositions);
+    dims2d[0] = numNodes;
+    dims2d[1] = 2;
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/LocalNodePosition", domainPositions);
 
     //image position
-    dimz[0] = nvertices;
-    dimz[1] = 3;
-    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/ImagePosition", imagePos);
+    dims2d[0] = nvertices;
+    dims2d[1] = 3;
+    writeFloatDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/ImagePosition", imagePos);
 
     //7)NodeNumbers
-    dims[0] = numNodes;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/NodeNumber", nodeNumber);
+    dims1d[0] = numNodes;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims1d, &status, "/NodeNumber", nodeNumber);
 
     //8) 'ParameterEdges'
     //connection array(in global index) of parameter edges
-    dimz[0] = numParamEdges;
-    dimz[1] = 2;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/LocalParamEdge", parameterEdgeArrayLocal);
+    dims2d[0] = numParamEdges;
+    dims2d[1] = 2;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/LocalParamEdge", parameterEdgeArrayLocal);
 
     //param edge
-    dimz[0] = numParamEdges;
-    dimz[1] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dimz, &status, "/ParamEdge", parameterEdgeArray);
+    dims2d[0] = numParamEdges;
+    dims2d[1] = 4;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims2d, &status, "/ParamEdge", parameterEdgeArray);
 
     //9) 'EdgePoints'
-    dims[0] = edgePointsArrayIdx;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/EdgePoints", edgePointsArray);
+    dims1d[0] = edgePointsArrayIdx;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims1d, &status, "/EdgePoints", edgePointsArray);
 
     //Supportive data
     //params
@@ -423,12 +423,12 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     psurfaceparams[2] = numTriangles;
     psurfaceparams[3] = numParamEdges;
 
-    dims[0] = 4;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/Params", psurfaceparams);
+    dims1d[0] = 4;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims1d, &status, "/Params", psurfaceparams);
 
     //nodetype
-    dims[0] = nvertices;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/NodeType", nodeType);
+    dims1d[0] = nvertices;
+    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims1d, &status, "/NodeType", nodeType);
 
     //close the file
     status = H5Fclose(file_id);
@@ -442,7 +442,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     hid_t     file_id;
     file_id = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     hid_t     dataset_id, dataspace_id,datatype;
-    hsize_t   dims[] ={numVertices};
+    hsize_t   dims[1];
     hsize_t   dimz[2];
     herr_t    status;
 
