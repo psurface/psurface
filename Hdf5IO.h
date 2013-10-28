@@ -38,10 +38,11 @@ class Hdf5IO{
     public:
     Hdf5IO(PSurface<dim,ctype>* psurface);
 
-    /** \brief Writes the parametrization in hdf5 format and create relatd xdmf file
-     *  If base is set to be true(1), we create hdf5 file that only contain necessary data
-     *  of the psurface. If base is set to be false(0), we create hdf5 file that contain all
-     *  needed to display it in paraview.
+    /** \brief Writes the parametrization in hdf5 format and create related xdmf file
+     *
+     *  \param base if true, we create hdf5 file that only contain necessary data
+     *  of the psurface. If false, we create hdf5 file that contains all data
+     *  needed to display the psurface object in paraview.
      */
     void creatHdfAndXdmf(const std::string&  xdf_filename, const std::string&  hdf_filename, bool base);
 
