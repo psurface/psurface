@@ -331,6 +331,9 @@ public:
             case Node<ctype>::INTERIOR_NODE:
                 interiorNodes++;
                 break;
+            default:
+                // do nothing, we only care for the three types above
+                break;
             }
         }
     }

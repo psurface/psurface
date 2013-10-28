@@ -482,7 +482,7 @@ void PlaneParam<ctype>::computeFloaterLambdas(SparseMatrix<ctype>& lambda_ij,
                 //p_k_3DCoords[k] = nodes[p_k[k]].getImagePos(nodePositions);
                 p_k_3DCoords[k] = nodePositions[nodes[p_k[k]].getNodeNumber()];
                 if (std::isnan(p_k_3DCoords[k][0])) {
-                    printf("iPos.size: %d,  nN: %d\n", nodePositions.size(), nodes[p_k[k]].getNodeNumber());
+                    std::cout << "iPos.size: " << nodePositions.size() << ",  nN: " << nodes[p_k[k]].getNodeNumber() << std::endl;
                     nodes[p_k[k]].print();
                 }
                 assert(!std::isnan(p_k_3DCoords[k][0]));
