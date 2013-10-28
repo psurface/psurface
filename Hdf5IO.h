@@ -2,7 +2,7 @@
 #define HDF5IO_H
 #include <stdio.h>
 #include <stdlib.h>
-#include "psurfaceAPI.h"
+
 namespace psurface{
 template<class ctype,int dim>
 class Hdf5IO{
