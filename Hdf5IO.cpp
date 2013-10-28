@@ -335,91 +335,24 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
         //Corner Node
         for (size_t cN=0; cN<cT.nodes.size(); cN++) {
 
-            if (cT.nodes[cN].isCORNER_NODE()){
-                for (int k = 0; k < 2; k++)
-                    domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-                for (int k = 0; k < 3; k++)
-                    nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
+            for (int k = 0; k < 2; k++)
+                domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
+            for (int k = 0; k < 3; k++)
+                nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
                                               +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
                                               +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
 
-                nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx + numVertices] = Node<ctype>::CORNER_NODE;
-                for (int k = 0; k < 3; k++)
-                    imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
-                newIdx[cN] = arrayIdx;
-                newIdxlocal[cN] = localArrayIdx;
-                arrayIdx++;
-                localArrayIdx++;
-            }
+            nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
+            nodeType[arrayIdx + numVertices] = cT.nodes[cN].type;
+            for (int k = 0; k < 3; k++)
+                imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
+            newIdx[cN] = arrayIdx;
+            newIdxlocal[cN] = localArrayIdx;
+            arrayIdx++;
+            localArrayIdx++;
+
         }
 
-        //Intersection Node
-        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
-
-            if (cT.nodes[cN].isINTERSECTION_NODE()){
-                for (int k = 0; k < 2; k++)
-                    domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-                for (int k = 0; k < 3; k++)
-                    nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
-                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
-                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
-
-                nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx + numVertices] = Node<ctype>::INTERSECTION_NODE;
-                for (int k = 0; k < 3; k++)
-                    imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
-                newIdx[cN] = arrayIdx;
-                newIdxlocal[cN] = localArrayIdx;
-                arrayIdx++;
-                localArrayIdx++;
-            }
-        }
-
-        //Touching Node
-        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
-
-            if (cT.nodes[cN].isTOUCHING_NODE()){
-                for (int k = 0; k < 2; k++)
-                    domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-                for (int k = 0; k < 3; k++)
-                    nodePositions[arrayIdx][k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
-                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
-                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
-                nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx+ numVertices] = Node<ctype>::TOUCHING_NODE;
-                for (int k = 0; k < 3; k++)
-                    imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
-                newIdx[cN] = arrayIdx;
-                newIdxlocal[cN] = localArrayIdx;
-                arrayIdx++;
-                localArrayIdx++;
-            }
-        }
-
-        //Interior Nodes
-        for (size_t cN=0; cN<cT.nodes.size(); cN++) {
-
-            if (cT.nodes[cN].isINTERIOR_NODE()){
-               for (int k = 0; k < 2; k++)
-                    domainPositions[arrayIdx][k] = (cT.nodes[cN].domainPos())[k];
-
-                for (int k = 0; k < 3; k++)
-                (nodePositions[arrayIdx])[k] = cCoords[0][k]*cT.nodes[cN].domainPos()[0]
-                                              +cCoords[1][k]*cT.nodes[cN].domainPos()[1]
-                                              +cCoords[2][k]*(1 - cT.nodes[cN].domainPos()[0] - cT.nodes[cN].domainPos()[1]);
-                nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
-                nodeType[arrayIdx+ numVertices] = Node<ctype>::INTERIOR_NODE;
-                for (int k = 0; k < 3; k++)
-                    imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
-
-                newIdx[cN] = arrayIdx;
-                newIdxlocal[cN] = localArrayIdx;
-
-                arrayIdx++;
-                localArrayIdx++;
-            }
-        }
         // the parameterEdges for this triangle
         typename PlaneParam<ctype>::UndirectedEdgeIterator cE;
         for (cE = cT.firstUndirectedEdge(); cE.isValid(); ++cE){
