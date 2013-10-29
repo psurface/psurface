@@ -3,7 +3,8 @@
 
 # Magic variable: all programs in TESTS are run when 'make check' is called.
 TESTS = gmshiotest \
-        simplifytest
+        simplifytest \
+        sparsematrixtest
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -19,3 +20,8 @@ simplifytest_SOURCES = simplifytest.cpp
 simplifytest_CPPFLAGS = $(AM_CPPFLAGS)
 simplifytest_LDADD = $(top_builddir)/libpsurface.la
 simplifytest_LDFLAGS = $(AM_LDFLAGS)
+
+sparsematrixtest_SOURCES = sparsematrixtest.cpp
+sparsematrixtest_CPPFLAGS = $(AM_CPPFLAGS)
+sparsematrixtest_LDADD = $(top_builddir)/libpsurface.la
+sparsematrixtest_LDFLAGS = $(AM_LDFLAGS)

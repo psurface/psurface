@@ -34,4 +34,6 @@ psurface-simplify
 # Tests
 test/gmshiotest
 test/simplifytest
+test/sparsematrixtest
+
 
