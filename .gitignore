@@ -32,6 +32,9 @@ psurface-convert
 psurface-simplify
 
 # Tests
+test/*.log
+test/*.trs
+
 test/gmshiotest
 test/simplifytest
 test/sparsematrixtest
