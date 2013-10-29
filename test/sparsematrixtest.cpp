@@ -123,36 +123,43 @@ void test(const double tolerance, const int n, const int maxIter) {
   check_result<ctype, rhstype>(result1, trueTest1, tolerance, "specific matrix check 1 failed");
 
   // second specific matrix
-  vector<rhstype> residue2(5);
-  vector<rhstype> result2(5);
-  vector<rhstype> b2(5);
-  SparseMatrix<ctype> test2(5);
+  vector<rhstype> residue2(6);
+  vector<rhstype> result2(6);
+  vector<rhstype> b2(6);
+  SparseMatrix<ctype> test2(6);
 
   test2.setEntry(0, 0, 1);
   test2.setEntry(1, 1, 1);
   test2.setEntry(2, 2, 1);
   test2.setEntry(3, 3, 1);
   test2.setEntry(4, 4, 1);
-  test2.setEntry(1, 2, -0.473423);
-  test2.setEntry(1, 0, -0.166667);
-  test2.setEntry(1, 3, -0.193244);
-  test2.setEntry(1, 4, -0.166667);
+  test2.setEntry(5, 5, 1);
+  test2.setEntry(1, 2, -0.0666667);
+  test2.setEntry(1, 3, -0.312071);
+  test2.setEntry(1, 4, -0.312071);
+  test2.setEntry(1, 0, -0.154595);
+  test2.setEntry(1, 5, -0.154595);
 
-  b2[0] = rhstype(-.5, 0.866025);
-  b2[1] = rhstype(0, 0);
-  b2[2] = rhstype(1, 0);
-  b2[3] = rhstype(-1, -1.01577e-07);
-  b2[4] = rhstype(-0.5, -0.866026);
+  b2[0] = rhstype(0.5,0.866025);
+  b2[1] = rhstype(0,0);
+  b2[2] = rhstype(1,0);
+  b2[3] = rhstype(-0.5,0.866025);
+  b2[4] = rhstype(-0.5,-0.866025);
+  b2[5] = rhstype(0.5,-0.866025);
 
   // solutions
   countIter = maxIter;
   test2.BiCGSTABC(b2, result2, residue2, &countIter, tolerance);
-  vector<rhstype> trueTest2(5);
+
+  // Note: The following vector is NOT the correct result.  However, the solver
+  // aborts before even getting to this line.
+  vector<rhstype> trueTest2(6);
   trueTest2[0] = rhstype(-.5, 0.866);
   trueTest2[1] = rhstype(0.1135, 0);
   trueTest2[2] = rhstype(1, 0);
   trueTest2[3] = rhstype(-1, 0);
   trueTest2[4] = rhstype(-.5, -0.866);
+  trueTest2[5] = rhstype(-.5, -0.866);
 
   // check results
   print_vector(result2);
