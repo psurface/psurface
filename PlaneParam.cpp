@@ -423,29 +423,27 @@ void PlaneParam<ctype>::applyParametrization(const std::vector<StaticVector<ctyp
     // Compute the right side. We use complex numbers for solving the systems
     // for both x- and y-components in one pass.  This leads to a considerable
     // speedup.
-    std::vector<std::complex<ctype> > b(nodes.size());
-
-    std::fill(b.begin(), b.end(), 0);
+    Vector<ctype> b(nodes.size(), StaticVector<ctype, 2>(0));
 
     for (size_t i=0; i<nodes.size(); i++)
         if (!nodes[i].isINTERIOR_NODE()) {
-            // not elegant
-            b[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
+          // not elegant
+          b[i] = nodes[i].domainPos();
         }
 
     // solve the system
     int maxIter=3000;
-    std::vector<std::complex<ctype> > residue;
-    std::vector<std::complex<ctype> > result(nodes.size());
+    Vector<ctype> residue(nodes.size());
+    Vector<ctype> result(nodes.size());
 
     for (size_t i=0; i<nodes.size(); i++)
-        result[i] = std::complex<ctype>(nodes[i].domainPos()[0], nodes[i].domainPos()[1]);
+      result[i] = nodes[i].domainPos();
 
-    lambda_ij.BiCGSTABC(b, result, residue, &maxIter, 1e-6);
+    lambda_ij.BiCGSTAB(b, result, residue, maxIter, 1e-6);
 
     for (size_t i=0; i<nodes.size(); i++)
         if (nodes[i].isINTERIOR_NODE())
-            nodes[i].setDomainPos(StaticVector<ctype,2>(real(result[i]), imag(result[i])));
+            nodes[i].setDomainPos(result[i]);
 
 }
 
