@@ -1,5 +1,7 @@
 #include "config.h"
 
+#include "fenv.h"
+
 #include <exception>
 #include <iostream>
 #include <memory>
@@ -30,6 +32,8 @@ typedef vector<string> StringVector;
 
 int main(int argc, char* argv[])
 {
+  feenableexcept(FE_INVALID);
+
   //// Meshes to test.
   const string basepath("examplefiles/");
   StringVector input(2);
