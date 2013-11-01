@@ -34,16 +34,6 @@ namespace psurface {
         (*this)[i] = other[i];
     }
 
-    /** \brief Assignment */
-    Vector<T>& operator=(const Vector<T>& other) {
-      assert(other.size() == this->size());
-
-      for (size_t i=0; i<this->size(); i++)
-        (*this)[i] = other[i];
-
-      return *this;
-    }
-
     /** \brief Addition */
     Vector<T>& operator+=(const Vector<T>& other) {
       assert(other.size() == this->size());
