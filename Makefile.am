@@ -1,5 +1,9 @@
 SUBDIRS = test
 
+# install pkg-config information
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = psurface.pc
+
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = psurface-convert psurface-simplify

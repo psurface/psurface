@@ -16,6 +16,7 @@ config.status
 configure
 libpsurface.la
 libtool
+psurface.pc
 stamp-h1
 
 m4/libtool.m4

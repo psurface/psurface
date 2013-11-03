@@ -142,6 +142,11 @@ AC_DEFUN([CHECK_FOR_HDF5],[
  AC_SUBST([HDF5_LDFLAGS])
  AC_SUBST([HDF5_LIBS])
 
+ # pkg-config needs these flags directly
+ AC_SUBST([direct_HDF5_CPPFLAGS])
+ AC_SUBST([direct_HDF5_LDFLAGS])
+ AC_SUBST([direct_HDF5_LIBS])
+
  # also tell automake
  AM_CONDITIONAL(HAVE_HDF5, test x$HAVE_HDF5 = x1)
 
