@@ -2,8 +2,6 @@
 
 - better interface
 
-- amiramesh reader more stable
-
 - Factor out memory management of McSurfaceBase into a PoolAllocator class
 
 - McOctree::merge()
@@ -11,8 +9,6 @@
 - BFLocate: better edge handling
 
 - iterators should handle obsolete nodes
-
-- getBoundingBox
 
 - topology-change check doesn't need to be checked beforehand
 
