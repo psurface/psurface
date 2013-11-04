@@ -28,10 +28,7 @@ namespace ParamToolBox {
 
     ///
     int PSURFACE_API computeFeatureStatus(const PSurface<2,float>* par, int v, int& featureEdgeA, 
-                                              int& featureEdgeB, 
-                                              const std::vector<bool>* featureVertices=NULL, 
-                                              const std::vector<int>* featureEdges=NULL
-                                              );
+                                          int& featureEdgeB);
 
     ///
     bool PSURFACE_API findAllHalfStars(int centerIdx, 
@@ -97,8 +94,7 @@ namespace ParamToolBox {
                                                  int numHalfStars,
                                                  int featureEdgeA,
                                                  int featureEdgeB,
-                                                 MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>* edgeOctree,
-                                                 std::vector<int>* featureEdges
+                                                 MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>* edgeOctree
                                                  );
 
     ///

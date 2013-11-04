@@ -26,23 +26,15 @@ signed char ParamToolBox::orientation(const StaticVector<float,2>& a, const Stat
 }
 
 int ParamToolBox::computeFeatureStatus(const PSurface<2,float>* par, int v,
-                                       int& featureEdgeA, int& featureEdgeB,
-                                       const std::vector<bool>* featureVertices, const std::vector<int>* featureEdgesField)
+                                       int& featureEdgeA, int& featureEdgeB)
 {
     std::vector<int> featureEdges(0);
 
-    if (featureVertices && (*featureVertices)[v])
-        return ParamToolBox::FEATURE_POINT;
-
     for (int i=0; i<par->vertices(v).degree(); i++){
-
         const std::vector<int>& cFan = par->edges(par->vertices(v).edges[i]).triangles;
 
-        if (cFan.size() != 2 ||
-            par->triangles(cFan[0]).patch != par->triangles(cFan[1]).patch ||
-            (featureEdgesField && (*featureEdgesField)[par->vertices(v).edges[i]] != -1))
+        if (cFan.size() != 2 || par->triangles(cFan[0]).patch != par->triangles(cFan[1]).patch)
             featureEdges.push_back(par->vertices(v).edges[i]);
-
     }
 
     if (featureEdges.size() == 0)
@@ -60,7 +52,6 @@ int ParamToolBox::computeFeatureStatus(const PSurface<2,float>* par, int v,
     featureEdgeB = featureEdges[1];
 
     return par->edges(featureEdgeA).triangles.size();
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -933,8 +924,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
                                           int numHalfStars,
                                           int featureEdgeA,
                                           int featureEdgeB,
-                                          MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>* edgeOctree,
-                                          std::vector<int>* featureEdges)
+                                          MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>* edgeOctree)
 {
     int i, j;
 
