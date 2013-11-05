@@ -424,7 +424,7 @@ int main(int argc, char **argv) try {
       auto_ptr<Hdf5IO<float,2> > pn(new Hdf5IO<float,2>(par.get()));
       pn->createHdfAndXdmf(xdmffile, output, base);
 #else
-        cerr << "You have given an hdf5 input file, but psurface-simplify" << endl;
+        cerr << "You have given an hdf5 output file, but psurface-simplify" << endl;
         cerr << " has been compiled without hdf5 support!" << endl;
     throw runtime_error("No hdf5 support.");
 #endif
