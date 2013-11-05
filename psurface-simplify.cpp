@@ -374,7 +374,7 @@ int main(int argc, char **argv) try {
       pconvert->initCompletePSurface(surf.get(), input);
 #else
       std::cerr << "You have given an hdf5 input file, but psurface-simplify" << std::endl;
-      std::cerr << " has been compiled without hdf5 support!" << std::endl;
+      std::cerr << "has been compiled without hdf5 support!" << std::endl;
       throw runtime_error("No hdf5 support.");
 #endif
     }
@@ -391,7 +391,7 @@ int main(int argc, char **argv) try {
       AmiraMesh* am = AmiraMesh::read(input.c_str());
       PSURFACE_API AmiraMeshIO<float> amIO;
       if( !amIO.initFromAmiraMesh(par.get(), am, input.c_str(), surf.get()))
-    throw runtime_error("Unable to initiate psurface from amiramesh file!");
+        throw runtime_error("Unable to initiate psurface from amiramesh file!");
     }
     break;
   default:
@@ -424,9 +424,9 @@ int main(int argc, char **argv) try {
       auto_ptr<Hdf5IO<float,2> > pn(new Hdf5IO<float,2>(par.get()));
       pn->createHdfAndXdmf(xdmffile, output, base);
 #else
-        cerr << "You have given an hdf5 output file, but psurface-simplify" << endl;
-        cerr << " has been compiled without hdf5 support!" << endl;
-    throw runtime_error("No hdf5 support.");
+      cerr << "You have given an hdf5 output file, but psurface-simplify" << endl;
+      cerr << "has been compiled without hdf5 support!" << endl;
+      throw runtime_error("No hdf5 support.");
 #endif
     }
     break;
