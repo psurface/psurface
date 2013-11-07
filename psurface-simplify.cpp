@@ -15,20 +15,14 @@
 
 #include <getopt.h>
 
-#ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"
-#else
-#include "hxsurface/Surface.h"
-#endif
-
 #include "AmiraMeshIO.h"
-#include "psurfaceAPI.h"
 #include "PSurface.h"
 #include "Hdf5IO.h"
 #include "GmshIO.h"
 #include "VtkIO.h"
 
-#if defined HAVE_AMIRAMESH || !defined PSURFACE_STANDALONE
+#if defined HAVE_AMIRAMESH
 #include <amiramesh/AmiraMesh.h>
 #endif
 
