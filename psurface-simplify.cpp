@@ -402,7 +402,7 @@ int main(int argc, char **argv) try {
     break;
   default:
     {
-      throw runtime_error("Unkown input type.");
+      throw runtime_error("Unknown input type.");
     }
   };
 
