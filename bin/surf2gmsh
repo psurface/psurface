@@ -1,0 +1,59 @@
+#!/usr/bin/awk -f
+
+
+### Some functions.
+function readLines(lines, k, n) {
+  for (i = k; i <= n; ++i) {
+    getline
+    lines[i] = $1 " " $2 " " $3
+  }
+}
+
+### Some rules.
+/Vertices/ {
+  number_of_nodes += $2
+  readLines(nodes, 1, $2)
+}
+
+/Triangles/ {
+  ++patches
+
+  new_number_of_elements = number_of_elements + $2
+
+  readLines(elements, number_of_elements+1, new_number_of_elements)
+  number_of_elements = max_in_patch[patches] = new_number_of_elements
+}
+
+### Output.
+END {
+  # Output Header. Assuming 8-byte double.
+  print "$MeshFormat"
+  print "2.0 0 8"
+  print "$EndMeshFormat"
+
+  # Output Nodes.
+  print "$Nodes"
+  print number_of_nodes
+
+  for (i = 1; i <= number_of_nodes; ++i)
+    print i, nodes[i]
+
+  print "$EndNodes"
+
+  # Output Elements.
+  print "$Elements"
+  print number_of_elements
+
+  p = 1
+  i = 1
+  while (i <= number_of_elements) {
+    while (i <= max_in_patch[p]) {
+      # node number, 2 for "triangle", 1 for "one tag", patch number, nodes
+      print i, 2, 1, p, elements[i]
+      ++i
+    }
+    ++p
+  }
+ 
+  print "$EndElements"
+}
