@@ -69,10 +69,10 @@ int main(int argc, char **argv)
              type = optarg;
              break;
         case ':':
-            printf("the option need a value\n");
+            printf("the option needs a value\n");
             break;
         case '?':
-            printf("unknow option%c\n",optopt);
+            printf("unknown option '%c'\n",optopt);
             break;
         }
     }
