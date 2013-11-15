@@ -191,10 +191,8 @@ int removePoint(int vertex, const psurface::QualityRequest& quality,
     return 1;
 }
 
-void updateErrors(int vertex, const psurface::QualityRequest& quality,
+void updateErrors(int vertex, vector<int>& neighbors, const psurface::QualityRequest& quality,
                   PSurface<2, float>* par, MultiDimOctree<Edge, EdgeIntersectionFunctor, float, 3>& edgetree, VertexHeap& vertexHeap) {
-    vector<int> neighbors = par->getNeighbors(vertex);
-
     for (int k = 0; k < neighbors.size(); ++k) {
       VertexHeap::ErrorValue error = vertexHeap.getError(neighbors[k]);
 
@@ -256,9 +254,12 @@ int removeNumberOfPoints (int n, psurface::QualityRequest& req, PSurface<2, floa
     // Get the index of the vertex to remove next.
     int index = vertexHeap.extractMin();
 
+    // Save the neighbors before the vertex is removed.
+    vector<int> neighbors = par->getNeighbors(index);
+
     // Now really remove a point.
     if (removePoint(index, req, par, &edgetree)) {
-      updateErrors(index, req, par, edgetree, vertexHeap);
+      updateErrors(index, neighbors, req, par, edgetree, vertexHeap);
       ++removedPoints;
     } else {
       VertexHeap::ErrorValue oldErr = vertexHeap.getMinErrorStatus();
