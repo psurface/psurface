@@ -507,10 +507,6 @@ void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >
 
    // set up parametrization
     psurface_.surface = const_cast<Surface*>(surface2_);
-    psurface_.patches.resize(1);
-    psurface_.patches[0].innerRegion = 0;
-    psurface_.patches[0].outerRegion = 1;
-    psurface_.patches[0].boundaryId  = 0;
 
     // ///////
     std::cout << nVert1 << " resp. " << nVert2 << " contact nodes found!" << std::endl;

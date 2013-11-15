@@ -54,7 +54,6 @@ template <int dim, class ctype>
 void PSurface<dim,ctype>::clear()
 {
     surface = NULL;
-    patches.clear();
 
     iPos.clear();
     SurfaceBase<Vertex<ctype>, Edge, DomainTriangle<ctype> >::clear();
@@ -295,13 +294,14 @@ void PSurface<dim,ctype>::setupOriginalSurface()
 
 #ifndef PSURFACE_STANDALONE
     // create patches.  Only the Amira Surface class needs this
+    // We create dummy patches, as we don't have patches at all anymore.
     surface->patches.resize(numPatches());
 
     for (i=0; i<surface->patches.size(); i++){
         surface->patches[i] = new Surface::Patch();
-        surface->patches[i]->innerRegion = patches[i].innerRegion;
-        surface->patches[i]->outerRegion = patches[i].outerRegion;
-        surface->patches[i]->boundaryId  = patches[i].boundaryId;
+        surface->patches[i]->innerRegion = 0;
+        surface->patches[i]->outerRegion = 1;
+        surface->patches[i]->boundaryId  = 0;
     }
 #endif
     ////////////////////////////////////////////

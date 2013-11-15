@@ -122,12 +122,6 @@
       PSurfaceFactory<2,ctype> factory(par);
       factory.setTargetSurface(par->surface);
 
-      //patches
-      PSurface<2,float>::Patch patch;
-      patch.innerRegion = 0;
-      patch.outerRegion = 1;
-      patch.boundaryId =  0;
-
       ///insert vertex
       int numVertices = 0;
       for(int i = 0; i < number_of_nodes; i++)

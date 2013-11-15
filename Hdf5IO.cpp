@@ -205,17 +205,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
 
-    //1) 'Patches'
-    int patches_vec[par->patches.size()];
-    for (size_t i = 0; i < par->patches.size();i++)
-    {
-        patches_vec[3*i] = (par->patches[i]).innerRegion;
-        patches_vec[3*i + 1] = (par->patches[i]).outerRegion;
-        patches_vec[3*i + 2] = (par->patches[i]).boundaryId;
-    }
-    dims1d[0] = par->patches.size()*3;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims1d, &status, "/patches_vec", patches_vec);
-
     //2) 'BaseGridVertexCoords'
     ctype basecoords[numVertices][3];
     for (int i = 0; i < numVertices; i++)
@@ -449,17 +438,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     int i, j, k;
     numVertices  = par->getNumVertices();
     numTriangles = par->getNumTriangles();
-
-    //1) 'Patches'
-    int patches_vec[par->patches.size()];
-    for(i = 0; i < par->patches.size();i++)
-    {
-        patches_vec[3*i] = (par->patches[i]).innerRegion;
-        patches_vec[3*i + 1] = (par->patches[i]).outerRegion;
-        patches_vec[3*i + 2] = (par->patches[i]).boundaryId;
-    }
-    dims[0] = par->patches.size()*3;
-    writeIntDataToFile(&file_id, &dataset_id, &dataspace_id, &datatype, dims, &status, "/patches_vec", patches_vec);
 
     //2) 'BaseGridVertexCoords'
     ctype basecoords[numVertices][3];
@@ -810,12 +788,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims, "/EdgePoints", edgePointsArray);
       hdf_close(dataset, filespace, memspace);
 
-      //patches
-      int *patch;
-      readIntDataFromFile(&file, &dataset, &filespace, &memspace, dims, "/patches_vec", patch);
-      hdf_close(dataset, filespace, memspace);
-      int patch_size = dims[0]/3;
-
       H5Fclose(file);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -824,16 +796,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       PSurfaceFactory<2,ctype> factory(par);
       //(Assume) Target surface already exists
       factory.setTargetSurface(surf);
-
-      //patches
-      PSurface<2,float>::Patch Patch; //= new PSurface<2, ctype>::Patch;
-      for (i=0; i< patch_size; i++)
-      {
-          Patch.innerRegion = patch[3*i];
-          Patch.outerRegion = patch[3*i + 1];
-          Patch.boundaryId = patch[3*i + 2];
-          par->patches.push_back(Patch);
-      }
 
       //insert vertex
       StaticVector<ctype,3> newVertex;

@@ -37,23 +37,6 @@ public:
     /** \brief An exception being thrown by code in this class */
     class ParamError {};
 
-    /** This little class encapsulates all data about surface patches
-     */
-    class Patch {
-    public:
-
-        Patch() : innerRegion(0), outerRegion(0), boundaryId(0) {}
-
-        /// The number of the material on one side of the triangle patch
-        int innerRegion;
-
-        /// The number of the material on the other side of the patch
-        int outerRegion;
-
-        /// An additional ID storing some form of material property
-        int boundaryId;
-    };
-
     /// Destructor
     virtual ~PSurface();
 
@@ -78,10 +61,15 @@ public:
      */
     void createPointLocationStructure();
 
+#ifndef PSURFACE_STANDALONE
     /// Returns the number of patches.
     int numPatches() const {
-        return patches.size();
+        int result = 0;
+        for (size_t i=0; i<this->triangleArray.size(); i++)
+          result = std::max(result, this->triangleArray[i].patch + 1);
+        return result;
     }
+#endif
 
     int getNumNodes() const;
 
@@ -293,10 +281,6 @@ public:
         It is set by calling the method createPointLocationStructure().
         You should not set it deliberately unless you know what you're doing.*/
     bool hasUpToDatePointLocationStructure;
-
-
-    /// All base grid patches
-    std::vector<Patch> patches;
 
     /// The image positions of all nodes \deprecated To be replaced by a procedural interface
     std::vector<StaticVector<ctype,3> > iPos;

@@ -59,16 +59,6 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     am.parameters.set("ContentType", "Parametrization");
 
 
-    ////////////////////////////////////////////
-    // the patches array
-    AmiraMesh::Location* patchesLoc = new AmiraMesh::Location("Patches", par->numPatches());
-    am.insert(patchesLoc);
-
-    AmiraMesh::Data* patchesData = new AmiraMesh::Data("Patches", patchesLoc,
-                                                       McPrimType::mc_int32, 3,
-                                                       (void*)&par->patches[0]);
-    am.insert(patchesData);
-
     //////////////////////////////////////
     // store base grid vertices
     AmiraMesh::Location* vertices = new AmiraMesh::Location("BaseGridVertexCoords", numVertices);
@@ -340,20 +330,6 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
         printf("But the format is not supported anymore :-(\n");
         return false;
     }
-
-    //////////////////////////////////////////////
-    // the innerRegions and outerRegions arrays
-    //////////////////////////////////////////////
-    AmiraMesh::Data* AMpatches = am->findData("Patches", HxINT32, 3, "Patches");
-    if (!AMpatches){
-        printf("AmiraMesh: Field 'Patches' not found!\n");
-        return false;
-    }
-
-    psurf->patches.resize(AMpatches->location()->dims()[0]);
-
-    for (size_t i=0; i<psurf->patches.size(); i++)
-        psurf->patches[i] = ((typename PSurface<2,ctype>::Patch*)AMpatches->dataPtr())[i];
 
     //////////////////////////////////
     // load the base grid vertices
