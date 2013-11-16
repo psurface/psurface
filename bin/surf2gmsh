@@ -1,54 +1,64 @@
 #!/usr/bin/awk -f
 
 
-### Some functions.
+# Read n lines into array "lines" starting at entry k.
 function readLines(lines, k, n) {
   for (i = k; i <= n; ++i) {
     getline
-    lines[i] = $1 " " $2 " " $3
+    lines[i] = $1 " " $2 " " $3 # Store the first three fields read separated by whitespaces.
   }
 }
 
-### Some rules.
+# If a line containing "Vertices" is found, store the second field, that is supposed to be the number of vertices
+# and read the just found number of lines of vertices coordinates into an array "nodes".
+# In a sane input file there is just one of those lines.
 /Vertices/ {
   number_of_nodes += $2
   readLines(nodes, 1, $2)
 }
 
+# Rule for a line containing "Triangles".
 /Triangles/ {
+  # If a line containing "Triangles" is found, we also know that we found a new patch.
   ++patches
 
+  # The second field is supposed to be the number of elements in this patch.
   new_number_of_elements = number_of_elements + $2
 
+  # Read the new element nodes into the array "elements".
   readLines(elements, number_of_elements+1, new_number_of_elements)
+
+  # Update the number of elements found so far and store the index up to which the elements belong to the current patch.
   number_of_elements = max_in_patch[patches] = new_number_of_elements
 }
 
-### Output.
+# If the end of the file is reached, output an equivalent gmsh file on stdout.
 END {
-  # Output Header. Assuming 8-byte double.
+  # Output header.
   print "$MeshFormat"
+  # "2.0" for file format version 2.0, 0 for ASCII, 8 since a double is supposed to be 8-bytes on a machine using gmsh.
   print "2.0 0 8"
   print "$EndMeshFormat"
 
-  # Output Nodes.
+  # Output nodes.
   print "$Nodes"
   print number_of_nodes
 
   for (i = 1; i <= number_of_nodes; ++i)
-    print i, nodes[i]
+    print i, nodes[i] # Print the node number followed by read coordinate of the node.
 
   print "$EndNodes"
 
-  # Output Elements.
+  # Output elements.
   print "$Elements"
   print number_of_elements
 
   p = 1
   i = 1
   while (i <= number_of_elements) {
+    # p-th entry of max_in_patch contains the index up to which the elements of the p-th patch belong.
     while (i <= max_in_patch[p]) {
-      # node number, 2 for "triangle", 1 for "one tag", patch number, nodes
+      # Output: node number, 2 for "element type triangle", 1 for "one tag", patch number, nodes of the triangle
       print i, 2, 1, p, elements[i]
       ++i
     }
