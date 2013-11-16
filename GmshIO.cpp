@@ -78,15 +78,45 @@
       int number_of_elements;
       readfile(file,1,"%d\n",&number_of_elements);
 
+      bool patches = false;
+      std::vector<int> patchNums;
+
       for (int i=1; i<=number_of_elements; i++)
       {
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d ",&id,&elm_type,&number_of_tags);
-        for (int k=1; k<=number_of_tags; k++)
-        {
-          int blub;
-          readfile(file,1,"%d ",&blub);
+
+        // handle tags
+        int new_patch;
+
+        // find the patch this element is belonging to
+        if (number_of_tags > 0) {
+          // if this is not the first entry and we did not find any patches before, which patches are the elements before this one belonging to ?
+          if (1 != i && !patches)
+            throw std::runtime_error("found elements with and without tags\n");
+
+          // we found a patch, thous we are using patches
+          patches = true;
+
+          // first tag is the patch number
+          readfile(file, 1, "%d ", &new_patch);
+
+          // other tags will be ignored
+          for (int k=2; k<=number_of_tags; ++k) {
+              int dummy;
+              readfile(file, 1, "%d ", &dummy);
+          }
+        } else {
+          // if we did not any find tags though we found some before, which patch is this element belonging to ?
+          if (patches)
+            throw std::runtime_error("found elements with and without tags\n");
+
+          // if no patch numbers are provided, assign them all to the first
+          new_patch = 0;
         }
+
+        // store new patch
+        patchNums.push_back(new_patch);
 
         if(elm_type != 2)
         {
@@ -151,7 +181,7 @@
 
           par->triangles(newTriangle).makeOneTriangle(vertexIdx[0], vertexIdx[1], vertexIdx[2]);
 
-          par->triangles(newTriangle).patch = 0;
+          par->triangles(newTriangle).patch = patchNums[i];
 
           par->integrateTriangle(newTriangle);
       }
