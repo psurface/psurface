@@ -57,6 +57,9 @@ private:
 
     /// write the connectivity array
     void writeGridCells(VTK::VTUWriter& writer, bool basegrid);
+
+    /// write cell data
+    void writeGridCellData(VTK::VTUWriter& writer);
 };
 }// namespace psurface
 #endif

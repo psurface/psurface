@@ -112,6 +112,8 @@
     writeGridPoints(writer,basegrid);
     // Cells
     writeGridCells(writer,basegrid);
+    // Cell data
+    writeGridCellData(writer);
 
     writer.endMain();
   }
@@ -231,6 +233,26 @@
 
       writer.endCells();
   }
+
+
+  template<class ctype,int dim>
+  void psurface::VTKIO<ctype,dim>::writeGridCellData(VTK::VTUWriter& writer)
+  {
+    writer.beginCellData();
+
+    // patch numbers
+    {
+      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p
+        (writer.makeArrayWriter<int>("Patch", 1, numTriangles));
+      if(!p->writeIsNoop()) {
+        for(int i = 0; i < numTriangles; i++)
+          p->write(par->triangles(i).patch);
+      }
+    }
+
+    writer.endCellData();
+  }
+
 
 //   Explicit template instantiations.
 namespace psurface {
