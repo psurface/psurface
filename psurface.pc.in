@@ -7,5 +7,5 @@ Name: psurface
 Version: @VERSION@
 Description: library for storing piecewise linear maps between triangular surfaces
 Requires:
-Libs: -L${libdir} @AMIRAMESH_LDFLAGS@ @AMIRAMESH_LIBS@ @direct_HDF5_LDFLAGS@ @direct_HDF5_LIBS@
+Libs: -L${libdir} -lpsurface @AMIRAMESH_LDFLAGS@ @AMIRAMESH_LIBS@ @direct_HDF5_LDFLAGS@ @direct_HDF5_LIBS@
 Cflags: -I${includedir} @AMIRAMESH_CPPFLAGS@ @direct_HDF5_CPPFLAGS@
