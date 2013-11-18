@@ -113,7 +113,7 @@
     // Cells
     writeGridCells(writer,basegrid);
     // Cell data
-    writeGridCellData(writer);
+    writeGridCellData(writer,basegrid);
 
     writer.endMain();
   }
@@ -236,7 +236,7 @@
 
 
   template<class ctype,int dim>
-  void psurface::VTKIO<ctype,dim>::writeGridCellData(VTK::VTUWriter& writer)
+  void psurface::VTKIO<ctype,dim>::writeGridCellData(VTK::VTUWriter& writer, bool basegrid)
   {
     writer.beginCellData();
 
@@ -247,6 +247,11 @@
       if(!p->writeIsNoop()) {
         for(int i = 0; i < numTriangles; i++)
           p->write(par->triangles(i).patch);
+
+        if(!basegrid) {
+          for (size_t i = 0; i < parameterEdgeArray.size(); i++)
+            p->write(-1);
+        }
       }
     }
 

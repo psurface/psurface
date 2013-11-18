@@ -59,7 +59,7 @@ private:
     void writeGridCells(VTK::VTUWriter& writer, bool basegrid);
 
     /// write cell data
-    void writeGridCellData(VTK::VTUWriter& writer);
+    void writeGridCellData(VTK::VTUWriter& writer, bool basegrid);
 };
 }// namespace psurface
 #endif
