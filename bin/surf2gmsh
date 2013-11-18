@@ -1,5 +1,9 @@
 #!/usr/bin/awk -f
 
+# This program reads files in the ASCII Hypermesh format (as written by Amira),
+# and converts them to the native gmsh format.
+#
+# Written by Benjamin Bykowski
 
 # Read n lines into array "lines" starting at entry k.
 function readLines(lines, k, n) {
