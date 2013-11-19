@@ -199,8 +199,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     else
     // create hdf5 file that only contain necessary data of the psurface.
       writeBaseHdf5Data(hdf_filename);
-
-     return;
   }
 
   template<class ctype,int dim>
@@ -433,7 +431,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
     //close the file
     status = H5Fclose(file_id);
-    return;
   };
 
   template<class ctype,int dim>
@@ -647,7 +644,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
     //close the file
     status = H5Fclose(file_id);
-    return;
   };
 
   template<class ctype,int dim>
@@ -728,7 +724,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     fprintf(xmf, "</Domain>\n");
     fprintf(xmf, "</Xdmf>\n");
     fclose(xmf);
-    return;
   };
 
   template<class ctype,int dim>
@@ -813,7 +808,8 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       StaticVector<ctype,3> newVertex;
       for(i = 0; i < numVertices; i++)
       {
-          for(int j = 0; j < 3; j++) newVertex[j] = tricoords[3*i + j];
+          for(int j = 0; j < 3; j++)
+              newVertex[j] = tricoords[3*i + j];
           factory.insertVertex(newVertex);
       }
 
@@ -823,7 +819,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
           for (j=0; j<3; j++)
               par->iPos[i][j] = coords[3*i + j];
 
-      //insert trianlges and the plain graph onto it.
+      //insert triangles and the plain graph onto it.
       int edgeCounter=0, edgePointCounter=0;
       int nodeArrayIdx = 0;
 
@@ -902,7 +898,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     }
     par->hasUpToDatePointLocationStructure = false;
     par->setupOriginalSurface();
-    return;
   };
 
   //initialize PsurfaceConvert from the psurface object
