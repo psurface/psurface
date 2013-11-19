@@ -114,16 +114,14 @@ int main(int argc, char **argv)
     else
       printf(" could not tell the output type by file extension\n");
 
-  PSurface<2,float>* par = new PSurface<2,float>;
-  Surface* surf = new Surface;
+  PSurface<2,float>* par;
 
   switch(inputType)
   {
     case HDF5:
       {
 #if HAVE_HDF5
-        Hdf5IO<float,2>* pconvert = new Hdf5IO<float,2>(par);
-        pconvert->initCompletePSurface(surf, input);
+        par = Hdf5IO<float,2>::read(input);
 #else
         std::cerr << "You have given an hdf5 input file, but psurface-convert" << std::endl;
         std::cerr << "has been compiled without hdf5 support!" << std::endl;
@@ -143,6 +141,9 @@ int main(int argc, char **argv)
 #if HAVE_AMIRAMESH
         AmiraMesh* am = AmiraMesh::read(input);
         AmiraMeshIO<float> amIO;
+        Surface* surf = new Surface;
+        par = new PSurface<2,float>;
+
         if( !amIO.initFromAmiraMesh(par,am,input, surf))
         {
           printf("unable to initiate psurface from amira mesh file!\n");

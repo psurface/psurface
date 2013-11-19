@@ -365,14 +365,12 @@ int main(int argc, char **argv) try {
 
   ////// Read input file.
   auto_ptr<PSurface<2,float> > par(new PSurface<2,float>);
-  auto_ptr<Surface> surf(new Surface);
 
   switch(inputType) {
   case HDF5:
     {
 #if HAVE_HDF5
-      auto_ptr<Hdf5IO<float,2> > pconvert(new Hdf5IO<float,2>(par.get()));
-      pconvert->initCompletePSurface(surf.get(), input);
+      par = auto_ptr<PSurface<2,float> >(Hdf5IO<float,2>::read(input));
 #else
       std::cerr << "You have given an hdf5 input file, but psurface-simplify" << std::endl;
       std::cerr << "has been compiled without hdf5 support!" << std::endl;
@@ -392,6 +390,7 @@ int main(int argc, char **argv) try {
 #if defined HAVE_AMIRAMESH
       AmiraMesh* am = AmiraMesh::read(input.c_str());
       AmiraMeshIO<float> amIO;
+      auto_ptr<Surface> surf(new Surface);
       if( !amIO.initFromAmiraMesh(par.get(), am, input.c_str(), surf.get()))
         throw runtime_error("Unable to initiate psurface from amiramesh file!");
 #else
