@@ -391,7 +391,7 @@ int main(int argc, char **argv) try {
     {
 #if defined HAVE_AMIRAMESH
       AmiraMesh* am = AmiraMesh::read(input.c_str());
-      PSURFACE_API AmiraMeshIO<float> amIO;
+      AmiraMeshIO<float> amIO;
       if( !amIO.initFromAmiraMesh(par.get(), am, input.c_str(), surf.get()))
         throw runtime_error("Unable to initiate psurface from amiramesh file!");
 #else
@@ -449,7 +449,7 @@ int main(int argc, char **argv) try {
   case AMIRA:
     {
 #if defined HAVE_AMIRAMESH
-      PSURFACE_API AmiraMeshIO<float> amIO;
+      AmiraMeshIO<float> amIO;
       amIO.writeAmiraMesh(par.get(), output.c_str());
 #else
       std::cerr << "You have given an amira output file, but psurface-simplify" << std::endl;
