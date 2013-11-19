@@ -9,6 +9,7 @@
 #include "StaticVector.h"
 #include "Domains.h"
 #include "PSurface.h"
+#include "TargetSurface.h"
 #include "PSurfaceFactory.h"
 #include "Hdf5IO.h"
 
@@ -173,6 +174,17 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       H5Dclose(dataset);
       H5Sclose(filespace);
       H5Sclose(memspace);
+  }
+
+  template<class ctype,int dim>
+  psurface::PSurface<dim, ctype>* psurface::Hdf5IO<ctype,dim>::read(const std::string& filename)
+  {
+      PSurface<dim,float>* p = new PSurface<dim,float>;
+      Surface* surf = new Surface;
+      Hdf5IO<float,dim>* hdf5io = new Hdf5IO<float,dim>(p);
+      hdf5io->initCompletePSurface(surf, filename);
+      delete hdf5io;
+      return p;
   }
 
   template<class ctype,int dim>

@@ -36,6 +36,9 @@ class Hdf5IO{
     void writeBaseHdf5Data(const std::string& filename);
 
     public:
+    /// Read a psurface object from an hdf5 file
+    static PSurface<dim, ctype>* read(const std::string& filename);
+
     Hdf5IO(PSurface<dim,ctype>* psurface);
 
     /** \brief Writes the parametrization in hdf5 format and create related xdmf file
