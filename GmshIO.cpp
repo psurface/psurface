@@ -132,6 +132,8 @@
         triArray.push_back(elementDofs);
       }
 
+      fclose(file); // we got everything that we need
+
       //remove vertices that are not corners of a triangle
       std::vector<bool> nodeInTri(number_of_nodes);
       std::vector<int>  newNodeIndex(number_of_nodes);
