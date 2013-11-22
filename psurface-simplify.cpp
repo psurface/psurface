@@ -67,8 +67,8 @@ void print_usage() {
        << "-l x : set allowed max edge length to x          (default: " << req.maxEdgeLength          << ")" << endl
        << "-r x : set importance of aspect ratio to x       (default: " << req.aspectRatio            << ")" << endl
        << "-d x : set importance of Hausdorff distance to x (default: " << req.hausdorffDistance      << ")" << endl
-       << "-b x : 1 to output just the basegrid             (default: " << 1                          << ")" << endl
-       << "-s   : do not allow self intersection            (default: " << req.intersections          << ")" << endl
+       << "-b   : set to output just the basegrid           (default: " << "true"                     << ")" << endl
+       << "-s   : set to not allow self intersection        (default: " << req.intersections          << ")" << endl
        << endl;
 }
 
@@ -291,7 +291,7 @@ int removeNumberOfPoints (int n, psurface::QualityRequest& req, PSurface<2, floa
 int main(int argc, char **argv) try {
   ////// Parse arguments.
   string input, output;
-  int base = 1;
+  bool base = false;
   QualityRequest req;
 
   bool nodeCount = false, nodeNumber = false;
@@ -299,7 +299,7 @@ int main(int argc, char **argv) try {
 
   int opt;
 
-  while ((opt = getopt(argc, argv, ":i:o:n:b:t:l:r:d:s:c:")) != EOF) {
+  while ((opt = getopt(argc, argv, ":i:o:n:c:bt:l:r:d:s")) != EOF) {
     switch (opt) {
     case 'i':
       input = optarg;
@@ -322,7 +322,7 @@ int main(int argc, char **argv) try {
       nodeCount = true;
       break;
     case 'b':
-      stringstream(optarg) >> base;
+      base = true;
       break;
     case 't':
       req.smallDihedralAngles = true;
