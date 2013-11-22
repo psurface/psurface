@@ -6,7 +6,7 @@ pkgconfig_DATA = psurface.pc
 
 ACLOCAL_AMFLAGS = -I m4
 
-bin_PROGRAMS = psurface-convert psurface-simplify
+bin_PROGRAMS = psurface-convert psurface-simplify psurface-smooth
 
 include_psurface_HEADERS = \
 	$(top_srcdir)/AmiraMeshIO.h \
@@ -92,3 +92,8 @@ psurface_simplify_SOURCES =  psurface-simplify.cpp
 psurface_simplify_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
 psurface_simplify_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LIBS) libpsurface.la
 psurface_simplify_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LDFLAGS)
+
+psurface_smooth_SOURCES =  psurface-smooth.cpp
+psurface_smooth_CPPFLAGS = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
+psurface_smooth_LDADD = $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LIBS) libpsurface.la
+psurface_smooth_LDFLAGS = $(AM_LDFLAGS) $(HDF5_LIBS) $(HDF5_LDFLAGS)  $(AMIRAMESH_LDFLAGS)
