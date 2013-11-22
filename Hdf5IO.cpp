@@ -5,6 +5,7 @@
 #include <hdf5.h>
 #include <memory>
 #include <tr1/memory>
+#include <stdexcept>
 
 #include "StaticVector.h"
 #include "Domains.h"
@@ -731,7 +732,6 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   {
       ///////////////////////////////////////////////////////////////////////////////////////////////
       //Read parametrization data from hdf5 file
-      hid_t file;
       hid_t datatype, dataset;
       hid_t filespace;
       hid_t       memspace;
@@ -740,7 +740,10 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       herr_t status,status_n;
       int rank;
       int i,j,k;
-      file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      hid_t file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      if (file<0)
+        throw std::runtime_error("Couldn't open file '" + filename + "' for reading!");
+
 
       //read params
       int *psurfaceparams;
