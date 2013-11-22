@@ -185,7 +185,7 @@ int main(int argc, char **argv)
     case VTU:
       {
         VTKIO<float,2> pn(par);
-        pn.createVTU(output,basegrid);
+        pn.createVTU(str.c_str(), basegrid ? "" : (str.substr(0, str.length()-std::string(".vtu").length())) + "-graph.vtu");
       }
       break;
 

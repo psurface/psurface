@@ -34,32 +34,37 @@ class VTKIO{
     /// Number of ParamEdge
     int numParamEdges;
 
-    /// Total number of cells
-    int ncells;
-    /// Total number of points
-    int nvertices;
-
     public:
     VTKIO(PSurface<dim,ctype>* psurface);
 
     ///write the parametrization into vtu file
-    void createVTU(std::string filename, bool basegrid);
+    void createVTU(const std::string& element_filename, const std::string& graph_filename);
 
 private:
     ///write data file to stream
-    void writeDataFile(std::ostream& s, bool basegrid);
-
-    /// write point data
-    void writeNodeTypes(VTK::VTUWriter& writer);
+    void writeElementDataFile(std::ostream& s);
 
     /// write the positions of vertices
-    void writeGridPoints(VTK::VTUWriter& writer, bool basegrid);
+    void writeElementGridPoints(VTK::VTUWriter& writer);
 
     /// write the connectivity array
-    void writeGridCells(VTK::VTUWriter& writer, bool basegrid);
+    void writeElementGridCells(VTK::VTUWriter& writer);
 
     /// write cell data
-    void writeGridCellData(VTK::VTUWriter& writer, bool basegrid);
+    void writeElementGridCellData(VTK::VTUWriter& writer);
+
+
+    ///write data file to stream
+    void writeGraphDataFile(std::ostream& s);
+
+    /// write point data
+    void writeGraphNodeTypes(VTK::VTUWriter& writer);
+
+    /// write the positions of vertices
+    void writeGraphGridPoints(VTK::VTUWriter& writer);
+
+    /// write the connectivity array
+    void writeGraphGridCells(VTK::VTUWriter& writer);
 };
 }// namespace psurface
 #endif
