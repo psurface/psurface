@@ -131,7 +131,7 @@ int main(int argc, char **argv) try {
       auto_ptr<Hdf5IO<float,2> > pconvert(new Hdf5IO<float,2>(par.get()));
       pconvert->initCompletePSurface(surf.get(), input);
 #else
-      cerr << "You have given an hdf5 input file, but psurface-simplify" << endl;
+      cerr << "You have given an hdf5 input file, but psurface-smooth" << endl;
       cerr << "has been compiled without hdf5 support!" << endl;
       throw runtime_error("No hdf5 support.");
 #endif
@@ -145,7 +145,7 @@ int main(int argc, char **argv) try {
       if( !amIO.initFromAmiraMesh(par.get(), am, input.c_str(), surf.get()))
         throw runtime_error("Unable to initiate psurface from amiramesh file!");
 #else
-      cerr << "You have given an amira input file, but psurface-simplify" << endl;
+      cerr << "You have given an amira input file, but psurface-smooth" << endl;
       cerr << "has been compiled without amira support!" << endl;
       throw runtime_error("No amira support.");
 #endif
@@ -178,7 +178,7 @@ int main(int argc, char **argv) try {
       auto_ptr<Hdf5IO<float,2> > pn(new Hdf5IO<float,2>(par.get()));
       pn->createHdfAndXdmf(xdmffile, output, false);
 #else
-      cerr << "You have given an hdf5 output file, but psurface-simplify" << endl;
+      cerr << "You have given an hdf5 output file, but psurface-smooth" << endl;
       cerr << "has been compiled without hdf5 support!" << endl;
       throw runtime_error("No hdf5 support.");
 #endif
@@ -198,7 +198,7 @@ int main(int argc, char **argv) try {
       PSURFACE_API AmiraMeshIO<float> amIO;
       amIO.writeAmiraMesh(par.get(), output.c_str());
 #else
-      cerr << "You have given an amira output file, but psurface-simplify" << endl;
+      cerr << "You have given an amira output file, but psurface-smooth" << endl;
       cerr << "has been compiled without amira support!" << endl;
       throw runtime_error("No amira support.");
 #endif
