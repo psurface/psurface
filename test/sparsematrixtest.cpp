@@ -71,7 +71,10 @@ void test(const ctype tolerance, const int n, const int maxIter) {
   // check results
   check_result<ctype>(result, b, tolerance, "ladder matrix check failed");
 
+  ///////////////////////////////////////////////////////////////////////
   //// setup specific tests
+  ///////////////////////////////////////////////////////////////////////
+
   Vector<ctype> residue1(3);
   Vector<ctype> result1(3);
   Vector<ctype> b1(3);
@@ -131,6 +134,24 @@ void test(const ctype tolerance, const int n, const int maxIter) {
 
   // check results
   check_result_by_mult(test2, result2, b2, tolerance, "specific matrix check 2 failed");
+
+  // third specific matrix -- the identity!
+  Vector<ctype> residual3(2);
+  Vector<ctype> result3(2);
+  Vector<ctype> b3(2);
+  SparseMatrix<ctype> test3(2);
+
+  test3.setEntry(0, 0, 1);
+  test3.setEntry(1, 1, 1);
+
+  b3[0] = StaticVector<ctype, 2>(0,0);
+  b3[1] = StaticVector<ctype, 2>(0,0);
+
+  // solutions
+  test3.BiCGSTAB(b3, result3, residual3, maxIter, tolerance);
+
+  // check results
+  check_result_by_mult(test3, result3, b3, tolerance, "specific matrix check 3 failed");
 }
 
 int main (int argc, char* argv[]) {
