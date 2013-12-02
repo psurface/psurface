@@ -80,6 +80,10 @@ void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, i
 
 }
 
+// Smooth only in horizontal direction
+//
+// TODO: This implementation is wastefull:  We solve for x- and y- coordinates, but then
+// throw away the y-coordinates again.  Doesn't matter much...
 template <class ctype>
 void PSurfaceSmoother<ctype>::applyHorizontalRelaxation(DomainPolygon& quadri, PSurface<2,ctype>* psurface)
 {
@@ -95,34 +99,28 @@ void PSurfaceSmoother<ctype>::applyHorizontalRelaxation(DomainPolygon& quadri, P
         lambda_ij.setEntry(i, i, 1);
 
     // compute the right side, only x-coordinates are interesting
-    std::vector<float> b_x(quadri.nodes.size());
+    Vector<float> b(quadri.nodes.size());
 
-    std::fill(b_x.begin(), b_x.end(), 0);
+    std::fill(b.begin(), b.end(), StaticVector<float,2>(0));
 
     for (int i=0; i<quadri.nodes.size(); i++)
         if (!quadri.nodes[i].isINTERIOR_NODE())
-            b_x[i] = quadri.nodes[i].domainPos()[0];
+            b[i][0] = quadri.nodes[i].domainPos()[0];
 
     // solve the system
     int maxIter=3000;
-    std::vector<float> residual;
-    std::vector<float> result = b_x;
+    Vector<float> residual(quadri.nodes.size());
+    Vector<float> result = b;
 
     // xCoords
     for (int i=0; i<quadri.nodes.size(); i++)
-        result[i] = quadri.nodes[i].domainPos()[0];
+        result[i] = quadri.nodes[i].domainPos();
 
-#ifdef _MSC_VER
-    #pragma message("Smoothing linear system is not actually solved!")
-#else
-    #warning Smoothing linear system is not actually solved!
-#endif
-    //lambda_ij.BiCGSTAB(b_x, result, residual, &maxIter, 0.000001);
+    lambda_ij.BiCGSTAB(b, result, residual, maxIter, 0.000001);
 
     for (size_t i=0; i<quadri.nodes.size(); i++)
         if (quadri.nodes[i].isINTERIOR_NODE())
-            //quadri.nodes[i].domainPos.x = result[i];
-            quadri.nodes[i].setDomainPos(StaticVector<float,2>(result[i], quadri.nodes[i].domainPos()[1]));
+            quadri.nodes[i].setDomainPos(StaticVector<float,2>(result[i][0], quadri.nodes[i].domainPos()[1]));
 
 }
 
