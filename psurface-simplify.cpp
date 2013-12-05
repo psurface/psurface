@@ -59,7 +59,7 @@ void print_usage() {
        << "   psurface-simplify -i <inputfilename> -o <outputfilename> (-n <node number> | -c <number of nodes>)" << endl
        << endl
        << "where " << endl
-       << "-n removes a specific node with given node number (quality request will be ignored)" << endl
+       << "-n removes a specific node with given node number" << endl
        << "-c removes given number of points" << endl
        << endl
        << "Optional arguments:" << endl
@@ -67,7 +67,7 @@ void print_usage() {
        << "-l x : set allowed max edge length to x          (default: " << req.maxEdgeLength          << ")" << endl
        << "-r x : set importance of aspect ratio to x       (default: " << req.aspectRatio            << ")" << endl
        << "-d x : set importance of Hausdorff distance to x (default: " << req.hausdorffDistance      << ")" << endl
-       << "-b   : set to output just the basegrid           (default: " << "true"                     << ")" << endl
+       << "-b   : set to output just the basegrid           (default: " << "0"                        << ")" << endl
        << "-s   : set to not allow self intersection        (default: " << req.intersections          << ")" << endl
        << endl;
 }
