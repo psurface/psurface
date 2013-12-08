@@ -5,6 +5,7 @@
 #include "Vector.h"
 #include "StaticVector.h"
 #include <stdexcept>
+#include <sstream>
 
 namespace psurface {
 
@@ -103,36 +104,70 @@ public:
     /// another iterative solver for nonsymmetric matrices: BI-CGSTAB
     size_t BiCGSTAB(const Vector<T>& b, Vector<T>& x, Vector<T>& r,
                   const size_t& maxIter, const T& tolerance) const {
+      const float EPSILON=1e-20;
       const size_t n = numCols;
 
-      T rho, rho_old, alpha, beta, omega;
+      T rho, rho_old, alpha, beta, omega, h, norm0;
       Vector<T> r0(n), p(n, StaticVector<T, 2>(0)), v(n, StaticVector<T, 2>(0)), s(n), t(n);
 
       r = r0 = b - multVec(x);
+      norm0 = r0.length();
+
       rho_old = alpha = omega = 1;
+
+      if (r.length() < (tolerance * norm0) || r.length() < 1e-15)
+        return 0;
 
       for (size_t k = 0; k < maxIter; ++k) {
         rho = r0 * r;
+
+        if (std::abs(rho) <= EPSILON) {
+          std::ostringstream os;
+          os << "Breakdown in BiCGSTAB - rho "
+             << rho << " <= EPSILON " << EPSILON
+             << " after " << k << " iterations";
+          throw std::runtime_error(os.str());
+        }
+
+        if (std::abs(omega) <= EPSILON) {
+          std::ostringstream os;
+          os << "Breakdown in BiCGSTAB - omega "
+             << omega << " <= EPSILON " << EPSILON
+             << " after " << k << " iterations";
+          throw std::runtime_error(os.str());
+        }
+
         beta = (rho/rho_old)*(alpha/omega);
         p = r + beta*(p - omega * v);
+
         v = multVec(p);
-        alpha = rho/(r0 * v);
+        h = r0 * v;
+
+        if (std::abs(h) < EPSILON) {
+          std::ostringstream os;
+          os << "Breakdown in BiCGSTAB - h "
+             << h << " < EPSILON " << EPSILON
+             << " after " << k << " iterations";
+          throw std::runtime_error(os.str());
+        }
+
+        alpha = rho/h;
+        x += alpha * p;
+
         s = r - alpha * v;
 
-        if (0 == s.length()) {
-          x += alpha * p;
+        if (s.length() < (tolerance * norm0))
           return k;
-        }
 
         t = multVec(s);
         omega = (t*s)/(t*t);
 
-        x += alpha * p + omega * s;
+        x += omega * s;
         r = s - omega*t;
 
         rho_old = rho;
 
-        if (r.length() < tolerance)
+        if (r.length() < (tolerance * norm0)  || r.length() < 1e-15)
           return k;
       }
 
