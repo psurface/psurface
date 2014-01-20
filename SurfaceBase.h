@@ -24,14 +24,11 @@
 
 namespace psurface {
 
-/** A simple pointer-based surface.  The @c VertexType, @c EdgeType, and @c TriangleType
-    classes have to be derived from McVertex, McEdge, McTriangle,
-    respectively.
+/** A simple triangle surface in 3d.
     
-    For an example of the use of this class look at the module HxParametrization,
+    For an example of the use of this class look at the class HxPSurface,
     which is derived from McPointerSurface, and its three constituent classes
     DomainVertex, DomainEdge, and DomainTriangle.
-    @see McVertex, McEdge, McTriangle
 */
 template <class VertexType, class EdgeType, class TriangleType>
 class PSURFACE_API SurfaceBase {
