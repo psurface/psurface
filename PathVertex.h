@@ -45,13 +45,9 @@ public:
 
     /** \brief Equality-operator. */
     bool operator==(const PathVertex& other) const {
-        
-        if ((tri_==other.tri_) && (edge_ == other.edge_) && (std::fabs(locEdge_-other.locEdge_)<1e-8)
+        return (tri_==other.tri_) && (edge_ == other.edge_) && (std::fabs(locEdge_-other.locEdge_)<1e-8)
                 && (corner_ == other.corner_) && (type_ == other.type_) && (bundle_==other.bundle_)
-                    && (std::fabs(lambda_-other.lambda_)<1e-8) && (enteringEdge_ == other.enteringEdge_))
-            return true;
-
-        return false;
+                    && (std::fabs(lambda_-other.lambda_)<1e-8) && (enteringEdge_ == other.enteringEdge_);
     }
 
     /** \brief Print the content for debugging */
