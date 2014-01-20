@@ -31,6 +31,7 @@ libpsurface*.tar.gz
 # Executable files
 psurface-convert
 psurface-simplify
+psurface-smooth
 
 # Tests
 test/*.log
