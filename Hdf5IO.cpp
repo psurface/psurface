@@ -220,9 +220,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     ctype basecoords[numVertices][3];
     for (int i = 0; i < numVertices; i++)
     {
-      basecoords[i][0] = (par->vertices(i))[0];
-      basecoords[i][1] = (par->vertices(i))[1];
-      basecoords[i][2] = (par->vertices(i))[2];
+      basecoords[i][0] = par->vertices(i)[0];
+      basecoords[i][1] = par->vertices(i)[1];
+      basecoords[i][2] = par->vertices(i)[2];
     }
     dims2d[0] = numVertices;
     dims2d[1] = 3;
@@ -246,9 +246,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     ctype ipos[par->iPos.size()][3];
     for (size_t i = 0; i < par->iPos.size(); i++)
     {
-        ipos[i][0] = (par->iPos[i])[0];
-        ipos[i][1] = (par->iPos[i])[1];
-        ipos[i][2] = (par->iPos[i])[2];
+        ipos[i][0] = par->iPos[i][0];
+        ipos[i][1] = par->iPos[i][1];
+        ipos[i][2] = par->iPos[i][2];
     }
     dims2d[0] = par->iPos.size();
     dims2d[1] = 3;
@@ -345,7 +345,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
             nodeNumber[arrayIdx]     = cT.nodes[cN].getNodeNumber();
             nodeType[arrayIdx + numVertices] = cT.nodes[cN].type;
             for (int k = 0; k < 3; k++)
-                imagePos[arrayIdx+ numVertices][k] = (par->imagePos(i,cN))[k];
+                imagePos[arrayIdx+ numVertices][k] = par->imagePos(i,cN)[k];
             newIdx[cN] = arrayIdx;
             newIdxlocal[cN] = localArrayIdx;
             arrayIdx++;
@@ -453,9 +453,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     ctype basecoords[numVertices][3];
     for(i = 0; i < numVertices; i++)
     {
-      basecoords[i][0] = (par->vertices(i))[0];
-      basecoords[i][1] = (par->vertices(i))[1];
-      basecoords[i][2] = (par->vertices(i))[2];
+      basecoords[i][0] = par->vertices(i)[0];
+      basecoords[i][1] = par->vertices(i)[1];
+      basecoords[i][2] = par->vertices(i)[2];
     }
     dimz[0] = numVertices;
     dimz[1] = 3;
@@ -479,9 +479,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
     ctype ipos[par->iPos.size()][3];
     for(i = 0; i < par->iPos.size(); i++)
     {
-        ipos[i][0] = (par->iPos[i])[0];
-        ipos[i][1] = (par->iPos[i])[1];
-        ipos[i][2] = (par->iPos[i])[2];
+        ipos[i][0] = par->iPos[i][0];
+        ipos[i][1] = par->iPos[i][1];
+        ipos[i][2] = par->iPos[i][2];
     }
     dimz[0] = par->iPos.size();
     dimz[1] = 3;
