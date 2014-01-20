@@ -8,7 +8,7 @@ template<class ctype,int dim>
 class Hdf5IO{
     private:
     /// Psurface object hdf5IO deals.
-    PSurface<dim,ctype>* par;
+    PSurface<2,ctype>* par;
     /// Global coordinate of nodes
     std::vector<StaticVector<ctype,3> > nodePositions;
     /// Parameter Edge endpoints in global index
@@ -37,9 +37,19 @@ class Hdf5IO{
 
     public:
     /// Read a psurface object from an hdf5 file
-    static PSurface<dim, ctype>* read(const std::string& filename);
+    static PSurface<2, ctype>* read(const std::string& filename);
 
-    Hdf5IO(PSurface<dim,ctype>* psurface);
+    /** \brief Hdf5 I/O for a 2d psurface in a 3d world
+     *
+     * This is the case we actually support
+     */
+    Hdf5IO(PSurface<2,ctype>* psurface);
+
+    /** \brief Hdf5 I/O for a 1d psurface in a 2d world
+     *
+     * We don't support this case yet.
+     */
+    Hdf5IO(PSurface<1,ctype>* psurface) {}
 
     /** \brief Writes the parametrization in hdf5 format and create related xdmf file
      *

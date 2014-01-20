@@ -178,9 +178,9 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
   }
 
   template<class ctype,int dim>
-  psurface::PSurface<dim, ctype>* psurface::Hdf5IO<ctype,dim>::read(const std::string& filename)
+  psurface::PSurface<2, ctype>* psurface::Hdf5IO<ctype,dim>::read(const std::string& filename)
   {
-      PSurface<dim,float>* p = new PSurface<dim,float>;
+      PSurface<2,float>* p = new PSurface<2,float>;
       Surface* surf = new Surface;
       Hdf5IO<float,dim>* hdf5io = new Hdf5IO<float,dim>(p);
       hdf5io->initCompletePSurface(surf, filename);
@@ -905,12 +905,13 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
 
   //initialize PsurfaceConvert from the psurface object
   template<class ctype,int dim>
-  psurface::Hdf5IO<ctype,dim>::Hdf5IO(PSurface<dim,ctype>* psurface)
+  psurface::Hdf5IO<ctype,dim>::Hdf5IO(PSurface<2,ctype>* psurface)
   {
     par = psurface;
   }
 
 //   Explicit template instantiations.
 namespace psurface {
+  template class Hdf5IO<float,1>;
   template class Hdf5IO<float,2>;
 }
