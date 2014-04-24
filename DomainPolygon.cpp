@@ -1,5 +1,7 @@
 #include "config.h"
 
+#include <stdexcept>
+
 #ifdef _MSC_VER
     // Required to make cmath define M_PI etc.
     #define _USE_MATH_DEFINES
@@ -228,10 +230,9 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
         }else if (edgePoints[thePolygonEdge[1]][0] == edgePoints[thePolygonEdge[0]].back()){
             centerNodePoly = edgePoints[thePolygonEdge[1]][0];
         }else{
-            printf("centerNode NOT found!\n");
             print(true, false, false);
             //triangle->print(true, false, false);
-            assert(false);
+            throw std::runtime_error("centerNode NOT found!");
         }
 
         // merge centerNode
@@ -240,8 +241,7 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
         }else if (tmpEdgePoints[theTriangleEdge[1]][0] == tmpEdgePoints[theTriangleEdge[0]].back()){
             centerNodeTri = tmpEdgePoints[theTriangleEdge[1]][0];
         }else{
-            printf("centerNode Tri NOT found!\n");
-            assert(false);
+            throw std::runtime_error("centerNode Tri NOT found!");
         }
 
         mergeNodes(centerNodePoly, centerNodeTri);
@@ -1423,7 +1423,7 @@ void DomainPolygon::print(bool showEdgePoints, bool showParamEdges, bool showNod
     if (showEdgePoints){
 
         for (size_t i=0; i<edgePoints.size(); i++){
-            printf("edgePoints %d:\n", i);
+            printf("edgePoints %zu:\n", i);
             for (size_t j=0; j<edgePoints[i].size(); j++){
                 printf("  %d) -- ", edgePoints[i][j]);
                 nodes[edgePoints[i][j]].print();

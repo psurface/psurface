@@ -3,6 +3,8 @@
 
 #include "StaticVector.h"
 
+#include <stdexcept>
+
 #include "SurfaceParts.h"
 #include "PlaneParam.h"
 
@@ -127,7 +129,7 @@ public:
         else if (this->nodes[cN].getCorner() == ((j+1)%3))
             return edgePoints[j].size()-1;
 
-        assert(false);
+        throw std::runtime_error("domain edge position NOT found!");
     }
 
     /** assuming the domain coordinates are given as world coordinates

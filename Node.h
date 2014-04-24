@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 #include <stdio.h>
 #include "StaticVector.h"
 #include <vector>
@@ -302,7 +303,7 @@ public:
         case 2: return domainPos()[0];
         }
         print();
-        assert(false);
+        throw std::runtime_error("Undefined position");
     }
 
     /** \brief Returns a 1-dimensional coordinate \f$ \lambda \in [0,1] \f$ giving
@@ -318,7 +319,7 @@ public:
         case 2: return domainPos()[0];
         }
 
-        assert(false);
+        throw std::runtime_error("Undefined position");
     }
 
     /** \brief Returns the index of an edge node resp. to its edgePoint array. */

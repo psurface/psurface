@@ -26,8 +26,8 @@ public:
                const NodeBundle& bundle, 
                ctype lambda, int enteringEdge, int corner=-1) :
         tri_(tri), edge_(edge), locEdge_(locEdge),  
-        type_(type), bundle_(bundle), lambda_(lambda),
-        enteringEdge_(enteringEdge), corner_(corner)
+        corner_(corner), type_(type), bundle_(bundle),
+        lambda_(lambda), enteringEdge_(enteringEdge)
     {} 
 
     /** \brief Assignment operator */
