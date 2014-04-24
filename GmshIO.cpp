@@ -23,7 +23,7 @@
 
       FILE* file = fopen(filename.c_str(),"r");
       if (not file)
-          throw(std::runtime_error("Could open file '" + filename + "' for reading!"));
+          throw(std::runtime_error("Could not open file '" + filename + "' for reading!"));
 
       // process header
       double version_number;
