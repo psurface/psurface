@@ -97,14 +97,6 @@ AC_DEFUN([DUNE_MPI],[
 
   AC_LANG_PUSH([C])
 
-  # enable/disable parallel features
-  AC_ARG_ENABLE(parallel,
-    AS_HELP_STRING([--enable-parallel],
-      [Enable the parallel features of Dune. If enabled
-       configure will try to determine your MPI automatically. You can
-       overwrite this setting by specifying the MPICC variable]))
-  AC_SUBST(ENABLE_PARALLEL, "$enable_parallel")
-
   # disable runtest if we have a queuing system
   AC_ARG_ENABLE(mpiruntest,
     AS_HELP_STRING([--disable-mpiruntest],
@@ -112,8 +104,6 @@ AC_DEFUN([DUNE_MPI],[
 
   with_mpi="no"
 
-  ## do nothing if --disable-parallel is used
-  AS_IF([test "x$enable_parallel" = "xyes"],[
     ACX_MPI([
       MPICOMP="$MPICC"
 
@@ -124,7 +114,7 @@ AC_DEFUN([DUNE_MPI],[
     ],[
       # ACX_MPI didn't find anything
       with_mpi="no"
-    ])])
+    ])
 
   # if an MPI implementation was found..
   AS_IF([test "x$with_mpi" != "xno"],[
