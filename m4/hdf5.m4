@@ -55,7 +55,7 @@ AC_DEFUN([CHECK_FOR_HDF5],[
  # start building variables
 
  # use special HDF5-lib-path if it's set
- if test x$with_hdf5 != x ; then
+ if test "x$with_hdf5" != x && test "x$with_hdf5" != xno ; then
    #  extract absolute path
    if test -d $with_hdf5; then
      eval with_hdf5=`cd $with_hdf5 ; pwd`
@@ -95,9 +95,13 @@ AC_DEFUN([CHECK_FOR_HDF5],[
         HDF5_PARALLEL=1],[],[#include"H5pubconf.h"])
 
  # test for an arbitrary header
- AC_CHECK_HEADER([hdf5.h],
-   [HAVE_HDF5=1],
-   [HAVE_HDF5=0])
+ if test "x$with_hdf5" != xno ; then
+   AC_CHECK_HEADER([hdf5.h],
+     [HAVE_HDF5=1],
+     [HAVE_HDF5=0])
+ else
+   HAVE_HDF5=0
+ fi
 
  # Just for the configure check.  In the end, -L has to go into LIBS.
  LDFLAGS="$LDFLAGS $_dune_hdf5_libpath"
