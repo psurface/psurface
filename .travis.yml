@@ -1,0 +1,4 @@
+language: cpp
+sudo: false
+
+before_script: autoreconf -isf
