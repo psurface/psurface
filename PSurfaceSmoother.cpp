@@ -41,7 +41,7 @@ void PSurfaceSmoother<ctype>::applyEdgeRelaxation(PSurface<2,ctype>* psurface, i
     CircularPatch<float> cutter(2, psurface);
 
     // all this true copying is rather inefficient...
-    std::tr1::array<DomainTriangle<float>, 2> backupTriangles;
+    std::array<DomainTriangle<float>, 2> backupTriangles;
     backupTriangles[0] = psurface->triangles(cE.triangles[0]);
     backupTriangles[1] = psurface->triangles(cE.triangles[1]);
 

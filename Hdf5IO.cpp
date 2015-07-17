@@ -827,7 +827,7 @@ void writeFloatDataToFile(hid_t* file_id, hid_t* dataset_id, hid_t* dataspace_id
       int nodeArrayIdx = 0;
 
       for (i = 0; i< numTriangles; i++){
-          std::tr1::array<unsigned int, 3> triangleVertices = {static_cast<unsigned int>(baseGridTriArray[4*i + 1]),
+          std::array<unsigned int, 3> triangleVertices = {static_cast<unsigned int>(baseGridTriArray[4*i + 1]),
                                                                static_cast<unsigned int>(baseGridTriArray[4*i + 2]),
                                                                static_cast<unsigned int>(baseGridTriArray[4*i + 3])};
 

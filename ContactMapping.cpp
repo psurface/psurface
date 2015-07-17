@@ -17,10 +17,10 @@
 using namespace psurface;
 
 template <class ctype>
-void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >& coords1,  ///< The vertex coordinates of the first surface
-               const std::vector<std::tr1::array<int,2> >& tri1,       ///< The triangles of the first surface
-               const std::vector<std::tr1::array<ctype,2> >& coords2,  ///< The vertices of the second surface
-               const std::vector<std::tr1::array<int,2> >& tri2,
+void ContactMapping<2,ctype>::build(const std::vector<std::array<ctype,2> >& coords1,  ///< The vertex coordinates of the first surface
+               const std::vector<std::array<int,2> >& tri1,       ///< The triangles of the first surface
+               const std::vector<std::array<ctype,2> >& coords2,  ///< The vertices of the second surface
+               const std::vector<std::array<int,2> >& tri2,
                                     const DirectionFunction<2,ctype>* domainDirection,
                                     const DirectionFunction<2,ctype>* targetDirection
                )
@@ -81,7 +81,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
     //   Build the segments-per-vertex arrays
     // /////////////////////////////////////////////////////
 
-    std::vector<std::tr1::array<int, 2> > segPerVertex1(psurface_.domainVertices.size());
+    std::vector<std::array<int, 2> > segPerVertex1(psurface_.domainVertices.size());
     for (size_t i=0; i<segPerVertex1.size(); i++)
         segPerVertex1[i][0] = segPerVertex1[i][1] = -1;
 
@@ -117,7 +117,7 @@ void ContactMapping<2,ctype>::build(const std::vector<std::tr1::array<ctype,2> >
 
 
     // Build the segments-per-vertex arrays for the target vertices
-    std::vector<std::tr1::array<int, 2> > segPerVertex2(psurface_.targetVertices.size());
+    std::vector<std::array<int, 2> > segPerVertex2(psurface_.targetVertices.size());
     for (size_t i=0; i<segPerVertex2.size(); i++)
         segPerVertex2[i][0] = segPerVertex2[i][1] = -1;
 
@@ -407,7 +407,7 @@ void ContactMapping<2,ctype>::computeDiscreteDomainDirections(const DirectionFun
 }
 
 template <class ctype>
-void ContactMapping<2,ctype>::computeDiscreteTargetDirections(const std::vector<std::tr1::array<int,2> >& elements,
+void ContactMapping<2,ctype>::computeDiscreteTargetDirections(const std::vector<std::array<int,2> >& elements,
                                                               const DirectionFunction<2,ctype>* direction,
                                                               std::vector<StaticVector<ctype,2> >& normals)
 {
@@ -461,10 +461,10 @@ void ContactMapping<2,ctype>::computeDiscreteTargetDirections(const std::vector<
 }
 
 template <class ctype>
-void ContactMapping<3,ctype>::build(const std::vector<std::tr1::array<ctype,3> >& coords1,  ///< The vertices of the first surface
-                         const std::vector<std::tr1::array<int,3> >& tri1,       ///< The triangles of the first surface
-                         const std::vector<std::tr1::array<ctype,3> >& coords2,  ///< The vertices of the second surface
-                         const std::vector<std::tr1::array<int,3> >& tri2,
+void ContactMapping<3,ctype>::build(const std::vector<std::array<ctype,3> >& coords1,  ///< The vertices of the first surface
+                         const std::vector<std::array<int,3> >& tri1,       ///< The triangles of the first surface
+                         const std::vector<std::array<ctype,3> >& coords2,  ///< The vertices of the second surface
+                         const std::vector<std::array<int,3> >& tri2,
                                     const DirectionFunction<3,ctype>* domainDirection,
                                     const DirectionFunction<3,ctype>* targetDirection)
 {

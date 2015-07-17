@@ -1,19 +1,7 @@
 #ifndef PSURFACE_FACTORY_H
 #define PSURFACE_FACTORY_H
 
-// Check for VC9 / VS2008 with installed feature pack.
-#if defined(_MSC_VER) && (_MSC_VER>=1500)
-    // Dummy-include to define _CPPLIB_VER.
-    #include <vector>
-
-    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
-        #include <array>
-    #else
-        #error Please install the Visual Studio 2008 SP1 for TR1 support.
-    #endif
-#else
-    #include <tr1/array>
-#endif
+#include <array>
 
 #ifdef PSURFACE_STANDALONE
 namespace psurface { class Surface; }
@@ -43,7 +31,7 @@ public:
 
     \return The index of the newly inserted triangle
     */
-    unsigned int insertSimplex(const std::tr1::array<unsigned int, dim+1>& v);
+    unsigned int insertSimplex(const std::array<unsigned int, dim+1>& v);
 
     /**
        \param domainVertex if the normal projection hits a base grid vertex, this is the vertex
@@ -79,7 +67,7 @@ public:
                                 const StaticVector<ctype,2>& dP1, const StaticVector<ctype,2>& dP2, 
                                 int edge1, int edge2, int nodeNumber);
 
-    void addParTriangle(int tri, const std::tr1::array<int,3>& p);
+    void addParTriangle(int tri, const std::array<int,3>& p);
     
 
 

@@ -412,7 +412,7 @@ bool psurface::AmiraMeshIO<ctype>::initFromAmiraMesh(psurface::PSurface<2,ctype>
     for (int i=0; i<numTriangles; i++){
 
         //int newTriIdx = psurface->createSpaceForTriangle(triIdx[i][0], triIdx[i][1], triIdx[i][2]);
-        std::tr1::array<unsigned int, 3> triangleVertices = {((unsigned int*)AMtriangles->dataPtr())[3*i+0],
+        std::array<unsigned int, 3> triangleVertices = {((unsigned int*)AMtriangles->dataPtr())[3*i+0],
                                                              ((unsigned int*)AMtriangles->dataPtr())[3*i+1],
                                                              ((unsigned int*)AMtriangles->dataPtr())[3*i+2]};
         int newTriIdx = factory.insertSimplex(triangleVertices);

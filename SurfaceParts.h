@@ -271,9 +271,9 @@ public:
     //////////////////////////////////////////////////////////////
 public:
 
-    std::tr1::array<int, 3> vertices;
+    std::array<int, 3> vertices;
 
-    std::tr1::array<int, 3> edges;
+    std::array<int, 3> edges;
 
 };
 

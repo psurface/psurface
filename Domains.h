@@ -157,7 +157,7 @@ public:
 
 
     /// a list of all nodes that are located exactly on the boundary of the triangle
-    std::tr1::array<std::vector<NodeIdx>, 3> edgePoints;
+    std::array<std::vector<NodeIdx>, 3> edgePoints;
 
     /// the patch number
     int patch;

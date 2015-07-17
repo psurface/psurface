@@ -159,8 +159,8 @@ public:
                                  const StaticVector<ctype,2>& direction,
                                  int& bestSegment,
                                  ctype& rangeLocalPosition,
-                                 const std::vector<std::tr1::array<int,2> >& targetSegments,
-                                 const std::vector<std::tr1::array<ctype, 2> >& coords);
+                                 const std::vector<std::array<int,2> >& targetSegments,
+                                 const std::vector<std::array<ctype, 2> >& coords);
     
     static bool rayIntersectsLine(const StaticVector<ctype, 2>& basePoint, 
                                   const StaticVector<ctype, 2>& direction,

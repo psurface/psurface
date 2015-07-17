@@ -113,7 +113,7 @@ void DomainPolygon::mergeTriangle(int tri, StaticVector<float,2> coords[3], int&
 
     installWorldCoordinates(newNodeIdx, coords[0], coords[1], coords[2]);
 
-    std::tr1::array<std::vector<int>, 3> tmpEdgePoints = cT.edgePoints;
+    std::array<std::vector<int>, 3> tmpEdgePoints = cT.edgePoints;
 
     //checkConsistency("Poly merge before augmentNeighborIdx\n");
 
@@ -391,7 +391,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
         //////////////////////////////////////////////////////////////////////////
 
         // determine the planar world coordinates of the triangle about to be separated
-        std::tr1::array<StaticVector<float,2>, 3> newTriangleCoords;
+        std::array<StaticVector<float,2>, 3> newTriangleCoords;
         int boundaryIdx;
         for (j=0; j<boundaryPoints.size(); j++)
             if (boundaryPoints[j] == par->triangles(fillIn[i]).vertices[0])
@@ -603,7 +603,7 @@ bool DomainPolygon::triangulate(CircularPatch<float>& fillIn, std::vector<unsign
 void DomainPolygon::cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
                                       std::vector<int>& nodeLocs,
                                       DomainTriangle<float>& cT,
-                                      const std::tr1::array<StaticVector<float,2>, 3>& newTriangleCoords,
+                                      const std::array<StaticVector<float,2>, 3>& newTriangleCoords,
                                       std::vector<int>& triNewEdgePoints,
                                       std::vector<int>& polyNewEdgePoints,
                                       std::vector<unsigned int>& nodeStack)

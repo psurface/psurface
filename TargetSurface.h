@@ -45,7 +45,7 @@ class Surface {
             file format, the first point in the surface's point array is 1.
             In this data structure, the first point has the index 0.
             Conversion is done when writing and reading. */
-        std::tr1::array<int,3> points;
+        std::array<int,3> points;
 
     };
     

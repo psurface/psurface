@@ -1,19 +1,7 @@
 #ifndef POINT_INTERSECTION_FUNCTOR_H
 #define POINT_INTERSECTION_FUNCTOR_H
 
-// Check for VC9 / VS2008 with installed feature pack.
-#if defined(_MSC_VER) && (_MSC_VER>=1500)
-    // Dummy-include to define _CPPLIB_VER.
-    #include <vector>
-
-    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
-        #include <array>
-    #else
-        #error Please install the Visual Studio 2008 SP1 for TR1 support.
-    #endif
-#else
-    #include <tr1/array>
-#endif
+#include <array>
 
 #include "SurfaceParts.h"
 
@@ -24,7 +12,7 @@ namespace psurface {
 struct EdgeIntersectionFunctor
 {
     class MyMcBox2f 
-        : std::tr1::array<float,4>
+        : std::array<float,4>
     {
     public:
         MyMcBox2f(float a, float b, float c, float d)
@@ -48,8 +36,8 @@ struct EdgeIntersectionFunctor
         : vertices_(vertices)
     {}
 
-    bool operator()(const std::tr1::array<float,3>& lower,
-                    const std::tr1::array<float,3>& upper, const Edge& item) const {
+    bool operator()(const std::array<float,3>& lower,
+                    const std::array<float,3>& upper, const Edge& item) const {
 
         // The edge intersects the box if one of the endpoints is within the box
         if (Box<float,3>(lower,upper).contains(vertices_[item.from]) 

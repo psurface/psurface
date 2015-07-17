@@ -1,20 +1,6 @@
 #ifndef STATIC_VECTOR_H
 #define STATIC_VECTOR_H
 
-// Check for VC9 / VS2008 with installed feature pack.
-#if defined(_MSC_VER) && (_MSC_VER>=1500)
-    // Dummy-include to define _CPPLIB_VER.
-    #include <vector>
-
-    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
-        #include <array>
-    #else
-        #error Please install the Visual Studio 2008 SP1 for TR1 support.
-    #endif
-#else
-    #include <tr1/array>
-#endif
-
 #ifdef _MSC_VER
     // Required to make cmath define M_PI etc.
     #define _USE_MATH_DEFINES
@@ -22,6 +8,7 @@
 #include <cmath>
 #include <cstring>  // for size_t
 
+#include <array>
 #include <iostream>
 #include <assert.h>
 
@@ -29,18 +16,18 @@ namespace psurface {
 
 template <class T, int N>
 class StaticVector
-    : public std::tr1::array<T,N>
+    : public std::array<T,N>
 {
 public:
 
     /** \brief Default constructor.  Leaves the vector uninitialized. */
     StaticVector()
-        : std::tr1::array<T,N>()
+        : std::array<T,N>()
     {}
 
     /** \brief Construction from a single scalar */
     explicit StaticVector(const T& s) {
-        this->assign(s);
+        this->fill(s);
     }
 
     /** \brief Construction from a two scalars */

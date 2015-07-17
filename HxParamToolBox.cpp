@@ -454,7 +454,7 @@ bool ParamToolBox::mergeStarIntoPolygon(int centerIdx, DomainPolygon& fullStar,
 
     for (i=1; i<fullStarTris.size(); i++){
 
-        const std::tr1::array<int, 3>& currentTriPoints = par->triangles(fullStarTris[i]).vertices;
+        const std::array<int, 3>& currentTriPoints = par->triangles(fullStarTris[i]).vertices;
 
         for (j=0; j<3; j++)
             if (currentTriPoints[j] == centerIdx){
@@ -832,7 +832,7 @@ bool ParamToolBox::removeRegularPoint(PSurface<2,float>* par, int centerPoint, c
 
     for (i=1; i<fullStarTris.size(); i++){
 
-        const std::tr1::array<int, 3>& currentTriPoints = par->triangles(fullStarTris[i]).vertices;
+        const std::array<int, 3>& currentTriPoints = par->triangles(fullStarTris[i]).vertices;
 
         for (j=0; j<3; j++)
             if (currentTriPoints[j] == centerPoint){
@@ -1155,7 +1155,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
                 firstTri.flip();
             }
 
-            const std::tr1::array<int, 3>& firstTriPoints = par->triangles(halfStarTris[i][0]).vertices;
+            const std::array<int, 3>& firstTriPoints = par->triangles(halfStarTris[i][0]).vertices;
 
             StaticVector<float,2> triCoords[3];
 
@@ -1175,7 +1175,7 @@ bool ParamToolBox::removeFeatureLinePoint(PSurface<2,float>* par,
 
             for (int k=1; k<halfStarTris[i].size(); k++){
 
-                const std::tr1::array<int, 3>& currentTriPoints = par->triangles(halfStarTris[i][k]).vertices;
+                const std::array<int, 3>& currentTriPoints = par->triangles(halfStarTris[i][k]).vertices;
 
                 for (j=0; j<3; j++)
                     if (currentTriPoints[j] == centerPoint){

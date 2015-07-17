@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include <array>
 #include <vector>
 #include <set>
 
@@ -11,17 +12,6 @@
 
 #include <algorithm>
 #include <iostream>
-
-// Check for VC9 / VS2008 with installed feature pack.
-#if defined(_MSC_VER) && (_MSC_VER>=1500)
-    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
-        #include <array>
-    #else
-        #error Please install the Visual Studio 2008 SP1 for TR1 support.
-    #endif
-#else
-    #include <tr1/array>
-#endif
 
 #include "StaticVector.h"
 #include "StaticMatrix.h"
@@ -257,7 +247,7 @@ template <class VertexType, class EdgeType, class TriangleType>
 typename SurfaceBase<VertexType,EdgeType,TriangleType>::ctype SurfaceBase<VertexType,EdgeType,TriangleType>::minInteriorAngle(int n) const
 {
     ctype minAngle = 2*M_PI;
-    const std::tr1::array<int, 3>& p = triangles(n).vertices;
+    const std::array<int, 3>& p = triangles(n).vertices;
 
     for (int i=0; i<3; i++){
         StaticVector<ctype,3> a = vertices(p[(i+1)%3]) - vertices(p[i]);
@@ -276,7 +266,7 @@ template <class VertexType, class EdgeType, class TriangleType>
 typename SurfaceBase<VertexType,EdgeType,TriangleType>::ctype SurfaceBase<VertexType,EdgeType,TriangleType>::aspectRatio(int n) const
 {
 
-    const std::tr1::array<int, 3>& p = triangles(n).vertices;
+    const std::array<int, 3>& p = triangles(n).vertices;
 
     const ctype a = (vertices(p[1]) - vertices(p[0])).length();
     const ctype b = (vertices(p[2]) - vertices(p[1])).length();

@@ -133,8 +133,8 @@ public:
         }
 
         /** \brief Make a copy of the three vertex indices  */
-        std::tr1::array<NodeIdx, 3> vertices() const {
-            std::tr1::array<NodeIdx, 3> result;
+        std::array<NodeIdx, 3> vertices() const {
+            std::array<NodeIdx, 3> result;
             result[0] = vertices(0);
             result[1] = vertices(1);
             result[2] = vertices(2);
@@ -379,7 +379,7 @@ public:
     /**@name access methods */
     //@{
     ///
-    int map(const StaticVector<ctype,2>& domainCoord, std::tr1::array<NodeIdx, 3>& vertices, StaticVector<ctype,2>& coords,
+    int map(const StaticVector<ctype,2>& domainCoord, std::array<NodeIdx, 3>& vertices, StaticVector<ctype,2>& coords,
             int seed=-1) const;
     //@}
 
