@@ -4,7 +4,6 @@
 #include <string.h>
 #include <hdf5.h>
 #include <memory>
-#include <tr1/memory>
 #include <stdexcept>
 
 #include "StaticVector.h"

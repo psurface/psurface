@@ -8,7 +8,6 @@
 #include <string.h>
 #include <fstream>
 #include <memory>
-#include <tr1/memory>
 
 #ifdef PSURFACE_STANDALONE
 #include "TargetSurface.h"
