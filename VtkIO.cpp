@@ -2,7 +2,6 @@
 #include <vector>
 #include <string.h>
 #include <memory>
-#include <tr1/memory>
 #include <fstream>
 
 #include "StaticVector.h"
@@ -143,7 +142,7 @@
 
       writer.beginPointData(scalars, vectors);
       {
-            std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
+            std::shared_ptr<VTK::DataArrayWriter<ctype> > p
             (writer.makeArrayWriter<ctype>(scalars, 1, numNodes));
             for (int i = 0; i < numNodes; i++)
                 p->write(nodeType[i]);
@@ -158,7 +157,7 @@
   {
       writer.beginPoints();
       {
-            std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
+            std::shared_ptr<VTK::DataArrayWriter<ctype> > p
             (writer.makeArrayWriter<ctype>("Coordinates", 3, numVertices));
             if(!p->writeIsNoop()) {
                   for(int i = 0; i < numVertices; i++)
@@ -174,7 +173,7 @@
   {
       writer.beginPoints();
       {
-            std::tr1::shared_ptr<VTK::DataArrayWriter<ctype> > p
+            std::shared_ptr<VTK::DataArrayWriter<ctype> > p
             (writer.makeArrayWriter<ctype>("Coordinates", 3, numNodes));
             if(!p->writeIsNoop()) {
               for(int i = 0; i < numNodes; i++)
@@ -192,7 +191,7 @@
       writer.beginCells();
       // connectivity
       {
-          std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p1
+          std::shared_ptr<VTK::DataArrayWriter<int> > p1
           (writer.makeArrayWriter<int>("connectivity", 1, 3*numTriangles));
           if(!p1->writeIsNoop())
           {
@@ -204,7 +203,7 @@
 
       // offsets
       {
-          std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p2
+          std::shared_ptr<VTK::DataArrayWriter<int> > p2
           (writer.makeArrayWriter<int>("offsets", 1, numTriangles));
           if(!p2->writeIsNoop()) {
               int offset = 0;
@@ -218,7 +217,7 @@
 
       // types
       {
-          std::tr1::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
+          std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
           (writer.makeArrayWriter<unsigned char>("types", 1, numTriangles));
           if(!p3->writeIsNoop())
           {
@@ -236,7 +235,7 @@
       writer.beginCells();
       // connectivity
       {
-          std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p1
+          std::shared_ptr<VTK::DataArrayWriter<int> > p1
           (writer.makeArrayWriter<int>("connectivity", 1, 2*numParamEdges));
           if(!p1->writeIsNoop())
           {
@@ -248,7 +247,7 @@
 
       // offsets
       {
-          std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p2
+          std::shared_ptr<VTK::DataArrayWriter<int> > p2
           (writer.makeArrayWriter<int>("offsets", 1, numParamEdges));
           if(!p2->writeIsNoop()) {
               int offset = 0;
@@ -262,7 +261,7 @@
 
       // types
       {
-          std::tr1::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
+          std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
           (writer.makeArrayWriter<unsigned char>("types", 1, numParamEdges));
           if(!p3->writeIsNoop())
           {
@@ -281,7 +280,7 @@
 
     // patch numbers
     {
-      std::tr1::shared_ptr<VTK::DataArrayWriter<int> > p
+      std::shared_ptr<VTK::DataArrayWriter<int> > p
         (writer.makeArrayWriter<int>("Patch", 1, numTriangles));
       if(!p->writeIsNoop()) {
         for(int i = 0; i < numTriangles; i++)

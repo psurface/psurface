@@ -174,7 +174,7 @@
       ///insert triangles and the plane graph on them
       for (size_t i=0; i<triArray.size(); i++){
 
-          std::tr1::array<int, 3> vertexIdx;
+          std::array<int, 3> vertexIdx;
 
           for (int j=0; j<3; j++)
               vertexIdx[j] = newNodeIndex[triArray[i][j]-1];

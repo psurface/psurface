@@ -111,7 +111,7 @@ public:
     void cutParameterEdges(int boundaryIdx, NodeIdx startNode, NodeIdx lastNode,
                            std::vector<int>& nodeLocs,
                            DomainTriangle<float>& cT,
-                           const std::tr1::array<StaticVector<float,2>, 3>& newTriangleCoords,
+                           const std::array<StaticVector<float,2>, 3>& newTriangleCoords,
                            std::vector<int>& triNewEdgePoints,
                            std::vector<int>& polyNewEdgePoints,
                            std::vector<unsigned int>& nodeStack);
@@ -157,7 +157,7 @@ public:
                 c*(1-nodes[i].domainPos()[0]-nodes[i].domainPos()[1]));
     }
 
-    void augmentNeighborIdx(int newNodeIdx, std::tr1::array<std::vector<int>, 3>& edgePoints) {
+    void augmentNeighborIdx(int newNodeIdx, std::array<std::vector<int>, 3>& edgePoints) {
         int i,d = newNodeIdx;
 
         for (i=newNodeIdx; i<nodes.size(); i++)
@@ -169,7 +169,7 @@ public:
                 edgePoints[i][j] += d;
     }
 
-    void updateEdgePoints(std::tr1::array<std::vector<int>,3>& edgePoints, int oldNode, int newNode) {
+    void updateEdgePoints(std::array<std::vector<int>,3>& edgePoints, int oldNode, int newNode) {
         int i;
         for (i=0; i<3; i++){
             if (edgePoints[i][0]==oldNode)

@@ -20,7 +20,7 @@ void PSurfaceFactory<dim,ctype>::insertVertex(const StaticVector<ctype,dim+1>& p
 }
 
 template <int dim, class ctype>
-unsigned int  PSurfaceFactory<dim,ctype>::insertSimplex(const std::tr1::array<unsigned int, dim+1>& v)
+unsigned int  PSurfaceFactory<dim,ctype>::insertSimplex(const std::array<unsigned int, dim+1>& v)
 {
     unsigned int idx = psurface_->createSpaceForTriangle(v[0], v[1], v[2]);
     psurface_->integrateTriangle(idx);
@@ -281,7 +281,7 @@ NodeBundle PSurfaceFactory<dim,ctype>::addTouchingNodePair(int tri1, int tri2,
 }
 
 template <int dim, class ctype>
-void PSurfaceFactory<dim,ctype>::addParTriangle(int tri, const std::tr1::array<int,3>& p)
+void PSurfaceFactory<dim,ctype>::addParTriangle(int tri, const std::array<int,3>& p)
 {
     DomainTriangle<ctype>& cT = psurface_->triangles(tri);
 

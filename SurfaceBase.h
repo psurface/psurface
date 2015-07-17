@@ -1,18 +1,8 @@
 #ifndef SURFACE_BASE_H
 #define SURFACE_BASE_H
 
+#include <array>
 #include <vector>
-
-// Check for VC9 / VS2008 with installed feature pack.
-#if defined(_MSC_VER) && (_MSC_VER>=1500)
-    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
-        #include <array>
-    #else
-        #error Please install the Visual Studio 2008 SP1 for TR1 support.
-    #endif
-#else
-    #include <tr1/array>
-#endif
 
 #include <limits>
 

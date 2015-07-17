@@ -150,7 +150,7 @@ public:
      */
     bool map(int tri,                ///< The triangle of the input point \f$x\f$
             const StaticVector<ctype,2>& p,                      ///< The barycentric coordinates of \f$x\f$ with respect to tri
-            std::tr1::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
+            std::array<int,3>& vertices,               ///< Return value: The three vertices of the triangle that \f$\phi(x)\f$ is on
             StaticVector<ctype,2>& coords,                 ///< The barycentric coordinates of \f$\phi(x)\f$ wrt <tt>vertices</tt>
             int seed=-1
             ) const;
@@ -190,8 +190,8 @@ public:
      * \f$t\f$ is part of.
      */
     void getActualVertices(int tri,
-                           const std::tr1::array<NodeIdx, 3>& nds,
-                           std::tr1::array<GlobalNodeIdx, 3>& vertices   ///< The result nodes are returned here
+                           const std::array<NodeIdx, 3>& nds,
+                           std::array<GlobalNodeIdx, 3>& vertices   ///< The result nodes are returned here
                            ) const;
 
     /** \brief Given three nodes that form a triangle \f$t\f$ on a base grid triangle,
@@ -201,7 +201,7 @@ public:
      * \return A triangle index, -1 if the input data was invalid.
      */
     int getImageSurfaceTriangle(int tri,
-                                const std::tr1::array<NodeIdx, 3>& nds
+                                const std::array<NodeIdx, 3>& nds
                                 ) const;
 
     /** \brief Returns the set of all target triangles that contain the image of a node.
@@ -266,10 +266,10 @@ protected:
     /** \brief Internal routine used by map()
      */
     void handleMapOnEdge(int tri, const StaticVector<ctype,2>& p, const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b,
-                         int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const;
+                         int edge, int edgePos, std::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const;
 
     /** \brief Internal routine used by setupOriginalSurface() */
-    void appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch);
+    void appendTriangleToOriginalSurface(const std::array<int,3>& v, int patch);
 
 
     /////////////////////////////////////////////////////
@@ -370,7 +370,7 @@ public:
 
     std::vector<StaticVector<ctype, 2> > targetVertices;
 
-    std::vector<std::tr1::array<int, 2> > targetSegments;
+    std::vector<std::array<int, 2> > targetSegments;
 };
 
 } // namespace psurface

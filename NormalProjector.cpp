@@ -1371,7 +1371,7 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<c
 
     // Fix some initial value
     // Some problems have two solutions and the Newton converges to the wrong one
-    x.assign(0.5);
+    x.fill(0.5);
 
     for (int i=0; i<30; i++) {
 
@@ -1754,8 +1754,8 @@ bool NormalProjector<ctype>::normalProjection(const StaticVector<ctype,2>& base,
                                               const StaticVector<ctype,2>& direction,
                                               int& bestSegment,
                                               ctype& rangeLocalPosition,
-                                              const std::vector<std::tr1::array<int,2> >& targetSegments,
-                                              const std::vector<std::tr1::array<ctype, 2> >& coords)
+                                              const std::vector<std::array<int,2> >& targetSegments,
+                                              const std::vector<std::array<ctype, 2> >& coords)
 {
     bestSegment = -1;
     int nTargetSegments = targetSegments.size();

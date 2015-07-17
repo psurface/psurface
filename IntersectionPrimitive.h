@@ -1,19 +1,7 @@
 #ifndef INTERSECTIONPRIMITIVE_H
 #define INTERSECTIONPRIMITIVE_H
 
-// Check for VC9 / VS2008 with installed feature pack.
-#if defined(_MSC_VER) && (_MSC_VER>=1500)
-    // Dummy-include to define _CPPLIB_VER.
-    #include <vector>
-
-    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
-        #include <array>
-    #else
-        #error Please install the Visual Studio 2008 SP1 for TR1 support.
-    #endif
-#else
-    #include <tr1/array>
-#endif
+#include <array>
 
 #include "StaticVector.h"
 
@@ -49,13 +37,13 @@ public:
      * Therefore, its shape can be described as three vectors
      * from \f$ R^3\f$ each.
      */
-    std::tr1::array<StaticVector<ctype,dimworld>, nPoints> points;
+    std::array<StaticVector<ctype,dimworld>, nPoints> points;
 
     /** An IntersectionPrimitive always represents the overlap of two basis functions
      * restricted to the image of one mortar and one nonmortar triangle.
      * The indices of those two triangles are given in this array.
      */
-    std::tr1::array<int, 2> tris;
+    std::array<int, 2> tris;
 
     /** This array marks the exact parts of the mortar and the nonmortar
      * triangles whose overlap is represented by a given IntersectionPrimitive.
@@ -66,7 +54,7 @@ public:
      * mortar side.  The second index tells which of the simplex points
      * of the IntersectionPrimitive is to be considered.  
      */
-    std::tr1::array<std::tr1::array<StaticVector<ctype,dim>, nPoints> , 2> localCoords;
+    std::array<std::array<StaticVector<ctype,dim>, nPoints> , 2> localCoords;
 
 };
 

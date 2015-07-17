@@ -6,6 +6,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign silent-rules])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])   # needed for some non-standard archivers
 LT_INIT
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
 
 AC_CONFIG_MACRO_DIR([m4])
 

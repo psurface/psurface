@@ -1,17 +1,7 @@
 #include "config.h"
 
+#include <array>
 #include <vector>
-
-// Check for VC9 / VS2008 with installed feature pack.
-#if defined(_MSC_VER) && (_MSC_VER>=1500)
-    #if defined(_CPPLIB_VER) && _CPPLIB_VER>=505
-        #include <array>
-    #else
-        #error Please install the Visual Studio 2008 SP1 for TR1 support.
-    #endif
-#else
-    #include <tr1/array>
-#endif
 
 #ifdef _MSC_VER
     // Required to make cmath define M_PI etc.
@@ -94,7 +84,7 @@ StaticVector<ctype,2> PSurface<dim,ctype>::getLocalTargetCoords(const GlobalNode
         StaticVector<ctype,3> iPos = imagePos(n.tri, n.idx);
 
         // Convert from McVec3f to StaticVector
-        std::tr1::array<StaticVector<ctype,3>, 3> p;
+        std::array<StaticVector<ctype,3>, 3> p;
 
         for (int i=0; i<3; i++)
             for (int j=0; j<3; j++)
@@ -324,7 +314,7 @@ void PSurface<dim,ctype>::setupOriginalSurface()
         for (i=0; i<numNodes; i++) {
 
             Node<ctype>& cN = cT.nodes[i];
-            std::tr1::array<int,3> v;
+            std::array<int,3> v;
 
             v[0] = cN.nodeNumber;
 
@@ -441,7 +431,7 @@ void PSurface<dim,ctype>::setupOriginalSurface()
 }
 
 template <int dim, class ctype>
-void PSurface<dim,ctype>::appendTriangleToOriginalSurface(const std::tr1::array<int,3>& v, int patch)
+void PSurface<dim,ctype>::appendTriangleToOriginalSurface(const std::array<int,3>& v, int patch)
 {
     surface->triangles.push_back(Surface::Triangle());
 
@@ -458,7 +448,7 @@ void PSurface<dim,ctype>::appendTriangleToOriginalSurface(const std::tr1::array<
 
 
 template <int dim, class ctype>
-bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::tr1::array<int,3>& vertices,
+bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::array<int,3>& vertices,
                          StaticVector<ctype,2>& coords, int seed) const
 {
     int i;
@@ -474,7 +464,7 @@ bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::t
 
             if (a[1]+1e-5 > p[1] && p[1] > b[1]-1e-5) {
 
-                std::tr1::array<GlobalNodeIdx, 3> targetNodes;
+                std::array<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 1, i, targetNodes, coords);
                 vertices[0] = nodes(targetNodes[0]).getNodeNumber();
                 vertices[1] = nodes(targetNodes[1]).getNodeNumber();
@@ -492,7 +482,7 @@ bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::t
 
             if (b[0]+1e-5 > p[0] && p[0] > a[0]-1e-5) {
 
-                std::tr1::array<GlobalNodeIdx, 3> targetNodes;
+                std::array<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 2, i, targetNodes, coords);
                 vertices[0] = nodes(targetNodes[0]).getNodeNumber();
                 vertices[1] = nodes(targetNodes[1]).getNodeNumber();
@@ -509,7 +499,7 @@ bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::t
 
             if (a[0]+1e-5>p[0] && p[0]>b[0]-1e-5) {
 
-                std::tr1::array<GlobalNodeIdx, 3> targetNodes;
+                std::array<GlobalNodeIdx, 3> targetNodes;
                 handleMapOnEdge(triIdx, p, a, b, 0, i, targetNodes, coords);
                 vertices[0] = nodes(targetNodes[0]).getNodeNumber();
                 vertices[1] = nodes(targetNodes[1]).getNodeNumber();
@@ -523,7 +513,7 @@ bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::t
 
     }
 
-    std::tr1::array<NodeIdx, 3> v;
+    std::array<NodeIdx, 3> v;
     int status = tri.map(p, v, coords, seed);
 
     if (!status)
@@ -535,7 +525,7 @@ bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::t
 
     // ///////////////////////////////////////////////////////
     // make sure we don't return intersection nodes
-    std::tr1::array<GlobalNodeIdx, 3> resultNodes;
+    std::array<GlobalNodeIdx, 3> resultNodes;
     getActualVertices(triIdx, v, resultNodes);
     vertices[0] = nodes(resultNodes[0]).getNodeNumber();
     vertices[1] = nodes(resultNodes[1]).getNodeNumber();
@@ -547,8 +537,8 @@ bool PSurface<dim,ctype>::map(int triIdx, const StaticVector<ctype,2>& p, std::t
 }
 
 template <int dim, class ctype>
-void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeIdx, 3>& nds,
-                                        std::tr1::array<GlobalNodeIdx, 3>& vertices) const
+void PSurface<dim,ctype>::getActualVertices(int tri, const std::array<NodeIdx, 3>& nds,
+                                        std::array<GlobalNodeIdx, 3>& vertices) const
 {
     const DomainTriangle<ctype>& cT = this->triangles(tri);
     //cT.print(true, true, true);
@@ -681,13 +671,13 @@ void PSurface<dim,ctype>::getActualVertices(int tri, const std::tr1::array<NodeI
 
 template <int dim, class ctype>
 int PSurface<dim,ctype>::getImageSurfaceTriangle(int tri,
-                                             const std::tr1::array<NodeIdx, 3>& nds
+                                             const std::array<NodeIdx, 3>& nds
                                              ) const
 {
     int i;
 
-    std::tr1::array<GlobalNodeIdx, 3> actualVertices;
-    std::tr1::array<std::vector<int>, 3> trianglesPerNode;
+    std::array<GlobalNodeIdx, 3> actualVertices;
+    std::array<std::vector<int>, 3> trianglesPerNode;
 
     getActualVertices(tri, nds, actualVertices);
 
@@ -802,7 +792,7 @@ void PSurface<dim,ctype>::getTrianglesPerEdge(int from, int to, std::vector<int>
 
 template <int dim, class ctype>
 void PSurface<dim,ctype>::handleMapOnEdge(int triIdx, const StaticVector<ctype,2>& p, const StaticVector<ctype,2>& a, const StaticVector<ctype,2>& b,
-                                      int edge, int edgePos, std::tr1::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const
+                                      int edge, int edgePos, std::array<GlobalNodeIdx, 3>& vertices, StaticVector<ctype,2>& coords) const
 {
     const DomainTriangle<ctype>& tri = this->triangles(triIdx);
     ctype lambda = (p-a).length() / (a-b).length();
@@ -868,7 +858,7 @@ template <int dim, class ctype>
 bool PSurface<dim,ctype>::positionMap(int triIdx, const StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const
 {
     StaticVector<ctype,2> localCoords;
-    std::tr1::array<int,3> tri;
+    std::array<int,3> tri;
 
     int status = map(triIdx, p, tri, localCoords);
 
@@ -890,7 +880,7 @@ template <int dim, class ctype>
 bool PSurface<dim,ctype>::directNormalMap(int triIdx, const StaticVector<ctype,2>& p, StaticVector<ctype,3>& result) const
 {
     StaticVector<ctype,2> localCoords;
-    std::tr1::array<int,3> tri;
+    std::array<int,3> tri;
 
     int status = map(triIdx, p, tri, localCoords);
 

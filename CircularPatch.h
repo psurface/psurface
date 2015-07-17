@@ -42,8 +42,8 @@ public:
         triangles.assign(size,-1U);
 
         innerEdges.resize(size-1);
-        std::tr1::array<int, 2> emptyArray;
-        emptyArray.assign(-1U);
+        std::array<int, 2> emptyArray;
+        emptyArray.fill(-1U);
         innerEdges.assign(innerEdges.size(),emptyArray);
 
         par = param;
@@ -66,8 +66,8 @@ public:
         triangles.assign(size,-1);
         
         innerEdges.resize(size-1);
-        std::tr1::array<int, 2> emptyArray;
-        emptyArray.assign(-1);
+        std::array<int, 2> emptyArray;
+        emptyArray.fill(-1);
         innerEdges.assign(innerEdges.size(), emptyArray);
     }
 
@@ -143,7 +143,7 @@ public:
 
     ctype distanceTo(const class StaticVector<ctype,3> &) const ;
 
-    std::vector<std::tr1::array<int, 2> > innerEdges;
+    std::vector<std::array<int, 2> > innerEdges;
 
 private:
 

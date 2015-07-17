@@ -8,7 +8,7 @@ namespace psurface {
 
 template <class T, int N>
 class StaticMatrix
-    : public std::tr1::array<StaticVector<T,N>, N>
+    : public std::array<StaticVector<T,N>, N>
 {
 public:
 
