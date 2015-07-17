@@ -1,3 +1,6 @@
+# LOCALLY MODIFIED FOR PSURFACE:
+# 2015-07-17: Removed check for "override"
+#
 # ============================================================================
 #  http://www.gnu.org/software/autoconf-archive/ax_cxx_compile_stdcxx_11.html
 # ============================================================================
@@ -41,13 +44,6 @@ m4_define([_AX_CXX_COMPILE_STDCXX_11_testbody], [[
     struct check
     {
       static_assert(sizeof(int) <= sizeof(T), "not big enough");
-    };
-
-    struct Base {
-    virtual void f() {}
-    };
-    struct Child : public Base {
-    virtual void f() override {}
     };
 
     typedef check<check<bool>> right_angle_brackets;
