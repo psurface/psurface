@@ -17,3 +17,8 @@ Such is the case, e.g., in contact problems.
 This second functionality is also available for 1d surfaces in 2d space.
 
 The easiest way to use psurface for domain decomposition is to get the [dune-grid-glue module](http://www.dune-project.org/modules/dune-grid-glue/) and use it to drive psurface.
+
+Publications
+------------
+
+* [O. Sander: The PSurface library. Computing and Visualization in Science 14(8), pp. 353-370](https://dx.doi.org/10.1007/s00791-013-0193-4)
