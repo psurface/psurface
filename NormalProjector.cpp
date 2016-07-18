@@ -1331,6 +1331,8 @@ bool NormalProjector<ctype>::computeInverseNormalProjection(const StaticVector<c
 
         // computation of the other components is unstable
         for (int j=0;j<3; j++) {
+            using std::isinf;
+            using std::isnan;
 
             r[1] = c[j]/d[j];
 
@@ -1479,6 +1481,8 @@ bool NormalProjector<ctype>::edgeIntersectsNormalFan(const StaticVector<ctype,3>
         StaticVector<ctype,3> c =(p0q0+eta*n0).cross(q10);
         StaticVector<ctype,3> d =q10.cross(p10+eta*n10);
         for (int j=0;j<3; j++) {
+            using std::isinf;
+            using std::isnan;
 
             r[0] = c[j]/d[j];
             if (isnan(r[0]) || isinf(r[0]))
