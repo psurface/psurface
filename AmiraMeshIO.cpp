@@ -283,7 +283,7 @@ int psurface::AmiraMeshIO<ctype>::writeAmiraMesh(PSurface<2,ctype>* par, const c
     // actually write the file
     //////////////////////////////
     if (!am.write(filename) ) {
-        printf("An error has occured writing file %s.\n", filename);
+        printf("An error has occurred writing file %s.\n", filename);
         return 0;
     }
 

@@ -347,7 +347,7 @@ int PlaneParam<ctype>::map(const StaticVector<ctype,2> &domainCoord, std::array<
     DirectedEdgeIterator e = BFLocate(domainCoord);
 
     if (!e.isValid()) {
-        printf("[PlaneParam::map] An error occured when calling BFLocate\n");
+        printf("[PlaneParam::map] An error occurred when calling BFLocate\n");
         return false;
     }
 
